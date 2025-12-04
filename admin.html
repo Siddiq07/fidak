@@ -2,284 +2,424 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Art Fest — Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Art Fest — Admin Dashboard</title>
 
   <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
+  <!-- SheetJS for Excel import -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <style>
-    body { background: #f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-    .container-small { max-width: 1200px; margin: 2rem auto; }
-    .table-actions button { margin-left: .25rem; }
-    .toast-container { z-index: 1080; }
-    .badge-status { padding:.45em .6em; border-radius: .5rem; }
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --accent:#4f46e5;
+      --muted:#6b7280;
+      --success:#10b981;
+      --danger:#ef4444;
+    }
+    body { background: var(--bg); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:#222; }
+    .navbar { background: linear-gradient(90deg,#ffffff 0%, rgba(255,255,255,0.9) 100%); box-shadow:0 6px 18px rgba(16,24,40,0.06); }
+    .container-wide { max-width: 1200px; margin: 30px auto; }
+    .card-neo { background:var(--card); border-radius:12px; box-shadow:0 6px 20px rgba(16,24,40,0.05); border:0; }
+    .section-title { font-weight:700; color: #0f172a; }
+    .muted { color: var(--muted); }
+    .btn-accent { background: linear-gradient(90deg,var(--accent),#7c3aed); color:#fff; border:0; }
+    .form-label { font-weight:600; font-size:0.92rem; }
+    .small-muted { color:var(--muted); font-size:0.875rem; }
+    .table thead { background: #fbfbff; }
+    .modal-header { border-bottom:0; }
+    .toast-container { z-index: 11000; }
+    .badge-status { padding: .4rem .6rem; border-radius: 999px; font-weight:600; }
+    .file-input-label { cursor: pointer; }
+    hr.sep { border-top: 1px dashed #eef2ff; margin: 1rem 0 1.25rem; }
+    /* Responsive adjustments */
+    @media (max-width: 768px) { .container-wide { margin: 12px; } }
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container">
-      <a class="navbar-brand fw-bold text-primary" href="index.html">Art Fest — Admin</a>
-      <div class="ms-auto">
-        <button class="btn btn-outline-danger" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
+
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container container-wide d-flex align-items-center">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <span class="badge text-bg-primary rounded-pill"><i class="bi bi-palette-fill"></i></span>
+        <div>
+          <div style="font-weight:700">Art Fest Management</div>
+          <div style="font-size:.82rem; color:var(--muted)">Administrator Dashboard</div>
+        </div>
+      </a>
+
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <button id="btnImportExcel" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i> Import Students (Excel)</button>
+        <input type="file" id="excelFile" accept=".xlsx,.xls" style="display:none" />
+        <button id="logoutBtn" class="btn btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Logout</button>
       </div>
     </div>
   </nav>
 
-  <div class="container container-small">
+  <main class="container container-wide">
 
-    <div class="d-flex justify-content-between align-items-center my-4">
-      <h2>Administrator Dashboard</h2>
-      <div>
-        <button id="addStudentBtn" class="btn btn-sm btn-primary"><i class="bi bi-person-plus"></i> Add Student</button>
-        <button id="addTeamBtn" class="btn btn-sm btn-success"><i class="bi bi-people"></i> Add Team</button>
-        <button id="addEventBtn" class="btn btn-sm btn-warning"><i class="bi bi-calendar-event"></i> Add Event</button>
-      </div>
-    </div>
-
-    <!-- Stats -->
+    <!-- TOP STATS -->
     <div class="row g-3 mb-4">
       <div class="col-md-3">
-        <div class="card p-3">
-          <div class="small text-muted">Students</div>
+        <div class="card-neo p-3">
+          <div class="small-muted">Students</div>
           <div class="h4" id="stat-total-students">0</div>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card p-3">
-          <div class="small text-muted">Teams</div>
+        <div class="card-neo p-3">
+          <div class="small-muted">Teams</div>
           <div class="h4" id="stat-total-teams">0</div>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card p-3">
-          <div class="small text-muted">Events</div>
+        <div class="card-neo p-3">
+          <div class="small-muted">Events</div>
           <div class="h4" id="stat-total-events">0</div>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="card p-3">
-          <div class="small text-muted">Pending Approvals</div>
+        <div class="card-neo p-3">
+          <div class="small-muted">Pending</div>
           <div class="h4" id="stat-pending-events">0</div>
         </div>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
-      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-students">Students</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-teams">Teams</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-events">Events</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-approvals">Approvals</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-results">Results</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-notifications">Notifications</button></li>
-    </ul>
-
-    <div class="tab-content">
-
-      <!-- STUDENTS -->
-      <div class="tab-pane fade show active" id="tab-students">
-        <div class="card mb-4">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light">
-                  <tr><th>Chess #</th><th>Name</th><th>Team</th><th>Attendance</th><th class="text-end">Actions</th></tr>
-                </thead>
-                <tbody id="studentTableBody">
-                  <!-- populated dynamically -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    <!-- ACTIONS -->
+    <div class="card-neo p-3 mb-4 d-flex gap-2 flex-wrap align-items-center">
+      <div class="d-flex gap-2">
+        <button id="addStudentBtn" class="btn btn-accent"><i class="bi bi-person-plus"></i> Add Student</button>
+        <button id="addTeamBtn" class="btn btn-success"><i class="bi bi-people"></i> Add Team</button>
+        <button id="addEventBtn" class="btn btn-warning"><i class="bi bi-calendar-event"></i> Add Event</button>
       </div>
+      <div class="ms-auto small-muted">Upload Excel: columns allowed — <strong>Chess Number, Name, Class, Team</strong>. Team must match existing team name or left blank.</div>
+    </div>
 
-      <!-- TEAMS -->
-      <div class="tab-pane fade" id="tab-teams">
-        <div class="card mb-4">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light"><tr><th>Team</th><th>Leader</th><th>Members</th><th>Score</th><th class="text-end">Actions</th></tr></thead>
-                <tbody id="teamTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- TABS -->
+    <div class="card-neo p-3 mb-4">
+      <ul class="nav nav-pills mb-3" id="tabs">
+        <li class="nav-item"><button class="nav-link active" data-bs-target="#tab-students">Students</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-teams">Teams</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-events">Events</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-approvals">Approvals</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-results">Results</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-attendance">Attendance</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-notifications">Notifications</button></li>
+      </ul>
 
-      <!-- EVENTS -->
-      <div class="tab-pane fade" id="tab-events">
-        <div class="card mb-4">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light"><tr><th>Event</th><th>Type</th><th>Points</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
-                <tbody id="eventTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div id="tabContents">
 
-      <!-- APPROVALS -->
-      <div class="tab-pane fade" id="tab-approvals">
-        <div class="card mb-4">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover mb-0">
-                <thead class="table-light"><tr><th>Event</th><th>Team</th><th>Participant</th><th>Submitted At</th><th class="text-end">Actions</th></tr></thead>
-                <tbody id="pendingEventsTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RESULTS -->
-      <div class="tab-pane fade" id="tab-results">
-        <div class="card mb-4 p-3">
-          <form id="publishResultForm" class="row g-2 align-items-end">
-            <div class="col-md-4">
-              <label class="form-label">Event</label>
-              <select id="resultEvent" class="form-select"></select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">1st (Chess #)</label>
-              <input id="firstPlace" class="form-control" />
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">2nd (Chess #)</label>
-              <input id="secondPlace" class="form-control" />
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">3rd (Chess #)</label>
-              <input id="thirdPlace" class="form-control" />
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-success w-100" type="submit"><i class="bi bi-upload"></i> Publish</button>
-            </div>
-          </form>
-          <hr/>
+        <!-- STUDENTS TAB -->
+        <section id="tab-students" class="tab-section">
           <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead class="table-light"><tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th></tr></thead>
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Chess #</th>
+                  <th>Name</th>
+                  <th>Class</th>
+                  <th>Team</th>
+                  <th>Attendance</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- TEAMS TAB -->
+        <section id="tab-teams" class="tab-section" style="display:none">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Team</th>
+                  <th>Leader (Chess #)</th>
+                  <th>Members</th>
+                  <th>Score</th>
+                  <th>Password</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teamTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- EVENTS TAB -->
+        <section id="tab-events" class="tab-section" style="display:none">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Event</th>
+                  <th>Type</th>
+                  <th>Description / Rules</th>
+                  <th>Status</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="eventTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- APPROVALS TAB -->
+        <section id="tab-approvals" class="tab-section" style="display:none">
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Event</th>
+                  <th>Team</th>
+                  <th>Participant</th>
+                  <th>Submitted At</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pendingEventsTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- RESULTS TAB -->
+        <section id="tab-results" class="tab-section" style="display:none">
+          <div class="mb-3">
+            <form id="resultForm" class="row gx-2 gy-2 align-items-end">
+              <div class="col-md-4">
+                <label class="form-label">Select Event</label>
+                <select id="resultEvent" class="form-select"></select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">1st Place (Chess #)</label>
+                <input id="rFirst" class="form-control" type="number" min="0" />
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Points for 1st (0-100)</label>
+                <input id="pFirst" class="form-control" type="number" min="0" max="100" value="100"/>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">2nd (Chess #)</label>
+                <input id="rSecond" class="form-control" type="number" />
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Points for 2nd (0-100)</label>
+                <input id="pSecond" class="form-control" type="number" min="0" max="100" value="50"/>
+              </div>
+
+              <div class="col-md-2">
+                <label class="form-label">3rd (Chess #)</label>
+                <input id="rThird" class="form-control" type="number" />
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Points for 3rd (0-100)</label>
+                <input id="pThird" class="form-control" type="number" min="0" max="100" value="25"/>
+              </div>
+
+              <div class="col-md-2 d-flex align-items-center">
+                <div class="form-check mt-1">
+                  <input class="form-check-input" type="checkbox" value="" id="publishNow">
+                  <label class="form-check-label small-muted" for="publishNow">Publish now</label>
+                </div>
+              </div>
+
+              <div class="col-md-2">
+                <button class="btn btn-success w-100" type="submit"><i class="bi bi-upload"></i> Add Result</button>
+              </div>
+            </form>
+          </div>
+
+          <hr class="sep"/>
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light">
+                <tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th><th>Published</th></tr>
+              </thead>
               <tbody id="publishedResultsTableBody"></tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- NOTIFICATIONS -->
-      <div class="tab-pane fade" id="tab-notifications">
-        <div class="card mb-4 p-3">
-          <form id="notificationForm" class="row g-2 align-items-end">
-            <div class="col-md-5"><label class="form-label">Title</label><input id="notificationTitle" class="form-control" required/></div>
-            <div class="col-md-5"><label class="form-label">Message</label><input id="notificationMessage" class="form-control" required/></div>
-            <div class="col-md-2"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-bell-fill"></i> Send</button></div>
-          </form>
-          <hr/>
+        <!-- ATTENDANCE TAB -->
+        <section id="tab-attendance" class="tab-section" style="display:none">
+          <div class="mb-3 d-flex gap-2 align-items-center">
+            <div>
+              <label class="form-label small-muted">Select Date</label>
+              <input type="date" id="attendanceDate" class="form-control" />
+            </div>
+            <div>
+              <label class="form-label small-muted">&nbsp;</label>
+              <button id="btnMarkAllPresent" class="btn btn-outline-success">Mark All Present</button>
+            </div>
+            <div class="ms-auto small-muted">Attendance stored under students/{id}/attendance as {status, timestamp, date}</div>
+          </div>
+
           <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table align-middle">
+              <thead class="table-light"><tr><th>Chess #</th><th>Name</th><th>Team</th><th>Attendance</th><th class="text-end">Action</th></tr></thead>
+              <tbody id="attendanceTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- NOTIFICATIONS TAB -->
+        <section id="tab-notifications" class="tab-section" style="display:none">
+          <form id="notificationForm" class="row g-2 mb-3">
+            <div class="col-md-4"><label class="form-label">Title</label><input id="notificationTitle" class="form-control" required/></div>
+            <div class="col-md-6"><label class="form-label">Message</label><input id="notificationMessage" class="form-control" required/></div>
+            <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-bell-fill"></i> Send</button></div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="table align-middle">
               <thead class="table-light"><tr><th>Title</th><th>Message</th><th>To</th><th>Date</th></tr></thead>
               <tbody id="notificationHistoryTable"></tbody>
             </table>
           </div>
-        </div>
+        </section>
+
       </div>
+    </div>
+  </main>
 
-    </div> <!-- tab-content -->
-
-  </div> <!-- container -->
-
-  <!-- Modals -->
-  <!-- Student Modal -->
+  <!-- MODALS -->
+  <!-- STUDENT MODAL -->
   <div class="modal fade" id="studentModal" tabindex="-1">
     <div class="modal-dialog">
       <form id="studentForm" class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Add Student</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header">
+          <h5 class="modal-title">Add Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
         <div class="modal-body">
-          <input type="hidden" id="student-id" />
-          <div class="mb-3"><label class="form-label">Chess Number</label><input id="studentChess" class="form-control" required/></div>
-          <div class="mb-3"><label class="form-label">Name</label><input id="studentName" class="form-control" required/></div>
-          <div class="mb-3"><label class="form-label">Team</label>
+          <input type="hidden" id="student-id">
+          <div class="mb-3">
+            <label class="form-label">Chess Number</label>
+            <input id="studentChess" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input id="studentName" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Class</label>
+            <input id="studentClass" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Team</label>
             <select id="studentTeam" class="form-select"><option value="">Unassigned</option></select>
           </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button class="btn btn-primary" type="submit">Save</button></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-accent" type="submit">Save</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- Team Modal -->
+  <!-- TEAM MODAL -->
   <div class="modal fade" id="teamModal" tabindex="-1">
     <div class="modal-dialog">
       <form id="teamForm" class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Add Team</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header">
+          <h5 class="modal-title">Add Team</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
         <div class="modal-body">
-          <input type="hidden" id="team-id" />
-          <div class="mb-3"><label class="form-label">Team Name</label><input id="teamName" class="form-control" required/></div>
-          <div class="mb-3"><label class="form-label">Leader (Chess #)</label>
-            <select id="teamLeader" class="form-select"><option value="">Choose leader</option></select>
+          <input type="hidden" id="team-id">
+          <div class="mb-3">
+            <label class="form-label">Team Name</label>
+            <input id="teamNameInput" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Leader (Chess #)</label>
+            <select id="teamLeader" class="form-select"><option value="">None</option></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password (auto-generated or edit)</label>
+            <div class="input-group">
+              <input id="teamPassword" class="form-control" />
+              <button id="btnGenPassword" class="btn btn-outline-secondary" type="button">Generate</button>
+              <button id="btnCopyPassword" class="btn btn-outline-primary" type="button">Copy</button>
+            </div>
+            <div class="small-muted mt-1">Leaders will use this password to login with their chess number.</div>
           </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button class="btn btn-success" type="submit">Save Team</button></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-success" type="submit">Save Team</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- Event Modal -->
+  <!-- EVENT MODAL -->
   <div class="modal fade" id="eventModal" tabindex="-1">
     <div class="modal-dialog">
       <form id="eventForm" class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Add Event</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header">
+          <h5 class="modal-title">Add Event</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
         <div class="modal-body">
-          <input type="hidden" id="event-id" />
-          <div class="mb-3"><label class="form-label">Event Name</label><input id="eventName" class="form-control" required/></div>
-          <div class="mb-3"><label class="form-label">Type</label>
+          <input type="hidden" id="event-id">
+          <div class="mb-3">
+            <label class="form-label">Event Name</label>
+            <input id="eventName" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Type</label>
             <select id="eventType" class="form-select"><option>Stage</option><option>Non-Stage</option></select>
           </div>
-          <div class="mb-3"><label class="form-label">Points (1/2/3)</label>
-            <div class="input-group">
-              <input id="eventPt1" class="form-control" type="number" value="5" />
-              <input id="eventPt2" class="form-control" type="number" value="3" />
-              <input id="eventPt3" class="form-control" type="number" value="1" />
-            </div>
+          <div class="mb-3">
+            <label class="form-label">Description / Rules</label>
+            <textarea id="eventDescription" class="form-control" rows="4" placeholder="Describe rules or instructions for this event..."></textarea>
           </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button class="btn btn-warning" type="submit">Save Event</button></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-warning" type="submit">Save Event</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- Confirm Delete Modal -->
+  <!-- CONFIRM DELETE -->
   <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
     <div class="modal-dialog modal-sm">
       <div class="modal-content">
         <div class="modal-body" id="confirmDeleteModalBody">Are you sure?</div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button id="confirmDeleteBtn" class="btn btn-danger">Delete</button></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast container -->
+  <!-- TOAST -->
   <div id="toastRoot" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
-  <!-- Bootstrap JS -->
+  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Firebase and Admin Script (module) -->
   <script type="module">
-    // ---------------------------
-    // FIREBASE
-    // ---------------------------
+    // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import {
-      getDatabase, ref, onValue, get, child, set, update, remove, push
+      getDatabase, ref, onValue, get, set, update, remove, push
     } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
       authDomain: "gen7-3e139.firebaseapp.com",
@@ -295,110 +435,111 @@
     const database = getDatabase(app);
     const rootRef = ref(database);
 
-    // ---------------------------
-    // AUTH: ensure admin
-    // ---------------------------
+    // Session check (must be admin)
     const userJson = sessionStorage.getItem('user');
-    let currentUser = userJson ? JSON.parse(userJson) : null;
-    if (!currentUser || currentUser.role !== 'Admin') {
-      // redirect to index if not admin
-      location.href = 'index.html';
-      throw new Error('Not authorized');
-    }
+    if (!userJson) { location.href = 'index.html'; throw new Error('Not logged in'); }
+    const currentUser = JSON.parse(userJson);
+    if (!currentUser || currentUser.role !== 'Admin') { location.href = 'index.html'; throw new Error('Not admin'); }
 
-    // ---------------------------
-    // DOM elements
-    // ---------------------------
+    // DOM references
     const studentTableBody = document.getElementById('studentTableBody');
     const teamTableBody = document.getElementById('teamTableBody');
     const eventTableBody = document.getElementById('eventTableBody');
     const pendingEventsTableBody = document.getElementById('pendingEventsTableBody');
     const publishedResultsTableBody = document.getElementById('publishedResultsTableBody');
     const notificationHistoryTable = document.getElementById('notificationHistoryTable');
+    const attendanceTableBody = document.getElementById('attendanceTableBody');
 
     const statStudents = document.getElementById('stat-total-students');
     const statTeams = document.getElementById('stat-total-teams');
     const statEvents = document.getElementById('stat-total-events');
     const statPending = document.getElementById('stat-pending-events');
 
+    // Buttons / inputs
     const addStudentBtn = document.getElementById('addStudentBtn');
     const addTeamBtn = document.getElementById('addTeamBtn');
     const addEventBtn = document.getElementById('addEventBtn');
+    const btnImportExcel = document.getElementById('btnImportExcel');
+    const excelFileInput = document.getElementById('excelFile');
 
-    // Modals and forms
-    const studentModalEl = new bootstrap.Modal(document.getElementById('studentModal'));
-    const teamModalEl = new bootstrap.Modal(document.getElementById('teamModal'));
-    const eventModalEl = new bootstrap.Modal(document.getElementById('eventModal'));
-    const confirmDeleteModalEl = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    // Forms & modals
+    const studentModal = new bootstrap.Modal(document.getElementById('studentModal'));
+    const teamModal = new bootstrap.Modal(document.getElementById('teamModal'));
+    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
 
     const studentForm = document.getElementById('studentForm');
     const teamForm = document.getElementById('teamForm');
     const eventForm = document.getElementById('eventForm');
+    const resultForm = document.getElementById('resultForm');
+    const notificationForm = document.getElementById('notificationForm');
 
+    const studentIdHidden = document.getElementById('student-id');
     const studentChess = document.getElementById('studentChess');
     const studentName = document.getElementById('studentName');
+    const studentClass = document.getElementById('studentClass');
     const studentTeam = document.getElementById('studentTeam');
-    const studentIdHidden = document.getElementById('student-id');
 
-    const teamName = document.getElementById('teamName');
-    const teamLeader = document.getElementById('teamLeader');
     const teamIdHidden = document.getElementById('team-id');
+    const teamNameInput = document.getElementById('teamNameInput');
+    const teamLeader = document.getElementById('teamLeader');
+    const teamPassword = document.getElementById('teamPassword');
+    const btnGenPassword = document.getElementById('btnGenPassword');
+    const btnCopyPassword = document.getElementById('btnCopyPassword');
 
     const eventIdHidden = document.getElementById('event-id');
     const eventName = document.getElementById('eventName');
     const eventType = document.getElementById('eventType');
-    const eventPt1 = document.getElementById('eventPt1');
-    const eventPt2 = document.getElementById('eventPt2');
-    const eventPt3 = document.getElementById('eventPt3');
+    const eventDescription = document.getElementById('eventDescription');
 
     const resultEvent = document.getElementById('resultEvent');
-    const firstPlace = document.getElementById('firstPlace');
-    const secondPlace = document.getElementById('secondPlace');
-    const thirdPlace = document.getElementById('thirdPlace');
-    const publishResultForm = document.getElementById('publishResultForm');
+    const rFirst = document.getElementById('rFirst'), pFirst = document.getElementById('pFirst');
+    const rSecond = document.getElementById('rSecond'), pSecond = document.getElementById('pSecond');
+    const rThird = document.getElementById('rThird'), pThird = document.getElementById('pThird');
+    const publishNow = document.getElementById('publishNow');
 
-    const notificationForm = document.getElementById('notificationForm');
+    const attendanceDate = document.getElementById('attendanceDate');
+    const btnMarkAllPresent = document.getElementById('btnMarkAllPresent');
+
     const notificationTitle = document.getElementById('notificationTitle');
     const notificationMessage = document.getElementById('notificationMessage');
+
+    let db = { students: [], teams: [], events: [], participations: [], results: [], notifications: [] };
+    let deleteCallback = null;
 
     // Toast helper
     const toastRoot = document.getElementById('toastRoot');
     function showToast(message, type='success') {
-      const toast = document.createElement('div');
-      toast.className = `toast align-items-center text-bg-${type} border-0`;
-      toast.role = 'alert'; toast.ariaLive = 'assertive'; toast.ariaAtomic = 'true';
-      toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-      toastRoot.appendChild(toast);
-      const btoast = new bootstrap.Toast(toast, { delay: 3000 });
-      btoast.show();
-      toast.addEventListener('hidden.bs.toast', () => toast.remove());
+      const t = document.createElement('div');
+      t.className = `toast align-items-center text-bg-${type} border-0`;
+      t.setAttribute('role','alert'); t.setAttribute('aria-live','assertive'); t.setAttribute('aria-atomic','true');
+      t.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+      toastRoot.appendChild(t);
+      const bt = new bootstrap.Toast(t, { delay: 3000 }); bt.show();
+      t.addEventListener('hidden.bs.toast', () => t.remove());
     }
 
-    // Generic delete callback holder
-    let deleteCallback = null;
+    // Generic delete button
     document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
       if (deleteCallback) deleteCallback();
-      confirmDeleteModalEl.hide();
+      deleteCallback = null;
+      confirmDeleteModal.hide();
     });
 
-    // ---------------------------
-    // MODELS (in-memory snapshot)
-    // ---------------------------
-    let db = {
-      students: [], // arrays
-      teams: [],
-      events: [],
-      participations: [],
-      results: [],
-      notifications: []
-    };
+    // Tab switching
+    document.querySelectorAll('#tabs [data-bs-target]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
+        const t = document.querySelector(btn.dataset.bsTarget || btn.getAttribute('data-bs-target'));
+        if (t) t.style.display = 'block';
+        document.querySelectorAll('#tabs .nav-link').forEach(n => n.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
 
-    // ---------------------------
-    // REALTIME LISTENERS (sync db -> UI)
-    // ---------------------------
-    // We listen to the whole root and map objects to arrays for easier UI handling.
-    onValue(rootRef, (snapshot) => {
-      const data = snapshot.val() || {};
+    // Listen DB
+    onValue(rootRef, (snap) => {
+      const data = snap.val() || {};
       db.students = data.students ? Object.values(data.students) : [];
       db.teams = data.teams ? Object.values(data.teams) : [];
       db.events = data.events ? Object.values(data.events) : [];
@@ -406,16 +547,15 @@
       db.results = data.results ? Object.values(data.results) : [];
       db.notifications = data.notifications ? Object.values(data.notifications) : [];
 
-      // Ensure numeric ids where appropriate
-      db.students.forEach(s => { s.id = s.id !== undefined ? (typeof s.id === 'string' ? (isFinite(s.id) ? parseInt(s.id,10) : s.id) : s.id) : s.id; });
-      db.teams.forEach(t => { t.id = t.id !== undefined ? (typeof t.id === 'string' && isFinite(t.id) ? parseInt(t.id,10) : t.id) : t.id; });
+      // normalize ids
+      db.students.forEach(s => { if (s && s.id !== undefined) s.id = Number(s.id); });
+      db.teams.forEach(t => { if (t && t.id !== undefined && isFinite(t.id)) t.id = Number(t.id); });
+      db.events.forEach(e => { if (e && e.id !== undefined && isFinite(e.id)) e.id = Number(e.id); });
 
       renderAll();
     });
 
-    // ---------------------------
     // RENDER
-    // ---------------------------
     function renderAll() {
       renderStudents();
       renderTeams();
@@ -425,145 +565,125 @@
       renderNotifications();
       renderStats();
       populateDropdowns();
+      renderAttendanceTable();
     }
 
     function renderStudents() {
       studentTableBody.innerHTML = '';
       if (db.students.length === 0) {
-        studentTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No students</td></tr>`;
+        studentTableBody.innerHTML = `<tr><td colspan="6" class="text-center muted">No students added</td></tr>`;
         return;
       }
-      // sort by id
-      db.students.sort((a,b) => {
-        const ai = Number(a.id)||0, bi = Number(b.id)||0; return ai-bi;
-      }).forEach(s => {
+      db.students.sort((a,b)=> (a.id||0)-(b.id||0)).forEach(s => {
         const team = db.teams.find(t => t.id === s.teamId);
-        const teamNameText = team ? team.name : '<em class="text-muted">Unassigned</em>';
-        const status = s.attendance?.status || 'Absent';
-        const timestamp = s.attendance?.timestamp ? new Date(s.attendance.timestamp).toLocaleString() : 'N/A';
+        const att = s.attendance?.status || 'Absent';
+        const ts = s.attendance?.timestamp ? new Date(s.attendance.timestamp).toLocaleString() : 'N/A';
         const tr = document.createElement('tr');
+        tr.dataset.id = s.id;
         tr.innerHTML = `
           <td>${s.id}</td>
-          <td>${s.name}</td>
-          <td>${team ? team.name : 'Unassigned'}</td>
-          <td><span class="badge ${status === 'Present' ? 'bg-success' : 'bg-danger'}">${status}</span><div class="small text-muted">${timestamp}</div></td>
-          <td class="text-end table-actions">
+          <td>${s.name || ''}</td>
+          <td>${s.class || ''}</td>
+          <td>${team ? team.name : '<em class="muted">Unassigned</em>'}</td>
+          <td><div><span class="badge-status text-bg-${att==='Present'?'success':'danger'}">${att}</span><div class="small-muted">${ts}</div></div></td>
+          <td class="text-end">
             <button class="btn btn-sm btn-outline-primary btn-edit-student"><i class="bi bi-pencil-fill"></i></button>
             <button class="btn btn-sm btn-outline-danger btn-delete-student"><i class="bi bi-trash-fill"></i></button>
           </td>`;
-        tr.dataset.id = s.id;
         studentTableBody.appendChild(tr);
       });
     }
 
     function renderTeams() {
       teamTableBody.innerHTML = '';
-      if (db.teams.length === 0) {
-        teamTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No teams</td></tr>`;
-        return;
-      }
+      if (db.teams.length === 0) { teamTableBody.innerHTML = `<tr><td colspan="6" class="text-center muted">No teams</td></tr>`; return; }
       db.teams.forEach(t => {
         const leader = db.students.find(s => s.id === t.leaderId);
         const members = db.students.filter(s => s.teamId === t.id).length;
-        const score = t.score || 0;
+        const pwd = t.password ? '•'.repeat(4) : '<em class="muted">n/a</em>';
         const tr = document.createElement('tr');
+        tr.dataset.key = t.__key || ''; // optional
+        tr.dataset.id = t.id;
         tr.innerHTML = `
           <td><strong>${t.name}</strong></td>
-          <td>${leader ? leader.name + ' ('+leader.id+')' : '<em class="text-muted">No leader</em>'}</td>
+          <td>${leader ? leader.name + ' ('+leader.id+')' : '<em class="muted">No leader</em>'}</td>
           <td>${members}</td>
-          <td>${score}</td>
-          <td class="text-end table-actions">
+          <td>${t.score||0}</td>
+          <td><div class="d-flex gap-2 align-items-center"><div>${pwd}</div><button class="btn btn-sm btn-outline-secondary btn-show-pass"><i class="bi bi-eye"></i></button></div></td>
+          <td class="text-end">
             <button class="btn btn-sm btn-outline-primary btn-edit-team"><i class="bi bi-pencil-fill"></i></button>
             <button class="btn btn-sm btn-outline-danger btn-delete-team"><i class="bi bi-trash-fill"></i></button>
           </td>`;
-        tr.dataset.id = t.id;
         teamTableBody.appendChild(tr);
       });
     }
 
     function renderEvents() {
       eventTableBody.innerHTML = '';
-      resultEvent.innerHTML = `<option value="">Select event...</option>`;
-      if (db.events.length === 0) {
-        eventTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No events</td></tr>`;
-        return;
-      }
+      if (db.events.length === 0) { eventTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No events</td></tr>`; return; }
       db.events.forEach(ev => {
-        const pts = Array.isArray(ev.points) ? ev.points.join('/') : `${ev.points?.[0]||0}/${ev.points?.[1]||0}/${ev.points?.[2]||0}`;
         const status = ev.status || 'Open';
-        const row = document.createElement('tr');
-        row.innerHTML = `
+        const desc = ev.description ? (ev.description.length>120?ev.description.slice(0,120)+'...':ev.description) : '';
+        const tr = document.createElement('tr');
+        tr.dataset.id = ev.id;
+        tr.innerHTML = `
           <td>${ev.name}</td>
           <td>${ev.type}</td>
-          <td>${pts}</td>
-          <td><span class="badge bg-secondary">${status}</span></td>
-          <td class="text-end table-actions">
+          <td>${desc}</td>
+          <td><span class="badge ${status==='Completed'?'bg-secondary':'bg-info'}">${status}</span></td>
+          <td class="text-end">
             <button class="btn btn-sm btn-outline-primary btn-edit-event"><i class="bi bi-pencil"></i></button>
             <button class="btn btn-sm btn-outline-danger btn-delete-event"><i class="bi bi-trash-fill"></i></button>
           </td>`;
-        row.dataset.id = ev.id;
-        eventTableBody.appendChild(row);
-
-        // add to result dropdown
-        if ((ev.status || 'Open') !== 'Completed') resultEvent.innerHTML += `<option value="${ev.id}">${ev.name}</option>`;
+        eventTableBody.appendChild(tr);
       });
     }
 
     function renderParticipations() {
       pendingEventsTableBody.innerHTML = '';
       const pending = db.participations.filter(p => p.status === 'Pending');
-      if (pending.length === 0) {
-        pendingEventsTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No pending approvals</td></tr>`;
-        return;
-      }
+      if (!pending.length) { pendingEventsTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No pending approvals</td></tr>`; return; }
       pending.forEach(p => {
-        const eventObj = db.events.find(e => e.id === p.eventId);
-        const student = db.students.find(s => s.id === p.studentId);
+        const ev = db.events.find(e => e.id === p.eventId);
+        const stu = db.students.find(s => s.id === p.studentId);
         const team = db.teams.find(t => t.id === p.teamId);
-        if (!eventObj || !student || !team) return;
         const tr = document.createElement('tr');
+        tr.dataset.id = p.id;
         tr.innerHTML = `
-          <td>${eventObj.name}</td>
-          <td>${team.name}</td>
-          <td>${student.name} (${student.id})</td>
+          <td>${ev ? ev.name : '—'}</td>
+          <td>${team ? team.name : '—'}</td>
+          <td>${stu ? stu.name + ' ('+stu.id+')' : '—'}</td>
           <td>${new Date(p.submittedAt).toLocaleString()}</td>
-          <td class="text-end table-actions">
+          <td class="text-end">
             <button class="btn btn-sm btn-success btn-approve-event"><i class="bi bi-check-lg"></i></button>
             <button class="btn btn-sm btn-danger btn-reject-event"><i class="bi bi-x-lg"></i></button>
           </td>`;
-        tr.dataset.id = p.id;
         pendingEventsTableBody.appendChild(tr);
       });
     }
 
     function renderResults() {
       publishedResultsTableBody.innerHTML = '';
-      if (db.results.length === 0) {
-        publishedResultsTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No results published</td></tr>`;
-        return;
-      }
+      if (!db.results.length) { publishedResultsTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No results</td></tr>`; return; }
       db.results.forEach(r => {
         const ev = db.events.find(e => e.id === r.eventId);
-        const getName = (id) => {
-          if (!id || id === 'none') return '<em class="text-muted">N/A</em>';
-          const s = db.students.find(st => st.id === id);
-          return s ? s.name + ' ('+s.id+')' : id;
+        const getName = id => {
+          if (!id || id === 'none') return '<em class="muted">N/A</em>';
+          const s = db.students.find(x => String(x.id) === String(id));
+          return s ? `${s.name} (${s.id})` : id;
         };
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${ev ? ev.name : 'Unknown'}</td><td>${getName(r.first)}</td><td>${getName(r.second)}</td><td>${getName(r.third)}</td>`;
+        tr.innerHTML = `<td>${ev?ev.name:'Unknown'}</td><td>${getName(r.first)} (${r.pFirst||0})</td><td>${getName(r.second)} (${r.pSecond||0})</td><td>${getName(r.third)} (${r.pThird||0})</td><td>${r.published?new Date(r.publishedAt).toLocaleString():'No'}</td>`;
         publishedResultsTableBody.appendChild(tr);
       });
     }
 
     function renderNotifications() {
       notificationHistoryTable.innerHTML = '';
-      if (db.notifications.length === 0) {
-        notificationHistoryTable.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No notifications yet</td></tr>`;
-        return;
-      }
+      if (!db.notifications.length) { notificationHistoryTable.innerHTML = `<tr><td colspan="4" class="text-center muted">No notifications</td></tr>`; return; }
       [...db.notifications].reverse().forEach(n => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${n.title}</td><td>${n.message}</td><td>${n.to || 'All'}</td><td>${new Date(n.date).toLocaleString()}</td>`;
+        tr.innerHTML = `<td>${n.title}</td><td>${n.message}</td><td>${n.to||'All'}</td><td>${new Date(n.date).toLocaleString()}</td>`;
         notificationHistoryTable.appendChild(tr);
       });
     }
@@ -577,24 +697,55 @@
     }
 
     function populateDropdowns() {
-      // studentTeam select for studentModal
+      // students -> teamLeader select & studentTeam select
+      teamLeader.innerHTML = `<option value="">None</option>`;
       studentTeam.innerHTML = `<option value="">Unassigned</option>`;
-      db.teams.forEach(t => studentTeam.innerHTML += `<option value="${t.id}">${t.name}</option>`);
-      // teamLeader select for teamModal
-      teamLeader.innerHTML = `<option value="">Choose leader</option>`;
-      db.students.forEach(s => teamLeader.innerHTML += `<option value="${s.id}">${s.name} (${s.id})</option>`);
+      db.students.forEach(s => {
+        const opt = `<option value="${s.id}">${s.name || s.id} (${s.id})</option>`;
+        teamLeader.innerHTML += opt;
+      });
+      db.teams.forEach(t => {
+        studentTeam.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+      });
+
+      // resultEvent dropdown
+      resultEvent.innerHTML = `<option value="">Select event...</option>`;
+      db.events.forEach(e => {
+        resultEvent.innerHTML += `<option value="${e.id}">${e.name}</option>`;
+      });
     }
 
-    // ---------------------------
-    // ADD / EDIT / DELETE actions
-    // ---------------------------
+    // ATTENDANCE
+    function renderAttendanceTable() {
+      attendanceTableBody.innerHTML = '';
+      if (!db.students.length) { attendanceTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No students</td></tr>`; return; }
+      db.students.sort((a,b)=>(a.id||0)-(b.id||0)).forEach(s => {
+        const team = db.teams.find(t => t.id === s.teamId);
+        const att = s.attendance?.status || 'Absent';
+        const tr = document.createElement('tr');
+        tr.dataset.id = s.id;
+        tr.innerHTML = `
+          <td>${s.id}</td>
+          <td>${s.name||''}</td>
+          <td>${team?team.name:'Unassigned'}</td>
+          <td><span class="badge ${att==='Present'?'bg-success':'bg-danger'}">${att}</span></td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-success btn-mark-present">Present</button>
+            <button class="btn btn-sm btn-outline-danger btn-mark-absent">Absent</button>
+          </td>`;
+        attendanceTableBody.appendChild(tr);
+      });
+    }
 
-    // -- STUDENTS --
+    // ---------- CRUD & Event handlers ----------
+
+    // Add Student
     addStudentBtn.addEventListener('click', () => {
       studentForm.reset();
       studentIdHidden.value = '';
       studentChess.readOnly = false;
-      studentModalEl.show();
+      studentModal.show();
+      populateDropdowns();
     });
 
     studentForm.addEventListener('submit', async (ev) => {
@@ -602,37 +753,28 @@
       const idVal = studentIdHidden.value;
       const chess = studentChess.value.trim();
       const name = studentName.value.trim();
-      const teamIdStr = studentTeam.value;
-      const teamId = teamIdStr === '' ? null : (isFinite(teamIdStr) ? parseInt(teamIdStr,10) : teamIdStr);
-
+      const cls = studentClass.value.trim();
+      const teamIdVal = studentTeam.value || null;
       if (!chess || !name) { showToast('Provide chess number and name', 'danger'); return; }
       const chessNum = Number(chess);
-      if (Number.isNaN(chessNum)) { showToast('Chess number must be numeric', 'danger'); return; }
+      if (isNaN(chessNum)) { showToast('Chess number must be numeric', 'danger'); return; }
 
       if (idVal) {
-        // update existing
-        const studentRef = ref(database, `students/${idVal}`);
-        await update(studentRef, { name, teamId });
+        // update existing student path — students stored under students/{chess}
+        await update(ref(database, `students/${idVal}`), { name, class: cls, teamId: teamIdVal ? Number(teamIdVal) : null });
         showToast('Student updated');
-        studentModalEl.hide();
+        studentModal.hide();
       } else {
-        // add new — store under students/{chessNum}
-        const targetRef = ref(database, `students/${chessNum}`);
-        // ensure we don't overwrite existing unintentionally
-        const snap = await get(targetRef);
-        if (snap.exists()) { showToast('Chess number already exists', 'danger'); return; }
-        await set(targetRef, {
-          id: chessNum,
-          name,
-          teamId: teamId,
-          attendance: { status: 'Absent', timestamp: null }
-        });
+        const studRef = ref(database, `students/${chessNum}`);
+        const snap = await get(studRef);
+        if (snap.exists()) { showToast('Chess number exists', 'danger'); return; }
+        await set(studRef, { id: chessNum, name, class: cls, teamId: teamIdVal?Number(teamIdVal):null, attendance: { status:'Absent', timestamp:null } });
         showToast('Student added');
-        studentModalEl.hide();
+        studentModal.hide();
       }
     });
 
-    // student table click (delegate)
+    // Student table actions (delegate)
     studentTableBody.addEventListener('click', (ev) => {
       const btn = ev.target.closest('button');
       if (!btn) return;
@@ -645,108 +787,130 @@
         studentIdHidden.value = s.id;
         studentChess.value = s.id;
         studentChess.readOnly = true;
-        studentName.value = s.name;
+        studentName.value = s.name || '';
+        studentClass.value = s.class || '';
         studentTeam.value = s.teamId || '';
-        studentModalEl.show();
+        populateDropdowns();
+        studentModal.show();
       } else if (btn.classList.contains('btn-delete-student')) {
         const s = db.students.find(x => String(x.id) === String(id));
-        if (!s) return;
         document.getElementById('confirmDeleteModalBody').textContent = `Delete student "${s.name}" (${s.id})? This cannot be undone.`;
         deleteCallback = async () => {
           await remove(ref(database, `students/${s.id}`));
-          // remove any participations for that student
+          // remove participations
+          const snap = await get(rootRef);
+          const rootObj = snap.val() || {};
+          const partsObj = rootObj.participations || {};
           const updates = {};
-          db.participations.filter(p => p.studentId === s.id).forEach(p => updates[`participations/${p.id}`] = null);
-          // update teams to remove leader references if needed
-          db.teams.forEach(t => { if (t.leaderId === s.id) updates[`teams/${t.id}/leaderId`] = null; });
+          for (const k in partsObj) {
+            if (partsObj[k].studentId === s.id) updates[`participations/${k}`] = null;
+          }
           if (Object.keys(updates).length) await update(rootRef, updates);
           showToast('Student deleted');
         };
-        confirmDeleteModalEl.show();
+        confirmDeleteModal.show();
       }
     });
 
-    // -- TEAMS --
+    // Add Team
     addTeamBtn.addEventListener('click', () => {
       teamForm.reset();
       teamIdHidden.value = '';
+      teamPassword.value = generateTeamPassword();
       populateDropdowns();
-      teamModalEl.show();
+      teamModal.show();
+    });
+
+    // Generate password
+    btnGenPassword.addEventListener('click', () => { teamPassword.value = generateTeamPassword(); });
+
+    btnCopyPassword.addEventListener('click', () => {
+      if (!teamPassword.value) return showToast('No password to copy', 'danger');
+      navigator.clipboard.writeText(teamPassword.value).then(()=> showToast('Password copied'));
     });
 
     teamForm.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const idVal = teamIdHidden.value;
-      const name = teamName.value.trim();
+      const tName = teamNameInput.value.trim();
       const leaderIdVal = teamLeader.value || null;
-      const leaderId = leaderIdVal ? (isFinite(leaderIdVal) ? parseInt(leaderIdVal,10) : leaderIdVal) : null;
+      const pwd = teamPassword.value || generateTeamPassword();
 
-      if (!name) { showToast('Provide team name', 'danger'); return; }
+      if (!tName) { showToast('Provide team name', 'danger'); return; }
 
       if (idVal) {
-        // update team
-        await update(ref(database, `teams/${idVal}`), { name, leaderId });
+        // find team key and update
+        const snap = await get(rootRef);
+        const root = snap.val() || {};
+        const teamsObj = root.teams || {};
+        let foundKey = null;
+        for (const k in teamsObj) { if (String(teamsObj[k].id) === String(idVal)) { foundKey = k; break; } }
+        if (!foundKey) { showToast('Team key not found', 'danger'); return; }
+        await update(ref(database, `teams/${foundKey}`), { name: tName, leaderId: leaderIdVal?Number(leaderIdVal):null, password: pwd });
         showToast('Team updated');
-        teamModalEl.hide();
+        teamModal.hide();
       } else {
-        // create new team using push (unique key) and set id property to numeric timestamp
-        const newTeamRef = push(ref(database, 'teams'));
-        const autoKey = newTeamRef.key;
-        const numericId = Date.now(); // friendly id
-        await set(newTeamRef, { id: numericId, name, leaderId, score: 0 });
+        const nref = push(ref(database,'teams'));
+        const numericId = Date.now();
+        await set(nref, { id: numericId, name: tName, leaderId: leaderIdVal?Number(leaderIdVal):null, score:0, password: pwd });
         showToast('Team created');
-        teamModalEl.hide();
+        teamModal.hide();
       }
     });
 
-    teamTableBody.addEventListener('click', (ev) => {
+    // Team table actions
+    teamTableBody.addEventListener('click', async (ev) => {
       const btn = ev.target.closest('button');
       if (!btn) return;
       const tr = ev.target.closest('tr');
-      const id = tr?.dataset?.id;
-      if (!id) return;
-      const team = db.teams.find(x => String(x.id) === String(id));
-      if (!team) return;
+      const teamId = tr?.dataset?.id;
+      if (!teamId) return;
+      const teamObj = db.teams.find(t => String(t.id) === String(teamId));
+      if (!teamObj) return;
 
       if (btn.classList.contains('btn-edit-team')) {
-        teamIdHidden.value = team.id;
-        teamName.value = team.name;
-        teamLeader.value = team.leaderId || '';
+        teamIdHidden.value = teamObj.id;
+        teamNameInput.value = teamObj.name || '';
+        teamLeader.value = teamObj.leaderId || '';
+        teamPassword.value = teamObj.password || generateTeamPassword();
         populateDropdowns();
-        teamModalEl.show();
+        teamModal.show();
       } else if (btn.classList.contains('btn-delete-team')) {
-        document.getElementById('confirmDeleteModalBody').textContent = `Delete team "${team.name}"? This will not delete students but will unassign them.`;
+        document.getElementById('confirmDeleteModalBody').textContent = `Delete team "${teamObj.name}"? Students will be unassigned.`;
         deleteCallback = async () => {
-          // find DB key for team (teams are stored as an object; we must remove by known key)
-          // Approach: find team in DB as object by searching root snapshot (we have only arrays). We'll delete by matching id for all team keys.
-          // To be safe, fetch root object and remove the matching team key.
-          const rootSnap = await get(rootRef);
-          const rootData = rootSnap.val() || {};
-          const teamsObj = rootData.teams || {};
+          // find key
+          const snap = await get(rootRef);
+          const root = snap.val() || {};
+          const teamsObj = root.teams || {};
           let foundKey = null;
-          for (const k in teamsObj) {
-            if (String(teamsObj[k].id) === String(team.id)) { foundKey = k; break; }
-          }
-          if (foundKey) {
-            await remove(ref(database, `teams/${foundKey}`));
-            // unassign teamId from students
-            const updates = {};
-            db.students.filter(s => s.teamId === team.id).forEach(s => updates[`students/${s.id}/teamId`] = null);
-            if (Object.keys(updates).length) await update(rootRef, updates);
-            showToast('Team deleted');
-          } else {
-            showToast('Could not find team key to delete', 'danger');
-          }
+          for (const k in teamsObj) { if (String(teamsObj[k].id) === String(teamObj.id)) { foundKey = k; break; } }
+          if (!foundKey) return showToast('Team key not found', 'danger');
+          await remove(ref(database, `teams/${foundKey}`));
+          // unassign students
+          const updates = {};
+          db.students.filter(s => s.teamId === teamObj.id).forEach(s => updates[`students/${s.id}/teamId`] = null);
+          if (Object.keys(updates).length) await update(rootRef, updates);
+          showToast('Team deleted');
         };
-        confirmDeleteModalEl.show();
+        confirmDeleteModal.show();
+      } else if (btn.classList.contains('btn-show-pass')) {
+        // reveal password in modal
+        const snap = await get(rootRef);
+        const root = snap.val() || {};
+        const teamsObj = root.teams || {};
+        let foundKey = null, foundTeam = null;
+        for (const k in teamsObj) { if (String(teamsObj[k].id) === String(teamObj.id)) { foundKey = k; foundTeam = teamsObj[k]; break; } }
+        if (foundTeam) {
+          alert(`Password for team "${foundTeam.name}": ${foundTeam.password || '(none)'}`);
+        } else showToast('Team password not found', 'danger');
       }
     });
 
-    // -- EVENTS --
+    // Add Event
     addEventBtn.addEventListener('click', () => {
       eventForm.reset();
       eventIdHidden.value = '';
-      eventModalEl.show();
+      eventModal.show();
     });
 
     eventForm.addEventListener('submit', async (ev) => {
@@ -754,239 +918,249 @@
       const idVal = eventIdHidden.value;
       const name = eventName.value.trim();
       const type = eventType.value;
-      const pts = [Number(eventPt1.value)||0, Number(eventPt2.value)||0, Number(eventPt3.value)||0];
-
+      const desc = eventDescription.value.trim();
       if (!name) { showToast('Provide event name', 'danger'); return; }
 
       if (idVal) {
-        // update by searching event key
-        const rootSnap = await get(rootRef);
-        const rootData = rootSnap.val() || {};
-        const eventsObj = rootData.events || {};
+        const snap = await get(rootRef);
+        const root = snap.val() || {};
+        const eventsObj = root.events || {};
         let foundKey = null;
-        for (const k in eventsObj) {
-          if (String(eventsObj[k].id) === String(idVal)) { foundKey = k; break; }
-        }
-        if (foundKey) {
-          await update(ref(database, `events/${foundKey}`), { name, type, points: pts });
-          showToast('Event updated');
-          eventModalEl.hide();
-        } else showToast('Could not find event to update', 'danger');
+        for (const k in eventsObj) { if (String(eventsObj[k].id) === String(idVal)) { foundKey = k; break; } }
+        if (!foundKey) { showToast('Event key not found', 'danger'); return; }
+        await update(ref(database, `events/${foundKey}`), { name, type, description: desc });
+        showToast('Event updated');
+        eventModal.hide();
       } else {
-        const newRef = push(ref(database, 'events'));
-        const numericId = Date.now();
-        await set(newRef, { id: numericId, name, type, points: pts, status: 'Open' });
+        const nref = push(ref(database, 'events'));
+        await set(nref, { id: Date.now(), name, type, description: desc, status: 'Open' });
         showToast('Event created');
-        eventModalEl.hide();
+        eventModal.hide();
       }
     });
 
-    eventTableBody.addEventListener('click', (ev) => {
+    // Event table actions
+    eventTableBody.addEventListener('click', async (ev) => {
       const btn = ev.target.closest('button');
       if (!btn) return;
       const tr = ev.target.closest('tr');
       const id = tr?.dataset?.id;
       if (!id) return;
-      const evobj = db.events.find(x => String(x.id) === String(id));
-      if (!evobj) return;
+      const evObj = db.events.find(e => String(e.id) === String(id));
+      if (!evObj) return;
 
       if (btn.classList.contains('btn-edit-event')) {
-        eventIdHidden.value = evobj.id;
-        eventName.value = evobj.name;
-        eventType.value = evobj.type;
-        eventPt1.value = evobj.points?.[0] ?? 0;
-        eventPt2.value = evobj.points?.[1] ?? 0;
-        eventPt3.value = evobj.points?.[2] ?? 0;
-        eventModalEl.show();
+        eventIdHidden.value = evObj.id;
+        eventName.value = evObj.name;
+        eventType.value = evObj.type;
+        eventDescription.value = evObj.description || '';
+        eventModal.show();
       } else if (btn.classList.contains('btn-delete-event')) {
-        document.getElementById('confirmDeleteModalBody').textContent = `Delete event "${evobj.name}"?`;
+        document.getElementById('confirmDeleteModalBody').textContent = `Delete event "${evObj.name}"? This will remove related participations.`;
         deleteCallback = async () => {
-          // find event key in DB
-          const rootSnap = await get(rootRef);
-          const rootData = rootSnap.val() || {};
-          const eventsObj = rootData.events || {};
+          const snap = await get(rootRef);
+          const root = snap.val() || {};
+          const eventsObj = root.events || {};
           let foundKey = null;
-          for (const k in eventsObj) {
-            if (String(eventsObj[k].id) === String(evobj.id)) { foundKey = k; break; }
-          }
-          if (foundKey) {
-            await remove(ref(database, `events/${foundKey}`));
-            // remove related participations
-            const updates = {};
-            db.participations.filter(p => p.eventId === evobj.id).forEach(p => updates[`participations/${p.id}`] = null);
-            if (Object.keys(updates).length) await update(rootRef, updates);
-            showToast('Event deleted');
-          } else showToast('Could not find event to delete', 'danger');
+          for (const k in eventsObj) { if (String(eventsObj[k].id) === String(evObj.id)) { foundKey = k; break; } }
+          if (!foundKey) { showToast('Event key not found', 'danger'); return; }
+          await remove(ref(database, `events/${foundKey}`));
+          // remove participations
+          const partsObj = root.participations || {};
+          const updates = {};
+          for (const k in partsObj) { if (partsObj[k].eventId === evObj.id) updates[`participations/${k}`] = null; }
+          if (Object.keys(updates).length) await update(rootRef, updates);
+          showToast('Event deleted');
         };
-        confirmDeleteModalEl.show();
+        confirmDeleteModal.show();
       }
     });
 
-    // -- APPROVALS (Approve / Reject)
+    // Approvals: approve / reject
     pendingEventsTableBody.addEventListener('click', async (ev) => {
       const btn = ev.target.closest('button');
       if (!btn) return;
       const tr = ev.target.closest('tr');
       const id = tr?.dataset?.id;
       if (!id) return;
-      const part = db.participations.find(p => p.id === id);
-      if (!part) return;
-
-      // find participation's DB key
+      // find participation key
       const rootSnap = await get(rootRef);
-      const rootData = rootSnap.val() || {};
-      const partsObj = rootData.participations || {};
-      let foundKey = null;
-      for (const k in partsObj) {
-        if (String(partsObj[k].id) === String(part.id)) { foundKey = k; break; }
-      }
+      const root = rootSnap.val() || {};
+      const partsObj = root.participations || {};
+      let foundKey = null, partObj = null;
+      for (const k in partsObj) { if (String(partsObj[k].id) === String(id)) { foundKey = k; partObj = partsObj[k]; break; } }
       if (!foundKey) { showToast('Participation not found', 'danger'); return; }
 
       if (btn.classList.contains('btn-approve-event')) {
-        // mark approved
         await update(ref(database, `participations/${foundKey}`), { status: 'Approved', approvedAt: Date.now() });
-        showToast('Participation approved');
+        showToast('Approved');
       } else if (btn.classList.contains('btn-reject-event')) {
         await update(ref(database, `participations/${foundKey}`), { status: 'Rejected', rejectedAt: Date.now() });
-        showToast('Participation rejected');
+        showToast('Rejected');
       }
     });
 
-    // -- PUBLISH RESULTS --
-    publishResultForm.addEventListener('submit', async (ev) => {
+    // Result Form
+    resultForm.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const evId = resultEvent.value;
       if (!evId) { showToast('Select event', 'danger'); return; }
-      const rFirst = firstPlace.value.trim() || 'none';
-      const rSecond = secondPlace.value.trim() || 'none';
-      const rThird = thirdPlace.value.trim() || 'none';
+      const first = rFirst.value.trim() || 'none';
+      const second = rSecond.value.trim() || 'none';
+      const third = rThird.value.trim() || 'none';
+      const pf = Number(pFirst.value) || 0;
+      const ps = Number(pSecond.value) || 0;
+      const pt = Number(pThird.value) || 0;
+      const publish = publishNow.checked;
 
-      // push result to results collection
-      const rRef = push(ref(database, 'results'));
-      await set(rRef, {
-        id: Date.now(),
-        eventId: Number(evId),
-        first: isFinite(rFirst) ? Number(rFirst) : rFirst,
-        second: isFinite(rSecond) ? Number(rSecond) : rSecond,
-        third: isFinite(rThird) ? Number(rThird) : rThird,
-        publishedAt: Date.now()
-      });
+      // push result object
+      const rRef = push(ref(database,'results'));
+      const resultObj = { id: Date.now(), eventId: Number(evId), first: first, second: second, third: third, pFirst: pf, pSecond: ps, pThird: pt, published: publish ? true : false, publishedAt: publish?Date.now():null };
+      await set(rRef, resultObj);
 
-      // Optionally: update team scores (add points)
-      // We attempt to give points based on event definition
-      const evObj = db.events.find(e => Number(e.id) === Number(evId));
-      if (evObj) {
-        const pts = evObj.points || [0,0,0];
-        const updates = {};
-        // for each place, find student's team and add score
-        const addToTeamByStudent = (studentId, points) => {
-          if (!studentId || studentId === 'none') return;
-          const stu = db.students.find(s => Number(s.id) === Number(studentId));
-          if (!stu) return;
-          const teamId = stu.teamId;
-          if (!teamId) return;
-          // find team key
-          // We'll prepare updates as teams/{key}/score = (existing + pts)
-          const rootSnapAll = null; // placeholder
-          // We'll apply by searching teams when updating below synchronously
-          const team = db.teams.find(t => t.id === teamId);
-          if (team) {
-            const teamKey = Object.keys(rootDataOrPlaceholder()).find(k => {
-              const t = rootTeamsObj()[k];
-              return t && String(t.id) === String(team.id);
-            });
-            // instead of complicated key logic here, simply update by scanning teams and using update(rootRef, {...})
-            if (teamKey) {
-              updates[`teams/${teamKey}/score`] = (team.score || 0) + points;
-            } else {
-              // fallback: update by numeric id path (if teams stored by numeric id)
-              // We'll handle via scanning keys above below.
-            }
-          }
-        };
-        // For simplicity: compute in-memory then write by searching keys
-        // Find DB snapshot root to get team keys
+      // if publish now, update team scores
+      if (publish) {
         const rootSnap = await get(rootRef);
-        const rootData = rootSnap.val() || {};
-        const teamsObj = rootData.teams || {};
-        const findTeamKeyById = (tid) => {
+        const root = rootSnap.val() || {};
+        const teamsObj = root.teams || {};
+        // helper to add points to team by student id
+        const addPointsToTeamByStudent = (studentId, points) => {
+          if (!studentId || studentId === 'none') return null;
+          const stud = db.students.find(s => String(s.id) === String(studentId));
+          if (!stud || !stud.teamId) return null;
+          const tid = stud.teamId;
+          // find team key
           for (const k in teamsObj) {
-            if (String(teamsObj[k].id) === String(tid)) return k;
+            if (String(teamsObj[k].id) === String(tid)) {
+              const newScore = (teamsObj[k].score || 0) + Number(points||0);
+              teamsObj[k].score = newScore;
+              return { key: k, score: newScore };
+            }
           }
           return null;
         };
-        // apply points
-        const winners = [{id:rFirst, pts: pts[0]||0}, {id:rSecond, pts: pts[1]||0}, {id:rThird, pts: pts[2]||0}];
-        const teamScoreUpdates = {};
-        winners.forEach(w => {
-          if (!w.id || w.id === 'none') return;
-          const s = db.students.find(st => String(st.id) === String(w.id));
-          if (!s || !s.teamId) return;
-          const tKey = findTeamKeyById(s.teamId);
-          if (!tKey) return;
-          const currentScore = teamsObj[tKey].score || 0;
-          teamScoreUpdates[`teams/${tKey}/score`] = currentScore + (w.pts || 0);
-        });
-        if (Object.keys(teamScoreUpdates).length) await update(rootRef, teamScoreUpdates);
+
+        const updates = {};
+        const r1 = addPointsToTeamByStudent(first, pf);
+        const r2 = addPointsToTeamByStudent(second, ps);
+        const r3 = addPointsToTeamByStudent(third, pt);
+        if (r1) updates[`teams/${r1.key}/score`] = r1.score;
+        if (r2) updates[`teams/${r2.key}/score`] = r2.score;
+        if (r3) updates[`teams/${r3.key}/score`] = r3.score;
+        if (Object.keys(updates).length) await update(rootRef, updates);
+        showToast('Result published and team scores updated');
+        // mark event completed
+        for (const k in root.events || {}) {
+          if (String(root.events[k].id) === String(evId)) {
+            await update(ref(database, `events/${k}`), { status: 'Completed' });
+            break;
+          }
+        }
+      } else {
+        showToast('Result added (not published)');
       }
 
-      showToast('Result published', 'success');
-      // mark event completed
-      // find event key
-      const rootSnap2 = await get(rootRef);
-      const rootData2 = rootSnap2.val() || {};
-      const eventsObj2 = rootData2.events || {};
-      for (const k in eventsObj2) {
-        if (String(eventsObj2[k].id) === String(evId)) {
-          await update(ref(database, `events/${k}`), { status: 'Completed' });
-          break;
-        }
-      }
-      // clear form
-      firstPlace.value = secondPlace.value = thirdPlace.value = '';
+      // clear form fields
       resultEvent.value = '';
+      rFirst.value=''; rSecond.value=''; rThird.value=''; pFirst.value='100'; pSecond.value='50'; pThird.value='25'; publishNow.checked=false;
     });
 
-    // -- NOTIFICATIONS --
+    // Notifications
     notificationForm.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const title = notificationTitle.value.trim();
       const message = notificationMessage.value.trim();
-      if (!title || !message) { showToast('Provide title and message', 'danger'); return; }
-
-      const nRef = push(ref(database, 'notifications'));
-      await set(nRef, {
-        id: Date.now(),
-        title,
-        message,
-        to: 'All',
-        date: Date.now()
-      });
+      if (!title || !message) { showToast('Provide title & message', 'danger'); return; }
+      const nref = push(ref(database,'notifications'));
+      await set(nref, { id: Date.now(), title, message, to: 'All', date: Date.now() });
       showToast('Notification sent');
       notificationForm.reset();
     });
 
-    // ---------------------------
-    // Utility to find root snapshot structures (used in a few places)
-    // ---------------------------
-    async function rootDataOrPlaceholder() {
-      const snap = await get(rootRef);
-      return snap.val() || {};
-    }
-    function rootTeamsObj() {
-      // we can't synchronously read root snapshot here without awaiting; used only inside awaited flows
-      return {}; // placeholder - don't rely on this outside awaited context
-    }
+    // Attendance actions
+    attendanceTableBody.addEventListener('click', async (ev) => {
+      const btn = ev.target.closest('button');
+      if (!btn) return;
+      const tr = ev.target.closest('tr');
+      const id = tr?.dataset?.id;
+      if (!id) return;
+      const date = attendanceDate.value || new Date().toISOString().slice(0,10);
+      if (btn.classList.contains('btn-mark-present')) {
+        await update(ref(database, `students/${id}/attendance`), { status:'Present', timestamp: Date.now(), date });
+        showToast('Marked present');
+      } else if (btn.classList.contains('btn-mark-absent')) {
+        await update(ref(database, `students/${id}/attendance`), { status:'Absent', timestamp: Date.now(), date });
+        showToast('Marked absent');
+      }
+    });
 
-    // ---------------------------
-    // LOGOUT
-    // ---------------------------
+    btnMarkAllPresent.addEventListener('click', async () => {
+      const date = attendanceDate.value || new Date().toISOString().slice(0,10);
+      const updates = {};
+      db.students.forEach(s => updates[`students/${s.id}/attendance`] = { status:'Present', timestamp: Date.now(), date });
+      if (Object.keys(updates).length) {
+        await update(rootRef, updates);
+        showToast('All students marked present');
+      }
+    });
+
+    // Excel import (sheetjs)
+    btnImportExcel.addEventListener('click', () => excelFileInput.click());
+
+    excelFileInput.addEventListener('change', async (ev) => {
+      const f = ev.target.files[0];
+      if (!f) return;
+      const data = await f.arrayBuffer();
+      const wb = XLSX.read(data);
+      const sheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      // expected columns: Chess Number, Name, Class, Team
+      if (!json.length) return showToast('Excel empty', 'danger');
+
+      // Map and insert/update
+      const updates = {};
+      // ensure we have team name -> id mapping
+      const teamNameToId = {};
+      db.teams.forEach(t => { if (t.name) teamNameToId[String(t.name).trim().toLowerCase()] = t.id; });
+
+      for (const row of json) {
+        // tolerant keys
+        const chess = row['Chess Number'] || row['Chess'] || row['chess'] || row['chess number'] || row['ChessNumber'] || row['ID'] || row['id'];
+        const name = row['Name'] || row['Full Name'] || row['Student Name'] || row['name'];
+        const cls = row['Class'] || row['class'] || row['Standard'] || row['std'];
+        const teamName = row['Team'] || row['team'] || row['Group'] || '';
+
+        if (!chess || !name) continue;
+        const chessNum = Number(chess);
+        const teamId = teamName ? teamNameToId[String(teamName).trim().toLowerCase()] : null;
+        updates[`students/${chessNum}`] = { id: chessNum, name: String(name).trim(), class: cls ? String(cls).trim() : '', teamId: teamId || null, attendance: { status:'Absent', timestamp:null } };
+      }
+
+      if (Object.keys(updates).length) {
+        await update(rootRef, updates);
+        showToast(`Imported ${Object.keys(updates).length} students`);
+      } else {
+        showToast('No valid rows found', 'danger');
+      }
+      excelFileInput.value = '';
+    });
+
+    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
       sessionStorage.removeItem('user');
       location.href = 'index.html';
     });
 
-    // initial population attempt (if needed)
+    // Utilities
+    function generateTeamPassword() {
+      const n = Math.floor(1000 + Math.random()*9000);
+      return `TL-${n}`;
+    }
+
+    // Results: render / helper done via renderResults()
+
+    // Initial population
     populateDropdowns();
 
   </script>
