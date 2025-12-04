@@ -3,423 +3,315 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Art Fest — Admin Dashboard</title>
+  <title>Admin — Art Fest</title>
 
-  <!-- Bootstrap & Icons -->
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-  <!-- SheetJS for Excel import -->
+  <!-- SheetJS -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     :root{
       --bg:#f4f7fb;
-      --card:#ffffff;
+      --card:#fff;
       --accent:#4f46e5;
       --muted:#6b7280;
       --success:#10b981;
       --danger:#ef4444;
     }
-    body { background: var(--bg); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:#222; }
-    .navbar { background: linear-gradient(90deg,#ffffff 0%, rgba(255,255,255,0.9) 100%); box-shadow:0 6px 18px rgba(16,24,40,0.06); }
-    .container-wide { max-width: 1200px; margin: 30px auto; }
-    .card-neo { background:var(--card); border-radius:12px; box-shadow:0 6px 20px rgba(16,24,40,0.05); border:0; }
-    .section-title { font-weight:700; color: #0f172a; }
-    .muted { color: var(--muted); }
-    .btn-accent { background: linear-gradient(90deg,var(--accent),#7c3aed); color:#fff; border:0; }
-    .form-label { font-weight:600; font-size:0.92rem; }
-    .small-muted { color:var(--muted); font-size:0.875rem; }
-    .table thead { background: #fbfbff; }
-    .modal-header { border-bottom:0; }
-    .toast-container { z-index: 11000; }
-    .badge-status { padding: .4rem .6rem; border-radius: 999px; font-weight:600; }
-    .file-input-label { cursor: pointer; }
-    hr.sep { border-top: 1px dashed #eef2ff; margin: 1rem 0 1.25rem; }
-    /* Responsive adjustments */
-    @media (max-width: 768px) { .container-wide { margin: 12px; } }
+    body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
+    .container-wide{max-width:1200px;margin:28px auto;}
+    .card-neo{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(16,24,40,0.06);border:0;}
+    .small-muted{color:var(--muted)}
+    .section-title{font-weight:700;margin-bottom:8px}
+    .small-box{width:54px;height:36px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;margin:4px;cursor:pointer;font-weight:600}
+    .small-box.present{background:var(--success);color:#fff}
+    .small-box.absent{background:var(--danger);color:#fff}
+    .btn-accent{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#fff;border:0}
+    .table thead{background:#fbfbff}
+    .muted{color:var(--muted)}
+    @media (max-width:768px){ .container-wide{margin:12px} }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav class="navbar navbar-expand-lg mb-4">
-    <div class="container container-wide d-flex align-items-center">
-      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+  <nav class="navbar shadow-sm">
+    <div class="container container-wide d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
         <span class="badge text-bg-primary rounded-pill"><i class="bi bi-palette-fill"></i></span>
         <div>
-          <div style="font-weight:700">Art Fest Management</div>
-          <div style="font-size:.82rem; color:var(--muted)">Administrator Dashboard</div>
+          <div style="font-weight:700">Art Fest Admin</div>
+          <div class="small-muted">Realtime Dashboard</div>
         </div>
-      </a>
-
-      <div class="ms-auto d-flex gap-2 align-items-center">
-        <button id="btnImportExcel" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i> Import Students (Excel)</button>
-        <input type="file" id="excelFile" accept=".xlsx,.xls" style="display:none" />
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <button id="openStudents" class="btn btn-outline-secondary">Students</button>
+        <button id="openTeams" class="btn btn-outline-secondary">Teams</button>
+        <button id="openEvents" class="btn btn-outline-secondary">Events</button>
+        <button id="openAttendance" class="btn btn-outline-secondary">Attendance</button>
+        <button id="openResults" class="btn btn-outline-secondary">Results</button>
         <button id="logoutBtn" class="btn btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Logout</button>
       </div>
     </div>
   </nav>
 
-  <main class="container container-wide">
+  <main class="container-wide">
 
-    <!-- TOP STATS -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="card-neo p-3">
-          <div class="small-muted">Students</div>
-          <div class="h4" id="stat-total-students">0</div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card-neo p-3">
-          <div class="small-muted">Teams</div>
-          <div class="h4" id="stat-total-teams">0</div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card-neo p-3">
-          <div class="small-muted">Events</div>
-          <div class="h4" id="stat-total-events">0</div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card-neo p-3">
-          <div class="small-muted">Pending</div>
-          <div class="h4" id="stat-pending-events">0</div>
-        </div>
-      </div>
+    <!-- Top stats -->
+    <div class="row g-3 my-4">
+      <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Students</div><div class="h4" id="statStudents">0</div></div></div>
+      <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Teams</div><div class="h4" id="statTeams">0</div></div></div>
+      <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Events</div><div class="h4" id="statEvents">0</div></div></div>
+      <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Pending</div><div class="h4" id="statPending">0</div></div></div>
     </div>
 
-    <!-- ACTIONS -->
-    <div class="card-neo p-3 mb-4 d-flex gap-2 flex-wrap align-items-center">
-      <div class="d-flex gap-2">
-        <button id="addStudentBtn" class="btn btn-accent"><i class="bi bi-person-plus"></i> Add Student</button>
-        <button id="addTeamBtn" class="btn btn-success"><i class="bi bi-people"></i> Add Team</button>
-        <button id="addEventBtn" class="btn btn-warning"><i class="bi bi-calendar-event"></i> Add Event</button>
-      </div>
-      <div class="ms-auto small-muted">Upload Excel: columns allowed — <strong>Chess Number, Name, Class, Team</strong>. Team must match existing team name or left blank.</div>
-    </div>
-
-    <!-- TABS -->
+    <!-- Tabs container -->
     <div class="card-neo p-3 mb-4">
       <ul class="nav nav-pills mb-3" id="tabs">
-        <li class="nav-item"><button class="nav-link active" data-bs-target="#tab-students">Students</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-teams">Teams</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-events">Events</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-approvals">Approvals</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-results">Results</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-attendance">Attendance</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-target="#tab-notifications">Notifications</button></li>
+        <li class="nav-item"><button class="nav-link active" data-target="panel-students">Students</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="panel-teams">Teams</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="panel-events">Events</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="panel-attendance">Attendance</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="panel-results">Results</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="panel-approvals">Approvals</button></li>
+        <li class="nav-item"><button class="nav-link" data-target="panel-notifications">Notifications</button></li>
       </ul>
 
-      <div id="tabContents">
+      <div id="panels">
 
-        <!-- STUDENTS TAB -->
-        <section id="tab-students" class="tab-section">
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Chess #</th>
-                  <th>Name</th>
-                  <th>Class</th>
-                  <th>Team</th>
-                  <th>Attendance</th>
-                  <th class="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="studentTableBody"></tbody>
-            </table>
-          </div>
-        </section>
+        <!-- STUDENTS PANEL -->
+        <section id="panel-students" class="panel">
+          <div class="row g-3">
+            <div class="col-lg-5">
+              <div class="card-neo">
+                <div class="section-title">Add / Import Students</div>
+                <div class="small-muted mb-2">Excel file (columns accepted): Chess Number, Name, Class, Team</div>
 
-        <!-- TEAMS TAB -->
-        <section id="tab-teams" class="tab-section" style="display:none">
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Team</th>
-                  <th>Leader (Chess #)</th>
-                  <th>Members</th>
-                  <th>Score</th>
-                  <th>Password</th>
-                  <th class="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="teamTableBody"></tbody>
-            </table>
-          </div>
-        </section>
+                <input id="studentFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
+                <div class="d-flex gap-2">
+                  <button id="btnPreviewStudents" class="btn btn-outline-primary">Preview</button>
+                  <button id="btnImportStudents" class="btn btn-accent">Import to Database</button>
+                </div>
 
-        <!-- EVENTS TAB -->
-        <section id="tab-events" class="tab-section" style="display:none">
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Event</th>
-                  <th>Type</th>
-                  <th>Description / Rules</th>
-                  <th>Status</th>
-                  <th class="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="eventTableBody"></tbody>
-            </table>
-          </div>
-        </section>
+                <hr/>
+                <div class="small-muted">Preview (first 300 rows)</div>
+                <div id="studentsPreview" style="max-height:300px; overflow:auto"></div>
+              </div>
+            </div>
 
-        <!-- APPROVALS TAB -->
-        <section id="tab-approvals" class="tab-section" style="display:none">
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Event</th>
-                  <th>Team</th>
-                  <th>Participant</th>
-                  <th>Submitted At</th>
-                  <th class="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="pendingEventsTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- RESULTS TAB -->
-        <section id="tab-results" class="tab-section" style="display:none">
-          <div class="mb-3">
-            <form id="resultForm" class="row gx-2 gy-2 align-items-end">
-              <div class="col-md-4">
-                <label class="form-label">Select Event</label>
-                <select id="resultEvent" class="form-select"></select>
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">1st Place (Chess #)</label>
-                <input id="rFirst" class="form-control" type="number" min="0" />
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">Points for 1st (0-100)</label>
-                <input id="pFirst" class="form-control" type="number" min="0" max="100" value="100"/>
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">2nd (Chess #)</label>
-                <input id="rSecond" class="form-control" type="number" />
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">Points for 2nd (0-100)</label>
-                <input id="pSecond" class="form-control" type="number" min="0" max="100" value="50"/>
-              </div>
-
-              <div class="col-md-2">
-                <label class="form-label">3rd (Chess #)</label>
-                <input id="rThird" class="form-control" type="number" />
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">Points for 3rd (0-100)</label>
-                <input id="pThird" class="form-control" type="number" min="0" max="100" value="25"/>
-              </div>
-
-              <div class="col-md-2 d-flex align-items-center">
-                <div class="form-check mt-1">
-                  <input class="form-check-input" type="checkbox" value="" id="publishNow">
-                  <label class="form-check-label small-muted" for="publishNow">Publish now</label>
+            <div class="col-lg-7">
+              <div class="card-neo">
+                <div class="section-title">All Students</div>
+                <div class="table-responsive">
+                  <table class="table align-middle">
+                    <thead class="table-light"><tr><th>Chess #</th><th>Name</th><th>Class</th><th>Team</th><th>Attendance</th><th class="text-end">Actions</th></tr></thead>
+                    <tbody id="studentsTable"></tbody>
+                  </table>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
 
-              <div class="col-md-2">
-                <button class="btn btn-success w-100" type="submit"><i class="bi bi-upload"></i> Add Result</button>
+        <!-- TEAMS PANEL -->
+        <section id="panel-teams" class="panel d-none">
+          <div class="row g-3">
+            <div class="col-lg-5">
+              <div class="card-neo">
+                <div class="section-title">Add / Edit Team</div>
+                <div class="small-muted mb-2">Team password used by leader to login.</div>
+
+                <input type="hidden" id="teamKeyHidden">
+                <div class="mb-2"><label class="form-label">Team Name</label><input id="teamName" class="form-control"></div>
+                <div class="mb-2"><label class="form-label">Leader (Chess #)</label><select id="teamLeader" class="form-select"><option value="">None</option></select></div>
+                <div class="mb-2">
+                  <label class="form-label">Password</label>
+                  <div class="input-group">
+                    <input id="teamPassword" class="form-control" />
+                    <button id="genTeamPass" class="btn btn-outline-secondary">Generate</button>
+                    <button id="copyTeamPass" class="btn btn-outline-primary">Copy</button>
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button id="saveTeam" class="btn btn-success">Save Team</button>
+                  <button id="newTeam" class="btn btn-outline-secondary">New</button>
+                </div>
               </div>
-            </form>
-          </div>
+            </div>
 
-          <hr class="sep"/>
-
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light">
-                <tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th><th>Published</th></tr>
-              </thead>
-              <tbody id="publishedResultsTableBody"></tbody>
-            </table>
+            <div class="col-lg-7">
+              <div class="card-neo">
+                <div class="section-title">All Teams</div>
+                <div class="table-responsive">
+                  <table class="table align-middle">
+                    <thead class="table-light"><tr><th>Team</th><th>Leader</th><th>Members</th><th>Score</th><th>Password</th><th class="text-end">Actions</th></tr></thead>
+                    <tbody id="teamsTable"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <!-- ATTENDANCE TAB -->
-        <section id="tab-attendance" class="tab-section" style="display:none">
-          <div class="mb-3 d-flex gap-2 align-items-center">
-            <div>
-              <label class="form-label small-muted">Select Date</label>
-              <input type="date" id="attendanceDate" class="form-control" />
-            </div>
-            <div>
-              <label class="form-label small-muted">&nbsp;</label>
-              <button id="btnMarkAllPresent" class="btn btn-outline-success">Mark All Present</button>
-            </div>
-            <div class="ms-auto small-muted">Attendance stored under students/{id}/attendance as {status, timestamp, date}</div>
-          </div>
+        <!-- EVENTS PANEL -->
+        <section id="panel-events" class="panel d-none">
+          <div class="row g-3">
+            <div class="col-lg-5">
+              <div class="card-neo">
+                <div class="section-title">Add / Import Events</div>
+                <div class="small-muted mb-2">Excel columns accepted: Name, Type, Description</div>
 
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light"><tr><th>Chess #</th><th>Name</th><th>Team</th><th>Attendance</th><th class="text-end">Action</th></tr></thead>
-              <tbody id="attendanceTableBody"></tbody>
-            </table>
+                <input id="eventFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
+                <div class="d-flex gap-2">
+                  <button id="btnPreviewEvents" class="btn btn-outline-primary">Preview</button>
+                  <button id="btnImportEvents" class="btn btn-accent">Import Events</button>
+                </div>
+
+                <hr/>
+                <div class="mb-2"><label class="form-label">Event Name</label><input id="eventName" class="form-control"></div>
+                <div class="mb-2"><label class="form-label">Type</label><select id="eventType" class="form-select"><option>Stage</option><option>Non-Stage</option></select></div>
+                <div class="mb-2"><label class="form-label">Description / Rules</label><textarea id="eventDescription" class="form-control" rows="4"></textarea></div>
+                <div class="d-flex gap-2"><button id="saveEvent" class="btn btn-warning">Save Event</button></div>
+
+                <div class="mt-3 small-muted">Preview (first 300 rows)</div>
+                <div id="eventsPreview" style="max-height:260px; overflow:auto"></div>
+              </div>
+            </div>
+
+            <div class="col-lg-7">
+              <div class="card-neo">
+                <div class="section-title">All Events</div>
+                <div class="table-responsive">
+                  <table class="table align-middle">
+                    <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Description</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                    <tbody id="eventsTable"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <!-- NOTIFICATIONS TAB -->
-        <section id="tab-notifications" class="tab-section" style="display:none">
-          <form id="notificationForm" class="row g-2 mb-3">
-            <div class="col-md-4"><label class="form-label">Title</label><input id="notificationTitle" class="form-control" required/></div>
-            <div class="col-md-6"><label class="form-label">Message</label><input id="notificationMessage" class="form-control" required/></div>
-            <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-bell-fill"></i> Send</button></div>
-          </form>
+        <!-- ATTENDANCE PANEL -->
+        <section id="panel-attendance" class="panel d-none">
+          <div class="card-neo mb-3">
+            <div class="section-title">Create Attendance Session</div>
+            <div class="row g-2">
+              <div class="col-md-3"><label class="form-label">Date</label><input id="attDate" type="date" class="form-control"></div>
+              <div class="col-md-5"><label class="form-label">Description</label><input id="attDesc" class="form-control" placeholder="Session notes..."></div>
+              <div class="col-md-2"><label class="form-label">Method</label><select id="attMethod" class="form-select"><option value="all">All Students</option><option value="team">By Team</option></select></div>
+              <div class="col-md-2 d-none" id="attTeamWrap"><label class="form-label">Team</label><select id="attTeam" class="form-select"></select></div>
+            </div>
+            <div class="mt-3">
+              <button id="btnLoadAttendance" class="btn btn-info">Load Students</button>
+              <button id="btnSaveAttendance" class="btn btn-success ms-2">Save Session</button>
+            </div>
+          </div>
 
-          <div class="table-responsive">
-            <table class="table align-middle">
-              <thead class="table-light"><tr><th>Title</th><th>Message</th><th>To</th><th>Date</th></tr></thead>
-              <tbody id="notificationHistoryTable"></tbody>
-            </table>
+          <div class="card-neo mb-3" id="attendanceMarkCard" style="display:none;">
+            <div class="section-title">Mark Attendance</div>
+            <div class="small-muted mb-2">Click chess numbers to toggle: Present → Absent → None</div>
+            <div id="attendanceBoxes" style="padding:10px"></div>
+          </div>
+
+          <div class="card-neo">
+            <div class="section-title">Attendance Sessions</div>
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead class="table-light"><tr><th>Date</th><th>Description</th><th>Student Count</th><th class="text-end">Action</th></tr></thead>
+                <tbody id="attendanceSessions"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- RESULTS PANEL -->
+        <section id="panel-results" class="panel d-none">
+          <div class="row g-3">
+            <div class="col-lg-5">
+              <div class="card-neo">
+                <div class="section-title">Add Result</div>
+                <div class="mb-2"><label class="form-label">Event</label><select id="resultEvent" class="form-select"></select></div>
+                <div class="mb-2"><label class="form-label">1st Place (Chess #)</label><input id="resFirst" class="form-control"></div>
+                <div class="mb-2"><label class="form-label">Points (1st) max 100</label><input id="ptsFirst" type="number" min="0" max="100" value="100" class="form-control"></div>
+                <div class="mb-2"><label class="form-label">2nd Place (Chess #)</label><input id="resSecond" class="form-control"></div>
+                <div class="mb-2"><label class="form-label">Points (2nd)</label><input id="ptsSecond" type="number" min="0" max="100" value="50" class="form-control"></div>
+                <div class="mb-2"><label class="form-label">3rd Place (Chess #)</label><input id="resThird" class="form-control"></div>
+                <div class="mb-2"><label class="form-label">Points (3rd)</label><input id="ptsThird" type="number" min="0" max="100" value="25" class="form-control"></div>
+                <div class="form-check"><input id="resPublish" class="form-check-input" type="checkbox"><label class="form-check-label">Publish now (apply team scores)</label></div>
+                <div class="mt-3"><button id="btnAddResult" class="btn btn-primary">Add Result</button></div>
+              </div>
+            </div>
+
+            <div class="col-lg-7">
+              <div class="card-neo">
+                <div class="section-title">Results</div>
+                <div class="table-responsive">
+                  <table class="table align-middle">
+                    <thead class="table-light"><tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th><th>Published</th></tr></thead>
+                    <tbody id="resultsTable"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- APPROVALS PANEL -->
+        <section id="panel-approvals" class="panel d-none">
+          <div class="card-neo">
+            <div class="section-title">Pending Participations</div>
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead class="table-light"><tr><th>Event</th><th>Team</th><th>Participant</th><th>Submitted</th><th class="text-end">Actions</th></tr></thead>
+                <tbody id="pendingTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- NOTIFICATIONS PANEL -->
+        <section id="panel-notifications" class="panel d-none">
+          <div class="card-neo mb-3">
+            <div class="section-title">Send Notification</div>
+            <div class="row g-2">
+              <div class="col-md-4"><input id="notifTitle" class="form-control" placeholder="Title"></div>
+              <div class="col-md-6"><input id="notifMessage" class="form-control" placeholder="Message"></div>
+              <div class="col-md-2"><button id="btnSendNotif" class="btn btn-primary w-100">Send</button></div>
+            </div>
+          </div>
+
+          <div class="card-neo">
+            <div class="section-title">History</div>
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead class="table-light"><tr><th>Title</th><th>Message</th><th>Date</th></tr></thead>
+                <tbody id="notifHistory"></tbody>
+              </table>
+            </div>
           </div>
         </section>
 
       </div>
     </div>
+
   </main>
 
-  <!-- MODALS -->
-  <!-- STUDENT MODAL -->
-  <div class="modal fade" id="studentModal" tabindex="-1">
-    <div class="modal-dialog">
-      <form id="studentForm" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Add Student</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="student-id">
-          <div class="mb-3">
-            <label class="form-label">Chess Number</label>
-            <input id="studentChess" class="form-control" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input id="studentName" class="form-control" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Class</label>
-            <input id="studentClass" class="form-control" />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Team</label>
-            <select id="studentTeam" class="form-select"><option value="">Unassigned</option></select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
-          <button class="btn btn-accent" type="submit">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <!-- Toast container -->
+  <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:11000"></div>
 
-  <!-- TEAM MODAL -->
-  <div class="modal fade" id="teamModal" tabindex="-1">
-    <div class="modal-dialog">
-      <form id="teamForm" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Add Team</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="team-id">
-          <div class="mb-3">
-            <label class="form-label">Team Name</label>
-            <input id="teamNameInput" class="form-control" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Leader (Chess #)</label>
-            <select id="teamLeader" class="form-select"><option value="">None</option></select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Password (auto-generated or edit)</label>
-            <div class="input-group">
-              <input id="teamPassword" class="form-control" />
-              <button id="btnGenPassword" class="btn btn-outline-secondary" type="button">Generate</button>
-              <button id="btnCopyPassword" class="btn btn-outline-primary" type="button">Copy</button>
-            </div>
-            <div class="small-muted mt-1">Leaders will use this password to login with their chess number.</div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
-          <button class="btn btn-success" type="submit">Save Team</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- EVENT MODAL -->
-  <div class="modal fade" id="eventModal" tabindex="-1">
-    <div class="modal-dialog">
-      <form id="eventForm" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Add Event</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="event-id">
-          <div class="mb-3">
-            <label class="form-label">Event Name</label>
-            <input id="eventName" class="form-control" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Type</label>
-            <select id="eventType" class="form-select"><option>Stage</option><option>Non-Stage</option></select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Description / Rules</label>
-            <textarea id="eventDescription" class="form-control" rows="4" placeholder="Describe rules or instructions for this event..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
-          <button class="btn btn-warning" type="submit">Save Event</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- CONFIRM DELETE -->
-  <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-      <div class="modal-content">
-        <div class="modal-body" id="confirmDeleteModalBody">Are you sure?</div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toastRoot" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
-
-  <!-- SCRIPTS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Firebase app script (module) -->
   <script type="module">
-    // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import {
-      getDatabase, ref, onValue, get, set, update, remove, push
-    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    import { getDatabase, ref, set, push, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    // Firebase config
+    // ---------- CONFIG ----------
     const firebaseConfig = {
       apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
       authDomain: "gen7-3e139.firebaseapp.com",
@@ -432,736 +324,548 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-    const rootRef = ref(database);
+    const db = getDatabase(app);
+    const rootRef = ref(db);
 
-    // Session check (must be admin)
-    const userJson = sessionStorage.getItem('user');
-    if (!userJson) { location.href = 'index.html'; throw new Error('Not logged in'); }
-    const currentUser = JSON.parse(userJson);
-    if (!currentUser || currentUser.role !== 'Admin') { location.href = 'index.html'; throw new Error('Not admin'); }
-
-    // DOM references
-    const studentTableBody = document.getElementById('studentTableBody');
-    const teamTableBody = document.getElementById('teamTableBody');
-    const eventTableBody = document.getElementById('eventTableBody');
-    const pendingEventsTableBody = document.getElementById('pendingEventsTableBody');
-    const publishedResultsTableBody = document.getElementById('publishedResultsTableBody');
-    const notificationHistoryTable = document.getElementById('notificationHistoryTable');
-    const attendanceTableBody = document.getElementById('attendanceTableBody');
-
-    const statStudents = document.getElementById('stat-total-students');
-    const statTeams = document.getElementById('stat-total-teams');
-    const statEvents = document.getElementById('stat-total-events');
-    const statPending = document.getElementById('stat-pending-events');
-
-    // Buttons / inputs
-    const addStudentBtn = document.getElementById('addStudentBtn');
-    const addTeamBtn = document.getElementById('addTeamBtn');
-    const addEventBtn = document.getElementById('addEventBtn');
-    const btnImportExcel = document.getElementById('btnImportExcel');
-    const excelFileInput = document.getElementById('excelFile');
-
-    // Forms & modals
-    const studentModal = new bootstrap.Modal(document.getElementById('studentModal'));
-    const teamModal = new bootstrap.Modal(document.getElementById('teamModal'));
-    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
-    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-
-    const studentForm = document.getElementById('studentForm');
-    const teamForm = document.getElementById('teamForm');
-    const eventForm = document.getElementById('eventForm');
-    const resultForm = document.getElementById('resultForm');
-    const notificationForm = document.getElementById('notificationForm');
-
-    const studentIdHidden = document.getElementById('student-id');
-    const studentChess = document.getElementById('studentChess');
-    const studentName = document.getElementById('studentName');
-    const studentClass = document.getElementById('studentClass');
-    const studentTeam = document.getElementById('studentTeam');
-
-    const teamIdHidden = document.getElementById('team-id');
-    const teamNameInput = document.getElementById('teamNameInput');
-    const teamLeader = document.getElementById('teamLeader');
-    const teamPassword = document.getElementById('teamPassword');
-    const btnGenPassword = document.getElementById('btnGenPassword');
-    const btnCopyPassword = document.getElementById('btnCopyPassword');
-
-    const eventIdHidden = document.getElementById('event-id');
-    const eventName = document.getElementById('eventName');
-    const eventType = document.getElementById('eventType');
-    const eventDescription = document.getElementById('eventDescription');
-
-    const resultEvent = document.getElementById('resultEvent');
-    const rFirst = document.getElementById('rFirst'), pFirst = document.getElementById('pFirst');
-    const rSecond = document.getElementById('rSecond'), pSecond = document.getElementById('pSecond');
-    const rThird = document.getElementById('rThird'), pThird = document.getElementById('pThird');
-    const publishNow = document.getElementById('publishNow');
-
-    const attendanceDate = document.getElementById('attendanceDate');
-    const btnMarkAllPresent = document.getElementById('btnMarkAllPresent');
-
-    const notificationTitle = document.getElementById('notificationTitle');
-    const notificationMessage = document.getElementById('notificationMessage');
-
-    let db = { students: [], teams: [], events: [], participations: [], results: [], notifications: [] };
-    let deleteCallback = null;
-
-    // Toast helper
-    const toastRoot = document.getElementById('toastRoot');
-    function showToast(message, type='success') {
+    // ---------- small utilities ----------
+    function showToast(msg, type='success'){
       const t = document.createElement('div');
       t.className = `toast align-items-center text-bg-${type} border-0`;
-      t.setAttribute('role','alert'); t.setAttribute('aria-live','assertive'); t.setAttribute('aria-atomic','true');
-      t.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-      toastRoot.appendChild(t);
-      const bt = new bootstrap.Toast(t, { delay: 3000 }); bt.show();
-      t.addEventListener('hidden.bs.toast', () => t.remove());
+      t.setAttribute('role','alert');
+      t.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+      document.getElementById('toastRoot').appendChild(t);
+      const b = new bootstrap.Toast(t, { delay: 3000 });
+      b.show();
+      t.addEventListener('hidden.bs.toast', ()=> t.remove());
     }
 
-    // Generic delete button
-    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-      if (deleteCallback) deleteCallback();
-      deleteCallback = null;
-      confirmDeleteModal.hide();
-    });
+    function generatePassword(){
+      return 'TL-' + Math.floor(1000 + Math.random()*9000);
+    }
 
-    // Tab switching
-    document.querySelectorAll('#tabs [data-bs-target]').forEach(btn => {
+    // ---------- UI: tab switching ----------
+    document.querySelectorAll('#tabs [data-target]').forEach(btn=>{
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
-        const t = document.querySelector(btn.dataset.bsTarget || btn.getAttribute('data-bs-target'));
-        if (t) t.style.display = 'block';
+        document.querySelectorAll('#panels > section').forEach(s => s.classList.add('d-none'));
+        const id = btn.getAttribute('data-target');
+        document.getElementById(id).classList.remove('d-none');
         document.querySelectorAll('#tabs .nav-link').forEach(n => n.classList.remove('active'));
         btn.classList.add('active');
       });
     });
 
-    // Listen DB
-    onValue(rootRef, (snap) => {
-      const data = snap.val() || {};
-      db.students = data.students ? Object.values(data.students) : [];
-      db.teams = data.teams ? Object.values(data.teams) : [];
-      db.events = data.events ? Object.values(data.events) : [];
-      db.participations = data.participations ? Object.values(data.participations) : [];
-      db.results = data.results ? Object.values(data.results) : [];
-      db.notifications = data.notifications ? Object.values(data.notifications) : [];
+    // top nav quick open
+    document.getElementById('openStudents').addEventListener('click', ()=> document.querySelector('[data-target="panel-students"]').click());
+    document.getElementById('openTeams').addEventListener('click', ()=> document.querySelector('[data-target="panel-teams"]').click());
+    document.getElementById('openEvents').addEventListener('click', ()=> document.querySelector('[data-target="panel-events"]').click());
+    document.getElementById('openAttendance').addEventListener('click', ()=> document.querySelector('[data-target="panel-attendance"]').click());
+    document.getElementById('openResults').addEventListener('click', ()=> document.querySelector('[data-target="panel-results"]').click());
+    document.getElementById('logoutBtn').addEventListener('click', ()=> { sessionStorage.removeItem('user'); location.href='index.html'; });
 
-      // normalize ids
-      db.students.forEach(s => { if (s && s.id !== undefined) s.id = Number(s.id); });
-      db.teams.forEach(t => { if (t && t.id !== undefined && isFinite(t.id)) t.id = Number(t.id); });
-      db.events.forEach(e => { if (e && e.id !== undefined && isFinite(e.id)) e.id = Number(e.id); });
+    // ---------- Global snapshot ----------
+    let SNAP = { students:[], teams:[], events:[], participations:[], results:[], notifications:[], attendance:{} };
+
+    onValue(rootRef, snapshot => {
+      const data = snapshot.val() || {};
+      SNAP.students = data.students ? Object.values(data.students) : [];
+      SNAP.teams = data.teams ? Object.values(data.teams) : [];
+      SNAP.events = data.events ? Object.values(data.events) : [];
+      SNAP.participations = data.participations ? Object.values(data.participations) : [];
+      SNAP.results = data.results ? Object.values(data.results) : [];
+      SNAP.notifications = data.notifications ? Object.values(data.notifications) : [];
+      SNAP.attendance = data.attendance || {};
 
       renderAll();
     });
 
-    // RENDER
-    function renderAll() {
+    // ---------- RENDER ALL ----------
+    function renderAll(){
+      renderStats();
       renderStudents();
       renderTeams();
       renderEvents();
-      renderParticipations();
+      renderAttendanceSessions();
       renderResults();
+      renderPending();
       renderNotifications();
-      renderStats();
       populateDropdowns();
-      renderAttendanceTable();
     }
 
-    function renderStudents() {
-      studentTableBody.innerHTML = '';
-      if (db.students.length === 0) {
-        studentTableBody.innerHTML = `<tr><td colspan="6" class="text-center muted">No students added</td></tr>`;
-        return;
-      }
-      db.students.sort((a,b)=> (a.id||0)-(b.id||0)).forEach(s => {
-        const team = db.teams.find(t => t.id === s.teamId);
+    function renderStats(){
+      document.getElementById('statStudents').textContent = SNAP.students.length;
+      document.getElementById('statTeams').textContent = SNAP.teams.length;
+      document.getElementById('statEvents').textContent = SNAP.events.length;
+      document.getElementById('statPending').textContent = SNAP.participations.filter(p=>p.status==='Pending').length;
+    }
+
+    // ========== STUDENTS ==========
+    let studentsPreview = [];
+    document.getElementById('btnPreviewStudents').addEventListener('click', previewStudents);
+    document.getElementById('btnImportStudents').addEventListener('click', importStudents);
+
+    function previewStudents(){
+      const f = document.getElementById('studentFile').files[0];
+      if(!f) return showToast('Select Excel file','danger');
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const wb = XLSX.read(e.target.result, {type:'binary'});
+        const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''});
+        studentsPreview = json.slice(0,500);
+        renderStudentsPreview();
+      };
+      reader.readAsBinaryString(f);
+    }
+
+    function renderStudentsPreview(){
+      const wrap = document.getElementById('studentsPreview');
+      if(!studentsPreview.length){ wrap.innerHTML = '<div class="muted">No preview</div>'; return; }
+      let html = '<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Class</th><th>Team</th></tr></thead><tbody>';
+      studentsPreview.forEach(r=>{
+        const chess = r['Chess Number'] || r['Chess'] || r['chess'] || r['ID'] || r['id'] || '';
+        const name = r['Name'] || r['Full Name'] || r['name'] || '';
+        const cls = r['Class'] || r['class'] || '';
+        const team = r['Team'] || r['team'] || '';
+        html += `<tr><td>${chess}</td><td>${name}</td><td>${cls}</td><td>${team}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+    }
+
+    async function importStudents(){
+      if(!studentsPreview.length) return showToast('No preview to import','danger');
+      const teamMap = {};
+      SNAP.teams.forEach(t => { if(t.name) teamMap[t.name.trim().toLowerCase()] = t.id; });
+      const updates = {};
+      studentsPreview.forEach(r=>{
+        const chess = r['Chess Number'] || r['Chess'] || r['chess'] || r['ID'] || r['id'];
+        const name = r['Name'] || r['Full Name'] || r['name'] || '';
+        const cls = r['Class'] || r['class'] || '';
+        const teamName = r['Team'] || r['team'] || '';
+        if(!chess || !name) return;
+        const id = Number(chess);
+        const teamId = teamName ? teamMap[String(teamName).trim().toLowerCase()] || null : null;
+        updates[`students/${id}`] = { id, name: String(name).trim(), class: String(cls).trim(), teamId: teamId, attendance: { status:'Absent', timestamp:null } };
+      });
+      if(Object.keys(updates).length){
+        await update(rootRef, updates);
+        showToast('Students imported');
+        studentsPreview = [];
+        document.getElementById('studentsPreview').innerHTML = '';
+        document.getElementById('studentFile').value = '';
+      } else showToast('No valid rows','danger');
+    }
+
+    function renderStudents(){
+      const tbody = document.getElementById('studentsTable');
+      if(!SNAP.students.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No students</td></tr>'; return; }
+      SNAP.students.sort((a,b)=>(a.id||0)-(b.id||0));
+      let html = '';
+      SNAP.students.forEach(s=>{
+        const team = SNAP.teams.find(t => String(t.id) === String(s.teamId));
         const att = s.attendance?.status || 'Absent';
-        const ts = s.attendance?.timestamp ? new Date(s.attendance.timestamp).toLocaleString() : 'N/A';
-        const tr = document.createElement('tr');
-        tr.dataset.id = s.id;
-        tr.innerHTML = `
-          <td>${s.id}</td>
-          <td>${s.name || ''}</td>
-          <td>${s.class || ''}</td>
-          <td>${team ? team.name : '<em class="muted">Unassigned</em>'}</td>
-          <td><div><span class="badge-status text-bg-${att==='Present'?'success':'danger'}">${att}</span><div class="small-muted">${ts}</div></div></td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary btn-edit-student"><i class="bi bi-pencil-fill"></i></button>
-            <button class="btn btn-sm btn-outline-danger btn-delete-student"><i class="bi bi-trash-fill"></i></button>
-          </td>`;
-        studentTableBody.appendChild(tr);
+        const ts = s.attendance?.timestamp ? new Date(s.attendance.timestamp).toLocaleString() : '';
+        html += `<tr data-id="${s.id}"><td>${s.id}</td><td>${s.name||''}</td><td>${s.class||''}</td><td>${team?team.name:'Unassigned'}</td><td><div class="small-muted">${att}</div><div class="small-muted">${ts}</div></td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete">Delete</button></td></tr>`;
       });
+      tbody.innerHTML = html;
     }
 
-    function renderTeams() {
-      teamTableBody.innerHTML = '';
-      if (db.teams.length === 0) { teamTableBody.innerHTML = `<tr><td colspan="6" class="text-center muted">No teams</td></tr>`; return; }
-      db.teams.forEach(t => {
-        const leader = db.students.find(s => s.id === t.leaderId);
-        const members = db.students.filter(s => s.teamId === t.id).length;
-        const pwd = t.password ? '•'.repeat(4) : '<em class="muted">n/a</em>';
-        const tr = document.createElement('tr');
-        tr.dataset.key = t.__key || ''; // optional
-        tr.dataset.id = t.id;
-        tr.innerHTML = `
-          <td><strong>${t.name}</strong></td>
-          <td>${leader ? leader.name + ' ('+leader.id+')' : '<em class="muted">No leader</em>'}</td>
-          <td>${members}</td>
-          <td>${t.score||0}</td>
-          <td><div class="d-flex gap-2 align-items-center"><div>${pwd}</div><button class="btn btn-sm btn-outline-secondary btn-show-pass"><i class="bi bi-eye"></i></button></div></td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary btn-edit-team"><i class="bi bi-pencil-fill"></i></button>
-            <button class="btn btn-sm btn-outline-danger btn-delete-team"><i class="bi bi-trash-fill"></i></button>
-          </td>`;
-        teamTableBody.appendChild(tr);
-      });
-    }
-
-    function renderEvents() {
-      eventTableBody.innerHTML = '';
-      if (db.events.length === 0) { eventTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No events</td></tr>`; return; }
-      db.events.forEach(ev => {
-        const status = ev.status || 'Open';
-        const desc = ev.description ? (ev.description.length>120?ev.description.slice(0,120)+'...':ev.description) : '';
-        const tr = document.createElement('tr');
-        tr.dataset.id = ev.id;
-        tr.innerHTML = `
-          <td>${ev.name}</td>
-          <td>${ev.type}</td>
-          <td>${desc}</td>
-          <td><span class="badge ${status==='Completed'?'bg-secondary':'bg-info'}">${status}</span></td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary btn-edit-event"><i class="bi bi-pencil"></i></button>
-            <button class="btn btn-sm btn-outline-danger btn-delete-event"><i class="bi bi-trash-fill"></i></button>
-          </td>`;
-        eventTableBody.appendChild(tr);
-      });
-    }
-
-    function renderParticipations() {
-      pendingEventsTableBody.innerHTML = '';
-      const pending = db.participations.filter(p => p.status === 'Pending');
-      if (!pending.length) { pendingEventsTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No pending approvals</td></tr>`; return; }
-      pending.forEach(p => {
-        const ev = db.events.find(e => e.id === p.eventId);
-        const stu = db.students.find(s => s.id === p.studentId);
-        const team = db.teams.find(t => t.id === p.teamId);
-        const tr = document.createElement('tr');
-        tr.dataset.id = p.id;
-        tr.innerHTML = `
-          <td>${ev ? ev.name : '—'}</td>
-          <td>${team ? team.name : '—'}</td>
-          <td>${stu ? stu.name + ' ('+stu.id+')' : '—'}</td>
-          <td>${new Date(p.submittedAt).toLocaleString()}</td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-success btn-approve-event"><i class="bi bi-check-lg"></i></button>
-            <button class="btn btn-sm btn-danger btn-reject-event"><i class="bi bi-x-lg"></i></button>
-          </td>`;
-        pendingEventsTableBody.appendChild(tr);
-      });
-    }
-
-    function renderResults() {
-      publishedResultsTableBody.innerHTML = '';
-      if (!db.results.length) { publishedResultsTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No results</td></tr>`; return; }
-      db.results.forEach(r => {
-        const ev = db.events.find(e => e.id === r.eventId);
-        const getName = id => {
-          if (!id || id === 'none') return '<em class="muted">N/A</em>';
-          const s = db.students.find(x => String(x.id) === String(id));
-          return s ? `${s.name} (${s.id})` : id;
-        };
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${ev?ev.name:'Unknown'}</td><td>${getName(r.first)} (${r.pFirst||0})</td><td>${getName(r.second)} (${r.pSecond||0})</td><td>${getName(r.third)} (${r.pThird||0})</td><td>${r.published?new Date(r.publishedAt).toLocaleString():'No'}</td>`;
-        publishedResultsTableBody.appendChild(tr);
-      });
-    }
-
-    function renderNotifications() {
-      notificationHistoryTable.innerHTML = '';
-      if (!db.notifications.length) { notificationHistoryTable.innerHTML = `<tr><td colspan="4" class="text-center muted">No notifications</td></tr>`; return; }
-      [...db.notifications].reverse().forEach(n => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${n.title}</td><td>${n.message}</td><td>${n.to||'All'}</td><td>${new Date(n.date).toLocaleString()}</td>`;
-        notificationHistoryTable.appendChild(tr);
-      });
-    }
-
-    function renderStats() {
-      statStudents.textContent = db.students.length;
-      statTeams.textContent = db.teams.length;
-      statEvents.textContent = db.events.length;
-      const pendingCount = db.participations.filter(p => p.status === 'Pending').length;
-      statPending.textContent = pendingCount;
-    }
-
-    function populateDropdowns() {
-      // students -> teamLeader select & studentTeam select
-      teamLeader.innerHTML = `<option value="">None</option>`;
-      studentTeam.innerHTML = `<option value="">Unassigned</option>`;
-      db.students.forEach(s => {
-        const opt = `<option value="${s.id}">${s.name || s.id} (${s.id})</option>`;
-        teamLeader.innerHTML += opt;
-      });
-      db.teams.forEach(t => {
-        studentTeam.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-      });
-
-      // resultEvent dropdown
-      resultEvent.innerHTML = `<option value="">Select event...</option>`;
-      db.events.forEach(e => {
-        resultEvent.innerHTML += `<option value="${e.id}">${e.name}</option>`;
-      });
-    }
-
-    // ATTENDANCE
-    function renderAttendanceTable() {
-      attendanceTableBody.innerHTML = '';
-      if (!db.students.length) { attendanceTableBody.innerHTML = `<tr><td colspan="5" class="text-center muted">No students</td></tr>`; return; }
-      db.students.sort((a,b)=>(a.id||0)-(b.id||0)).forEach(s => {
-        const team = db.teams.find(t => t.id === s.teamId);
-        const att = s.attendance?.status || 'Absent';
-        const tr = document.createElement('tr');
-        tr.dataset.id = s.id;
-        tr.innerHTML = `
-          <td>${s.id}</td>
-          <td>${s.name||''}</td>
-          <td>${team?team.name:'Unassigned'}</td>
-          <td><span class="badge ${att==='Present'?'bg-success':'bg-danger'}">${att}</span></td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-success btn-mark-present">Present</button>
-            <button class="btn btn-sm btn-outline-danger btn-mark-absent">Absent</button>
-          </td>`;
-        attendanceTableBody.appendChild(tr);
-      });
-    }
-
-    // ---------- CRUD & Event handlers ----------
-
-    // Add Student
-    addStudentBtn.addEventListener('click', () => {
-      studentForm.reset();
-      studentIdHidden.value = '';
-      studentChess.readOnly = false;
-      studentModal.show();
-      populateDropdowns();
-    });
-
-    studentForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const idVal = studentIdHidden.value;
-      const chess = studentChess.value.trim();
-      const name = studentName.value.trim();
-      const cls = studentClass.value.trim();
-      const teamIdVal = studentTeam.value || null;
-      if (!chess || !name) { showToast('Provide chess number and name', 'danger'); return; }
-      const chessNum = Number(chess);
-      if (isNaN(chessNum)) { showToast('Chess number must be numeric', 'danger'); return; }
-
-      if (idVal) {
-        // update existing student path — students stored under students/{chess}
-        await update(ref(database, `students/${idVal}`), { name, class: cls, teamId: teamIdVal ? Number(teamIdVal) : null });
+    // student actions
+    document.getElementById('studentsTable').addEventListener('click', async (e)=>{
+      const tr = e.target.closest('tr'); if(!tr) return; const id = tr.dataset.id;
+      if(e.target.classList.contains('btn-delete')){
+        if(!confirm('Delete student?')) return;
+        await remove(ref(db, `students/${id}`));
+        showToast('Student deleted');
+      } else if(e.target.classList.contains('btn-edit')){
+        const snap = await get(ref(db, `students/${id}`)); const s = snap.val();
+        if(!s) return showToast('Not found','danger');
+        // quick inline edit: change name
+        const newName = prompt('Edit name', s.name) || s.name;
+        await update(ref(db, `students/${id}`), { name: newName });
         showToast('Student updated');
-        studentModal.hide();
-      } else {
-        const studRef = ref(database, `students/${chessNum}`);
-        const snap = await get(studRef);
-        if (snap.exists()) { showToast('Chess number exists', 'danger'); return; }
-        await set(studRef, { id: chessNum, name, class: cls, teamId: teamIdVal?Number(teamIdVal):null, attendance: { status:'Absent', timestamp:null } });
-        showToast('Student added');
-        studentModal.hide();
       }
     });
 
-    // Student table actions (delegate)
-    studentTableBody.addEventListener('click', (ev) => {
-      const btn = ev.target.closest('button');
-      if (!btn) return;
-      const tr = ev.target.closest('tr');
-      const id = tr?.dataset?.id;
-      if (!id) return;
-      if (btn.classList.contains('btn-edit-student')) {
-        const s = db.students.find(x => String(x.id) === String(id));
-        if (!s) return;
-        studentIdHidden.value = s.id;
-        studentChess.value = s.id;
-        studentChess.readOnly = true;
-        studentName.value = s.name || '';
-        studentClass.value = s.class || '';
-        studentTeam.value = s.teamId || '';
-        populateDropdowns();
-        studentModal.show();
-      } else if (btn.classList.contains('btn-delete-student')) {
-        const s = db.students.find(x => String(x.id) === String(id));
-        document.getElementById('confirmDeleteModalBody').textContent = `Delete student "${s.name}" (${s.id})? This cannot be undone.`;
-        deleteCallback = async () => {
-          await remove(ref(database, `students/${s.id}`));
-          // remove participations
-          const snap = await get(rootRef);
-          const rootObj = snap.val() || {};
-          const partsObj = rootObj.participations || {};
-          const updates = {};
-          for (const k in partsObj) {
-            if (partsObj[k].studentId === s.id) updates[`participations/${k}`] = null;
-          }
-          if (Object.keys(updates).length) await update(rootRef, updates);
-          showToast('Student deleted');
-        };
-        confirmDeleteModal.show();
-      }
+    // ========== TEAMS ==========
+    document.getElementById('genTeamPass').addEventListener('click', ()=> document.getElementById('teamPassword').value = generatePassword());
+    document.getElementById('copyTeamPass').addEventListener('click', ()=> {
+      const v = document.getElementById('teamPassword').value || '';
+      if(!v) return showToast('No password','danger');
+      navigator.clipboard.writeText(v).then(()=> showToast('Password copied'));
+    });
+    document.getElementById('saveTeam').addEventListener('click', saveTeam);
+    document.getElementById('newTeam').addEventListener('click', ()=> {
+      document.getElementById('teamKeyHidden').value = '';
+      document.getElementById('teamName').value = '';
+      document.getElementById('teamLeader').value = '';
+      document.getElementById('teamPassword').value = generatePassword();
     });
 
-    // Add Team
-    addTeamBtn.addEventListener('click', () => {
-      teamForm.reset();
-      teamIdHidden.value = '';
-      teamPassword.value = generateTeamPassword();
-      populateDropdowns();
-      teamModal.show();
-    });
-
-    // Generate password
-    btnGenPassword.addEventListener('click', () => { teamPassword.value = generateTeamPassword(); });
-
-    btnCopyPassword.addEventListener('click', () => {
-      if (!teamPassword.value) return showToast('No password to copy', 'danger');
-      navigator.clipboard.writeText(teamPassword.value).then(()=> showToast('Password copied'));
-    });
-
-    teamForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const idVal = teamIdHidden.value;
-      const tName = teamNameInput.value.trim();
-      const leaderIdVal = teamLeader.value || null;
-      const pwd = teamPassword.value || generateTeamPassword();
-
-      if (!tName) { showToast('Provide team name', 'danger'); return; }
-
-      if (idVal) {
-        // find team key and update
-        const snap = await get(rootRef);
-        const root = snap.val() || {};
-        const teamsObj = root.teams || {};
-        let foundKey = null;
-        for (const k in teamsObj) { if (String(teamsObj[k].id) === String(idVal)) { foundKey = k; break; } }
-        if (!foundKey) { showToast('Team key not found', 'danger'); return; }
-        await update(ref(database, `teams/${foundKey}`), { name: tName, leaderId: leaderIdVal?Number(leaderIdVal):null, password: pwd });
+    async function saveTeam(){
+      const key = document.getElementById('teamKeyHidden').value;
+      const name = document.getElementById('teamName').value.trim();
+      const leaderId = document.getElementById('teamLeader').value || null;
+      let pwd = document.getElementById('teamPassword').value || generatePassword();
+      if(!name) return showToast('Provide team name','danger');
+      if(key){
+        // find DB key by id
+        const rootSnap = await get(rootRef);
+        const rootObj = rootSnap.val() || {};
+        const teamsObj = rootObj.teams || {};
+        let found = null;
+        for(const k in teamsObj){ if(String(teamsObj[k].id) === String(key)){ found = k; break; } }
+        if(!found) return showToast('Team key not found','danger');
+        await update(ref(db, `teams/${found}`), { name, leaderId: leaderId?Number(leaderId):null, password: pwd });
         showToast('Team updated');
-        teamModal.hide();
       } else {
-        const nref = push(ref(database,'teams'));
+        const nref = push(ref(db, 'teams'));
         const numericId = Date.now();
-        await set(nref, { id: numericId, name: tName, leaderId: leaderIdVal?Number(leaderIdVal):null, score:0, password: pwd });
+        await set(nref, { id: numericId, name, leaderId: leaderId?Number(leaderId):null, score: 0, password: pwd });
         showToast('Team created');
-        teamModal.hide();
+      }
+      // clear form
+      document.getElementById('teamKeyHidden').value=''; document.getElementById('teamName').value=''; document.getElementById('teamLeader').value=''; document.getElementById('teamPassword').value='';
+    }
+
+    function renderTeams(){
+      const tbody = document.getElementById('teamsTable');
+      if(!SNAP.teams.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No teams</td></tr>'; return; }
+      SNAP.teams.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+      let html = '';
+      SNAP.teams.forEach(t=>{
+        const leader = SNAP.students.find(s=>String(s.id)===String(t.leaderId));
+        const members = SNAP.students.filter(s=>String(s.teamId)===String(t.id)).length;
+        const pwd = t.password || '';
+        html += `<tr data-id="${t.id}"><td><strong>${t.name}</strong></td><td>${leader?leader.name+' ('+leader.id+')':'-'}</td><td>${members}</td><td>${t.score||0}</td><td><input class="form-control form-control-sm team-pwd" data-id="${t.id}" value="${pwd}"></td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-team">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-team">Delete</button></td></tr>`;
+      });
+      tbody.innerHTML = html;
+
+      // attach change handler for password inputs
+      document.querySelectorAll('.team-pwd').forEach(inp=>{
+        inp.addEventListener('change', async (e)=>{
+          const tid = e.target.dataset.id; const val = e.target.value;
+          // find key for team
+          const rootSnap = await get(rootRef); const rootObj = rootSnap.val() || {}; const teamsObj = rootObj.teams || {};
+          let found = null;
+          for(const k in teamsObj){ if(String(teamsObj[k].id) === String(tid)){ found = k; break; } }
+          if(found) { await update(ref(db, `teams/${found}`), { password: val }); showToast('Password updated'); }
+        });
+      });
+    }
+
+    document.getElementById('teamsTable').addEventListener('click', async (e)=>{
+      const tr = e.target.closest('tr'); if(!tr) return; const tid = tr.dataset.id;
+      if(e.target.classList.contains('btn-delete-team')){
+        if(!confirm('Delete team? Students will be unassigned.')) return;
+        // find key
+        const rootSnap = await get(rootRef); const rootObj = rootSnap.val() || {}; const teamsObj = rootObj.teams || {};
+        let found = null;
+        for(const k in teamsObj){ if(String(teamsObj[k].id) === String(tid)){ found = k; break; } }
+        if(!found) return showToast('Team key not found','danger');
+        await remove(ref(db, `teams/${found}`));
+        // unassign students
+        const updates = {};
+        SNAP.students.filter(s=>String(s.teamId)===String(tid)).forEach(s => updates[`students/${s.id}/teamId`] = null);
+        if(Object.keys(updates).length) await update(rootRef, updates);
+        showToast('Team deleted');
+      } else if(e.target.classList.contains('btn-edit-team')){
+        const t = SNAP.teams.find(x=>String(x.id)===String(tid));
+        if(!t) return showToast('Team not found','danger');
+        // populate form
+        document.getElementById('teamKeyHidden').value = t.id;
+        document.getElementById('teamName').value = t.name || '';
+        document.getElementById('teamLeader').value = t.leaderId || '';
+        document.getElementById('teamPassword').value = t.password || '';
+        document.querySelector('[data-target="panel-teams"]').click();
       }
     });
 
-    // Team table actions
-    teamTableBody.addEventListener('click', async (ev) => {
-      const btn = ev.target.closest('button');
-      if (!btn) return;
-      const tr = ev.target.closest('tr');
-      const teamId = tr?.dataset?.id;
-      if (!teamId) return;
-      const teamObj = db.teams.find(t => String(t.id) === String(teamId));
-      if (!teamObj) return;
+    // ========== EVENTS ==========
+    let eventsPreview = [];
+    document.getElementById('btnPreviewEvents').addEventListener('click', previewEvents);
+    document.getElementById('btnImportEvents').addEventListener('click', importEvents);
+    document.getElementById('saveEvent').addEventListener('click', saveEvent);
 
-      if (btn.classList.contains('btn-edit-team')) {
-        teamIdHidden.value = teamObj.id;
-        teamNameInput.value = teamObj.name || '';
-        teamLeader.value = teamObj.leaderId || '';
-        teamPassword.value = teamObj.password || generateTeamPassword();
-        populateDropdowns();
-        teamModal.show();
-      } else if (btn.classList.contains('btn-delete-team')) {
-        document.getElementById('confirmDeleteModalBody').textContent = `Delete team "${teamObj.name}"? Students will be unassigned.`;
-        deleteCallback = async () => {
-          // find key
-          const snap = await get(rootRef);
-          const root = snap.val() || {};
-          const teamsObj = root.teams || {};
-          let foundKey = null;
-          for (const k in teamsObj) { if (String(teamsObj[k].id) === String(teamObj.id)) { foundKey = k; break; } }
-          if (!foundKey) return showToast('Team key not found', 'danger');
-          await remove(ref(database, `teams/${foundKey}`));
-          // unassign students
-          const updates = {};
-          db.students.filter(s => s.teamId === teamObj.id).forEach(s => updates[`students/${s.id}/teamId`] = null);
-          if (Object.keys(updates).length) await update(rootRef, updates);
-          showToast('Team deleted');
+    function previewEvents(){
+      const f = document.getElementById('eventFile').files[0]; if(!f) return showToast('Select file','danger');
+      const reader = new FileReader();
+      reader.onload = e => {
+        const wb = XLSX.read(e.target.result,{type:'binary'});
+        const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''});
+        eventsPreview = json.slice(0,500);
+        renderEventsPreview();
+      };
+      reader.readAsBinaryString(f);
+    }
+
+    function renderEventsPreview(){
+      const wrap = document.getElementById('eventsPreview');
+      if(!eventsPreview.length){ wrap.innerHTML = '<div class="muted">No preview</div>'; return; }
+      let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>';
+      eventsPreview.forEach(r=>{
+        const name = r['Name'] || r['Event'] || r['name'] || '';
+        const type = r['Type'] || r['type'] || '';
+        const desc = r['Description'] || r['Desc'] || r['description'] || '';
+        html += `<tr><td>${name}</td><td>${type}</td><td>${desc}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+    }
+
+    async function importEvents(){
+      if(!eventsPreview.length) return showToast('No preview','danger');
+      const updates = {};
+      for(const r of eventsPreview){
+        const name = r['Name'] || r['Event'] || r['name'] || ''; if(!name) continue;
+        const type = r['Type'] || r['type'] || 'Non-Stage';
+        const desc = r['Description'] || r['description'] || '';
+        const id = Date.now() + Math.floor(Math.random()*9999);
+        updates[`events/${id}`] = { id, name: String(name).trim(), type: String(type).trim(), description: String(desc).trim(), status: 'Open' };
+      }
+      if(Object.keys(updates).length){ await update(rootRef, updates); showToast('Events imported'); eventsPreview = []; document.getElementById('eventsPreview').innerHTML=''; document.getElementById('eventFile').value=''; }
+      else showToast('No valid rows','danger');
+    }
+
+    async function saveEvent(){
+      const name = document.getElementById('eventName').value.trim();
+      const type = document.getElementById('eventType').value;
+      const desc = document.getElementById('eventDescription').value.trim();
+      if(!name) return showToast('Provide event name','danger');
+      const id = Date.now();
+      await set(ref(db, `events/${id}`), { id, name, type, description: desc, status: 'Open' });
+      document.getElementById('eventName').value=''; document.getElementById('eventDescription').value='';
+      showToast('Event saved');
+    }
+
+    function renderEvents(){
+      const body = document.getElementById('eventsTable');
+      if(!SNAP.events.length){ body.innerHTML = '<tr><td colspan="5" class="text-center muted">No events</td></tr>'; return; }
+      SNAP.events.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+      let html = '';
+      SNAP.events.forEach(e=>{
+        const desc = e.description ? (e.description.length>120? e.description.slice(0,120)+'...' : e.description) : '';
+        html += `<tr data-id="${e.id}"><td>${e.name}</td><td>${e.type}</td><td>${desc}</td><td><span class="small-muted">${e.status||'Open'}</span></td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event">Delete</button></td></tr>`;
+      });
+      body.innerHTML = html;
+    }
+
+    document.getElementById('eventsTable').addEventListener('click', async (e)=>{
+      const tr = e.target.closest('tr'); if(!tr) return; const id = tr.dataset.id;
+      if(e.target.classList.contains('btn-delete-event')){
+        if(!confirm('Delete event?')) return;
+        await remove(ref(db, `events/${id}`));
+        // remove participations for that event
+        const rootSnap = await get(rootRef); const rootObj = rootSnap.val() || {}; const parts = rootObj.participations || {};
+        const updates = {}; for(const k in parts) if(parts[k].eventId === Number(id)) updates[`participations/${k}`] = null;
+        if(Object.keys(updates).length) await update(rootRef, updates);
+        showToast('Event deleted');
+      } else if(e.target.classList.contains('btn-edit-event')){
+        const evSnap = await get(ref(rootRef, `events/${id}`)); const ev = evSnap.val();
+        if(!ev) return showToast('Event not found','danger');
+        document.querySelector('[data-target="panel-events"]').click();
+        document.getElementById('eventName').value = ev.name || '';
+        document.getElementById('eventType').value = ev.type || 'Non-Stage';
+        document.getElementById('eventDescription').value = ev.description || '';
+      }
+    });
+
+    // ========== ATTENDANCE ==========
+    document.getElementById('attMethod').addEventListener('change', ()=>{
+      document.getElementById('attTeamWrap').classList.toggle('d-none', document.getElementById('attMethod').value !== 'team');
+    });
+    document.getElementById('btnLoadAttendance').addEventListener('click', loadAttendance);
+    document.getElementById('btnSaveAttendance').addEventListener('click', saveAttendance);
+
+    function loadAttendance(){
+      const method = document.getElementById('attMethod').value;
+      const teamId = document.getElementById('attTeam').value;
+      let list = [];
+      if(method === 'all') list = SNAP.students.slice();
+      else list = SNAP.students.filter(s => String(s.teamId) === String(teamId));
+      const wrap = document.getElementById('attendanceBoxes');
+      let html = '';
+      list.forEach(s => {
+        html += `<div class="small-box" data-id="${s.id}" onclick="toggleBox(this)">${s.id}</div>`;
+      });
+      wrap.innerHTML = html;
+      document.getElementById('attendanceMarkCard').style.display = list.length ? 'block' : 'none';
+    }
+
+    window.toggleBox = function(el){
+      if(el.classList.contains('present')){ el.classList.remove('present'); el.classList.add('absent'); }
+      else if(el.classList.contains('absent')){ el.classList.remove('absent'); }
+      else el.classList.add('present');
+    };
+
+    async function saveAttendance(){
+      const date = document.getElementById('attDate').value;
+      if(!date) return showToast('Select date','danger');
+      const desc = document.getElementById('attDesc').value || '';
+      const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box'));
+      const record = { description: desc, date, students: {} };
+      boxes.forEach(b => {
+        const id = b.dataset.id;
+        if(b.classList.contains('present')) record.students[String(id)] = 'Present';
+        else if(b.classList.contains('absent')) record.students[String(id)] = 'Absent';
+        else record.students[String(id)] = 'Absent';
+      });
+      // write session
+      await set(ref(db, `attendance/${date}`), record);
+      // update student attendance meta
+      const updates = {};
+      for(const sid in record.students) updates[`students/${sid}/attendance`] = { status: record.students[sid], timestamp: Date.now(), date };
+      if(Object.keys(updates).length) await update(rootRef, updates);
+      showToast('Attendance saved');
+      document.getElementById('attendanceMarkCard').style.display = 'none';
+    }
+
+    function renderAttendanceSessions(){
+      const wrap = document.getElementById('attendanceSessions');
+      const att = SNAP.attendance || {};
+      const keys = Object.keys(att).sort((a,b)=> b.localeCompare(a));
+      if(!keys.length){ wrap.innerHTML = '<tr><td colspan="4" class="text-center muted">No sessions</td></tr>'; return; }
+      let html = '';
+      keys.forEach(k => {
+        const r = att[k];
+        const count = r.students ? Object.keys(r.students).length : 0;
+        html += `<tr><td>${k}</td><td>${r.description || ''}</td><td>${count}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary" onclick="viewAttendance('${k}')">View</button></td></tr>`;
+      });
+      wrap.innerHTML = html;
+    }
+
+    window.viewAttendance = async function(date){
+      const snap = await get(ref(db, `attendance/${date}`)); const r = snap.val();
+      if(!r) return showToast('Not found','danger');
+      let txt = `Attendance - ${date}\n${r.description || ''}\n\n`;
+      if(r.students) for(const s in r.students) txt += `${s}: ${r.students[s]}\n`;
+      alert(txt);
+    };
+
+    // ========== RESULTS ==========
+    document.getElementById('btnAddResult').addEventListener('click', addResult);
+
+    async function addResult(){
+      const evId = document.getElementById('resultEvent').value;
+      if(!evId) return showToast('Select event','danger');
+      const r1 = document.getElementById('resFirst').value.trim() || 'none';
+      const r2 = document.getElementById('resSecond').value.trim() || 'none';
+      const r3 = document.getElementById('resThird').value.trim() || 'none';
+      const p1 = Number(document.getElementById('ptsFirst').value) || 0;
+      const p2 = Number(document.getElementById('ptsSecond').value) || 0;
+      const p3 = Number(document.getElementById('ptsThird').value) || 0;
+      const publish = document.getElementById('resPublish').checked;
+
+      const rref = push(ref(db, 'results'));
+      const obj = { id: Date.now(), eventId: Number(evId), first: r1, second: r2, third: r3, pFirst: p1, pSecond: p2, pThird: p3, published: publish, publishedAt: publish?Date.now():null };
+      await set(rref, obj);
+
+      if(publish){
+        // update team scores
+        const rootSnap = await get(rootRef); const rootObj = rootSnap.val() || {};
+        const teamsObj = rootObj.teams || {}; const studentsObj = rootObj.students || {};
+        const updates = {};
+        const addPoints = (studentId, pts) => {
+          if(!studentId || studentId === 'none') return;
+          const s = studentsObj[String(studentId)];
+          if(!s || !s.teamId) return;
+          for(const k in teamsObj){ if(String(teamsObj[k].id) === String(s.teamId)){ updates[`teams/${k}/score`] = (teamsObj[k].score||0) + Number(pts||0); break; } }
         };
-        confirmDeleteModal.show();
-      } else if (btn.classList.contains('btn-show-pass')) {
-        // reveal password in modal
-        const snap = await get(rootRef);
-        const root = snap.val() || {};
-        const teamsObj = root.teams || {};
-        let foundKey = null, foundTeam = null;
-        for (const k in teamsObj) { if (String(teamsObj[k].id) === String(teamObj.id)) { foundKey = k; foundTeam = teamsObj[k]; break; } }
-        if (foundTeam) {
-          alert(`Password for team "${foundTeam.name}": ${foundTeam.password || '(none)'}`);
-        } else showToast('Team password not found', 'danger');
-      }
-    });
+        addPoints(r1, p1); addPoints(r2, p2); addPoints(r3, p3);
+        if(Object.keys(updates).length) await update(rootRef, updates);
+        // mark event completed
+        const eventsObj = rootObj.events || {};
+        for(const k in eventsObj) if(String(eventsObj[k].id) === String(evId)){ await update(ref(db, `events/${k}`), { status: 'Completed' }); break; }
+        showToast('Result published and scores updated');
+      } else showToast('Result saved (draft)');
 
-    // Add Event
-    addEventBtn.addEventListener('click', () => {
-      eventForm.reset();
-      eventIdHidden.value = '';
-      eventModal.show();
-    });
+      // clear inputs
+      document.getElementById('resFirst').value=''; document.getElementById('resSecond').value=''; document.getElementById('resThird').value='';
+    }
 
-    eventForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const idVal = eventIdHidden.value;
-      const name = eventName.value.trim();
-      const type = eventType.value;
-      const desc = eventDescription.value.trim();
-      if (!name) { showToast('Provide event name', 'danger'); return; }
+    function renderResults(){
+      const tbody = document.getElementById('resultsTable');
+      if(!SNAP.results.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No results</td></tr>'; return; }
+      let html = '';
+      SNAP.results.forEach(r => {
+        const ev = SNAP.events.find(e => String(e.id) === String(r.eventId));
+        html += `<tr><td>${ev?ev.name:'Unknown'}</td><td>${r.first} (${r.pFirst||0})</td><td>${r.second} (${r.pSecond||0})</td><td>${r.third} (${r.pThird||0})</td><td>${r.published?new Date(r.publishedAt).toLocaleString():'No'}</td></tr>`;
+      });
+      tbody.innerHTML = html;
+    }
 
-      if (idVal) {
-        const snap = await get(rootRef);
-        const root = snap.val() || {};
-        const eventsObj = root.events || {};
-        let foundKey = null;
-        for (const k in eventsObj) { if (String(eventsObj[k].id) === String(idVal)) { foundKey = k; break; } }
-        if (!foundKey) { showToast('Event key not found', 'danger'); return; }
-        await update(ref(database, `events/${foundKey}`), { name, type, description: desc });
-        showToast('Event updated');
-        eventModal.hide();
-      } else {
-        const nref = push(ref(database, 'events'));
-        await set(nref, { id: Date.now(), name, type, description: desc, status: 'Open' });
-        showToast('Event created');
-        eventModal.hide();
-      }
-    });
+    // ========== PARTICIPATIONS (approvals) ==========
+    function renderPending(){
+      const tbody = document.getElementById('pendingTable');
+      const pending = SNAP.participations.filter(p => p.status === 'Pending');
+      if(!pending.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No pending</td></tr>'; return; }
+      let html = '';
+      pending.forEach(p => {
+        const ev = SNAP.events.find(e => String(e.id) === String(p.eventId));
+        const team = SNAP.teams.find(t => String(t.id) === String(p.teamId));
+        const stu = SNAP.students.find(s => String(s.id) === String(p.studentId));
+        html += `<tr data-id="${p.id}"><td>${ev?ev.name:'-'}</td><td>${team?team.name:'-'}</td><td>${stu?stu.name+' ('+stu.id+')':'-'}</td><td>${new Date(p.submittedAt).toLocaleString()}</td><td class="text-end"><button class="btn btn-sm btn-success btn-approve">Approve</button> <button class="btn btn-sm btn-danger btn-reject">Reject</button></td></tr>`;
+      });
+      tbody.innerHTML = html;
+    }
 
-    // Event table actions
-    eventTableBody.addEventListener('click', async (ev) => {
-      const btn = ev.target.closest('button');
-      if (!btn) return;
-      const tr = ev.target.closest('tr');
-      const id = tr?.dataset?.id;
-      if (!id) return;
-      const evObj = db.events.find(e => String(e.id) === String(id));
-      if (!evObj) return;
+    document.getElementById('pendingTable').addEventListener('click', async (e)=>{
+      const tr = e.target.closest('tr'); if(!tr) return; const pid = tr.dataset.id;
+      const rootSnap = await get(rootRef); const rootObj = rootSnap.val() || {}; const parts = rootObj.participations || {};
+      let foundKey = null;
+      for(const k in parts) if(String(parts[k].id) === String(pid)){ foundKey = k; break; }
+      if(!foundKey) return showToast('Not found','danger');
 
-      if (btn.classList.contains('btn-edit-event')) {
-        eventIdHidden.value = evObj.id;
-        eventName.value = evObj.name;
-        eventType.value = evObj.type;
-        eventDescription.value = evObj.description || '';
-        eventModal.show();
-      } else if (btn.classList.contains('btn-delete-event')) {
-        document.getElementById('confirmDeleteModalBody').textContent = `Delete event "${evObj.name}"? This will remove related participations.`;
-        deleteCallback = async () => {
-          const snap = await get(rootRef);
-          const root = snap.val() || {};
-          const eventsObj = root.events || {};
-          let foundKey = null;
-          for (const k in eventsObj) { if (String(eventsObj[k].id) === String(evObj.id)) { foundKey = k; break; } }
-          if (!foundKey) { showToast('Event key not found', 'danger'); return; }
-          await remove(ref(database, `events/${foundKey}`));
-          // remove participations
-          const partsObj = root.participations || {};
-          const updates = {};
-          for (const k in partsObj) { if (partsObj[k].eventId === evObj.id) updates[`participations/${k}`] = null; }
-          if (Object.keys(updates).length) await update(rootRef, updates);
-          showToast('Event deleted');
-        };
-        confirmDeleteModal.show();
-      }
-    });
-
-    // Approvals: approve / reject
-    pendingEventsTableBody.addEventListener('click', async (ev) => {
-      const btn = ev.target.closest('button');
-      if (!btn) return;
-      const tr = ev.target.closest('tr');
-      const id = tr?.dataset?.id;
-      if (!id) return;
-      // find participation key
-      const rootSnap = await get(rootRef);
-      const root = rootSnap.val() || {};
-      const partsObj = root.participations || {};
-      let foundKey = null, partObj = null;
-      for (const k in partsObj) { if (String(partsObj[k].id) === String(id)) { foundKey = k; partObj = partsObj[k]; break; } }
-      if (!foundKey) { showToast('Participation not found', 'danger'); return; }
-
-      if (btn.classList.contains('btn-approve-event')) {
-        await update(ref(database, `participations/${foundKey}`), { status: 'Approved', approvedAt: Date.now() });
+      if(e.target.classList.contains('btn-approve')){
+        await update(ref(db, `participations/${foundKey}`), { status: 'Approved', approvedAt: Date.now() });
         showToast('Approved');
-      } else if (btn.classList.contains('btn-reject-event')) {
-        await update(ref(database, `participations/${foundKey}`), { status: 'Rejected', rejectedAt: Date.now() });
+      } else if(e.target.classList.contains('btn-reject')){
+        await update(ref(db, `participations/${foundKey}`), { status: 'Rejected', rejectedAt: Date.now() });
         showToast('Rejected');
       }
     });
 
-    // Result Form
-    resultForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const evId = resultEvent.value;
-      if (!evId) { showToast('Select event', 'danger'); return; }
-      const first = rFirst.value.trim() || 'none';
-      const second = rSecond.value.trim() || 'none';
-      const third = rThird.value.trim() || 'none';
-      const pf = Number(pFirst.value) || 0;
-      const ps = Number(pSecond.value) || 0;
-      const pt = Number(pThird.value) || 0;
-      const publish = publishNow.checked;
-
-      // push result object
-      const rRef = push(ref(database,'results'));
-      const resultObj = { id: Date.now(), eventId: Number(evId), first: first, second: second, third: third, pFirst: pf, pSecond: ps, pThird: pt, published: publish ? true : false, publishedAt: publish?Date.now():null };
-      await set(rRef, resultObj);
-
-      // if publish now, update team scores
-      if (publish) {
-        const rootSnap = await get(rootRef);
-        const root = rootSnap.val() || {};
-        const teamsObj = root.teams || {};
-        // helper to add points to team by student id
-        const addPointsToTeamByStudent = (studentId, points) => {
-          if (!studentId || studentId === 'none') return null;
-          const stud = db.students.find(s => String(s.id) === String(studentId));
-          if (!stud || !stud.teamId) return null;
-          const tid = stud.teamId;
-          // find team key
-          for (const k in teamsObj) {
-            if (String(teamsObj[k].id) === String(tid)) {
-              const newScore = (teamsObj[k].score || 0) + Number(points||0);
-              teamsObj[k].score = newScore;
-              return { key: k, score: newScore };
-            }
-          }
-          return null;
-        };
-
-        const updates = {};
-        const r1 = addPointsToTeamByStudent(first, pf);
-        const r2 = addPointsToTeamByStudent(second, ps);
-        const r3 = addPointsToTeamByStudent(third, pt);
-        if (r1) updates[`teams/${r1.key}/score`] = r1.score;
-        if (r2) updates[`teams/${r2.key}/score`] = r2.score;
-        if (r3) updates[`teams/${r3.key}/score`] = r3.score;
-        if (Object.keys(updates).length) await update(rootRef, updates);
-        showToast('Result published and team scores updated');
-        // mark event completed
-        for (const k in root.events || {}) {
-          if (String(root.events[k].id) === String(evId)) {
-            await update(ref(database, `events/${k}`), { status: 'Completed' });
-            break;
-          }
-        }
-      } else {
-        showToast('Result added (not published)');
-      }
-
-      // clear form fields
-      resultEvent.value = '';
-      rFirst.value=''; rSecond.value=''; rThird.value=''; pFirst.value='100'; pSecond.value='50'; pThird.value='25'; publishNow.checked=false;
-    });
-
-    // Notifications
-    notificationForm.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const title = notificationTitle.value.trim();
-      const message = notificationMessage.value.trim();
-      if (!title || !message) { showToast('Provide title & message', 'danger'); return; }
-      const nref = push(ref(database,'notifications'));
-      await set(nref, { id: Date.now(), title, message, to: 'All', date: Date.now() });
+    // ========== NOTIFICATIONS ==========
+    document.getElementById('btnSendNotif').addEventListener('click', async ()=>{
+      const title = document.getElementById('notifTitle').value.trim();
+      const msg = document.getElementById('notifMessage').value.trim();
+      if(!title || !msg) return showToast('Provide title & message','danger');
+      const nref = push(ref(db, 'notifications'));
+      await set(nref, { id: Date.now(), title, message: msg, to: 'All', date: Date.now() });
+      document.getElementById('notifTitle').value=''; document.getElementById('notifMessage').value='';
       showToast('Notification sent');
-      notificationForm.reset();
     });
 
-    // Attendance actions
-    attendanceTableBody.addEventListener('click', async (ev) => {
-      const btn = ev.target.closest('button');
-      if (!btn) return;
-      const tr = ev.target.closest('tr');
-      const id = tr?.dataset?.id;
-      if (!id) return;
-      const date = attendanceDate.value || new Date().toISOString().slice(0,10);
-      if (btn.classList.contains('btn-mark-present')) {
-        await update(ref(database, `students/${id}/attendance`), { status:'Present', timestamp: Date.now(), date });
-        showToast('Marked present');
-      } else if (btn.classList.contains('btn-mark-absent')) {
-        await update(ref(database, `students/${id}/attendance`), { status:'Absent', timestamp: Date.now(), date });
-        showToast('Marked absent');
-      }
-    });
-
-    btnMarkAllPresent.addEventListener('click', async () => {
-      const date = attendanceDate.value || new Date().toISOString().slice(0,10);
-      const updates = {};
-      db.students.forEach(s => updates[`students/${s.id}/attendance`] = { status:'Present', timestamp: Date.now(), date });
-      if (Object.keys(updates).length) {
-        await update(rootRef, updates);
-        showToast('All students marked present');
-      }
-    });
-
-    // Excel import (sheetjs)
-    btnImportExcel.addEventListener('click', () => excelFileInput.click());
-
-    excelFileInput.addEventListener('change', async (ev) => {
-      const f = ev.target.files[0];
-      if (!f) return;
-      const data = await f.arrayBuffer();
-      const wb = XLSX.read(data);
-      const sheetName = wb.SheetNames[0];
-      const ws = wb.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      // expected columns: Chess Number, Name, Class, Team
-      if (!json.length) return showToast('Excel empty', 'danger');
-
-      // Map and insert/update
-      const updates = {};
-      // ensure we have team name -> id mapping
-      const teamNameToId = {};
-      db.teams.forEach(t => { if (t.name) teamNameToId[String(t.name).trim().toLowerCase()] = t.id; });
-
-      for (const row of json) {
-        // tolerant keys
-        const chess = row['Chess Number'] || row['Chess'] || row['chess'] || row['chess number'] || row['ChessNumber'] || row['ID'] || row['id'];
-        const name = row['Name'] || row['Full Name'] || row['Student Name'] || row['name'];
-        const cls = row['Class'] || row['class'] || row['Standard'] || row['std'];
-        const teamName = row['Team'] || row['team'] || row['Group'] || '';
-
-        if (!chess || !name) continue;
-        const chessNum = Number(chess);
-        const teamId = teamName ? teamNameToId[String(teamName).trim().toLowerCase()] : null;
-        updates[`students/${chessNum}`] = { id: chessNum, name: String(name).trim(), class: cls ? String(cls).trim() : '', teamId: teamId || null, attendance: { status:'Absent', timestamp:null } };
-      }
-
-      if (Object.keys(updates).length) {
-        await update(rootRef, updates);
-        showToast(`Imported ${Object.keys(updates).length} students`);
-      } else {
-        showToast('No valid rows found', 'danger');
-      }
-      excelFileInput.value = '';
-    });
-
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      sessionStorage.removeItem('user');
-      location.href = 'index.html';
-    });
-
-    // Utilities
-    function generateTeamPassword() {
-      const n = Math.floor(1000 + Math.random()*9000);
-      return `TL-${n}`;
+    function renderNotifications(){
+      const tbody = document.getElementById('notifHistory');
+      if(!SNAP.notifications.length){ tbody.innerHTML = '<tr><td colspan="3" class="text-center muted">No notifications</td></tr>'; return; }
+      let html = '';
+      [...SNAP.notifications].reverse().forEach(n => html += `<tr><td>${n.title}</td><td>${n.message}</td><td>${new Date(n.date).toLocaleString()}</td></tr>`);
+      tbody.innerHTML = html;
     }
 
-    // Results: render / helper done via renderResults()
+    // ========== POPULATE DROPDOWNS ==========
+    function populateDropdowns(){
+      // team dropdown for attendance
+      const tsel = document.getElementById('attTeam'); tsel.innerHTML = '<option value="">Select team</option>';
+      SNAP.teams.forEach(t => tsel.innerHTML += `<option value="${t.id}">${t.name}</option>`);
 
-    // Initial population
-    populateDropdowns();
+      // result event dropdown
+      const re = document.getElementById('resultEvent'); re.innerHTML = '<option value="">Select event</option>';
+      SNAP.events.forEach(e => re.innerHTML += `<option value="${e.id}">${e.name}</option>`);
+
+      // team leader select
+      const tl = document.getElementById('teamLeader'); tl.innerHTML = '<option value="">None</option>';
+      SNAP.students.forEach(s => tl.innerHTML += `<option value="${s.id}">${s.name} (${s.id})</option>`);
+    }
+
+    // central render wrappers
+    function renderTeamsTable(){ renderTeams(); } // backward-compatible call
+    function renderEventsTable(){ renderEvents(); }
+    function renderResultsTable(){ renderResults(); }
+    function renderNotificationsTable(){ renderNotifications(); }
+
+    // call first render (onValue will call again)
+    setTimeout(()=> renderAll(), 400);
 
   </script>
 </body>
