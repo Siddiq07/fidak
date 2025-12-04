@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin — Art Fest (Students/Events/Attendance updated)</title>
+<title>Admin — Full</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -12,28 +12,26 @@
 <style>
 :root{--bg:#f4f7fb;--card:#fff;--muted:#6b7280;--accent:#4f46e5;--success:#10b981;--danger:#ef4444}
 body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#0f172a}
-.container-wide{max-width:1200px;margin:28px auto}
+.container-wide{max-width:1200px;margin:20px auto}
 .card-neo{background:var(--card);border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-.small-muted{color:var(--muted)}
 .section-title{font-weight:700;margin-bottom:8px}
-.small-box{width:54px;height:36px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;margin:4px;cursor:pointer;user-select:none;font-weight:700}
+.small-box{width:64px;height:40px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;margin:6px;cursor:pointer;user-select:none;font-weight:700}
 .small-box.present{background:var(--success);color:#fff}
 .small-box.absent{background:var(--danger);color:#fff}
 .btn-accent{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#fff;border:0}
 .table thead{background:#fbfbff}
 .muted{color:var(--muted)}
-@media (max-width:768px){.container-wide{margin:12px}}
 </style>
 </head>
 <body>
 
-<nav class="navbar shadow-sm">
+<nav class="navbar shadow-sm mb-3">
   <div class="container container-wide d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-3">
       <span class="badge text-bg-primary rounded-pill"><i class="bi bi-palette-fill"></i></span>
       <div>
-        <div style="font-weight:700">Art Fest Admin</div>
-        <div class="small-muted">Unique students/events + attendance time & edit</div>
+        <div style="font-weight:700">Admin Panel</div>
+        <div class="small-muted">Students / Events / Attendance</div>
       </div>
     </div>
     <div class="d-flex gap-2 align-items-center">
@@ -42,55 +40,45 @@ body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",R
       <button id="openEvents" class="btn btn-outline-secondary">Events</button>
       <button id="openAttendance" class="btn btn-outline-secondary">Attendance</button>
       <button id="openResults" class="btn btn-outline-secondary">Results</button>
-      <button id="logoutBtn" class="btn btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Logout</button>
+      <button id="logoutBtn" class="btn btn-outline-danger"><i class="bi bi-box-arrow-right"></i></button>
     </div>
   </div>
 </nav>
 
-<main class="container-wide">
+<main class="container container-wide">
 
-  <div class="row g-3 my-4">
-    <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Students</div><div class="h4" id="statStudents">0</div></div></div>
-    <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Teams</div><div class="h4" id="statTeams">0</div></div></div>
-    <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Events</div><div class="h4" id="statEvents">0</div></div></div>
-    <div class="col-md-3"><div class="card-neo text-center"><div class="small-muted">Pending</div><div class="h4" id="statPending">0</div></div></div>
-  </div>
-
-  <div class="card-neo p-3 mb-4">
-    <ul class="nav nav-pills mb-3" id="tabs">
+  <div class="card-neo mb-3">
+    <ul class="nav nav-pills" id="tabs">
       <li class="nav-item"><button class="nav-link active" data-target="panel-students">Students</button></li>
       <li class="nav-item"><button class="nav-link" data-target="panel-teams">Teams</button></li>
       <li class="nav-item"><button class="nav-link" data-target="panel-events">Events</button></li>
       <li class="nav-item"><button class="nav-link" data-target="panel-attendance">Attendance</button></li>
       <li class="nav-item"><button class="nav-link" data-target="panel-results">Results</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-approvals">Approvals</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-notifications">Notifications</button></li>
     </ul>
 
-    <div id="panels">
-
+    <div id="panels" class="mt-3">
       <!-- STUDENTS -->
       <section id="panel-students" class="panel">
-        <div class="row g-3">
+        <div class="row">
           <div class="col-lg-5">
-            <div class="card-neo">
+            <div class="card-neo mb-3">
               <div class="section-title">Import Students (Excel)</div>
-              <div class="small-muted mb-2">Columns accepted: Chess Number, Name, Team</div>
+              <div class="small-muted mb-2">Columns: Chess Number, Name, Team (Team optional)</div>
               <input id="studentFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2 mb-2">
                 <button id="previewStudents" class="btn btn-outline-primary">Preview</button>
                 <button id="importStudents" class="btn btn-accent">Import</button>
               </div>
 
-              <hr/>
+              <hr>
               <div class="section-title">Add Student Manually</div>
-              <div class="mb-2"><input id="manualChess" class="form-control" placeholder="Chess Number"></div>
-              <div class="mb-2"><input id="manualName" class="form-control" placeholder="Name"></div>
-              <div class="mb-2"><select id="manualTeam" class="form-select"><option value="">Unassigned</option></select></div>
+              <input id="manualChess" class="form-control mb-2" placeholder="Chess ID (alphanumeric) e.g. A12 or S-01">
+              <input id="manualName" class="form-control mb-2" placeholder="Name">
+              <select id="manualTeam" class="form-select mb-2"><option value="">Unassigned</option></select>
               <div><button id="addManualStudent" class="btn btn-success">Add Student</button></div>
 
-              <hr/>
-              <div class="small-muted">Preview</div>
+              <hr>
+              <div class="section-title">Preview</div>
               <div id="studentsPreview" style="max-height:260px; overflow:auto"></div>
             </div>
           </div>
@@ -100,7 +88,7 @@ body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",R
               <div class="section-title">All Students</div>
               <div class="table-responsive">
                 <table class="table align-middle">
-                  <thead class="table-light"><tr><th>Chess #</th><th>Name</th><th>Team</th><th>Attendance</th><th class="text-end">Actions</th></tr></thead>
+                  <thead class="table-light"><tr><th>Chess #</th><th>Name</th><th>Team</th><th class="text-end">Actions</th></tr></thead>
                   <tbody id="studentsTable"></tbody>
                 </table>
               </div>
@@ -111,29 +99,23 @@ body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",R
 
       <!-- TEAMS -->
       <section id="panel-teams" class="panel d-none">
-        <div class="row g-3">
+        <div class="row">
           <div class="col-lg-5">
-            <div class="card-neo">
-              <div class="section-title">Add / Edit Team</div>
-              <input type="hidden" id="teamKeyHidden">
-              <div class="mb-2"><input id="teamName" class="form-control" placeholder="Team name"></div>
-              <div class="mb-2"><select id="teamLeader" class="form-select"><option value="">Leader (Chess #)</option></select></div>
-              <div class="mb-2">
-                <div class="input-group">
-                  <input id="teamPassword" class="form-control" placeholder="Password" />
-                  <button id="genTeamPass" class="btn btn-outline-secondary">Gen</button>
-                </div>
-              </div>
-              <div class="d-flex gap-2"><button id="saveTeam" class="btn btn-success">Save</button><button id="clearTeam" class="btn btn-outline-secondary">New</button></div>
+            <div class="card-neo mb-3">
+              <div class="section-title">Add Team</div>
+              <input id="teamName" class="form-control mb-2" placeholder="Team name">
+              <select id="teamLeader" class="form-select mb-2"><option value="">Leader (Chess#)</option></select>
+              <input id="teamPassword" class="form-control mb-2" placeholder="Password (optional)">
+              <div class="d-flex gap-2"><button id="saveTeam" class="btn btn-success">Save</button></div>
             </div>
           </div>
 
           <div class="col-lg-7">
             <div class="card-neo">
-              <div class="section-title">All Teams</div>
+              <div class="section-title">Teams</div>
               <div class="table-responsive">
                 <table class="table align-middle">
-                  <thead class="table-light"><tr><th>Team</th><th>Leader</th><th>Members</th><th>Score</th><th>Password</th><th class="text-end">Actions</th></tr></thead>
+                  <thead class="table-light"><tr><th>Team</th><th>Leader</th><th>Members</th><th class="text-end">Actions</th></tr></thead>
                   <tbody id="teamsTable"></tbody>
                 </table>
               </div>
@@ -144,27 +126,32 @@ body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",R
 
       <!-- EVENTS -->
       <section id="panel-events" class="panel d-none">
-        <div class="row g-3">
+        <div class="row">
           <div class="col-lg-5">
+            <div class="card-neo mb-3">
+              <div class="section-title">Add Event</div>
+              <input id="eventName" class="form-control mb-2" placeholder="Event name">
+              <select id="eventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option></select>
+              <textarea id="eventDescription" class="form-control mb-2" rows="4" placeholder="Description / rules"></textarea>
+              <div><button id="saveEvent" class="btn btn-warning">Save Event</button></div>
+            </div>
             <div class="card-neo">
-              <div class="section-title">Add / Import Events</div>
-              <div class="small-muted mb-2">Columns accepted: Name, Type, Description</div>
+              <div class="section-title">Import Events (Excel)</div>
               <input id="eventFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
               <div class="d-flex gap-2"><button id="previewEvents" class="btn btn-outline-primary">Preview</button><button id="importEvents" class="btn btn-accent">Import</button></div>
-              <hr/>
-              <div class="mb-2"><input id="eventName" class="form-control" placeholder="Event name"></div>
-              <div class="mb-2"><select id="eventType" class="form-select"><option>Stage</option><option>Non-Stage</option></select></div>
-              <div class="mb-2"><textarea id="eventDescription" class="form-control" rows="4" placeholder="Description / rules"></textarea></div>
-              <div><button id="saveEvent" class="btn btn-warning">Save Event</button></div>
-              <hr/>
-              <div id="eventsPreview" style="max-height:260px; overflow:auto"></div>
+              <div id="eventsPreview" style="max-height:220px; overflow:auto" class="mt-2"></div>
             </div>
           </div>
 
           <div class="col-lg-7">
             <div class="card-neo">
-              <div class="section-title">All Events</div>
-              <div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Name</th><th>Type</th><th>Description</th><th>Status</th><th class="text-end">Actions</th></tr></thead><tbody id="eventsTable"></tbody></table></div>
+              <div class="section-title">Events</div>
+              <div class="table-responsive">
+                <table class="table align-middle">
+                  <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Description</th><th class="text-end">Actions</th></tr></thead>
+                  <tbody id="eventsTable"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -173,16 +160,15 @@ body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",R
       <!-- ATTENDANCE -->
       <section id="panel-attendance" class="panel d-none">
         <div class="card-neo mb-3">
-          <div class="section-title">Create Attendance Session</div>
-          <div class="row g-2">
-            <div class="col-md-3"><input id="attDate" type="date" class="form-control" /></div>
-            <div class="col-md-2"><input id="attTime" type="time" class="form-control" /></div>
+          <div class="row g-2 align-items-center">
+            <div class="col-md-2"><input id="attDate" type="date" class="form-control"></div>
+            <div class="col-md-2"><input id="attTime" type="time" class="form-control"></div>
             <div class="col-md-4"><input id="attDesc" class="form-control" placeholder="Description"></div>
-            <div class="col-md-2"><select id="attMethod" class="form-select"><option value="all">All Students</option><option value="team">By Team</option></select></div>
-            <div class="col-md-1 d-none" id="attTeamWrap"><select id="attTeam" class="form-select"></select></div>
+            <div class="col-md-2"><select id="attMethod" class="form-select"><option value="all">All</option><option value="team">By Team</option></select></div>
+            <div class="col-md-2 d-none" id="attTeamWrap"><select id="attTeam" class="form-select"></select></div>
           </div>
 
-          <div class="mt-3 d-flex gap-2">
+          <div class="mt-3">
             <button id="loadAttendance" class="btn btn-info">Load Students</button>
             <button id="toggleAll" class="btn btn-outline-secondary">Toggle All</button>
             <button id="saveAttendance" class="btn btn-success">Save Session</button>
@@ -191,65 +177,53 @@ body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",R
 
         <div class="card-neo mb-3" id="attendanceMarkCard" style="display:none">
           <div class="section-title">Mark Attendance</div>
-          <div class="small-muted mb-2">Click numbers or use Toggle All. Edit loaded sessions and re-save to update.</div>
-          <div id="attendanceBoxes" style="padding:10px"></div>
+          <div class="small-muted mb-2">Hover over chess number to see the name. Click to toggle present/absent.</div>
+          <div id="attendanceBoxes" style="padding:12px"></div>
         </div>
 
         <div class="card-neo">
-          <div class="section-title">Attendance Sessions</div>
-          <div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Date</th><th>Time</th><th>Description</th><th>Count</th><th class="text-end">Action</th></tr></thead><tbody id="attendanceSessions"></tbody></table></div>
+          <div class="section-title">Saved Sessions</div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light"><tr><th>Date</th><th>Time</th><th>Description</th><th>Count</th><th class="text-end">Actions</th></tr></thead>
+              <tbody id="attendanceSessions"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <!-- RESULTS -->
       <section id="panel-results" class="panel d-none">
-        <div class="row g-3">
-          <div class="col-lg-5">
-            <div class="card-neo">
-              <div class="section-title">Add / Publish Result</div>
-              <div class="mb-2"><select id="resultEvent" class="form-select"><option value="">Select event</option></select></div>
-              <div class="mb-2"><select id="resFirst" class="form-select"><option value="">1st</option></select></div>
-              <div class="mb-2"><input id="ptsFirst" type="number" class="form-control" placeholder="Points (max 100)" value="100"></div>
-              <div class="mb-2"><select id="resSecond" class="form-select"><option value="">2nd</option></select></div>
-              <div class="mb-2"><input id="ptsSecond" type="number" class="form-control" placeholder="Points" value="50"></div>
-              <div class="mb-2"><select id="resThird" class="form-select"><option value="">3rd</option></select></div>
-              <div class="mb-2"><input id="ptsThird" type="number" class="form-control" placeholder="Points" value="25"></div>
-              <div class="form-check"><input id="publishNow" type="checkbox" class="form-check-input"><label class="form-check-label">Publish now</label></div>
-              <div class="mt-3 d-flex gap-2"><button id="addResult" class="btn btn-primary">Add Result</button><button id="clearResult" class="btn btn-outline-secondary">Clear</button></div>
-            </div>
-          </div>
-
-          <div class="col-lg-7">
-            <div class="card-neo">
-              <div class="section-title">Results</div>
-              <div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Event</th><th>1st (pts)</th><th>2nd (pts)</th><th>3rd (pts)</th><th>Published</th><th class="text-end">Actions</th></tr></thead><tbody id="resultsTable"></tbody></table></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- APPROVALS -->
-      <section id="panel-approvals" class="panel d-none">
         <div class="card-neo">
-          <div class="section-title">Pending Participations</div>
-          <div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Event</th><th>Team</th><th>Participant</th><th>Submitted</th><th class="text-end">Action</th></tr></thead><tbody id="pendingTable"></tbody></table></div>
-        </div>
-      </section>
-
-      <!-- NOTIFICATIONS -->
-      <section id="panel-notifications" class="panel d-none">
-        <div class="card-neo mb-3">
-          <div class="section-title">Send Notification</div>
+          <div class="section-title">Results (quick)</div>
           <div class="row g-2">
-            <div class="col-md-4"><input id="notifTitle" class="form-control" placeholder="Title"></div>
-            <div class="col-md-6"><input id="notifMessage" class="form-control" placeholder="Message"></div>
-            <div class="col-md-2"><button id="sendNotif" class="btn btn-primary w-100">Send</button></div>
+            <div class="col-md-4"><select id="resultEvent" class="form-select"><option value="">Select event</option></select></div>
+            <div class="col-md-2"><button id="refreshParticipants" class="btn btn-outline-secondary">Load</button></div>
+            <div class="col-md-6"></div>
+          </div>
+          <div class="mt-2">
+            <div class="row g-2">
+              <div class="col-md-4"><select id="resFirst" class="form-select"><option value="">1st</option></select></div>
+              <div class="col-md-2"><input id="ptsFirst" type="number" class="form-control" value="100"></div>
+              <div class="col-md-4"><select id="resSecond" class="form-select"><option value="">2nd</option></select></div>
+              <div class="col-md-2"><input id="ptsSecond" type="number" class="form-control" value="50"></div>
+            </div>
+            <div class="row g-2 mt-2">
+              <div class="col-md-4"><select id="resThird" class="form-select"><option value="">3rd</option></select></div>
+              <div class="col-md-2"><input id="ptsThird" type="number" class="form-control" value="25"></div>
+              <div class="col-md-6 text-end"><button id="addResult" class="btn btn-primary">Add Result</button></div>
+            </div>
           </div>
         </div>
 
-        <div class="card-neo">
-          <div class="section-title">History</div>
-          <div class="table-responsive"><table class="table align-middle"><thead class="table-light"><tr><th>Title</th><th>Message</th><th>Date</th></tr></thead><tbody id="notifHistory"></tbody></table></div>
+        <div class="card-neo mt-3">
+          <div class="section-title">Results List</div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light"><tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th><th class="text-end">Actions</th></tr></thead>
+              <tbody id="resultsTable"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -258,17 +232,39 @@ body{background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",R
 
 </main>
 
-<div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:11000"></div>
+<!-- Edit student modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editStudentForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Chess Number (read-only)</label>
+        <input id="editChess" class="form-control mb-2" readonly>
+        <label class="form-label">Name</label>
+        <input id="editName" class="form-control mb-2" required>
+        <label class="form-label">Team</label>
+        <select id="editTeam" class="form-select mb-2"><option value="">Unassigned</option></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="deleteStudentBtn" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
+/* ----------------- Firebase init ----------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* ---------------------------
-   Firebase config (your config)
-----------------------------*/
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
   authDomain: "gen7-3e139.firebaseapp.com",
@@ -282,112 +278,50 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ---------------------------
-   Utilities
-----------------------------*/
-function toast(msg, type='success'){
-  const t = document.createElement('div');
-  t.className = `toast align-items-center text-bg-${type} border-0`;
-  t.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-  document.getElementById('toastRoot').appendChild(t);
-  const b = new bootstrap.Toast(t, { delay: 3000 }); b.show();
-  t.addEventListener('hidden.bs.toast', ()=> t.remove());
-}
+/* ----------------- utilities ----------------- */
 const $ = id => document.getElementById(id);
+function toast(msg, type='success'){
+  const el = document.createElement('div');
+  el.className = `toast align-items-center text-bg-${type} border-0`;
+  el.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+  $('toastRoot').appendChild(el);
+  const b = new bootstrap.Toast(el, { delay: 3000 }); b.show();
+  el.addEventListener('hidden.bs.toast', ()=> el.remove());
+}
+function encodeKey(k){ return encodeURIComponent(String(k)); }
+function decodeKey(k){ return decodeURIComponent(String(k)); }
 
-/* ---------------------------
-   Cache & maps
-----------------------------*/
-let CACHE = { students:[], teams:[], events:[], participations:[], results:[], notifications:[], attendance:{} };
-let KEYMAP = { students:{}, teams:{}, events:{}, participations:{}, results:{}, notifications:{}, attendance:{} }; // id -> dbKey or dbKey for attendance
-let DBKEYS = { students:{}, teams:{}, events:{}, participations:{}, results:{}, notifications:{}, attendance:{} }; // dbKey -> id
+/* ----------------- cached arrays & maps ----------------- */
+let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
+let KEYMAP = { students: {}, teams: {}, events: {}, results: {} };
 
-/* small helpers for uniqueness */
-function studentIdExists(id){ return CACHE.students.some(s => String(s.id) === String(id)); }
-function studentNameExists(name){ if(!name) return false; const n = String(name).trim().toLowerCase(); return CACHE.students.some(s => String(s.name||'').trim().toLowerCase() === n); }
-function eventNameExists(name){ if(!name) return false; const n = String(name).trim().toLowerCase(); return CACHE.events.some(e => String(e.name||'').trim().toLowerCase() === n); }
+/* ----------------- DB listeners (separate) ----------------- */
+const studentsRef = ref(db, 'students');
+const teamsRef = ref(db, 'teams');
+const eventsRef = ref(db, 'events');
+const partsRef = ref(db, 'participations');
+const resultsRef = ref(db, 'results');
+const attendanceRef = ref(db, 'attendance');
 
-/* ---------------------------
-   Fast render scheduling
-----------------------------*/
-let rafScheduled = false;
-function scheduleRender(){ if(rafScheduled) return; rafScheduled = true; requestAnimationFrame(()=>{ rafScheduled = false; renderAll(); }); }
-
-/* ---------------------------
-   Listeners for each node
-----------------------------*/
-const refs = {
-  studentsRef: ref(db,'students'),
-  teamsRef: ref(db,'teams'),
-  eventsRef: ref(db,'events'),
-  partsRef: ref(db,'participations'),
-  resultsRef: ref(db,'results'),
-  notifRef: ref(db,'notifications'),
-  attendanceRef: ref(db,'attendance')
-};
-
-onValue(refs.studentsRef, snap => {
+onValue(studentsRef, snap => {
   const obj = snap.val() || {};
   CACHE.students = Object.values(obj);
-  KEYMAP.students = {}; DBKEYS.students = {};
-  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined){ KEYMAP.students[v.id] = k; DBKEYS.students[k] = v.id; } });
-  scheduleRender();
+  KEYMAP.students = {};
+  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.students[v.id] = k; });
+  renderAll();
 });
-onValue(refs.teamsRef, snap => {
-  const obj = snap.val() || {};
-  CACHE.teams = Object.values(obj);
-  KEYMAP.teams = {}; DBKEYS.teams = {};
-  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined){ KEYMAP.teams[v.id] = k; DBKEYS.teams[k] = v.id; } });
-  scheduleRender();
-});
-onValue(refs.eventsRef, snap => {
-  const obj = snap.val() || {};
-  CACHE.events = Object.values(obj);
-  KEYMAP.events = {}; DBKEYS.events = {};
-  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined){ KEYMAP.events[v.id] = k; DBKEYS.events[k] = v.id; } });
-  scheduleRender();
-});
-onValue(refs.partsRef, snap => {
-  const obj = snap.val() || {};
-  CACHE.participations = Object.values(obj);
-  KEYMAP.participations = {}; DBKEYS.participations = {};
-  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined){ KEYMAP.participations[v.id] = k; DBKEYS.participations[k] = v.id; } });
-  scheduleRender();
-});
-onValue(refs.resultsRef, snap => {
-  const obj = snap.val() || {};
-  CACHE.results = Object.values(obj);
-  KEYMAP.results = {}; DBKEYS.results = {};
-  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined){ KEYMAP.results[v.id] = k; DBKEYS.results[k] = v.id; } });
-  scheduleRender();
-});
-onValue(refs.notifRef, snap => {
-  const obj = snap.val() || {};
-  CACHE.notifications = Object.values(obj);
-  scheduleRender();
-});
-onValue(refs.attendanceRef, snap => {
-  const obj = snap.val() || {};
-  CACHE.attendance = obj || {};
-  // map attendance dbKey -> (date/time if present)
-  KEYMAP.attendance = {}; DBKEYS.attendance = {};
-  Object.entries(obj).forEach(([k,v]) => {
-    // if v has id property, map; otherwise use key
-    const id = v && v.id !== undefined ? v.id : k;
-    KEYMAP.attendance[id] = k;
-    DBKEYS.attendance[k] = id;
-  });
-  scheduleRender();
-});
+onValue(teamsRef, snap => { const obj = snap.val() || {}; CACHE.teams = Object.values(obj); KEYMAP.teams = {}; Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.teams[v.id] = k; }); renderAll(); });
+onValue(eventsRef, snap => { const obj = snap.val() || {}; CACHE.events = Object.values(obj); KEYMAP.events = {}; Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.events[v.id] = k; }); renderAll(); });
+onValue(partsRef, snap => { CACHE.participations = Object.values(snap.val() || {}); renderAll(); });
+onValue(resultsRef, snap => { CACHE.results = Object.values(snap.val() || {}); renderAll(); });
+onValue(attendanceRef, snap => { CACHE.attendance = snap.val() || {}; renderAll(); });
 
-/* ---------------------------
-   UI: Tabs
-----------------------------*/
+/* ----------------- UI tab handlers ----------------- */
 document.querySelectorAll('#tabs [data-target]').forEach(btn=>{
   btn.addEventListener('click', ()=> {
     document.querySelectorAll('#panels > section').forEach(s => s.classList.add('d-none'));
     const id = btn.getAttribute('data-target');
-    document.getElementById(id).classList.remove('d-none');
+    $(id).classList.remove('d-none');
     document.querySelectorAll('#tabs .nav-link').forEach(n => n.classList.remove('active'));
     btn.classList.add('active');
   });
@@ -399,28 +333,21 @@ $('openAttendance').addEventListener('click', ()=> document.querySelector('[data
 $('openResults').addEventListener('click', ()=> document.querySelector('[data-target="panel-results"]').click());
 $('logoutBtn').addEventListener('click', ()=> { sessionStorage.clear(); location.href='index.html'; });
 
-/* ---------------------------
-   Renderers
-----------------------------*/
+/* ----------------- renderers ----------------- */
 function renderAll(){
-  renderStats();
   renderStudents();
   renderTeams();
   renderEvents();
   renderAttendanceSessions();
-  renderResults();
-  renderPending();
-  renderNotifications();
   populateDropdowns();
-}
-function renderStats(){
-  $('statStudents').textContent = CACHE.students.length;
-  $('statTeams').textContent = CACHE.teams.length;
-  $('statEvents').textContent = CACHE.events.length;
-  $('statPending').textContent = CACHE.participations.filter(p => String(p.status || '').toLowerCase() === 'pending').length;
+  renderResults();
 }
 
-/* ---------- STUDENTS ---------- */
+/* Students uniqueness helpers */
+function studentIdExists(id){ return CACHE.students.some(s => String(s.id) === String(id)); }
+function studentNameExists(name){ if(!name) return false; const n=name.trim().toLowerCase(); return CACHE.students.some(s => String(s.name||'').trim().toLowerCase() === n); }
+
+/* Students preview/import */
 let studentsPreviewRows = [];
 $('previewStudents').addEventListener('click', ()=> {
   const f = $('studentFile').files[0];
@@ -429,50 +356,42 @@ $('previewStudents').addEventListener('click', ()=> {
   r.onload = e => {
     const wb = XLSX.read(e.target.result, { type:'binary' });
     const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' });
-    studentsPreviewRows = json.slice(0,500);
+    studentsPreviewRows = json.slice(0,1000);
     renderStudentsPreview();
   };
   r.readAsBinaryString(f);
 });
-
 function renderStudentsPreview(){
   const wrap = $('studentsPreview');
   if(!studentsPreviewRows.length){ wrap.innerHTML = '<div class="muted">No preview</div>'; return; }
-  let html = '<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Team</th></tr></thead><tbody>';
+  let html = `<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Team</th></tr></thead><tbody>`;
   studentsPreviewRows.forEach(r=>{
-    const chess = r['Chess Number'] || r['Chess'] || r['ID'] || r['id'] || '';
-    const name = r['Name'] || r['name'] || '';
-    const team = r['Team'] || r['team'] || '';
-    html += `<tr><td>${chess}</td><td>${name}</td><td>${team}</td></tr>`;
+    const chess = (r['Chess Number']||r['Chess']||r['ID']||r['id']||'').toString();
+    const name = (r['Name']||r['name']||'').toString();
+    const team = (r['Team']||r['team']||'').toString();
+    html += `<tr><td>${escapeHtml(chess)}</td><td>${escapeHtml(name)}</td><td>${escapeHtml(team)}</td></tr>`;
   });
   html += '</tbody></table>';
   wrap.innerHTML = html;
 }
-
 $('importStudents').addEventListener('click', async ()=>{
   if(!studentsPreviewRows.length) return toast('No preview','danger');
-
-  // build team name -> id map
-  const teamNameToId = {};
-  CACHE.teams.forEach(t => { if(t.name) teamNameToId[String(t.name).trim().toLowerCase()] = t.id; });
-
-  const updates = {};
-  let imported = 0, skipped = 0;
+  // team name -> id map
+  const teamNameToId = {}; CACHE.teams.forEach(t => { if(t.name) teamNameToId[String(t.name).trim().toLowerCase()] = t.id; });
+  const updates = {}; let imported=0, skipped=0;
   studentsPreviewRows.forEach(r=>{
-    const chessRaw = r['Chess Number'] || r['Chess'] || r['ID'] || r['id'];
-    const nameRaw = r['Name'] || r['name'];
+    const chessRaw = (r['Chess Number']||r['Chess']||r['ID']||r['id']||'').toString().trim();
+    const nameRaw = (r['Name']||r['name']||'').toString().trim();
     if(!chessRaw || !nameRaw){ skipped++; return; }
-    const chess = Number(chessRaw);
-    const name = String(nameRaw).trim();
-    // uniqueness checks
+    const chess = chessRaw;
+    const name = nameRaw;
     if(studentIdExists(chess) || studentNameExists(name)){ skipped++; return; }
-    const teamName = r['Team'] || r['team'] || '';
-    const teamId = teamName ? teamNameToId[String(teamName).trim().toLowerCase()] || null : null;
-    updates[`students/${chess}`] = { id: chess, name, teamId: teamId ? Number(teamId) : null, attendance: { status:'Absent', timestamp:null } };
+    const teamName = (r['Team']||r['team']||'').toString().trim();
+    const teamId = teamName ? (teamNameToId[teamName.toLowerCase()] || null) : null;
+    updates[`students/${encodeKey(chess)}`] = { id: chess, name, teamId: teamId ? String(teamId) : null };
     imported++;
   });
-
-  if(!Object.keys(updates).length) return toast(`No rows imported (imported ${imported}, skipped ${skipped})`,'warning');
+  if(!Object.keys(updates).length) return toast(`Imported ${imported}, skipped ${skipped}`,'warning');
   await update(ref(db,'/'), updates);
   studentsPreviewRows = [];
   $('studentsPreview').innerHTML = '';
@@ -480,213 +399,247 @@ $('importStudents').addEventListener('click', async ()=>{
   toast(`Imported ${imported}, skipped ${skipped}`);
 });
 
-$('addManualStudent').addEventListener('click', async ()=> {
+/* Manual add student */
+$('addManualStudent').addEventListener('click', async ()=>{
   const chessRaw = $('manualChess').value.trim();
-  const nameRaw = $('manualName').value.trim();
+  const name = $('manualName').value.trim();
   const teamId = $('manualTeam').value || null;
-  if(!chessRaw || !nameRaw) return toast('Enter chess number and name','danger');
-  const chess = Number(chessRaw);
-  const name = String(nameRaw).trim();
-  if(studentIdExists(chess)) return toast('Chess number already exists','danger');
+  if(!chessRaw || !name) return toast('Enter chess ID and name','danger');
+  if(studentIdExists(chessRaw)) return toast('Chess ID already exists','danger');
   if(studentNameExists(name)) return toast('Name already exists','danger');
-  await set(ref(db, `students/${chess}`), { id: chess, name, teamId: teamId ? Number(teamId) : null, attendance: { status:'Absent', timestamp:null } });
+  await set(ref(db, `students/${encodeKey(chessRaw)}`), { id: chessRaw, name, teamId: teamId ? String(teamId) : null });
   $('manualChess').value=''; $('manualName').value=''; $('manualTeam').value='';
-  toast('Student added');
+  toast('Student saved');
 });
 
+/* render students table */
 function renderStudents(){
-  const body = $('studentsTable');
-  if(!CACHE.students.length){ body.innerHTML = '<tr><td colspan="5" class="text-center muted">No students</td></tr>'; return; }
-  CACHE.students.sort((a,b)=> (a.id||0)-(b.id||0));
-  const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t.name);
+  const tbody = $('studentsTable');
+  if(!CACHE.students.length){ tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">No students</td></tr>'; return; }
+  CACHE.students.sort((a,b)=> String(a.id).localeCompare(String(b.id)));
+  const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
   let html = '';
   CACHE.students.forEach(s=>{
-    const teamName = s.teamId ? (teamMap[s.teamId] || 'Unknown') : 'Unassigned';
-    const att = s.attendance?.status || 'Absent';
-    const ts = s.attendance?.timestamp ? new Date(s.attendance.timestamp).toLocaleString() : '';
-    html += `<tr data-id="${s.id}"><td>${s.id}</td><td>${s.name||''}</td><td>${teamName}</td><td><div class="small-muted">${att}</div><div class="small-muted">${ts}</div></td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-student">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-student">Delete</button></td></tr>`;
+    const team = s.teamId ? (teamMap[s.teamId]||'Unknown') : 'Unassigned';
+    html += `<tr data-key="${encodeKey(s.id)}"><td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(team)}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-student">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-student">Delete</button></td></tr>`;
   });
-  body.innerHTML = html;
+  tbody.innerHTML = html;
 }
 
-/* student table actions */
+/* students table actions (delegation) */
 $('studentsTable').addEventListener('click', async (e)=>{
-  const tr = e.target.closest('tr'); if(!tr) return; const id = tr.dataset.id;
+  const tr = e.target.closest('tr'); if(!tr) return;
+  const dbKey = tr.dataset.key;
   if(e.target.classList.contains('btn-delete-student')){
     if(!confirm('Delete student?')) return;
-    await remove(ref(db, `students/${id}`));
-    toast('Deleted');
+    await remove(ref(db, `students/${dbKey}`));
+    toast('Student deleted');
+    return;
   } else if(e.target.classList.contains('btn-edit-student')){
-    const snap = await get(ref(db, `students/${id}`));
-    const s = snap.val(); if(!s) return toast('Not found','danger');
-    // edit name and team (no class)
-    const newName = prompt('Name', s.name) || s.name;
-    if(String(newName).trim().toLowerCase() !== String(s.name||'').trim().toLowerCase()){
-      if(studentNameExists(newName)) return toast('Name already exists','danger');
-    }
-    const newTeam = prompt('Team id (leave blank to unassign)', s.teamId||'') || s.teamId||null;
-    await update(ref(db, `students/${id}`), { name: newName, teamId: newTeam ? Number(newTeam) : null });
-    toast('Updated');
+    const snap = await get(ref(db, `students/${dbKey}`));
+    const s = snap.val();
+    if(!s) return toast('Student not found','danger');
+    $('editChess').value = s.id;
+    $('editName').value = s.name || '';
+    // populate team select then set
+    populateDropdowns();
+    setTimeout(()=> { $('editTeam').value = s.teamId || ''; }, 60);
+    document.getElementById('editStudentModal').dataset.dbKey = dbKey;
+    new bootstrap.Modal(document.getElementById('editStudentModal')).show();
   }
 });
 
-/* ---------- TEAMS ---------- */
-$('genTeamPass').addEventListener('click', ()=> $('teamPassword').value = `TL-${Math.floor(1000+Math.random()*9000)}`);
-$('saveTeam').addEventListener('click', async ()=>{
-  const keyHidden = $('teamKeyHidden').value;
-  const name = $('teamName').value.trim(); if(!name) return toast('Provide team name','danger');
-  const leader = $('teamLeader').value || null;
-  const pwd = $('teamPassword').value || `TL-${Math.floor(1000+Math.random()*9000)}`;
-  if(keyHidden){
-    const dbKey = KEYMAP.teams[keyHidden] || Object.keys(DBKEYS.teams).find(k=>DBKEYS.teams[k] === Number(keyHidden));
-    if(dbKey) await update(ref(db, `teams/${dbKey}`), { name, leaderId: leader ? Number(leader) : null, password: pwd });
-    else toast('Team key not found','danger');
-  } else {
-    const p = push(ref(db, 'teams')); const id = Date.now();
-    await set(p, { id, name, leaderId: leader?Number(leader):null, score:0, password: pwd });
+/* edit student modal submit & delete */
+document.getElementById('editStudentForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = document.getElementById('editStudentModal').dataset.dbKey;
+  if(!dbKey) return toast('Missing key','danger');
+  const newName = $('editName').value.trim();
+  const newTeam = $('editTeam').value || null;
+  if(!newName) return toast('Name required','danger');
+  const curSnap = await get(ref(db, `students/${dbKey}`));
+  const cur = curSnap.val();
+  if(!cur) return toast('Student not found','danger');
+  if(String(newName).trim().toLowerCase() !== String(cur.name||'').trim().toLowerCase()){
+    if(studentNameExists(newName)) return toast('Name already exists','danger');
   }
-  $('teamKeyHidden').value=''; $('teamName').value=''; $('teamLeader').value=''; $('teamPassword').value='';
+  await update(ref(db, `students/${dbKey}`), { name: newName, teamId: newTeam ? String(newTeam) : null });
+  toast('Student updated');
+  bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+});
+$('deleteStudentBtn').addEventListener('click', async ()=>{
+  if(!confirm('Delete this student?')) return;
+  const dbKey = document.getElementById('editStudentModal').dataset.dbKey;
+  if(!dbKey) return toast('Missing key','danger');
+  await remove(ref(db, `students/${dbKey}`));
+  toast('Student deleted');
+  bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+});
+
+/* ----------------- TEAMS ----------------- */
+$('saveTeam').addEventListener('click', async ()=>{
+  const name = $('teamName').value.trim();
+  const leader = $('teamLeader').value || null;
+  const pwd = $('teamPassword').value.trim() || '';
+  if(!name) return toast('Team name required','danger');
+  const p = push(ref(db, 'teams'));
+  const id = Date.now().toString();
+  await set(p, { id, name, leaderId: leader ? String(leader) : null, password: pwd, score: 0 });
+  $('teamName').value=''; $('teamLeader').value=''; $('teamPassword').value='';
   toast('Team saved');
 });
-$('clearTeam').addEventListener('click', ()=> { $('teamKeyHidden').value=''; $('teamName').value=''; $('teamLeader').value=''; $('teamPassword').value=''; });
 function renderTeams(){
-  const body = $('teamsTable');
-  if(!CACHE.teams.length){ body.innerHTML = '<tr><td colspan="6" class="text-center muted">No teams</td></tr>'; return; }
-  CACHE.teams.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  const tbody = $('teamsTable');
+  if(!CACHE.teams.length){ tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">No teams</td></tr>'; return; }
+  CACHE.teams.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
   let html = '';
   CACHE.teams.forEach(t=>{
     const leader = CACHE.students.find(s => String(s.id) === String(t.leaderId));
     const members = CACHE.students.filter(s => String(s.teamId) === String(t.id)).length;
-    html += `<tr data-id="${t.id}"><td>${t.name}</td><td>${leader?leader.name+' ('+leader.id+')':'-'}</td><td>${members}</td><td>${t.score||0}</td><td><input class="form-control form-control-sm team-pwd" data-id="${t.id}" value="${t.password||''}"></td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-team">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-team">Delete</button></td></tr>`;
+    html += `<tr data-key="${t.id}"><td>${escapeHtml(t.name)}</td><td>${leader?escapeHtml(leader.name+' ('+leader.id+')'):'-'}</td><td>${members}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-team" data-key="${t.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-team" data-key="${t.id}">Delete</button></td></tr>`;
   });
-  body.innerHTML = html;
-  document.querySelectorAll('.team-pwd').forEach(inp=>{
-    inp.addEventListener('change', async (e)=>{
-      const tid = e.target.dataset.id; const val = e.target.value;
-      const dbKey = KEYMAP.teams[tid] || Object.keys(DBKEYS.teams).find(k=>DBKEYS.teams[k] === Number(tid));
-      if(dbKey){ await update(ref(db, `teams/${dbKey}`), { password: val }); toast('Password updated'); }
-    });
-  });
+  tbody.innerHTML = html;
 }
 $('teamsTable').addEventListener('click', async (e)=>{
-  const tr = e.target.closest('tr'); if(!tr) return; const tid = tr.dataset.id;
   if(e.target.classList.contains('btn-delete-team')){
+    const tid = e.target.dataset.key;
     if(!confirm('Delete team?')) return;
-    const dbKey = KEYMAP.teams[tid] || Object.keys(DBKEYS.teams).find(k=>DBKEYS.teams[k] === Number(tid));
-    if(dbKey){
-      await remove(ref(db, `teams/${dbKey}`));
-      const updates = {};
-      CACHE.students.filter(s => String(s.teamId) === String(tid)).forEach(s => updates[`students/${s.id}/teamId`] = null);
-      if(Object.keys(updates).length) await update(ref(db,'/'), updates);
-      toast('Team deleted');
-    } else toast('Team key not found','danger');
-  } else if(e.target.classList.contains('btn-edit-team')){
-    const team = CACHE.teams.find(t=>String(t.id)===String(tid));
-    if(!team) return toast('Not found','danger');
-    $('teamKeyHidden').value = team.id; $('teamName').value = team.name || ''; $('teamLeader').value = team.leaderId || ''; $('teamPassword').value = team.password || '';
-    document.querySelector('[data-target="panel-teams"]').click();
+    // remove team and unassign members
+    const dbKey = KEYMAP.teams[tid];
+    if(dbKey) await remove(ref(db, `teams/${dbKey}`));
+    const updates = {};
+    CACHE.students.filter(s => String(s.teamId) === String(tid)).forEach(s => updates[`students/${encodeKey(s.id)}/teamId`] = null);
+    if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+    toast('Team deleted');
   }
 });
 
-/* ---------- EVENTS ---------- */
-let eventsPreviewRows = [];
-$('previewEvents').addEventListener('click', ()=>{
+/* ----------------- EVENTS ----------------- */
+$('saveEvent').addEventListener('click', async ()=>{
+  const name = $('eventName').value.trim();
+  const type = $('eventType').value;
+  const desc = $('eventDescription').value.trim();
+  if(!name) return toast('Event name required','danger');
+  // uniqueness
+  if(CACHE.events.some(e => String(e.name||'').trim().toLowerCase() === name.toLowerCase())) return toast('Event name already exists','danger');
+  const p = push(ref(db, 'events'));
+  const id = Date.now().toString();
+  await set(p, { id, name, type, description: desc, status: 'Open' });
+  $('eventName').value=''; $('eventDescription').value='';
+  toast('Event added');
+});
+$('previewEvents').addEventListener('click', ()=> {
   const f = $('eventFile').files[0];
-  if(!f) return toast('Select file','danger');
+  if(!f) return toast('Choose event Excel','danger');
   const r = new FileReader();
   r.onload = e => {
     const wb = XLSX.read(e.target.result, { type:'binary' });
-    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' });
-    eventsPreviewRows = json.slice(0,500); renderEventsPreview();
+    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' }).slice(0,500);
+    let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>';
+    json.forEach(rw => html += `<tr><td>${escapeHtml(rw['Name']||rw['Event']||rw['name']||'')}</td><td>${escapeHtml(rw['Type']||rw['type']||'')}</td><td>${escapeHtml(rw['Description']||rw['description']||'')}</td></tr>`);
+    html += '</tbody></table>';
+    $('eventsPreview').innerHTML = html;
   };
   r.readAsBinaryString(f);
 });
-function renderEventsPreview(){
-  const wrap = $('eventsPreview');
-  if(!eventsPreviewRows.length){ wrap.innerHTML = '<div class="muted">No preview</div>'; return; }
-  let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>';
-  eventsPreviewRows.forEach(r => {
-    const name = r['Name'] || r['Event'] || r['name'] || '';
-    const type = r['Type'] || r['type'] || '';
-    const desc = r['Description'] || r['description'] || '';
-    html += `<tr><td>${name}</td><td>${type}</td><td>${desc}</td></tr>`;
-  });
-  html += '</tbody></table>'; wrap.innerHTML = html;
-}
 $('importEvents').addEventListener('click', async ()=>{
-  if(!eventsPreviewRows.length) return toast('No preview','danger');
-  const updates = {};
-  let imported = 0, skipped = 0;
-  eventsPreviewRows.forEach(r=>{
-    const nameRaw = r['Name'] || r['Event'] || r['name'] || '';
-    if(!nameRaw){ skipped++; return; }
-    const name = String(nameRaw).trim();
-    if(eventNameExists(name)){ skipped++; return; }
-    const type = r['Type'] || r['type'] || 'Non-Stage';
-    const desc = r['Description'] || r['description'] || '';
-    const id = Date.now() + Math.floor(Math.random()*9999);
-    updates[`events/${id}`] = { id, name, type, description: desc, status:'Open' };
-    imported++;
-  });
-  if(!Object.keys(updates).length) return toast(`Imported ${imported}, skipped ${skipped}`,'warning');
-  await update(ref(db,'/'), updates);
-  eventsPreviewRows = []; $('eventsPreview').innerHTML=''; $('eventFile').value='';
-  toast(`Imported ${imported}, skipped ${skipped}`);
-});
-$('saveEvent').addEventListener('click', async ()=>{
-  const name = $('eventName').value.trim(); if(!name) return toast('Provide event name','danger');
-  if(eventNameExists(name)) return toast('Event name already exists','danger');
-  const type = $('eventType').value; const desc = $('eventDescription').value.trim(); const id = Date.now();
-  await set(ref(db, `events/${id}`), { id, name, type, description: desc, status: 'Open' });
-  $('eventName').value=''; $('eventDescription').value=''; toast('Event saved');
+  const f = $('eventFile').files[0];
+  if(!f) return toast('Choose event Excel','danger');
+  const r = new FileReader();
+  r.onload = async e => {
+    const wb = XLSX.read(e.target.result, { type:'binary' });
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' }).slice(0,500);
+    const updates = {}; let imported=0, skipped=0;
+    rows.forEach(rw=>{
+      const name = (rw['Name']||rw['Event']||rw['name']||'').toString().trim();
+      if(!name){ skipped++; return; }
+      if(CACHE.events.some(ev => String(ev.name||'').trim().toLowerCase()===name.toLowerCase())){ skipped++; return; }
+      const type = (rw['Type']||rw['type']||'Non-Stage').toString();
+      const desc = (rw['Description']||rw['description']||'').toString();
+      const id = Date.now().toString() + Math.floor(Math.random()*1000);
+      updates[`events/${id}`] = { id, name, type, description: desc, status:'Open' };
+      imported++;
+    });
+    if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+    toast(`Imported ${imported}, skipped ${skipped}`);
+    $('eventFile').value='';
+    $('eventsPreview').innerHTML='';
+  };
+  r.readAsBinaryString(f);
 });
 function renderEvents(){
-  const body = $('eventsTable'); if(!CACHE.events.length){ body.innerHTML = '<tr><td colspan="5" class="text-center muted">No events</td></tr>'; return; }
-  CACHE.events.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  const tbody = $('eventsTable');
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">No events</td></tr>'; return; }
+  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
   let html = '';
-  CACHE.events.forEach(e => { const desc = e.description ? (e.description.length>120? e.description.slice(0,120)+'...' : e.description) : ''; html += `<tr data-id="${e.id}"><td>${e.name}</td><td>${e.type}</td><td>${desc}</td><td>${e.status||'Open'}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event">Delete</button></td></tr>`; });
-  body.innerHTML = html;
+  CACHE.events.forEach(ev => {
+    html += `<tr data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end"><button class="btn btn-sm btn-outline-danger btn-delete-event" data-key="${ev.id}">Delete</button></td></tr>`;
+  });
+  tbody.innerHTML = html;
 }
 $('eventsTable').addEventListener('click', async (e)=>{
-  const tr = e.target.closest('tr'); if(!tr) return; const id = tr.dataset.id;
   if(e.target.classList.contains('btn-delete-event')){
+    const id = e.target.dataset.key;
     if(!confirm('Delete event?')) return;
-    const dbKey = KEYMAP.events[id] || Object.keys(DBKEYS.events).find(k=>DBKEYS.events[k] === Number(id));
-    if(dbKey){ await remove(ref(db, `events/${dbKey}`)); toast('Event deleted'); }
-    else toast('Event key not found','danger');
-  } else if(e.target.classList.contains('btn-edit-event')){
-    const ev = CACHE.events.find(x=>String(x.id)===String(id));
-    if(!ev) return toast('Event not found','danger');
-    $('eventName').value = ev.name || ''; $('eventType').value = ev.type || 'Non-Stage'; $('eventDescription').value = ev.description || '';
-    document.querySelector('[data-target="panel-events"]').click();
+    const dbKey = KEYMAP.events[id] || id;
+    if(dbKey) await remove(ref(db, `events/${dbKey}`));
+    toast('Event removed');
   }
 });
 
-/* ---------- ATTENDANCE (with time + edit) ---------- */
+/* ----------------- ATTENDANCE ----------------- */
 let attendanceToggleState = 'none';
-let editingAttendanceDbKey = null; // when editing an existing session, holds DB key
+let editingAttendanceDbKey = null;
 
-$('attMethod').addEventListener('change', ()=> $('attTeamWrap').classList.toggle('d-none', $('attMethod').value !== 'team'));
+$('attMethod').addEventListener('change', ()=> $('attTeamWrap').classList.toggle('d-none', $('attMethod').value!=='team'));
 
-$('loadAttendance').addEventListener('click', ()=>{
-  const method = $('attMethod').value, teamId = $('attTeam').value;
+$('loadAttendance').addEventListener('click', ()=> {
+  const method = $('attMethod').value;
+  const teamId = $('attTeam').value;
   let list = [];
   if(method === 'all') list = CACHE.students.slice();
   else list = CACHE.students.filter(s => String(s.teamId) === String(teamId));
-  const wrap = $('attendanceBoxes'); let html = '';
-  list.forEach(s => html += `<div class="small-box" data-id="${s.id}" onclick="toggleBox(this)">${s.id}</div>`);
-  wrap.innerHTML = html;
+  const wrap = $('attendanceBoxes');
+  wrap.innerHTML = '';
+  list.forEach(s => {
+    // create small box with name in data attribute and using Bootstrap tooltip/popover
+    const div = document.createElement('div');
+    div.className = 'small-box';
+    div.dataset.key = encodeKey(s.id);
+    div.dataset.name = s.name || '';
+    div.textContent = s.id;
+    // tooltip: we'll use popover for hover name
+    div.setAttribute('data-bs-toggle','popover');
+    div.setAttribute('data-bs-trigger','hover focus');
+    div.setAttribute('title', s.id);
+    div.setAttribute('data-bs-content', s.name || '');
+    div.addEventListener('click', ()=> toggleAttendanceBox(div));
+    wrap.appendChild(div);
+  });
+  // initialize popovers on these boxes
+  initPopovers();
   $('attendanceMarkCard').style.display = list.length ? 'block' : 'none';
   attendanceToggleState = 'none'; $('toggleAll').textContent = 'Toggle All';
-  editingAttendanceDbKey = null; // reset edit state when loading fresh
+  editingAttendanceDbKey = null;
 });
 
-window.toggleBox = function(el){
+function initPopovers(){
+  // dispose old popovers first
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el=>{
+    // if already has popover instance, dispose
+    const inst = bootstrap.Popover.getInstance(el);
+    if(inst) inst.dispose();
+  });
+  // create new popovers
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el=>{
+    new bootstrap.Popover(el, { container: 'body', placement: 'top', trigger: 'hover focus' });
+  });
+}
+function toggleAttendanceBox(el){
   if(el.classList.contains('present')){ el.classList.remove('present'); el.classList.add('absent'); }
   else if(el.classList.contains('absent')){ el.classList.remove('absent'); }
   else el.classList.add('present');
-};
-
+}
 $('toggleAll').addEventListener('click', ()=>{
   const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box'));
   if(!boxes.length) return;
@@ -698,196 +651,136 @@ $('toggleAll').addEventListener('click', ()=>{
     attendanceToggleState = 'absent'; $('toggleAll').textContent = 'Reset/None';
   }
 });
-
 $('saveAttendance').addEventListener('click', async ()=>{
-  const date = $('attDate').value; const time = $('attTime').value || '';
+  const date = $('attDate').value;
+  const time = $('attTime').value || '';
   if(!date) return toast('Select date','danger');
   const desc = $('attDesc').value || '';
   const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box'));
   if(!boxes.length) return toast('Load students first','danger');
   const studentsObj = {};
-  boxes.forEach(b => {
-    const id = b.dataset.id;
+  boxes.forEach(b=>{
+    const id = decodeKey(b.dataset.key);
     if(b.classList.contains('present')) studentsObj[id] = 'Present';
     else if(b.classList.contains('absent')) studentsObj[id] = 'Absent';
     else studentsObj[id] = 'Absent';
   });
-
   const payload = { date, time, description: desc, students: studentsObj, savedAt: Date.now() };
-
   if(editingAttendanceDbKey){
-    // update existing session
     await set(ref(db, `attendance/${editingAttendanceDbKey}`), payload);
-    toast('Attendance session updated');
+    toast('Attendance updated');
     editingAttendanceDbKey = null;
   } else {
-    // create new session (push)
     const p = push(ref(db, 'attendance'));
     await set(p, payload);
-    toast('Attendance session saved');
+    toast('Attendance saved');
   }
-
-  // update each student's attendance meta
-  const updates = {};
-  for(const sid in studentsObj) updates[`students/${sid}/attendance`] = { status: studentsObj[sid], timestamp: Date.now(), date, time };
-  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
-
   $('attendanceMarkCard').style.display = 'none';
 });
 
+/* attendance sessions render + view/edit */
 function renderAttendanceSessions(){
-  const wrap = $('attendanceSessions');
-  const attObj = CACHE.attendance || {};
-  const rows = Object.entries(attObj || {});
-  if(!rows.length){ wrap.innerHTML = '<tr><td colspan="5" class="text-center muted">No sessions</td></tr>'; return; }
-  // show newest first
-  rows.sort((a,b)=>{
-    const ra = a[1]?.savedAt || 0; const rb = b[1]?.savedAt || 0; return rb - ra;
-  });
+  const tbody = $('attendanceSessions');
+  const att = CACHE.attendance || {};
+  const rows = Object.entries(att);
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No sessions</td></tr>'; return; }
+  // sort newest first by savedAt or key
+  rows.sort((a,b)=> (b[1].savedAt||0) - (a[1].savedAt||0));
   let html = '';
-  rows.forEach(([dbKey, r])=>{
-    const date = r.date || '';
-    const time = r.time || '';
-    const desc = r.description || '';
-    const count = r.students ? Object.keys(r.students).length : 0;
-    html += `<tr data-dbkey="${dbKey}"><td>${date}</td><td>${time}</td><td>${desc}</td><td>${count}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-view-att" data-db="${dbKey}">View</button> <button class="btn btn-sm btn-outline-secondary btn-edit-att" data-db="${dbKey}">Edit</button></td></tr>`;
+  rows.forEach(([k,v])=>{
+    const count = v.students ? Object.keys(v.students).length : 0;
+    html += `<tr data-db="${k}"><td>${escapeHtml(v.date||'')}</td><td>${escapeHtml(v.time||'')}</td><td>${escapeHtml(v.description||'')}</td><td>${count}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-view-att" data-db="${k}">View</button> <button class="btn btn-sm btn-outline-secondary btn-edit-att" data-db="${k}">Edit</button></td></tr>`;
   });
-  wrap.innerHTML = html;
+  tbody.innerHTML = html;
 }
-
-/* view or edit existing session */
 $('attendanceSessions').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return;
   const dbKey = btn.dataset.db;
   const snap = await get(ref(db, `attendance/${dbKey}`));
-  const session = snap.val();
-  if(!session) return toast('Session not found','danger');
+  const s = snap.val();
+  if(!s) return toast('Session not found','danger');
   if(btn.classList.contains('btn-view-att')){
-    let txt = `Attendance — ${session.date} ${session.time || ''}\n${session.description || ''}\n\n`;
-    if(session.students) for(const s in session.students) txt += `${s}: ${session.students[s]}\n`;
+    let txt = `Date: ${s.date} ${s.time || ''}\n${s.description || ''}\n\n`;
+    if(s.students) for(const id in s.students) txt += `${id}: ${s.students[id]}\n`;
     alert(txt);
   } else if(btn.classList.contains('btn-edit-att')){
-    // load session into attendanceMarkCard for editing
+    // load session in attendance boxes
     editingAttendanceDbKey = dbKey;
-    $('attDate').value = session.date || '';
-    $('attTime').value = session.time || '';
-    $('attDesc').value = session.description || '';
-    // default method load all and then mark those in session
-    const studentsIds = Object.keys(session.students || {});
-    // build boxes for those students (preserve team grouping choice: show all)
-    const wrap = $('attendanceBoxes'); let html = '';
-    // We'll show only students present in session (user wanted edit) — but better: load all students and mark
-    CACHE.students.forEach(s => {
-      const status = session.students[String(s.id)] || 'Absent';
-      const cls = status === 'Present' ? 'present' : 'absent';
-      html += `<div class="small-box ${cls}" data-id="${s.id}" onclick="toggleBox(this)">${s.id}</div>`;
+    $('attDate').value = s.date || '';
+    $('attTime').value = s.time || '';
+    $('attDesc').value = s.description || '';
+    const wrap = $('attendanceBoxes'); wrap.innerHTML = '';
+    // show all students but mark those in session
+    CACHE.students.forEach(st => {
+      const status = (s.students && s.students[st.id]) ? s.students[st.id] : 'Absent';
+      const div = document.createElement('div');
+      div.className = 'small-box ' + (status==='Present' ? 'present' : 'absent');
+      div.dataset.key = encodeKey(st.id);
+      div.dataset.name = st.name || '';
+      div.textContent = st.id;
+      div.setAttribute('data-bs-toggle','popover');
+      div.setAttribute('data-bs-trigger','hover focus');
+      div.setAttribute('title', st.id);
+      div.setAttribute('data-bs-content', st.name || '');
+      div.addEventListener('click', ()=> toggleAttendanceBox(div));
+      wrap.appendChild(div);
     });
-    wrap.innerHTML = html;
+    initPopovers();
     $('attendanceMarkCard').style.display = 'block';
-    $('attendanceTeams').value = ''; // noop if not present
-    toast('Loaded session for edit — make changes and Save Session');
+    toast('Loaded session for edit — change and Save');
   }
 });
 
-/* ---------- RESULTS (unchanged uniqueness) ---------- */
-$('resultEvent').addEventListener('change', async ()=>{
-  const evId = $('resultEvent').value;
-  const participants = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status || '').toLowerCase() === 'approved');
-  const studentsMap = {}; CACHE.students.forEach(s => studentsMap[s.id] = s.name);
-  const choices = participants.map(p => ({ id: p.studentId, name: studentsMap[p.studentId] || String(p.studentId) }));
-  ['resFirst','resSecond','resThird'].forEach(selId=>{
-    const sel = $(selId); sel.innerHTML = '<option value="">Select</option>';
-    choices.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`);
+/* ----------------- RESULTS (simple) ----------------- */
+$('refreshParticipants').addEventListener('click', async ()=>{
+  const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
+  // participants simulated from participations (approved)
+  const participants = CACHE.participations.filter(p => String(p.eventId) === String(ev) && String(p.status||'').toLowerCase()==='approved');
+  const map = {}; CACHE.students.forEach(s => map[s.id] = s.name);
+  const choices = participants.map(p => ({ id: p.studentId, name: map[p.studentId] || p.studentId }));
+  ['resFirst','resSecond','resThird'].forEach(id => {
+    const sel = $(id);
+    sel.innerHTML = '<option value="">Select</option>';
+    choices.forEach(c=> sel.innerHTML += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)} (${escapeHtml(c.id)})</option>`);
   });
 });
 $('addResult').addEventListener('click', async ()=>{
-  const evId = $('resultEvent').value; if(!evId) return toast('Select event','danger');
+  const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
   const first = $('resFirst').value || 'none', second = $('resSecond').value || 'none', third = $('resThird').value || 'none';
-  const p1 = Number($('ptsFirst').value) || 0, p2 = Number($('ptsSecond').value) || 0, p3 = Number($('ptsThird').value) || 0;
-  const publish = $('publishNow').checked;
+  const p1 = Number($('ptsFirst').value)||0, p2 = Number($('ptsSecond').value)||0, p3 = Number($('ptsThird').value)||0;
   const p = push(ref(db, 'results'));
-  const obj = { id: Date.now(), eventId: Number(evId), first, second, third, pFirst: p1, pSecond: p2, pThird: p3, published: publish, publishedAt: publish?Date.now():null };
-  await set(p, obj);
-  if(publish) await applyResultPoints(obj);
-  $('resFirst').value=''; $('resSecond').value=''; $('resThird').value=''; $('publishNow').checked=false;
+  const id = Date.now().toString();
+  await set(p, { id, eventId: ev, first, second, third, pFirst: p1, pSecond: p2, pThird: p3, published:false });
   toast('Result added');
 });
-async function applyResultPoints(resultObj){
-  const rootSnap = await get(ref(db,'/')); const root = rootSnap.val() || {};
-  const teamsObj = root.teams || {}; const studentsObj = root.students || {};
-  const updates = {};
-  const addPts = (sid, pts) => {
-    if(!sid || sid==='none') return;
-    const s = studentsObj[String(sid)]; if(!s || !s.teamId) return;
-    for(const k in teamsObj) if(String(teamsObj[k].id) === String(s.teamId)){ updates[`teams/${k}/score`] = (teamsObj[k].score || 0) + Number(pts||0); break; }
-  };
-  addPts(resultObj.first, resultObj.pFirst); addPts(resultObj.second, resultObj.pSecond); addPts(resultObj.third, resultObj.pThird);
-  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
-  // mark event completed
-  for(const k in root.events || {}) if(String((root.events[k]||{}).id) === String(resultObj.eventId)){ await update(ref(db, `events/${k}`), { status: 'Completed' }); break; }
-}
-
 function renderResults(){
   const tbody = $('resultsTable');
-  if(!CACHE.results.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No results</td></tr>'; return; }
+  if(!CACHE.results.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No results</td></tr>'; return; }
   let html = '';
-  CACHE.results.sort((a,b)=> (b.published?1:0)-(a.published?1:0) || (b.publishedAt||0)-(a.publishedAt||0));
   CACHE.results.forEach(r=>{
-    const ev = CACHE.events.find(e=>String(e.id)===String(r.eventId));
-    const published = r.published ? 'Yes' : 'No';
-    html += `<tr data-id="${r.id}"><td>${ev?ev.name:'Unknown'}</td><td>${r.first} (${r.pFirst||0})</td><td>${r.second} (${r.pSecond||0})</td><td>${r.third} (${r.pThird||0})</td><td>${published}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-result" data-id="${r.id}">Edit</button></td></tr>`;
+    const ev = CACHE.events.find(e => String(e.id)===String(r.eventId));
+    html += `<tr data-key="${r.id}"><td>${escapeHtml(ev?ev.name:'Unknown')}</td><td>${escapeHtml(r.first||'')}</td><td>${escapeHtml(r.second||'')}</td><td>${escapeHtml(r.third||'')}</td><td class="text-end"></td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
-/* ---------- APPROVALS ---------- */
-function renderPending(){
-  const tbody = $('pendingTable');
-  const pending = CACHE.participations.filter(p=> String(p.status || '').toLowerCase() === 'pending');
-  if(!pending.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No pending</td></tr>'; return; }
-  let html = '';
-  pending.forEach(p=>{
-    const ev = CACHE.events.find(e => String(e.id) === String(p.eventId));
-    const team = CACHE.teams.find(t => String(t.id) === String(p.teamId));
-    const stu = CACHE.students.find(s => String(s.id) === String(p.studentId));
-    html += `<tr data-id="${p.id}"><td>${ev?ev.name:'-'}</td><td>${team?team.name:'-'}</td><td>${stu?stu.name+' ('+stu.id+')':'-'}</td><td>${new Date(p.submittedAt).toLocaleString()}</td><td class="text-end"><button class="btn btn-sm btn-success btn-approve">Approve</button> <button class="btn btn-sm btn-danger btn-reject">Reject</button></td></tr>`;
-  });
-  tbody.innerHTML = html;
-}
-$('pendingTable').addEventListener('click', async (e)=>{
-  const tr = e.target.closest('tr'); if(!tr) return; const pid = tr.dataset.id;
-  const dbKey = KEYMAP.participations[pid] || Object.keys(DBKEYS.participations).find(k=>DBKEYS.participations[k] === Number(pid));
-  if(!dbKey) return toast('Not found','danger');
-  if(e.target.classList.contains('btn-approve')){ await update(ref(db, `participations/${dbKey}`), { status: 'Approved', approvedAt: Date.now() }); toast('Approved'); }
-  else if(e.target.classList.contains('btn-reject')){ await update(ref(db, `participations/${dbKey}`), { status: 'Rejected', rejectedAt: Date.now() }); toast('Rejected'); }
-});
-
-/* ---------- Notifications ---------- */
-$('sendNotif').addEventListener('click', async ()=>{
-  const title = $('notifTitle').value.trim(), msg = $('notifMessage').value.trim();
-  if(!title || !msg) return toast('Provide title & message','danger');
-  const p = push(ref(db, 'notifications')); await set(p, { id: Date.now(), title, message: msg, to: 'All', date: Date.now() });
-  $('notifTitle').value=''; $('notifMessage').value=''; toast('Notification sent');
-});
-function renderNotifications(){
-  const tb = $('notifHistory');
-  if(!CACHE.notifications.length){ tb.innerHTML = '<tr><td colspan="3" class="text-center muted">No notifications</td></tr>'; return; }
-  let html = '';
-  [...CACHE.notifications].reverse().forEach(n => html += `<tr><td>${n.title}</td><td>${n.message}</td><td>${new Date(n.date).toLocaleString()}</td></tr>`);
-  tb.innerHTML = html;
-}
-
-/* ---------- Populate dropdowns ---------- */
+/* ----------------- misc helpers ----------------- */
 function populateDropdowns(){
-  const manualTeam = $('manualTeam'); manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> manualTeam.innerHTML += `<option value="${t.id}">${t.name}</option>`);
-  const attTeam = $('attTeam'); attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t=> attTeam.innerHTML += `<option value="${t.id}">${t.name}</option>`);
-  const resultEvent = $('resultEvent'); resultEvent.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e => resultEvent.innerHTML += `<option value="${e.id}">${e.name}</option>`);
-  const teamLeader = $('teamLeader'); teamLeader.innerHTML = '<option value="">Leader (Chess#)</option>'; CACHE.students.forEach(s => teamLeader.innerHTML += `<option value="${s.id}">${s.name} (${s.id})</option>`);
+  // manualTeam
+  const manualTeam = $('manualTeam'); manualTeam.innerHTML = '<option value="">Unassigned</option>';
+  CACHE.teams.forEach(t => manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`);
+  const teamLeader = $('teamLeader'); if(teamLeader){ teamLeader.innerHTML = '<option value="">Leader (Chess#)</option>'; CACHE.students.forEach(s => teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
+  const attTeam = $('attTeam'); if(attTeam){ attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t=> attTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  const editTeam = $('editTeam'); if(editTeam){ editTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> editTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  // resultEvent
+  const resEv = $('resultEvent'); if(resEv){ resEv.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e => resEv.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`); }
 }
+
+/* escape HTML for safety */
+function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
 /* initial render */
-setTimeout(()=> scheduleRender(), 400);
-
+setTimeout(()=> renderAll(), 300);
 </script>
 </body>
 </html>
