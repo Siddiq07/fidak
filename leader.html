@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Leader Portal - Art Fest</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Embedded Custom Styles -->
+    <style>
+        :root {
+            --sidebar-width: 280px;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+
+        /* --- Sidebar Layout --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background-color: #198754; /* Green theme for Leader */
+            color: #ffffff;
+            padding: 1.5rem 0;
+            transition: all 0.3s ease;
+            z-index: 1030;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid #1a995c;
+        }
+        .sidebar-header a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .sidebar-nav {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-top: 1rem;
+        }
+
+        .sidebar .nav-link {
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            font-size: 1.05rem;
+            transition: all 0.2s ease;
+        }
+        .sidebar .nav-link i {
+            font-size: 1.25rem;
+            margin-right: 0.75rem;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #1a995c;
+        }
+        .sidebar .nav-link.active {
+            background-color: #ffffff;
+            color: #198754;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #1a995c;
+        }
+        .sidebar-footer .btn {
+            width: 100%;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            padding-left: var(--sidebar-width);
+            transition: all 0.3s ease;
+        }
+
+        .main-header {
+            background-color: #ffffff;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+        
+        .main-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+        }
+        .main-header h1 #team-name-header {
+            font-weight: bold;
+            color: #198754;
+        }
+
+        .content-section {
+            display: none; /* Hidden by default */
+            padding: 2rem;
+        }
+        .content-section.active-section {
+            display: block; /* Shown by JS */
+        }
+        
+        /* --- Mobile Toggle --- */
+        .sidebar-toggle {
+            font-size: 1.75rem;
+            background: none;
+            border: none;
+            color: #2c3e50;
+            display: none; /* Hidden on desktop */
+        }
+
+        /* --- Responsive Styles --- */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(calc(var(--sidebar-width) * -1));
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                padding-left: 0;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+
+        /* --- Custom Components --- */
+        .stat-card {
+            border: 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .stat-card .display-4 {
+            font-size: 2.5rem;
+        }
+        
+        /* Status Badges */
+        .status-Pending { background-color: var(--bs-warning); color: #000; }
+        .status-Approved { background-color: var(--bs-success); color: #fff; }
+        .status-Rejected { background-color: var(--bs-danger); color: #fff; }
+
+        /* Footer */
+        .footer {
+            background-color: #343a40;
+            color: #adb5bd;
+            padding: 1.5rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Sidebar -->
+    <div class="sidebar" id="leaderSidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+            <a href="index.html" title="Back to Home"><i class="bi bi-people-fill"></i> Leader Portal</a>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-target="dashboard">
+                        <i class="bi bi-grid-fill"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="my-team">
+                        <i class="bi bi-person-lines-fill"></i> My Team
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="events">
+                        <i class="bi bi-calendar-event-fill"></i> Events
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="results">
+                        <i class="bi bi-trophy-fill"></i> All Results
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="notifications">
+                        <i class="bi bi-bell-fill"></i> Notifications
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+            <a href="index.html" class="btn btn-outline-light" id="logoutBtn">
+                <i class="bi bi-box-arrow-left"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. Main Content Area -->
+    <div class="main-content">
+        
+        <!-- Header Bar -->
+        <header class="main-header shadow-sm">
+            <div>
+                <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h1 id="page-title" class="d-inline-block ms-3">Dashboard</h1>
+            </div>
+            <h3 class="d-none d-md-block">Team: <span id="team-name-header"></span></h3>
+        </header>
+
+        <!-- Page Content -->
+        <main>
+
+            <!-- =======================
+            Section 1: Dashboard
+            ======================== -->
+            <div id="dashboard" class="content-section active-section">
+                
+                <!-- Stat Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card text-bg-primary h-100">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">My Team Members</h5>
+                                    <span class="display-4 fw-bold" id="stat-total-members">0</span>
+                                </div>
+                                <i class="bi bi-people-fill display-3 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card text-bg-success h-100">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Approved Events</h5>
+                                    <span class="display-4 fw-bold" id="stat-approved-events">0</span>
+                                </div>
+                                <i class="bi bi-check-all display-3 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card text-bg-warning h-100">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Pending Approvals</h5>
+                                    <span class="display-4 fw-bold" id="stat-pending-events">0</span>
+                                </div>
+                                <i class="bi bi-exclamation-triangle-fill display-3 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card stat-card text-bg-danger h-100">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Rejected Events</h5>
+                                    <span class="display-4 fw-bold" id="stat-rejected-events">0</span>
+                                </div>
+                                <i class="bi bi-x-octagon-fill display-3 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Scores -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">Live Team Scoreboard</h4>
+                    </div>
+                    <div class="card-body" id="dashboard-team-scores">
+                        <!-- Scores will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- =======================
+            Section 2: My Team
+            ======================== -->
+            <div id="my-team" class="content-section">
+                <h2>My Team Members</h2>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Chess Number</th>
+                                        <th>Name</th>
+                                        <th>Attendance Status</th>
+                                        <th>Last Updated</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teamMemberTableBody">
+                                    <!-- Team members will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- =======================
+            Section 3: Events
+            ======================== -->
+            <div id="events" class="content-section">
+                <h2>Event Participation</h2>
+                <p class="text-muted">Register your team members for events. You can register each member for a maximum of 2 Stage and 2 Non-Stage events.</p>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Event Name</th>
+                                        <th>Type</th>
+                                        <th>My Participants</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eventParticipationTableBody">
+                                    <!-- Events will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =======================
+            Section 4: All Results
+            ======================== -->
+            <div id="results" class="content-section">
+                <h2>Published Results</h2>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>1st Place</th>
+                                        <th>2nd Place</th>
+                                        <th>3rd Place</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="publishedResultsTableBody">
+                                    <!-- Results will be dynamically inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =======================
+            Section 5: Notifications
+            ======================== -->
+            <div id="notifications" class="content-section">
+                <h2>Notifications</h2>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div id="notification-list" class="list-group">
+                            <!-- Notifications will be dynamically inserted here -->
+                            <p class="text-muted">No notifications yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Footer -->
+        <footer class="footer mt-auto">
+            &copy; <span id="current-year"></span> Art Fest Management System | Team Leader Portal
+        </footer>
+
+    </div>
+    
+    <!-- =======================
+    MODALS
+    ======================== -->
+
+    <!-- Add/Edit Participants Modal -->
+    <div class="modal fade" id="addParticipantModal" tabindex="-1" aria-labelledby="addParticipantModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="participantForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addParticipantModalLabel">Add Participants for [Event]</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="event-id">
+                        <input type="hidden" id="event-type">
+                        <p>Select the members from your team who will participate in this event.
+                           <br><strong>Rule:</strong> Max 2 Stage and 2 Non-Stage events per participant.
+                        </p>
+                        <div id="participant-checkbox-list" class="list-group">
+                            <!-- Team members will be dynamically inserted here as checkboxes -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="saveParticipantsBtn">Submit for Approval</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 5 JS Bundle (FIXED integrity attribute) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Custom Page-Switching & Dynamic Logic Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Real-Time Channel ---
+            const channel = new BroadcastChannel('artFestChannel');
+
+            // --- Database ---
+            let db = {};
+            let currentTeam = {}; // The logged-in leader's team
+            let teamMembers = []; // Students in this leader's team
+
+            function loadDB() {
+                let data = JSON.parse(localStorage.getItem('artFestDB'));
+                db = data || { students: [], teams: [], events: [], participations: [], results: [], notifications: [] };
+            }
+
+            function saveDB() {
+                localStorage.setItem('artFestDB', JSON.stringify(db));
+                channel.postMessage('db-updated'); // Notify other tabs
+                renderAll();
+            }
+
+            // --- Modals ---
+            const addParticipantModal = new bootstrap.Modal(document.getElementById('addParticipantModal'));
+            const participantForm = document.getElementById('participantForm');
+            
+            // --- UI Elements ---
+            const teamNameHeader = document.getElementById('team-name-header');
+            const teamMemberTableBody = document.getElementById('teamMemberTableBody');
+            const eventParticipationTableBody = document.getElementById('eventParticipationTableBody');
+            const publishedResultsTableBody = document.getElementById('publishedResultsTableBody');
+            const notificationList = document.getElementById('notification-list');
+            const participantCheckboxList = document.getElementById('participant-checkbox-list');
+
+            // --- Stats ---
+            const statTotalMembers = document.getElementById('stat-total-members');
+            const statApprovedEvents = document.getElementById('stat-approved-events');
+            const statPendingEvents = document.getElementById('stat-pending-events');
+            const statRejectedEvents = document.getElementById('stat-rejected-events');
+            const dashboardTeamScores = document.getElementById('dashboard-team-scores');
+
+            // =================================================================
+            // RENDER FUNCTIONS
+            // =================================================================
+
+            function renderAll() {
+                renderMyTeam();
+                renderEventParticipation();
+                renderResults();
+                renderNotifications();
+                renderStats();
+            }
+
+            function renderMyTeam() {
+                teamMemberTableBody.innerHTML = '';
+                if (teamMembers.length === 0) {
+                    teamMemberTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">You have no team members.</td></tr>';
+                }
+
+                teamMembers.forEach(student => {
+                    const status = student.attendance?.status || 'Absent';
+                    const timestamp = student.attendance?.timestamp ? new Date(student.attendance.timestamp).toLocaleString() : 'N/A';
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td><span class="badge fs-6 text-bg-${status === 'Present' ? 'success' : 'danger'}">${status}</span></td>
+                        <td>${timestamp}</td>
+                    `;
+                    teamMemberTableBody.appendChild(row);
+                });
+            }
+
+            function renderEventParticipation() {
+                eventParticipationTableBody.innerHTML = '';
+                if (db.events.length === 0) {
+                    eventParticipationTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No events created by admin yet.</td></tr>';
+                }
+
+                db.events.forEach(event => {
+                    // Find participations for *this* team and *this* event
+                    const myParticipations = db.participations.filter(p => p.teamId === currentTeam.id && p.eventId === event.id);
+                    
+                    let participants = '';
+                    let status = 'Not Entered';
+                    let statusClass = 'text-muted';
+                    let canAdd = true;
+
+                    if (myParticipations.length > 0) {
+                        participants = myParticipations.map(p => {
+                            const student = db.students.find(s => s.id === p.studentId);
+                            return student ? student.name : 'Unknown';
+                        }).join(', ');
+                        
+                        // Check statuses
+                        if (myParticipations.some(p => p.status === 'Rejected')) {
+                            status = 'Rejected';
+                            statusClass = 'status-Rejected';
+                            canAdd = true; // Allow resubmission
+                        } else if (myParticipations.some(p => p.status === 'Pending')) {
+                            status = 'Pending';
+                            statusClass = 'status-Pending';
+                            canAdd = false; // Waiting for admin
+                        } else if (myParticipations.every(p => p.status === 'Approved')) {
+                            status = 'Approved';
+                            statusClass = 'status-Approved';
+                            canAdd = false; // Locked in
+                        }
+                    }
+
+                    const row = document.createElement('tr');
+                    row.dataset.id = event.id;
+                    row.innerHTML = `
+                        <td>${event.name}</td>
+                        <td><span class="badge text-bg-${event.type === 'Stage' ? 'primary' : 'info'}">${event.type}</span></td>
+                        <td>${participants || 'N/A'}</td>
+                        <td><span class="badge ${statusClass}">${status}</span></td>
+                        <td class="text-end">
+                            ${canAdd && !currentTeam.isLocked ? 
+                                `<button class="btn btn-sm btn-primary btn-add-participant">
+                                    <i class="bi bi-plus-circle me-1"></i> ${myParticipations.length > 0 ? 'Re-Add' : 'Add'} Members
+                                 </button>` : 
+                                (currentTeam.isLocked ? '<span class="text-muted small">Locked</span>' : '')
+                            }
+                        </td>
+                    `;
+                    eventParticipationTableBody.appendChild(row);
+                });
+            }
+            
+            function renderResults() {
+                publishedResultsTableBody.innerHTML = '';
+                if (db.results.length === 0) {
+                    publishedResultsTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No results published yet.</td></tr>';
+                }
+
+                db.results.forEach(r => {
+                    const event = db.events.find(e => e.id === r.eventId);
+                    
+                    const getWinnerName = (studentId) => {
+                        if (studentId === 'none') return '<em class="text-muted">N/A</em>';
+                        const student = db.students.find(s => s.id === studentId);
+                        const team = db.teams.find(t => t.id === student?.teamId);
+                        return `${student.name} (${team?.name || 'N/A'})`;
+                    };
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${event?.name || 'Unknown Event'}</strong></td>
+                        <td>${getWinnerName(r.first)}</td>
+                        <td>${getWinnerName(r.second)}</td>
+                        <td>${getWinnerName(r.third)}</td>
+                    `;
+                    publishedResultsTableBody.appendChild(row);
+                });
+            }
+            
+            function renderNotifications() {
+                notificationList.innerHTML = '';
+                const myNotifications = db.notifications.filter(n => n.to === 'all' || n.to === 'leaders')
+                                            .sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                if (myNotifications.length === 0) {
+                    notificationList.innerHTML = '<p class="text-muted">No notifications yet.</p>';
+                    return;
+                }
+                
+                myNotifications.forEach(n => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${n.title}</h5>
+                            <small>${new Date(n.date).toLocaleString()}</small>
+                        </div>
+                        <p class="mb-1">${n.message}</p>
+                        <small>From: Admin</small>
+                    `;
+                    notificationList.appendChild(item);
+                });
+            }
+
+            function renderStats() {
+                statTotalMembers.textContent = teamMembers.length;
+                
+                const myParticipations = db.participations.filter(p => p.teamId === currentTeam.id);
+                statApprovedEvents.textContent = myParticipations.filter(p => p.status === 'Approved').length;
+                statPendingEvents.textContent = myParticipations.filter(p => p.status === 'Pending').length;
+                statRejectedEvents.textContent = myParticipations.filter(p => p.status === 'Rejected').length;
+                
+                // Render dashboard team scores
+                dashboardTeamScores.innerHTML = '';
+                const maxScore = Math.max(...db.teams.map(t => t.score), 10); // Avoid division by zero
+                
+                [...db.teams].sort((a,b) => b.score - a.score).forEach(team => {
+                    const percent = (team.score / maxScore) * 100;
+                    const isMyTeam = team.id === currentTeam.id ? 'fw-bold text-success' : '';
+                    
+                    const scoreBar = `
+                        <div class="mb-3">
+                            <label class="form-label ${isMyTeam}">${team.name} (${team.score} pts)</label>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar ${isMyTeam ? 'bg-success' : ''}" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100">${team.score} pts</div>
+                            </div>
+                        </div>`;
+                    dashboardTeamScores.innerHTML += scoreBar;
+                });
+            }
+
+            // =================================================================
+            // EVENT HANDLERS
+            // =================================================================
+
+            // Handle "Add Members" button click
+            eventParticipationTableBody.addEventListener('click', (e) => {
+                const button = e.target.closest('.btn-add-participant');
+                if (!button) return;
+
+                const row = e.target.closest('tr');
+                const eventId = parseInt(row.dataset.id);
+                const event = db.events.find(ev => ev.id === eventId);
+                
+                // Set modal title and hidden fields
+                document.getElementById('addParticipantModalLabel').textContent = `Add Participants for ${event.name}`;
+                document.getElementById('event-id').value = event.id;
+                document.getElementById('event-type').value = event.type;
+                
+                // --- Build checkbox list, enforcing rules ---
+                participantCheckboxList.innerHTML = '';
+                teamMembers.forEach(student => {
+                    // Check student's current participation count
+                    const participations = db.participations.filter(p => p.studentId === student.id && (p.status === 'Approved' || p.status === 'Pending'));
+                    const stageCount = participations.filter(p => db.events.find(e => e.id === p.eventId)?.type === 'Stage').length;
+                    const nonStageCount = participations.filter(p => db.events.find(e => e.id === p.eventId)?.type === 'Non-Stage').length;
+                    
+                    let isDisabled = false;
+                    let reason = '';
+                    
+                    if (event.type === 'Stage' && stageCount >= 2) {
+                        isDisabled = true;
+                        reason = '(Max 2 Stage events)';
+                    }
+                    if (event.type === 'Non-Stage' && nonStageCount >= 2) {
+                        isDisabled = true;
+                        reason = '(Max 2 Non-Stage events)';
+                    }
+                    
+                    // Check if this student is already in *this* event (e.g., from a rejected entry)
+                    const alreadyInThisEvent = db.participations.find(p => p.eventId === eventId && p.studentId === student.id);
+
+                    const item = document.createElement('label');
+                    item.className = `list-group-item ${isDisabled ? 'disabled' : ''}`;
+                    item.innerHTML = `
+                        <input class="form-check-input me-1" type="checkbox" value="${student.id}" ${isDisabled ? 'disabled' : ''} ${alreadyInThisEvent ? 'checked' : ''}>
+                        ${student.name} (${student.id})
+                        <small class="text-danger float-end">${reason}</small>
+                    `;
+                    participantCheckboxList.appendChild(item);
+                });
+                
+                addParticipantModal.show();
+            });
+
+            // Handle "Submit for Approval" button in modal
+            participantForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const eventId = parseInt(document.getElementById('event-id').value);
+                const selectedCheckboxes = participantCheckboxList.querySelectorAll('input[type="checkbox"]:checked');
+                
+                // 1. Remove all old 'Pending' or 'Rejected' entries for this team/event
+                db.participations = db.participations.filter(p => 
+                    !(p.teamId === currentTeam.id && p.eventId === eventId && (p.status === 'Pending' || p.status === 'Rejected'))
+                );
+
+                // 2. Add new 'Pending' entries
+                selectedCheckboxes.forEach(box => {
+                    const studentId = parseInt(box.value);
+                    const newId = db.participations.length > 0 ? Math.max(...db.participations.map(p => p.id)) + 1 : 1;
+                    
+                    db.participations.push({
+                        id: newId,
+                        studentId: studentId,
+                        eventId: eventId,
+                        teamId: currentTeam.id,
+                        status: 'Pending',
+                        submittedAt: new Date().toISOString()
+                    });
+                });
+                
+                saveDB();
+                addParticipantModal.hide();
+            });
+
+
+            // =================================================================
+            // PAGE SETUP
+            // =================================================================
+
+            // --- Page Navigation Logic ---
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const pageTitle = document.getElementById('page-title');
+            const sidebar = document.getElementById('leaderSidebar');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.dataset.target;
+                    
+                    contentSections.forEach(section => section.classList.remove('active-section'));
+                    document.getElementById(targetId).classList.add('active-section');
+                    
+                    pageTitle.textContent = this.textContent.trim();
+                    
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.remove('show');
+                    }
+                });
+            });
+
+            // --- Sidebar Toggle Logic ---
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+            
+            // --- Logout Logic ---
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                sessionStorage.removeItem('artFestUserRole');
+                sessionStorage.removeItem('artFestUserId');
+                window.location.href = './index.html';
+            });
+
+            // --- Set Current Year in Footer ---
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // --- Real-Time Sync Listener ---
+            channel.onmessage = (event) => {
+                if (event.data === 'db-updated') {
+                    loadDB();
+                    // Re-filter team members
+                    teamMembers = db.students.filter(s => s.teamId === currentTeam.id);
+                    renderAll();
+                }
+            };
+            
+            // --- Security Check & Initial Load ---
+            const userRole = sessionStorage.getItem('artFestUserRole');
+            const userId = parseInt(sessionStorage.getItem('artFestUserId'));
+
+            if (userRole !== 'Team Leader' || !userId) {
+                alert('Access Denied. Please log in.');
+                window.location.href = './index.html';
+                return;
+            }
+
+            loadDB();
+            currentTeam = db.teams.find(t => t.id === userId);
+            
+            if (!currentTeam) {
+                alert('Error: Could not find your team data.');
+                window.location.href = './index.html';
+                return;
+            }
+            
+            if (currentTeam.isLocked) {
+                alert('Your portal has been locked by the Admin.');
+                window.location.href = './index.html';
+                return;
+            }
+
+            teamMembers = db.students.filter(s => s.teamId === currentTeam.id);
+            teamNameHeader.textContent = currentTeam.name;
+            renderAll();
+        });
+    </script>
+</body>
+</html>

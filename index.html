@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Fest Management System</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Custom Embedded Styles -->
+    <style>
+        :root {
+            --color-primary-soft: #eaf2ff; /* A soft pastel blue */
+            --color-white: #ffffff;
+            --color-light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--color-light-bg);
+            scroll-behavior: smooth;
+        }
+
+        /* --- Header / Navbar --- */
+        .navbar {
+            transition: background-color 0.3s ease;
+        }
+
+        /* --- Hero Section --- */
+        .hero-section {
+            background-color: var(--color-primary-soft);
+            padding: 4rem 0;
+        }
+        .hero-section h1 {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* --- Role Cards --- */
+        .role-card {
+            transition: all 0.3s ease;
+            border: 0;
+            border-radius: 12px;
+            opacity: 0; /* Start hidden for animation */
+            transform: translateY(20px); /* Start low for animation */
+        }
+        
+        .role-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .role-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        }
+        
+        .role-card .btn-login {
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px; /* Pill-shaped buttons */
+        }
+        
+        /* Specific colors for role buttons */
+        .btn-admin { background-color: #0d6efd; border-color: #0d6efd; }
+        .btn-leader { background-color: #198754; border-color: #198754; }
+        .btn-participant { background-color: #0dcaf0; border-color: #0dcaf0; }
+
+        .btn-admin:hover { background-color: #0b5ed7; border-color: #0a58ca; }
+        .btn-leader:hover { background-color: #157347; border-color: #146c43; }
+        .btn-participant:hover { background-color: #0ba5c2; border-color: #0a99b5; }
+        
+        .btn-login.disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        /* --- Features Section --- */
+        #features {
+            background-color: var(--color-white);
+        }
+        
+        .feature-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            font-size: 2rem;
+            background-color: var(--color-primary-soft);
+            color: var(--bs-primary);
+            margin-bottom: 1rem;
+        }
+
+        /* --- Live Results Section --- */
+        #results {
+            background-color: var(--color-primary-soft);
+        }
+        .leaderboard-item {
+            background-color: var(--color-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            opacity: 0; /* Start hidden for animation */
+            transform: translateY(20px);
+        }
+        
+        .leaderboard-item.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .leaderboard-item:hover {
+            transform: scale(1.02);
+        }
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            width: 40px;
+        }
+        .leaderboard-team {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 1.5rem;
+            flex-grow: 1;
+        }
+        .leaderboard-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--bs-primary);
+            font-variant-numeric: tabular-nums;
+        }
+        .leaderboard-rank-1 { border-left: 5px solid #ffc107; }
+        .leaderboard-rank-2 { border-left: 5px solid #c0c0c0; }
+        .leaderboard-rank-3 { border-left: 5px solid #cd7f32; }
+
+
+        /* --- Footer --- */
+        .footer {
+            background-color: #2c3e50;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .footer a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: var(--color-white);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Header / Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="#">
+                <i class="bi bi-palette-fill"></i>
+                Art Fest Management
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#"><i class="bi bi-house-door me-1"></i>Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about"><i class="bi bi-info-circle me-1"></i>About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#results"><i class="bi bi-trophy me-1"></i>Results</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#roles"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact"><i class="bi bi-envelope me-1"></i>Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4">Welcome to the Art Fest</h1>
+            <p class="lead text-muted">Streamlining event coordination for admins, leaders, and participants. <br> Focus on the art, we'll handle the logistics.</p>
+            <a href="#roles" class="btn btn-primary btn-lg mt-3">Get Started</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+
+        <!-- About Section (Short Intro) -->
+        <section id="about" class="container py-5 my-3">
+            <div class="row">
+                <div class="col-lg-8 offset-lg-2 text-center">
+                    <h2 class="mb-4">About The System</h2>
+                    <p class="fs-5 text-muted">This platform is a one-stop solution for managing our university's art fest. It simplifies everything from student registration and team creation to event scheduling, attendance tracking, and live result publishing. Our goal is to create a seamless and transparent experience for everyone involved.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Results Section -->
+        <section id="results" class="py-5">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Live Team Rankings</h2>
+                    <p class="text-muted">Scores are updated in real-time as results are published.</p>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8" id="leaderboard-body">
+                        <!-- Rankings will be dynamically inserted here -->
+                        <div class="alert alert-info text-center">Live rankings will appear here once the fest begins.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Section (User Roles) -->
+        <section id="roles" class="py-5" style="background-color: var(--color-light-bg);">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Login to Your Portal</h2>
+                    <p class="text-muted">Select your role to access your dedicated dashboard.</p>
+                </div>
+                
+                <div class="row g-4 justify-content-center">
+                    
+                    <!-- Admin Card -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 text-center shadow-sm role-card p-4">
+                            <div class="card-body">
+                                <i class="bi bi-shield-lock display-3 text-primary mb-3"></i>
+                                <h4 class="card-title fw-bold">Admin Portal</h4>
+                                <p class="card-text text-muted">Manage events, teams, schedules, attendance, and all results. The complete control center.</p>
+                                <!-- Button triggers modal -->
+                                <button type="button" class="btn btn-primary btn-login btn-admin mt-3" data-bs-toggle="modal" data-bs-target="#loginModal" data-role="Admin" data-page="admin.html">
+                                    Login as Admin
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Leader Card -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 text-center shadow-sm role-card p-4">
+                            <div class="card-body">
+                                <i class="bi bi-people-fill display-3 text-success mb-3"></i>
+                                <h4 class="card-title fw-bold">Team Leader Portal</h4>
+                                <p class="card-text text-muted">Assign your team members to events, submit for approval, and track your team's scores live.</p>
+                                <!-- Button triggers modal -->
+                                <button type="button" class="btn btn-success btn-login btn-leader mt-3" data-bs-toggle="modal" data-bs-target="#loginModal" data-role="Team Leader" data-page="leader.html">
+                                    Login as Leader
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Participant Card -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 text-center shadow-sm role-card p-4">
+                            <div class="card-body">
+                                <i class="bi bi-person-fill display-3 text-info mb-3"></i>
+                                <h4 class="card-title fw-bold">Participant Portal</h4>
+                                <p class="card-text text-muted">View event results, check your participation schedule, and see your attendance status.</p>
+                                <!-- Button triggers modal -->
+                                <button type="button" class="btn btn-info btn-login btn-participant mt-3" data-bs-toggle="modal" data-bs-target="#loginModal" data-role="Participant" data-page="participant.html">
+                                    Login as Participant
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-5 my-3">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Core Features</h2>
+                    <p class="text-muted">Everything you need for a successful event.</p>
+                </div>
+                
+                <div class="row g-4 text-center">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-icon">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <h5 class="fw-bold">Event Scheduling</h5>
+                        <p class="text-muted">Easily create and manage all stage and non-stage events with schedules.</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-icon">
+                            <i class="bi bi-bell-fill"></i>
+                        </div>
+                        <h5 class="fw-bold">Notifications</h5>
+                        <p class="text-muted">Send real-time alerts and announcements to all users or specific groups.</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-icon">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                        <h5 class="fw-bold">Attendance Tracking</h5>
+                        <p class="text-muted">Mark and view participant attendance, available to all user levels.</p>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="feature-icon">
+                            <i class="bi bi-card-list"></i>
+                        </div>
+                        <h5 class="fw-bold">Live Results</h5>
+                        <p class="text-muted">Upload results instantly. View status with color codes for all events.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Simple Contact Section Placeholder -->
+        <section id="contact" class="container py-5">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 text-center">
+                    <h2 class="fw-bold">Get in Touch</h2>
+                    <p class="text-muted">Have questions? Feel free to reach out to the event organizers.</p>
+                    <a href="mailto:support@artfest.com" class="btn btn-outline-primary btn-lg">Contact Us</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 4. Footer -->
+    <footer class="footer py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-1">
+                Copyright &copy; <span id="current-year"></span> Art Fest Management
+            </p>
+            <div>
+                <a href="#">Terms of Use</a>
+                <span class="mx-2">|</span>
+                <a href="#">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="loginForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginModalLabel">Login as [Role]</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="login-role" value="">
+                        <input type="hidden" id="login-page" value="">
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label" id="username-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        
+                        <!-- This message will show for non-admin roles -->
+                        <div id="login-message" class="alert alert-info d-none">
+                            Logins for this role are enabled by the Admin. Please use the credentials provided.
+                        </div>
+                        
+                        <!-- This message shows for incorrect passwords -->
+                        <div id="error-message" class="alert alert-danger d-none">
+                            Incorrect credentials. Please try again.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap 5 JS Bundle (FIXED integrity attribute) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- Login and Animation Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Set current year in footer ---
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            // --- Database Access ---
+            // Helper function to safely get data from localStorage
+            const getDB = () => {
+                try {
+                    const db = JSON.parse(localStorage.getItem('artFestDB'));
+                    if (db && db.teams) {
+                        return db;
+                    }
+                } catch (e) {
+                    console.error("Error reading database from localStorage", e);
+                }
+                // Return a default structure if DB is empty or corrupt
+                return { teams: [], students: [], events: [], participations: [], results: [], notifications: [] };
+            };
+            
+            const db = getDB();
+
+            // --- Login Modal Logic ---
+            const loginModal = document.getElementById('loginModal');
+            const loginForm = document.getElementById('loginForm');
+            const loginMessage = document.getElementById('login-message');
+            const errorMessage = document.getElementById('error-message');
+            const usernameLabel = document.getElementById('username-label');
+            
+            // 1. When the modal is about to show, set its title and hide messages
+            loginModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const role = button.getAttribute('data-role');
+                const page = button.getAttribute('data-page');
+
+                // Update the modal's content
+                const modalTitle = loginModal.querySelector('.modal-title');
+                const roleInput = loginModal.querySelector('#login-role');
+                const pageInput = loginModal.querySelector('#login-page');
+
+                modalTitle.textContent = 'Login as ' + role;
+                roleInput.value = role;
+                pageInput.value = page;
+
+                // Customize labels
+                if (role === 'Admin') {
+                    usernameLabel.textContent = 'Username';
+                    loginMessage.classList.add('d-none');
+                } else if (role === 'Team Leader') {
+                    usernameLabel.textContent = 'Team Name';
+                    loginMessage.classList.remove('d-none');
+                } else if (role === 'Participant') {
+                    usernameLabel.textContent = 'Chess Number';
+                    loginMessage.classList.remove('d-none');
+                }
+
+                loginForm.reset();
+                errorMessage.classList.add('d-none');
+            });
+
+            // 2. Handle the login form submission
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault(); 
+                
+                const role = document.getElementById('login-role').value;
+                const page = document.getElementById('login-page').value;
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                let isValid = false;
+                let loginId = null; // This will be stored to identify the user
+
+                const currentDB = getDB(); // Get the latest DB data
+
+                if (role === 'Admin') {
+                    if (username === 'admin' && password === 'admin123') {
+                        isValid = true;
+                        loginId = 'admin';
+                    }
+                } else if (role === 'Team Leader') {
+                    const team = currentDB.teams.find(t => t.name === username);
+                    if (team && team.password === password) {
+                        isValid = true;
+                        loginId = team.id; // Store the team's ID
+                    }
+                } else if (role === 'Participant') {
+                    // Participant login is Chess Number for both
+                    const student = currentDB.students.find(s => s.id === parseInt(username));
+                    if (student && password === String(student.id)) {
+                        isValid = true;
+                        loginId = student.id; // Store the student's ID
+                    }
+                }
+
+                if (isValid) {
+                    // **SECURE LOGIN:** Store login ID in sessionStorage (clears when tab closes)
+                    sessionStorage.setItem('artFestUserRole', role);
+                    sessionStorage.setItem('artFestUserId', loginId);
+
+                    // Redirect to the correct portal page
+                    window.location.href = `./${page}`; // Use './' for relative path
+                } else {
+                    errorMessage.classList.remove('d-none');
+                }
+            });
+
+            // --- Live Leaderboard & Animations ---
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            
+            function renderLeaderboard() {
+                const currentDB = getDB();
+                if (!currentDB.teams || currentDB.teams.length === 0) {
+                    leaderboardBody.innerHTML = '<div class="alert alert-info text-center">Live rankings will appear here once the fest begins.</div>';
+                    return;
+                }
+
+                leaderboardBody.innerHTML = ''; // Clear existing
+                const sortedTeams = currentDB.teams.sort((a, b) => b.score - a.score);
+                const rankColors = ['leaderboard-rank-1', 'leaderboard-rank-2', 'leaderboard-rank-3'];
+
+                sortedTeams.forEach((team, index) => {
+                    const rank = index + 1;
+                    const rankClass = rank <= 3 ? rankColors[index] : '';
+
+                    const item = document.createElement('div');
+                    item.className = `leaderboard-item ${rankClass}`;
+                    item.innerHTML = `
+                        <div class="leaderboard-rank">${rank}</div>
+                        <div class="leaderboard-team">${team.name}</div>
+                        <div class="leaderboard-score" data-target="${team.score}">0</div>
+                    `;
+                    leaderboardBody.appendChild(item);
+                });
+            }
+
+            // --- Animation on Scroll ---
+            const animateOnScroll = () => {
+                const elements = document.querySelectorAll('.leaderboard-item, .role-card');
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            
+                            // Check if it's a score and animate count-up
+                            const scoreEl = entry.target.querySelector('.leaderboard-score');
+                            if (scoreEl && !scoreEl.classList.contains('is-animated')) {
+                                scoreEl.classList.add('is-animated');
+                                const target = +scoreEl.getAttribute('data-target');
+                                const duration = 1500;
+                                const stepTime = 20;
+                                const totalSteps = duration / stepTime;
+                                const increment = target / totalSteps;
+                                let current = 0;
+
+                                const updateCount = () => {
+                                    current += increment;
+                                    if (current < target) {
+                                        scoreEl.textContent = Math.ceil(current);
+                                        requestAnimationFrame(updateCount);
+                                    } else {
+                                        scoreEl.textContent = target;
+                                    }
+                                };
+                                requestAnimationFrame(updateCount);
+                            }
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                elements.forEach(el => observer.observe(el));
+            };
+            
+            // --- Real-Time Sync ---
+            // Listen for updates from the admin panel
+            const channel = new BroadcastChannel('artFestChannel');
+            channel.onmessage = (event) => {
+                if (event.data === 'db-updated') {
+                    renderLeaderboard();
+                    animateOnScroll();
+                }
+            };
+
+            // Initial Load
+            renderLeaderboard();
+            animateOnScroll();
+        });
+    </script>
+</body>
+</html>
