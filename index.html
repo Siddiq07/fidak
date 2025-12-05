@@ -11,11 +11,50 @@
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
+  <!-- XLSX if needed later -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <style>
+    /* --- base / original visual identity --- */
     body { background: #f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-    .hero { padding: 4rem 0; text-align:center; background: #eaf2ff }
-    .role-card { border-radius: 12px; transition: transform .18s ease; }
-    .role-card:hover { transform: translateY(-6px); }
+
+    .hero { padding: 3.5rem 0; text-align:center; background: #eaf2ff; border-radius: 8px; margin-bottom: 20px; }
+    .role-card { border-radius: 12px; transition: transform .18s ease, box-shadow .18s ease; }
+    .role-card:hover { transform: translateY(-6px); box-shadow: 0 10px 30px rgba(18, 38, 63, 0.06); }
+
+    /* --- scoreboard (blend with original theme) --- */
+    .scoreboard-wrap { margin-top: 22px; }
+    .scoreboard-panel { background: linear-gradient(180deg,#ffffff,#f7fbff); border-radius: 12px; padding: 16px; box-shadow: 0 6px 20px rgba(10,20,40,0.04); }
+    .score-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+    .team-card {
+      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(245,249,255,1));
+      border-radius: 10px; padding: 14px; border: 1px solid rgba(13,37,79,0.03);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .team-card:hover{ transform: translateY(-6px); box-shadow: 0 14px 30px rgba(10,20,40,0.06); }
+    .team-name { font-weight:700; font-size: 18px; color:#0f172a; }
+    .team-leader { font-size:13px; color:#475569; margin-top:4px; }
+    .score-number { font-weight:900; font-size:34px; margin-top:8px; color:#0b1220; }
+    .score-meta { margin-top:8px; font-size:12px; color:#64748b; }
+
+    /* animation flash on score update */
+    .flash { animation: flashAnim .7s ease; }
+    @keyframes flashAnim {
+      0%{ transform: scale(1); box-shadow: none; }
+      40%{ transform: scale(1.03); box-shadow: 0 18px 40px rgba(2,6,23,0.08); }
+      100%{ transform: scale(1); box-shadow: none; }
+    }
+
+    footer { margin-top: 28px; color:#6b7280; padding: 18px 0; text-align:center; }
+    .small-muted { color:#6b7280; font-size:13px; }
+
+    /* responsive tweaks */
+    @media (max-width:576px) {
+      .team-name { font-size:16px; }
+      .score-number { font-size:28px; }
+      .hero { padding: 2.25rem 0; }
+    }
+
   </style>
 </head>
 <body>
@@ -23,18 +62,19 @@
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
       <a class="navbar-brand fw-bold text-primary" href="#">Art Fest Management</a>
+      <div class="ms-auto small-muted">Connected: <span id="connStatus">—</span></div>
     </div>
   </nav>
 
-  <header class="hero">
-    <div class="container">
-      <h1 class="display-5 fw-bold">Welcome to Art Fest</h1>
-      <p class="lead text-muted">Choose your portal — Admin, Team Leader or Participant.</p>
-    </div>
-  </header>
+  <main class="container py-4">
+    <header class="hero">
+      <div class="container">
+        <h1 class="display-5 fw-bold">Welcome to Art Fest</h1>
+        <p class="lead text-muted">Choose your portal — Admin, Team Leader or Participant.</p>
+      </div>
+    </header>
 
-  <main class="container py-5">
-    <div class="row g-4 justify-content-center">
+    <section class="row g-4 justify-content-center">
       <div class="col-lg-4 col-md-6">
         <div class="card role-card shadow-sm p-4 text-center">
           <i class="bi bi-shield-lock display-3 text-primary mb-3"></i>
@@ -48,7 +88,7 @@
         <div class="card role-card shadow-sm p-4 text-center">
           <i class="bi bi-people-fill display-3 text-success mb-3"></i>
           <h4 class="mb-2">Team Leader Portal</h4>
-          <p class="text-muted">Manage your team and submit participants to events.</p>
+          <p class="text-muted">Log in with your Team and Password (set by Admin).</p>
           <button class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#loginModal" data-role="Leader" data-page="leader.html">Login as Leader</button>
         </div>
       </div>
@@ -57,16 +97,33 @@
         <div class="card role-card shadow-sm p-4 text-center">
           <i class="bi bi-person-fill display-3 text-info mb-3"></i>
           <h4 class="mb-2">Participant Portal</h4>
-          <p class="text-muted">View your events, results and attendance.</p>
+          <p class="text-muted">Enter your Chess Number to access your dashboard.</p>
           <button class="btn btn-info mt-2" data-bs-toggle="modal" data-bs-target="#loginModal" data-role="Participant" data-page="participant.html">Login as Participant</button>
         </div>
       </div>
-    </div>
-  </main>
+    </section>
 
-  <footer class="py-4 text-center text-muted">
-    &copy; <span id="current-year"></span> Art Fest Management
-  </footer>
+    <!-- scoreboard area -->
+    <section class="scoreboard-wrap">
+      <div class="scoreboard-panel">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <h5 class="m-0">Live Team Scores</h5>
+            <div class="small-muted">Real-time scoreboard — updates as admins change team scores</div>
+          </div>
+          <div class="text-end small-muted">
+            Last update: <span id="lastUpdate">—</span>
+          </div>
+        </div>
+
+        <div id="scoreGrid" class="score-grid"></div>
+      </div>
+    </section>
+
+    <footer>
+      &copy; <span id="current-year"></span> Art Fest Management
+    </footer>
+  </main>
 
   <!-- Login Modal -->
   <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
@@ -82,19 +139,34 @@
             <input type="hidden" id="login-role" value="">
             <input type="hidden" id="login-page" value="">
 
-            <div id="field-username" class="mb-3">
+            <!-- Admin username/password -->
+            <div id="field-admin-username" class="mb-3 d-none">
               <label class="form-label">Username</label>
-              <input id="username" class="form-control" placeholder="admin" />
+              <input id="adminUsername" class="form-control" placeholder="admin" />
             </div>
 
-            <div id="field-password" class="mb-3">
+            <div id="field-admin-password" class="mb-3 d-none">
               <label class="form-label">Password</label>
-              <input id="password" type="password" class="form-control" placeholder="••••••" />
+              <input id="adminPassword" type="password" class="form-control" placeholder="••••••" />
             </div>
 
-            <div id="field-chess" class="mb-3 d-none">
+            <!-- Leader: select team + password -->
+            <div id="field-leader-team" class="mb-3 d-none">
+              <label class="form-label">Team</label>
+              <select id="leaderTeamSelect" class="form-select">
+                <option value="">Loading teams...</option>
+              </select>
+            </div>
+
+            <div id="field-leader-password" class="mb-3 d-none">
+              <label class="form-label">Team Password</label>
+              <input id="leaderPassword" type="password" class="form-control" placeholder="Team password" />
+            </div>
+
+            <!-- Participant: chess number -->
+            <div id="field-participant-chess" class="mb-3 d-none">
               <label class="form-label">Chess Number</label>
-              <input id="chessNumber" class="form-control" placeholder="Enter chess number (e.g. 1234)" />
+              <input id="participantChess" class="form-control" placeholder="Enter chess number (e.g. A12 or 1234)" />
             </div>
 
             <div id="login-error" class="text-danger small d-none"></div>
@@ -109,15 +181,18 @@
     </div>
   </div>
 
+  <!-- Toast container -->
+  <div id="toastRoot" style="position:fixed;right:18px;bottom:18px;z-index:12000"></div>
+
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Firebase + Login Script (module) -->
+  <!-- Firebase + Page Script -->
   <script type="module">
-    // --- FIREBASE SETUP ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+    // Firebase config (same project)
     const firebaseConfig = {
       apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
       authDomain: "gen7-3e139.firebaseapp.com",
@@ -130,65 +205,207 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    const db = getDatabase(app);
 
-    // --- UI bindings ---
+    // UI helpers
+    const $ = id => document.getElementById(id);
+    function toast(msg, type='light') {
+      const t = document.createElement('div');
+      t.className = 'toast align-items-center text-bg-'+type+' border-0';
+      t.style.minWidth = '220px';
+      t.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+      $('toastRoot').appendChild(t);
+      const b = new bootstrap.Toast(t, { delay: 3500 }); b.show();
+      t.addEventListener('hidden.bs.toast', ()=> t.remove());
+    }
+
+    // DOM elements
+    const connStatus = $('connStatus');
+    const lastUpdate = $('lastUpdate');
+    const scoreGrid = $('scoreGrid');
+
     const loginModal = document.getElementById('loginModal');
     const loginForm = document.getElementById('loginForm');
     const loginModalEl = bootstrap.Modal.getOrCreateInstance(loginModal);
     const loginModalLabel = document.getElementById('loginModalLabel');
 
-    const fieldUsername = document.getElementById('field-username');
-    const fieldPassword = document.getElementById('field-password');
-    const fieldChess = document.getElementById('field-chess');
+    const adminUsernameField = $('field-admin-username');
+    const adminPasswordField = $('field-admin-password');
+    const leaderTeamField = $('field-leader-team');
+    const leaderPassField = $('field-leader-password');
+    const participantChessField = $('field-participant-chess');
+    const loginError = $('login-error');
 
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const chessInput = document.getElementById('chessNumber');
+    const adminUsernameInput = $('adminUsername');
+    const adminPasswordInput = $('adminPassword');
+    const leaderTeamSelect = $('leaderTeamSelect');
+    const leaderPasswordInput = $('leaderPassword');
+    const participantChessInput = $('participantChess');
 
-    const loginRoleInput = document.getElementById('login-role');
-    const loginPageInput = document.getElementById('login-page');
-    const loginError = document.getElementById('login-error');
+    const loginRoleInput = $('login-role');
+    const loginPageInput = $('login-page');
 
-    // Default admin credentials (Option A)
-    // Change ADMIN_PASSWORD here if you want a different one.
+    // Admin creds (you can change these)
     const ADMIN_USERNAME = 'admin';
     const ADMIN_PASSWORD = '1234';
 
-    // When a role button opens the modal, adapt the fields
+    // In-memory maps
+    let TEAMS_MAP = {}; // id -> team obj (includes password, score, leaderId)
+    let TEAMS_DBKEYS = {}; // id -> dbkey used in firebase (object key)
+    let STUDENTS_MAP = {}; // chessId -> student object
+
+    // Listen to teams (live)
+    onValue(ref(db, 'teams'), snap => {
+      const val = snap.val() || {};
+      TEAMS_MAP = {};
+      TEAMS_DBKEYS = {};
+      Object.entries(val).forEach(([dbKey, teamObj]) => {
+        if(!teamObj) return;
+        const tid = teamObj.id !== undefined ? String(teamObj.id) : String(dbKey);
+        TEAMS_MAP[tid] = { ...teamObj, id: tid };
+        TEAMS_DBKEYS[tid] = dbKey;
+      });
+      populateLeaderTeamSelect();
+      renderScoreboard();
+      connStatus.textContent = 'Connected';
+      lastUpdate.textContent = new Date().toLocaleTimeString();
+    });
+
+    // Listen to students for participant login checks
+    onValue(ref(db, 'students'), snap => {
+      const val = snap.val() || {};
+      STUDENTS_MAP = {};
+      Object.entries(val).forEach(([dbKey, s]) => {
+        if(!s) return;
+        // Student objects in our admin code use id field equal to chess id
+        const chessId = s.id !== undefined ? String(s.id) : String(dbKey);
+        STUDENTS_MAP[chessId] = { ...s, id: chessId, __dbKey: dbKey };
+      });
+    });
+
+    // helper: populate leader team dropdown
+    function populateLeaderTeamSelect() {
+      const prev = leaderTeamSelect.value;
+      leaderTeamSelect.innerHTML = `<option value="">Select team</option>`;
+      Object.values(TEAMS_MAP).sort((a,b)=> (a.name||'').localeCompare(b.name||'')).forEach(t=>{
+        leaderTeamSelect.innerHTML += `<option value="${encodeURIComponent(t.id)}">${escapeHtml(t.name || t.id)}</option>`;
+      });
+      if(prev) {
+        try { leaderTeamSelect.value = prev; } catch(e){ leaderTeamSelect.selectedIndex = 0; }
+      }
+    }
+
+    // escape
+    function escapeHtml(s) {
+      if(s === null || s === undefined) return '';
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    // scoreboard rendering & animation
+    let CURRENT_SCORES = {}; // tid -> number
+
+    function renderScoreboard() {
+      // Build array sorted by score desc then name
+      const arr = Object.values(TEAMS_MAP).slice().sort((a,b)=>{
+        const sa = Number(a.score || 0), sb = Number(b.score || 0);
+        if(sb !== sa) return sb - sa;
+        return (a.name||'').localeCompare(b.name||'');
+      });
+
+      // Create fragment
+      const frag = document.createDocumentFragment();
+      arr.forEach(t => {
+        const tid = t.id;
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        card.dataset.tid = tid;
+        card.innerHTML = `
+          <div class="team-name">${escapeHtml(t.name || tid)}</div>
+          <div class="team-leader">${t.leaderId ? 'Leader: ' + escapeHtml(String(t.leaderId)) : ''}</div>
+          <div class="score-number" data-score>0</div>
+          <div class="score-meta">Team ID: ${escapeHtml(tid)}</div>
+        `;
+
+        // animate score
+        const scoreEl = card.querySelector('[data-score]');
+        const prev = CURRENT_SCORES[tid] !== undefined ? Number(CURRENT_SCORES[tid]) : 0;
+        const target = Number(t.score || 0);
+        if(prev !== target) {
+          // visual flash
+          card.classList.remove('flash');
+          void card.offsetWidth;
+          card.classList.add('flash');
+          animateNumber(scoreEl, prev, target, 900);
+          CURRENT_SCORES[tid] = target;
+        } else {
+          scoreEl.textContent = String(target);
+          CURRENT_SCORES[tid] = target;
+        }
+
+        frag.appendChild(card);
+      });
+
+      // Replace grid
+      scoreGrid.innerHTML = '';
+      scoreGrid.appendChild(frag);
+    }
+
+    // number animation (ease)
+    function animateNumber(el, from, to, duration=700) {
+      from = Number(from)||0; to = Number(to)||0;
+      if(from === to) { el.textContent = String(to); return; }
+      const start = performance.now();
+      function frame(now) {
+        const t = Math.min(1, (now - start)/duration);
+        // ease in-out quad
+        const eased = t < .5 ? 2*t*t : -1 + (4 - 2*t)*t;
+        const val = Math.round(from + (to - from) * eased);
+        el.textContent = val;
+        if(t < 1) requestAnimationFrame(frame);
+        else el.textContent = String(to);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // Modal behavior: adapt fields by role
     document.querySelectorAll('[data-bs-toggle="modal"][data-bs-target="#loginModal"]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const role = btn.dataset.role;
         const page = btn.dataset.page;
         loginRoleInput.value = role;
         loginPageInput.value = page;
         loginError.classList.add('d-none');
-        usernameInput.value = '';
-        passwordInput.value = '';
-        chessInput.value = '';
 
-        if (role === 'Admin') {
+        // clear inputs
+        adminUsernameInput.value = ADMIN_USERNAME;
+        adminPasswordInput.value = '';
+        leaderTeamSelect.value = '';
+        leaderPasswordInput.value = '';
+        participantChessInput.value = '';
+
+        adminUsernameField.classList.add('d-none');
+        adminPasswordField.classList.add('d-none');
+        leaderTeamField.classList.add('d-none');
+        leaderPassField.classList.add('d-none');
+        participantChessField.classList.add('d-none');
+
+        if(role === 'Admin') {
           loginModalLabel.textContent = 'Admin Login';
-          fieldUsername.classList.remove('d-none');
-          fieldPassword.classList.remove('d-none');
-          fieldChess.classList.add('d-none');
+          adminUsernameField.classList.remove('d-none');
+          adminPasswordField.classList.remove('d-none');
+        } else if(role === 'Leader') {
+          loginModalLabel.textContent = 'Leader Login';
+          leaderTeamField.classList.remove('d-none');
+          leaderPassField.classList.remove('d-none');
+          populateLeaderTeamSelect();
         } else {
-          // Leader or Participant: only chess number needed
           loginModalLabel.textContent = role + ' Login';
-          fieldUsername.classList.add('d-none');
-          fieldPassword.classList.add('d-none');
-          fieldChess.classList.remove('d-none');
+          participantChessField.classList.remove('d-none');
         }
       });
     });
 
-    // Utility: show error text inside modal
-    function showLoginError(msg) {
-      loginError.textContent = msg;
-      loginError.classList.remove('d-none');
-    }
-
-    // On submit, perform role-specific checks and redirect
+    // login submit
     loginForm.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       loginError.classList.add('d-none');
@@ -196,13 +413,13 @@
       const page = loginPageInput.value;
 
       try {
-        if (role === 'Admin') {
-          const uname = usernameInput.value.trim();
-          const pwd = passwordInput.value;
-          if (uname === ADMIN_USERNAME && pwd === ADMIN_PASSWORD) {
-            sessionStorage.setItem('user', JSON.stringify({ role: 'Admin', username: uname }));
+        if(role === 'Admin') {
+          const u = adminUsernameInput.value.trim();
+          const p = adminPasswordInput.value;
+          if(u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
+            sessionStorage.setItem('user', JSON.stringify({ role: 'Admin', username: u }));
             loginModalEl.hide();
-            location.href = page;
+            window.location.href = page;
             return;
           } else {
             showLoginError('Invalid admin username or password.');
@@ -210,24 +427,37 @@
           }
         }
 
-        // Leader or Participant: use chessNumber and verify existence in Firebase
-        const chessRaw = chessInput.value.trim();
-        if (!chessRaw) { showLoginError('Enter your chess number.'); return; }
-        const chessNum = parseInt(chessRaw, 10);
-        if (Number.isNaN(chessNum)) { showLoginError('Chess number must be numeric.'); return; }
-
-        // read students and teams from firebase once
-        const dbRef = ref(database);
-        const snapshot = await get(dbRef);
-        const data = snapshot.val() || {};
-
-        // participant: check student exists
-        if (role === 'Participant') {
-          const students = data.students || {};
-          if (students[String(chessNum)]) {
-            sessionStorage.setItem('user', JSON.stringify({ role: 'Participant', studentId: chessNum }));
+        if(role === 'Leader') {
+          const encodedTid = leaderTeamSelect.value;
+          if(!encodedTid) { showLoginError('Select a team.'); return; }
+          const tid = decodeURIComponent(encodedTid);
+          const p = leaderPasswordInput.value || '';
+          const team = TEAMS_MAP[tid];
+          if(!team) { showLoginError('Team not found.'); return; }
+          const expected = (team.password || '').toString();
+          // If there is no password set by admin, allow login without password
+          if(expected === '' || p === expected) {
+            // Save session: leader logged in with team
+            sessionStorage.setItem('user', JSON.stringify({ role: 'Leader', teamId: tid, teamName: team.name || '' }));
             loginModalEl.hide();
-            location.href = page;
+            window.location.href = page;
+            return;
+          } else {
+            showLoginError('Incorrect team password.');
+            return;
+          }
+        }
+
+        if(role === 'Participant') {
+          const chessRaw = participantChessInput.value.trim();
+          if(!chessRaw) { showLoginError('Enter chess number.'); return; }
+          // exact match: our students are stored under key encodeURIComponent(chessId) / student.id
+          // We'll look up by id in STUDENTS_MAP
+          const found = STUDENTS_MAP[chessRaw] || STUDENTS_MAP[String(parseInt(chessRaw,10))] || null;
+          if(found) {
+            sessionStorage.setItem('user', JSON.stringify({ role: 'Participant', studentId: found.id }));
+            loginModalEl.hide();
+            window.location.href = page;
             return;
           } else {
             showLoginError('No participant found with that chess number.');
@@ -235,53 +465,41 @@
           }
         }
 
-        // leader: find a team whose leaderId equals chessNum
-        if (role === 'Leader') {
-          const teams = data.teams || {};
-          // teams stored as objects - search through them
-          const teamEntries = Object.entries(teams);
-          const found = teamEntries.find(([key, t]) => {
-            // t.leaderId may be number or string
-            return t && (t.leaderId === chessNum || t.leaderId === String(chessNum));
-          });
-
-          if (found) {
-            const [teamKey, teamObj] = found;
-            sessionStorage.setItem('user', JSON.stringify({
-              role: 'Leader',
-              leaderId: chessNum,
-              teamId: teamObj.id || parseInt(teamKey, 10),
-              teamName: teamObj.name || ''
-            }));
-            loginModalEl.hide();
-            location.href = page;
-            return;
-          } else {
-            showLoginError('No team found with that leader chess number.');
-            return;
-          }
-        }
-
         showLoginError('Unsupported role.');
-      } catch (err) {
-        console.error('Login error', err);
-        showLoginError('Network or Firebase error. Check console for details.');
+      } catch(err) {
+        console.error(err);
+        showLoginError('Network or Firebase error.');
       }
     });
 
-    // small UX: auto-fill admin username on modal open
-    document.getElementById('loginModal').addEventListener('shown.bs.modal', () => {
-      if (loginRoleInput.value === 'Admin') {
-        usernameInput.focus();
-        usernameInput.value = ADMIN_USERNAME;
-      } else {
-        chessInput.focus();
-      }
+    function showLoginError(msg) {
+      loginError.textContent = msg;
+      loginError.classList.remove('d-none');
+    }
+
+    // small accessibility: focus fields when modal shown
+    loginModal.addEventListener('shown.bs.modal', () => {
+      const role = loginRoleInput.value;
+      if(role === 'Admin') adminUsernameInput.focus();
+      else if(role === 'Leader') leaderTeamSelect.focus();
+      else participantChessInput.focus();
     });
 
-    // current year in footer
+    // default UI: set current year
     document.getElementById('current-year').textContent = new Date().getFullYear();
 
+    // Defensive: show disconnected initially; onValue will set connected
+    connStatus.textContent = 'Connecting...';
+
+    // Expose for debugging
+    window._ARTFEST = {
+      TEAMS_MAP, STUDENTS_MAP
+    };
+
+    // Ensure initial scoreboard render even if empty
+    setTimeout(()=> renderScoreboard(), 600);
+
   </script>
+
 </body>
 </html>
