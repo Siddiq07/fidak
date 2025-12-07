@@ -25,23 +25,67 @@
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#0f172a;background:var(--bg)}
     .app {display:flex;min-height:100vh}
-    .sidebar{
-      width:260px;background:linear-gradient(180deg,#fff,#f8fbff);border-right:1px solid #e6eefc;padding:18px;box-sizing:border-box;
-    }
-    .sidebar .logo{font-weight:800;color:var(--accent);font-size:18px;margin-bottom:12px}
-    .nav-item {margin-bottom:6px}
-    .nav-item button{width:100%;text-align:left;border-radius:8px;padding:10px 12px}
-    .nav-item button.active{background:linear-gradient(90deg,var(--accent),#7c3aed);color:white}
-    .content {flex:1;padding:18px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-    .card-neo{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 6px 18px rgba(15,23,42,0.05);margin-bottom:12px}
-    .section-title{font-weight:700;margin-bottom:8px}
-    .muted{color:var(--muted)}
-    .small-box{width:56px;height:36px;background:#f1f5ff;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;margin:6px;cursor:pointer;font-weight:700}
-    .small-box.present{background:var(--success);color:#fff}
-    .small-box.absent{background:var(--danger);color:#fff}
-    .btn-accent{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#fff;border:0}
-    .participated-row{background:#e8fff0}
+    /* --- Compact Vertical Sidebar --- */
+.sidebar{
+  width:80px;
+  background:#ffffff;
+  border-right:1px solid #e6eefc;
+  padding:12px 10px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+}
+
+.sidebar .logo{
+  font-weight:700;
+  color:var(--accent);
+  font-size:14px;
+  text-align:center;
+  margin-bottom:4px;
+}
+
+.nav-item{
+  width:100%;
+}
+
+.nav-item button{
+  width:100%;
+  background:#f4f7ff;
+  border-radius:12px;
+  border:0;
+  padding:14px 0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:20px;
+}
+
+.nav-item button.active{
+  background:linear-gradient(180deg,#5b8bff,#7a5bff);
+  color:white;
+}
+
+.text-label{
+  display:none !important;
+}
+
+.logout-box{
+  margin-top:auto;
+  width:100%;
+}
+
+.logout-box button{
+  width:100%;
+  border-radius:14px;
+  padding:12px 0;
+}
+.content{
+  flex:1;
+  padding:20px;
+  margin-left:0;
+}
     @media (max-width:900px){
       .sidebar{width:72px;padding:10px}
       .sidebar .text-label{display:none}
@@ -57,29 +101,65 @@
 <div class="app">
 
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="logo d-flex align-items-center gap-2">
-      <span class="badge bg-primary rounded-pill"><i class="bi bi-palette-fill"></i></span>
-      <div>
-        <div style="font-size:14px">Art Fest</div>
-        <div class="muted" style="font-size:11px">Admin Panel</div>
-      </div>
+<aside class="sidebar">
+
+  <div class="logo">
+    <i class="bi bi-palette-fill fs-3"></i>
+  </div>
+
+  <nav class="mt-2 w-100">
+
+    <div class="nav-item">
+      <button id="btnStudents" data-target="#panel-students">
+        <i class="bi bi-people-fill"></i>
+      </button>
     </div>
 
-    <nav class="mt-3">
-      <div class="nav-item"><button id="btnStudents" class="btn btn-light" data-target="#panel-students"><i class="bi bi-people-fill me-2"></i><span class="text-label">Students</span></button></div>
-      <div class="nav-item"><button id="btnTeams" class="btn btn-light" data-target="#panel-teams"><i class="bi bi-people"></i><span class="text-label"> Teams</span></button></div>
-      <div class="nav-item"><button id="btnEvents" class="btn btn-light" data-target="#panel-events"><i class="bi bi-calendar-event"></i><span class="text-label"> Events</span></button></div>
-      <div class="nav-item"><button id="btnAttendance" class="btn btn-light" data-target="#panel-attendance"><i class="bi bi-check2-all"></i><span class="text-label"> Attendance</span></button></div>
-      <div class="nav-item"><button id="btnApprovals" class="btn btn-light" data-target="#panel-approvals"><i class="bi bi-card-checklist"></i><span class="text-label"> Approvals</span></button></div>
-      <div class="nav-item"><button id="btnResults" class="btn btn-light" data-target="#panel-results"><i class="bi bi-list-ol"></i><span class="text-label"> Results</span></button></div>
-      <div class="nav-item"><button id="btnReports" class="btn btn-light" data-target="#panel-reports"><i class="bi bi-bar-chart-line"></i><span class="text-label"> Reports</span></button></div>
-    </nav>
-
-    <div style="position: absolute; bottom:16px; left:18px; right:18px">
-      <button id="logoutBtn" class="btn btn-outline-danger w-100"><i class="bi bi-box-arrow-right"></i> <span class="text-label"> Logout</span></button>
+    <div class="nav-item">
+      <button id="btnTeams" data-target="#panel-teams">
+        <i class="bi bi-people"></i>
+      </button>
     </div>
-  </aside>
+
+    <div class="nav-item">
+      <button id="btnEvents" data-target="#panel-events">
+        <i class="bi bi-calendar-event"></i>
+      </button>
+    </div>
+
+    <div class="nav-item">
+      <button id="btnAttendance" data-target="#panel-attendance">
+        <i class="bi bi-check2-all"></i>
+      </button>
+    </div>
+
+    <div class="nav-item">
+      <button id="btnApprovals" data-target="#panel-approvals">
+        <i class="bi bi-card-checklist"></i>
+      </button>
+    </div>
+
+    <div class="nav-item">
+      <button id="btnResults" data-target="#panel-results">
+        <i class="bi bi-list-ol"></i>
+      </button>
+    </div>
+
+    <div class="nav-item">
+      <button id="btnReports" data-target="#panel-reports">
+        <i class="bi bi-bar-chart-line"></i>
+      </button>
+    </div>
+
+  </nav>
+
+  <div class="logout-box">
+    <button id="logoutBtn" class="btn btn-outline-danger">
+      <i class="bi bi-box-arrow-right"></i>
+    </button>
+  </div>
+
+</aside>
 
   <!-- Content -->
   <main class="content">
