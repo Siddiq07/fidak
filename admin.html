@@ -223,31 +223,26 @@
   </aside>
 
   <!-- CONTENT START -->
-  <main class="content">
-    <div class="topbar">
+<main class="content">
+
+  <div class="topbar">
       <div>
         <h3 style="margin:0">Admin Dashboard</h3>
         <div class="muted">Manage Students · Teams · Events · Attendance · Results</div>
       </div>
       <div class="d-flex gap-2 align-items-center">
-        <button id="btnExportStudents" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i> Export Students PDF</button>
+        <button id="btnExportStudents" class="btn btn-outline-secondary">
+          <i class="bi bi-file-earmark-pdf"></i> Export Students PDF
+        </button>
         <div class="ms-2 muted">Year <span id="current-year"></span></div>
       </div>
-    </div>
+  </div>
 
-    <!-- Panels wrapper (replace with Part 2 content) -->
-    <div id="panels-wrapper"></div>
+  <!-- PANELS START INSIDE MAIN → NO BLANK SPACE -->
+  <div id="panels" class="mt-2">
 
-    <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
-  </main>
-</div>
-<!-- =========================
-     PANELS HTML (Part 2)
-     ========================= -->
-<div id="panels" class="mt-2">
-
-  <!-- STUDENTS -->
-  <section id="panel-students" class="card-neo">
+      <!-- STUDENTS -->
+      <section id="panel-students" class="card-neo">
     <div class="row g-3">
       <div class="col-lg-4">
         <div class="card-neo">
