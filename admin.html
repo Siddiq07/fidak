@@ -37,11 +37,27 @@ html,body{
   color:#0f172a;
   overflow-x:hidden;
 }
-.content{
-  flex:1;
-  padding:22px;
-  padding-left:32px; /* reduce this */
-  margin-left:0 !important;
+/* REMOVE OLD SIDEBAR GAP COMPLETELY */
+.app, body, html {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.main-wrapper, .page-wrapper, .container-wide, main {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* CONTENT FULL WIDTH */
+.content {
+    flex: 1;
+    padding: 20px;
+    margin: 0 !important;
+}
+
+/* Also remove old white panel line */
+.content::before {
+    display: none !important;
 }
 
 /* ======================================================
