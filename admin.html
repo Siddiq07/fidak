@@ -14,314 +14,212 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    
 
-/* RESET & BASE ---------------------------------------- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    /* RESET & BASE ---------------------------------------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  background: #f4f6ff;
-  font-family: Inter, system-ui, sans-serif;
-  overflow-x: hidden;
-  color: #0f172a;
-}
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #f4f6ff;
+      font-family: Inter, system-ui, sans-serif;
+      overflow-x: hidden;
+      color: #0f172a;
+    }
 
-/* SIDEBAR --------------------------------------------- */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 80px;
-  height: 100vh;
-  background: #ffffff;
-  border-right: 1px solid #e3e8ef;
-  padding: 16px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  z-index: 200;
-}
+    /* FIX MAIN LAYOUT (IMPORTANT) --------------------------- */
+    .app {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
 
-/* Sidebar Logo */
-.sidebar .logo {
-  font-size: 24px;
-  margin-bottom: 10px;
-  color: #2563eb;
-  font-weight: 700;
-}
+    /* SIDEBAR --------------------------------------------- */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 80px;
+      height: 100vh;
+      background: #ffffff;
+      border-right: 1px solid #e3e8ef;
+      padding: 16px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      z-index: 200;
+    }
 
-/* Sidebar Buttons */
-.nav-item {
-  width: 100%;
-}
+    .sidebar .logo {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #2563eb;
+      font-weight: 700;
+    }
 
-.nav-item button {
-  width: 100%;
-  height: 56px;
-  border: none;
-  border-radius: 14px;
-  background: #f1f5ff;
-  color: #3b4252;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  transition: 0.2s ease;
-}
+    .nav-item {
+      width: 100%;
+    }
 
-.nav-item button.active {
-  background: linear-gradient(180deg, #597bff, #7a5bff);
-  color: white;
-}
+    .nav-item button {
+      width: 100%;
+      height: 56px;
+      border: none;
+      border-radius: 14px;
+      background: #f1f5ff;
+      color: #3b4252;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      transition: 0.2s ease;
+    }
 
-/* Logout Button */
-.logout-box {
-  margin-top: auto;
-  width: 100%;
-}
+    .nav-item button.active {
+      background: linear-gradient(180deg, #597bff, #7a5bff);
+      color: white;
+    }
 
-.logout-box button {
-  width: 100%;
-  height: 60px;
-  border-radius: 14px;
-  border: 2px solid #ef4444;
-  background: white;
-  color: #ef4444;
-  font-size: 22px;
-}
+    /* Logout Button */
+    .logout-box {
+      margin-top: auto;
+      width: 100%;
+    }
 
-/* MAIN CONTENT ---------------------------------------- */
-.content {
-  margin-left: 80px !important;     /* Align beside sidebar */
-  padding: 20px;
-  width: calc(100% - 80px) !important;
-  min-height: 100vh;
-}
+    .logout-box button {
+      width: 100%;
+      height: 60px;
+      border-radius: 14px;
+      border: 2px solid #ef4444;
+      background: white;
+      color: #ef4444;
+      font-size: 22px;
+    }
 
-/* Remove space created by wrappers */
-main,
-.container-wide,
-.page-wrapper,
-.wrapper,
-.admin-container {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-}
+    /* MAIN CONTENT ---------------------------------------- */
+    .content {
+      margin-left: 80px !important; /* Align beside sidebar */
+      padding: 20px;
+      width: calc(100% - 80px) !important;
+      min-height: 100vh;
+    }
 
-/* DASHBOARD TOPBAR ------------------------------------ */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+    main,
+    .container-wide,
+    .page-wrapper,
+    .wrapper,
+    .admin-container {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+    }
 
-.topbar-title {
-  font-size: 32px;
-  font-weight: 800;
-}
+    /* COMPONENTS -------------------------------------------- */
+    .card-neo {
+      background: #ffffff;
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
 
-.topbar-sub {
-  color: #6b7280;
-  margin-top: -6px;
-}
+    .section-title {
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
 
-/* CARDS ------------------------------------------------ */
-.card-neo {
-  background: #ffffff;
-  padding: 14px;
-  border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
-  margin-bottom: 16px;
-}
+    .muted {
+      color: #6b7280;
+    }
 
-.section-title {
-  font-weight: 700;
-  font-size: 18px;
-  margin-bottom: 8px;
-}
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 70px;
+      }
+      .content {
+        margin-left: 70px !important;
+        width: calc(100% - 70px) !important;
+      }
+    }
 
-.muted {
-  color: #6b7280;
-}
-
-/* TABLES ---------------------------------------------- */
-.table thead {
-  background: #eef1ff;
-}
-
-.table td, .table th {
-  vertical-align: middle;
-}
-
-/* Green highlight for participated rows */
-.participated-row {
-  background: #e6ffe9;
-}
-
-/* BUTTONS --------------------------------------------- */
-.btn-accent {
-  background: linear-gradient(90deg, #2563eb, #7c3aed);
-  color: white;
-  border: none;
-}
-
-.btn-danger {
-  background: #ef4444;
-  border: none;
-  color: white;
-}
-
-.btn-success {
-  background: #10b981;
-  border: none;
-  color: white;
-}
-
-/* ATTENDANCE BOXES ------------------------------------ */
-.small-box {
-  width: 58px;
-  height: 40px;
-  border-radius: 6px;
-  background: #eef2ff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: 6px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.small-box.present {
-  background: #22c55e;
-  color: white;
-}
-
-.small-box.absent {
-  background: #ef4444;
-  color: white;
-}
-
-/* REPORT CARDS ---------------------------------------- */
-.report-card {
-  padding: 16px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-
-/* MOBILE RESPONSIVE ----------------------------------- */
-@media (max-width: 900px) {
-  .sidebar {
-    width: 70px;
-    padding: 10px;
-  }
-
-  .content {
-    margin-left: 70px !important;
-    width: calc(100% - 70px) !important;
-  }
-
-  .nav-item button {
-    height: 50px;
-  }
-
-  .small-box {
-    width: 44px;
-    height: 34px;
-    font-size: 12px;
-  }
-
-  .table {
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 600px) {
-  .topbar-title {
-    font-size: 24px;
-  }
-
-  .content {
-    padding: 14px;
-  }
-}
   </style>
 </head>
+
 <body>
+
 <div class="app">
 
   <!-- Sidebar -->
-<aside class="sidebar">
+  <aside class="sidebar">
 
-  <div class="logo">
-    <i class="bi bi-palette-fill fs-3"></i>
-  </div>
+    <div class="logo">
+      <i class="bi bi-palette-fill fs-3"></i>
+    </div>
 
-  <nav class="mt-2 w-100">
+    <nav class="mt-2 w-100">
 
-    <div class="nav-item">
-      <button id="btnStudents" data-target="#panel-students">
-        <i class="bi bi-people-fill"></i>
+      <div class="nav-item">
+        <button id="btnStudents" data-target="#panel-students">
+          <i class="bi bi-people-fill"></i>
+        </button>
+      </div>
+
+      <div class="nav-item">
+        <button id="btnTeams" data-target="#panel-teams">
+          <i class="bi bi-people"></i>
+        </button>
+      </div>
+
+      <div class="nav-item">
+        <button id="btnEvents" data-target="#panel-events">
+          <i class="bi bi-calendar-event"></i>
+        </button>
+      </div>
+
+      <div class="nav-item">
+        <button id="btnAttendance" data-target="#panel-attendance">
+          <i class="bi bi-check2-all"></i>
+        </button>
+      </div>
+
+      <div class="nav-item">
+        <button id="btnApprovals" data-target="#panel-approvals">
+          <i class="bi bi-card-checklist"></i>
+        </button>
+      </div>
+
+      <div class="nav-item">
+        <button id="btnResults" data-target="#panel-results">
+          <i class="bi bi-list-ol"></i>
+        </button>
+      </div>
+
+      <div class="nav-item">
+        <button id="btnReports" data-target="#panel-reports">
+          <i class="bi bi-bar-chart-line"></i>
+        </button>
+      </div>
+
+    </nav>
+
+    <div class="logout-box">
+      <button id="logoutBtn">
+        <i class="bi bi-box-arrow-right"></i>
       </button>
     </div>
 
-    <div class="nav-item">
-      <button id="btnTeams" data-target="#panel-teams">
-        <i class="bi bi-people"></i>
-      </button>
-    </div>
+  </aside>
 
-    <div class="nav-item">
-      <button id="btnEvents" data-target="#panel-events">
-        <i class="bi bi-calendar-event"></i>
-      </button>
-    </div>
-
-    <div class="nav-item">
-      <button id="btnAttendance" data-target="#panel-attendance">
-        <i class="bi bi-check2-all"></i>
-      </button>
-    </div>
-
-    <div class="nav-item">
-      <button id="btnApprovals" data-target="#panel-approvals">
-        <i class="bi bi-card-checklist"></i>
-      </button>
-    </div>
-
-    <div class="nav-item">
-      <button id="btnResults" data-target="#panel-results">
-        <i class="bi bi-list-ol"></i>
-      </button>
-    </div>
-
-    <div class="nav-item">
-      <button id="btnReports" data-target="#panel-reports">
-        <i class="bi bi-bar-chart-line"></i>
-      </button>
-    </div>
-
-  </nav>
-
-  <div class="logout-box">
-    <button id="logoutBtn" class="btn btn-outline-danger">
-      <i class="bi bi-box-arrow-right"></i>
-    </button>
-  </div>
-
-</aside>
-
-  <!-- Content -->
+  <!-- Content Start -->
   <main class="content">
     <div class="topbar">
       <div>
