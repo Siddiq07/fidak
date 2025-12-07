@@ -1,175 +1,523 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Leader Panel — Art Fest</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader Panel</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-  <style>
-    :root{
-      --bg:#f5f8ff; --card:#fff; --muted:#6b7280; --accent:#2563eb; --success:#10b981; --danger:#ef4444;
+<style>
+    body {
+        background:#f5f8ff;
+        font-family: Inter, system-ui;
+        margin:0;
+        padding:0;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:#0f172a}
-    .app{display:flex;min-height:100vh}
-    /* --- left narrow sidebar --- */
-    .sidebar{width:72px;background:#fff;border-right:1px solid #e6eefc;padding:12px;display:flex;flex-direction:column;align-items:center;gap:12px;position:fixed;left:0;top:0;bottom:0;z-index:200}
-    .sidebar .logo{font-size:20px;color:var(--accent);margin-bottom:6px}
-    .nav-btn{width:56px;height:56px;border-radius:12px;background:#f1f5ff;border:none;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
-    .nav-btn.active{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#fff}
-    .logout-wrap{margin-top:auto;width:100%;padding:6px}
-    /* --- main content area --- */
-    .content{margin-left:72px;flex:1;padding:18px;min-height:100vh}
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-    .card-neo{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.05);margin-bottom:14px}
-    .muted{color:var(--muted)}
-    .section-title{font-weight:700;margin-bottom:8px}
-    .small-box{width:56px;height:36px;border-radius:8px;background:#f1f5ff;display:inline-flex;align-items:center;justify-content:center;margin:6px;cursor:pointer}
-    .small-box.present{background:var(--success);color:#fff}
-    .small-box.absent{background:var(--danger);color:#fff}
-    .btn-accent{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#fff;border:0}
-    .muted-small{color:#94a3b8;font-size:13px}
-    @media (max-width:900px){
-      .content{margin-left:72px;padding:12px}
+
+    /* TOP NAVBAR */
+    .topnav {
+        width:100%;
+        background:white;
+        padding:10px 16px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        border-bottom:1px solid #e5e7eb;
+        position:sticky;
+        top:0;
+        z-index:1000;
     }
-    /* modal small name badge in attendance view */
-    .att-name { font-size:14px; font-weight:600 }
-  </style>
+
+    .nav-buttons button {
+        margin-right:6px;
+    }
+
+    .leader-name {
+        font-weight:700;
+        color:#2563eb;
+        font-size:16px;
+    }
+
+    .content-area {
+        padding:16px;
+    }
+
+    .card-neo {
+        background:white;
+        border-radius:12px;
+        padding:16px;
+        box-shadow:0 3px 10px rgba(0,0,0,0.05);
+        margin-bottom:16px;
+    }
+
+    .muted { color:#6b7280; }
+</style>
+
 </head>
 <body>
-  <div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar" role="navigation" aria-label="Main">
-      <div class="logo"><i class="bi bi-palette-fill"></i></div>
 
-      <button id="navHome" class="nav-btn active" title="Home"><i class="bi bi-house-fill"></i></button>
-      <button id="navParticipate" class="nav-btn" title="Participate"><i class="bi bi-people-fill"></i></button>
-      <button id="navEvents" class="nav-btn" title="Events"><i class="bi bi-calendar-event"></i></button>
-      <button id="navResults" class="nav-btn" title="Results"><i class="bi bi-list-ol"></i></button>
-      <button id="navReports" class="nav-btn" title="Reports"><i class="bi bi-bar-chart-line"></i></button>
+<!-- 🔵 TOP NAVIGATION -->
+<div class="topnav">
+    <div class="leader-name" id="leaderName">Leader Panel</div>
 
-      <div class="logout-wrap"><button id="leaderLogout" class="nav-btn" style="border:1px solid #f3dede;color:var(--danger)"><i class="bi bi-box-arrow-right"></i></button></div>
-    </aside>
-
-    <!-- Main content -->
-    <main class="content">
-      <div class="topbar">
-        <div>
-          <h3 id="leaderTitle" style="margin:0">Leader Panel</h3>
-          <div class="muted-small" id="leaderMeta">Team: — · Members: —</div>
-        </div>
-        <div class="d-flex gap-2 align-items-center">
-          <div class="muted-small">You are logged in as <strong id="leaderName">—</strong></div>
-        </div>
-      </div>
-
-      <!-- placeholder for panels -->
-      <div id="leaderPanels"></div>
-
-      <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
-    </main>
-  </div>
-  <!-- -------------------------
-     PANELS: Participate / Events / Results
-     ------------------------- -->
-<div id="panel-home" class="card-neo">
-  <div class="section-title">Overview</div>
-  <div class="muted">Use the "Participate" tab to submit members for events assigned to your team.</div>
+    <div class="nav-buttons">
+        <button class="btn btn-outline-primary" data-target="#panel-home">Home</button>
+        <button class="btn btn-outline-primary" data-target="#panel-participate">Participate</button>
+        <button class="btn btn-outline-primary" data-target="#panel-events">Events</button>
+        <button class="btn btn-outline-primary" data-target="#panel-results">Results</button>
+        <button class="btn btn-danger" id="logoutBtn">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+    </div>
 </div>
 
-<!-- PARTICIPATE -->
-<div id="panel-participate" class="card-neo d-none">
+<div class="content-area">
+    <div id="panels-wrapper">
+        <!-- Part 2 panels will load here -->
+    </div>
+</div>
+<!-- ===========================
+     PART 2 — PANELS (HTML)
+     Paste this inside <div id="panels-wrapper"> in Part 1
+     =========================== -->
+
+<!-- HOME / DASHBOARD -->
+<section id="panel-home" class="card-neo">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <h4 class="mb-0">Welcome, <span id="displayLeaderName">Leader</span></h4>
+      <div class="muted">Use the tabs to register participants, view events and upload results.</div>
+    </div>
+    <div>
+      <button id="btnExportMyParticipants" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-file-earmark-pdf"></i> My Participants PDF
+      </button>
+      <button id="btnRefreshPanels" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
+    </div>
+  </div>
+
   <div class="row g-3">
-    <div class="col-lg-5">
+    <div class="col-lg-6">
       <div class="card-neo">
-        <div class="section-title">Select Event & Add Participants</div>
-
-        <label class="form-label">Event</label>
-        <select id="leaderEventSelect" class="form-select mb-2">
-          <option value="">-- choose event --</option>
-        </select>
-
-        <div class="muted-small mb-2" id="eventMeta">Level: — · Type: — · Limits: —</div>
-
-        <div id="participantsWrap" style="max-height:320px;overflow:auto;padding:6px;border-radius:8px;border:1px solid #f1f5ff;background:#fcfdff">
-          <!-- generated checkboxes appear here -->
-        </div>
-
-        <div class="mt-2 d-flex gap-2">
-          <button id="submitParticipation" class="btn btn-accent">Submit Participation</button>
-          <button id="clearSelection" class="btn btn-outline-secondary">Clear</button>
+        <div class="section-title">My Team</div>
+        <div id="myTeamInfo" class="muted">Team info will appear here (name, leader)</div>
+        <hr>
+        <div class="section-title">Team Members</div>
+        <div id="myTeamMembers" style="max-height:240px; overflow:auto" class="mt-2">
+          <!-- list filled by JS: each member is shown with name (chess#) -->
         </div>
       </div>
     </div>
 
-    <div class="col-lg-7">
+    <div class="col-lg-6">
       <div class="card-neo">
-        <div class="section-title">My Team - Member List</div>
-        <div id="teamMembersList" style="max-height:420px;overflow:auto"></div>
+        <div class="section-title">Quick Stats</div>
+        <div class="row text-center g-2">
+          <div class="col-4">
+            <div class="card-neo p-2">
+              <div class="muted">Members</div>
+              <div id="statMembers" style="font-weight:700; font-size:18px">0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="card-neo p-2">
+              <div class="muted">Approved</div>
+              <div id="statApproved" style="font-weight:700; font-size:18px">0</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="card-neo p-2">
+              <div class="muted">Pending</div>
+              <div id="statPending" style="font-weight:700; font-size:18px">0</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- EVENTS (read-only list for leader) -->
-<div id="panel-events-list" class="card-neo d-none">
-  <div class="section-title">Events</div>
-  <div class="d-flex gap-2 mb-2">
-    <input id="searchEventByName" class="form-control" placeholder="Search by name">
-    <select id="filterByType" class="form-select" style="width:160px">
-      <option value="">All types</option><option value="Stage">Stage</option><option value="Non-Stage">Non-Stage</option>
-    </select>
-    <select id="filterByLevel" class="form-select" style="width:160px">
-      <option value="">All levels</option><option value="Junior">Junior</option><option value="Senior">Senior</option><option value="General">General</option><option value="Special">Special</option>
-    </select>
+<!-- PARTICIPATE: leader chooses event and checks members -->
+<section id="panel-participate" class="card-neo d-none">
+  <div class="section-title">Submit Participants (Leader)</div>
+  <div class="muted mb-2">Select an event — only students from your team & correct level will be shown to tick.</div>
+
+  <div class="row g-2 align-items-center mb-3">
+    <div class="col-md-5">
+      <label class="form-label">Event</label>
+      <select id="participateEvent" class="form-select">
+        <option value="">-- Select event --</option>
+        <!-- options populated by JS (include event.type & level in dataset) -->
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Event Type</label>
+      <input id="participateEventType" class="form-control" readonly>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Level</label>
+      <input id="participateEventLevel" class="form-control" readonly>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">&nbsp;</label>
+      <button id="btnLoadTeamMembers" class="btn btn-outline-primary w-100">Show Members</button>
+    </div>
   </div>
 
-  <div id="eventsListWrap" style="max-height:520px;overflow:auto"></div>
-</div>
+  <div class="card-neo mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="section-title">Team Members (tick to submit)</div>
+      <div class="muted" id="participateLimitsText">Limits: -</div>
+    </div>
 
-<!-- RESULTS (leader view) -->
-<div id="panel-results-list" class="card-neo d-none">
-  <div class="section-title">Results</div>
-  <div id="leaderResultsWrap" style="max-height:520px;overflow:auto"></div>
-</div>
-<!-- Hidden state -->
-<input type="hidden" id="leaderId">
-<input type="hidden" id="leaderTeamId">
+    <div id="participateMembersWrap" style="max-height:420px; overflow:auto; padding:8px;">
+      <!-- JS will render grouped member cards:
+           each row: checkbox, name, chess#, level (small), badge for already submitted/approved
+           example:
+           <div class="d-flex align-items-center mb-1">
+             <input type="checkbox" data-chess="C123" class="participateChk me-2">
+             <div><strong>John Doe</strong> <span class="muted"> (C123) </span></div>
+           </div>
+      -->
+    </div>
 
-<!-- Participation confirmation modal -->
-<div class="modal fade" id="confirmParticipationModal" tabindex="-1" aria-hidden="true">
+    <div class="mt-3 d-flex gap-2">
+      <button id="btnSubmitParticipation" class="btn btn-success">Submit Selected</button>
+      <button id="btnClearParticipation" class="btn btn-outline-secondary">Clear</button>
+      <button id="btnDownloadParticipationPdf" class="btn btn-outline-secondary ms-auto">
+        <i class="bi bi-file-earmark-pdf"></i> Download Submitted (PDF)
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTS: list & search by type/level + admin-status markers -->
+<section id="panel-events" class="card-neo d-none">
+  <div class="d-flex gap-2 mb-3">
+    <input id="searchEventText" class="form-control" placeholder="Search events by name...">
+    <select id="filterEventType" class="form-select" style="max-width:160px;">
+      <option value="">Type (All)</option>
+      <option value="Stage">Stage</option>
+      <option value="Non-Stage">Non-Stage</option>
+    </select>
+    <select id="filterEventLevel" class="form-select" style="max-width:160px;">
+      <option value="">Level (All)</option>
+      <option value="Junior">Junior</option>
+      <option value="Senior">Senior</option>
+      <option value="General">General</option>
+      <option value="Special">Special</option>
+    </select>
+    <button id="btnFilterEvents" class="btn btn-outline-primary">Search</button>
+    <button id="btnClearEventFilters" class="btn btn-outline-secondary">Clear</button>
+    <button id="btnDownloadEventsPdf" class="btn btn-outline-secondary ms-auto"><i class="bi bi-file-earmark-pdf"></i> Events PDF</button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th><th>Status</th><th class="text-end">Actions</th></tr>
+      </thead>
+      <tbody id="eventsListTable">
+        <!-- rows inserted by JS -->
+        <!-- if event already has results uploaded -> add light background class e.g. 'table-success' -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- RESULTS: select event -> auto fetch participants (approved) -> set 1/2/3 and points -> save draft/publish -->
+<section id="panel-results" class="card-neo d-none">
+  <div class="section-title">Results (Draft → Publish)</div>
+  <div class="muted mb-2">Select an event. Approved participants will be auto-loaded. Add 1st/2nd/3rd and points. Save draft, then Publish.</div>
+
+  <div class="row g-2 align-items-end">
+    <div class="col-md-5">
+      <label class="form-label">Event</label>
+      <select id="resultsEventSelect" class="form-select">
+        <option value="">-- Select event --</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Participant</label>
+      <select id="resultsParticipantSelect" class="form-select">
+        <option value="">Select participant</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Position</label>
+      <select id="resultsPositionSelect" class="form-select">
+        <option value="">Pos</option>
+        <option value="1">1st</option>
+        <option value="2">2nd</option>
+        <option value="3">3rd</option>
+      </select>
+    </div>
+
+    <div class="col-md-1">
+      <label class="form-label">Pts</label>
+      <input id="resultsPointsInput" type="number" min="0" max="100" class="form-control" placeholder="pts">
+    </div>
+
+    <div class="col-md-1">
+      <button id="btnAddResultDraft" class="btn btn-success w-100">Add</button>
+    </div>
+  </div>
+
+  <div class="card-neo mt-3">
+    <div class="section-title">Results List (per event)</div>
+    <div class="muted mb-2">Rows with light-green background mean results already uploaded for that event.</div>
+
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead class="table-light"><tr><th>Event</th><th>1st (pts)</th><th>2nd (pts)</th><th>3rd (pts)</th><th>Published</th><th class="text-end">Actions</th></tr></thead>
+        <tbody id="resultsListTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- (optional) small footer / empty state -->
+<section id="panel-empty" class="card-neo d-none">
+  <div class="muted">Select a tab to begin.</div>
+</section>
+
+<!-- NOTE:
+   - All interactive controls (buttons/selects) are wired by JS in Part 4.
+   - JS enforces Senior/Junior limits:
+       Senior: Stage=3, Non-Stage=4
+       Junior: Stage=2, Non-Stage=3
+     (JS will show limits text at #participateLimitsText and will prevent selecting above the allowed count)
+   - "Approved" here means participations with status === 'approved' in participations DB.
+-->
+<!-- ===========================
+     PART 3 — MODALS & HIDDEN FIELDS
+     Paste this after Part 2 (panels) and before Part 4 (scripts)
+     =========================== -->
+
+<!-- Hidden bookkeeping fields -->
+<input type="hidden" id="currentLeaderId">
+<input type="hidden" id="editEventId">
+<input type="hidden" id="editResultDbKey">
+<input type="hidden" id="editParticipationId">
+
+<!-- Edit Student Modal -->
+<div class="modal fade" id="modalEditStudent" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Confirm Participation</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <form id="formEditStudent" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
       <div class="modal-body">
-        <div id="confirmParticipationBody"></div>
+        <div class="mb-2">
+          <label class="form-label">Chess #</label>
+          <input id="modalEditChess" class="form-control" readonly>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Name</label>
+          <input id="modalEditName" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Level</label>
+          <select id="modalEditLevel" class="form-select">
+            <option>Senior</option>
+            <option>Junior</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Team</label>
+          <select id="modalEditTeam" class="form-select"><option value="">Unassigned</option></select>
+        </div>
       </div>
       <div class="modal-footer">
-        <button id="confirmParticipationBtn" class="btn btn-accent">Confirm</button>
-        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="btnModalDeleteStudent" type="button" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Event Modal (simple copy/paste-to-use) -->
+<div class="modal fade" id="modalEditEvent" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="formEditEvent" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Event</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Event Name</label>
+          <input id="modalEditEventName" class="form-control" required>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-6 mb-2">
+            <label class="form-label">Type</label>
+            <select id="modalEditEventType" class="form-select">
+              <option>Stage</option>
+              <option>Non-Stage</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-2">
+            <label class="form-label">Level</label>
+            <select id="modalEditEventLevel" class="form-select">
+              <option>Junior</option>
+              <option>Senior</option>
+              <option>General</option>
+              <option>Special</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Description / Rules</label>
+          <textarea id="modalEditEventDesc" rows="4" class="form-control"></textarea>
+        </div>
+
+        <div class="form-check mb-2">
+          <input id="modalEditEventRequireApproval" class="form-check-input" type="checkbox">
+          <label class="form-check-label">Require admin approval for leader-submitted participants</label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnModalDeleteEvent" type="button" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save Event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Full Edit Team Modal (members + lock) -->
+<div class="modal fade" id="modalEditTeam" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="formEditTeam" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Team</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Team Name</label>
+          <input id="modalEditTeamName" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Leader (Chess #)</label>
+          <select id="modalEditTeamLeader" class="form-select"><option value="">Select</option></select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Password</label>
+          <input id="modalEditTeamPassword" class="form-control">
+        </div>
+        <div class="form-check mb-2">
+          <input id="modalEditTeamLock" class="form-check-input" type="checkbox">
+          <label class="form-check-label">Lock team (prevent leader login)</label>
+        </div>
+
+        <div class="section-title mt-3">Members</div>
+        <div id="modalEditTeamMembers" style="max-height:220px; overflow:auto;" class="mt-2"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnModalDeleteTeam" type="button" class="btn btn-danger">Delete Team</button>
+        <button type="submit" class="btn btn-primary">Save Team</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Attendance Absentees Modal (shows names small list) -->
+<div class="modal fade" id="modalAttendanceView" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Absentees</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalAttendanceDetails" class="small"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnModalDownloadAbsentees" class="btn btn-primary">Download PDF</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- small modal to show attendance names (if needed) -->
-<div class="modal fade" id="leaderInfoModal" tabindex="-1" aria-hidden="true">
+<!-- Edit Result Modal (re-usable for any saved result row) -->
+<div class="modal fade" id="modalEditResult" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="formEditResult" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Result (Draft)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Event</label>
+          <input id="modalEditResultEvent" class="form-control" readonly>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Position (1 / 2 / 3)</label>
+          <select id="modalEditResultPosition" class="form-select">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Participant</label>
+          <select id="modalEditResultParticipant" class="form-select"><option value="">Select</option></select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Points</label>
+          <input id="modalEditResultPoints" type="number" min="0" max="100" class="form-control">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnModalDeleteResult" type="button" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Confirmation Modal (generic) -->
+<div class="modal fade" id="modalConfirm" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
-      <div class="modal-header"><h6 class="modal-title">Info</h6><button class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body" id="leaderInfoBody"></div>
+      <div class="modal-body text-center">
+        <div id="modalConfirmText" class="mb-3">Are you sure?</div>
+        <div class="d-flex justify-content-center gap-2">
+          <button id="modalConfirmYes" class="btn btn-danger">Yes</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-<!-- SCRIPT: Firebase & leader logic -->
 <script type="module">
+/* Part 4 — Admin Firebase & UI logic
+   Drop this script into the admin.html (replace previous script block).
+   Requires: firebase v11 RTDB, html2pdf + bootstrap already loaded by HTML.
+*/
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* ---------- Firebase config (use your existing config) ---------- */
+/* ---------- Firebase config (same as before) ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
   authDomain: "gen7-3e139.firebaseapp.com",
@@ -183,10 +531,30 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ---------- helpers ---------- */
+/* ---------- Utilities ---------- */
 const $ = id => document.getElementById(id);
-function toast(msg, type='success'){ const el=document.createElement('div'); el.className=`toast align-items-center text-bg-${type} border-0`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); const b=new bootstrap.Toast(el,{delay:3000}); b.show(); el.addEventListener('hidden.bs.toast', ()=> el.remove()); }
-function escapeHtml(s){ if(s==null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function toast(msg, type='success'){
+  try {
+    const root = $('toastRoot');
+    if(!root) { console.log('Toast:', msg); return; }
+    const el = document.createElement('div');
+    el.className = `toast align-items-center text-bg-${type} border-0`;
+    el.style.minWidth = '220px';
+    el.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+    root.appendChild(el);
+    const b = new bootstrap.Toast(el, { delay: 3000 }); b.show();
+    el.addEventListener('hidden.bs.toast', ()=> el.remove());
+  } catch(e){
+    console.log(type, msg);
+  }
+}
+function encodeKey(k){ return encodeURIComponent(String(k)); }
+function decodeKey(k){ return decodeURIComponent(String(k)); }
+function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* ---------- App caches & keymaps ---------- */
+let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
+let KEYMAP = { students: {}, teams: {}, events: {}, participations: {}, results: {} };
 
 /* ---------- DB refs ---------- */
 const studentsRef = ref(db, 'students');
@@ -194,302 +562,903 @@ const teamsRef = ref(db, 'teams');
 const eventsRef = ref(db, 'events');
 const partsRef = ref(db, 'participations');
 const resultsRef = ref(db, 'results');
+const attendanceRef = ref(db, 'attendance');
 
-/* ---------- caches ---------- */
-let CACHE = { students: [], teams: [], events: [], participations: [], results: [] };
-let KEYMAP = { students:{}, teams:{}, events:{}, participations:{}, results:{} };
-
-/* ---------- realtime listeners ---------- */
+/* ---------- Realtime listeners (keep caches up-to-date) ---------- */
 onValue(studentsRef, snap => {
-  const obj = snap.val() || {}; CACHE.students = Object.values(obj);
-  KEYMAP.students = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.students[String(v.id)] = k; });
-  renderTeamMembers();
-  renderEventsList();
-  renderLeaderResults();
+  const obj = snap.val() || {};
+  CACHE.students = Object.values(obj);
+  KEYMAP.students = {};
+  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.students[String(v.id)] = k; });
+  renderAll();
 });
 onValue(teamsRef, snap => {
-  const obj = snap.val() || {}; CACHE.teams = Object.values(obj);
-  KEYMAP.teams = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.teams[String(v.id)] = k; });
-  renderTeamMembers();
+  const obj = snap.val() || {};
+  CACHE.teams = Object.values(obj);
+  KEYMAP.teams = {};
+  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.teams[String(v.id)] = k; });
+  renderAll();
 });
 onValue(eventsRef, snap => {
-  const obj = snap.val() || {}; CACHE.events = Object.values(obj);
-  KEYMAP.events = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.events[String(v.id)] = k; });
-  populateEventSelect();
-  renderEventsList();
+  const obj = snap.val() || {};
+  CACHE.events = Object.values(obj);
+  KEYMAP.events = {};
+  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.events[String(v.id)] = k; });
+  renderAll();
 });
 onValue(partsRef, snap => {
-  const obj = snap.val() || {}; CACHE.participations = Object.values(obj);
-  KEYMAP.participations = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.participations[String(v.id)] = k; });
-  renderTeamMembers();
-  renderLeaderResults();
+  const obj = snap.val() || {};
+  CACHE.participations = Object.values(obj);
+  KEYMAP.participations = {};
+  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.participations[String(v.id)] = k; });
+  renderAll();
 });
 onValue(resultsRef, snap => {
-  const obj = snap.val() || {}; CACHE.results = Object.values(obj);
-  KEYMAP.results = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.results[String(v.id)] = k; });
-  renderLeaderResults();
+  const obj = snap.val() || {};
+  CACHE.results = Object.values(obj);
+  KEYMAP.results = {};
+  Object.entries(obj).forEach(([k,v]) => { if(v && v.id!==undefined) KEYMAP.results[String(v.id)] = k; });
+  renderAll();
+});
+onValue(attendanceRef, snap => {
+  CACHE.attendance = snap.val() || {};
+  renderAll();
 });
 
-/* ---------- Leader identity (example) ----------
-   In your system the leader will be determined by auth. For demo we read sessionStorage keys:
-   - leaderId (chess #)
-   - leaderTeamId (team id)
-   You can set these in the admin side or via login flow.
-*/
-function getLeaderFromSession(){
-  const leaderId = sessionStorage.getItem('leaderId') || 'K01';   // fallback demo
-  const teamId = sessionStorage.getItem('leaderTeamId') || null;
-  $('leaderId').value = leaderId;
-  $('leaderTeamId').value = teamId || '';
-  // find student to display name
-  const st = CACHE.students.find(s => String(s.id) === String(leaderId));
-  $('leaderName').textContent = st? st.name : leaderId;
-  $('leaderMeta').textContent = `Team: ${teamId || '—'} · Members: ${CACHE.students.filter(s => String(s.teamId)===String(teamId)).length}`;
-}
-
-/* ---------- UI routing from sidebar ---------- */
-const panels = {
-  home: $('panel-home'),
-  participate: $('panel-participate'),
-  events: $('panel-events-list'),
-  results: $('panel-results-list')
-};
-function showPanel(key){
-  Object.values(panels).forEach(p => p && p.classList.add('d-none'));
-  if(key === 'home') panels.home.classList.remove('d-none');
-  if(key === 'participate') panels.participate.classList.remove('d-none');
-  if(key === 'events') panels.events.classList.remove('d-none');
-  if(key === 'results') panels.results.classList.remove('d-none');
-}
-$('navHome').addEventListener('click', ()=> { document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); $('navHome').classList.add('active'); showPanel('home'); });
-$('navParticipate').addEventListener('click', ()=> { document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); $('navParticipate').classList.add('active'); showPanel('participate'); });
-$('navEvents').addEventListener('click', ()=> { document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); $('navEvents').classList.add('active'); showPanel('events'); });
-$('navResults').addEventListener('click', ()=> { document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); $('navResults').classList.add('active'); showPanel('results'); });
-
-/* init */
-setTimeout(()=> {
-  getLeaderFromSession();
-  showPanel('home');
-}, 300);
-
-/* ---------- Populate event select (leader only sees events; can filter later) ---------- */
-function populateEventSelect(){
-  const sel = $('leaderEventSelect'); if(!sel) return;
-  const current = sel.value;
-  sel.innerHTML = '<option value="">-- choose event --</option>';
-  CACHE.events.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||'')).forEach(ev=>{
-    sel.innerHTML += `<option value="${escapeHtml(ev.id)}" data-type="${escapeHtml(ev.type||'')}" data-level="${escapeHtml(ev.level||'General')}">${escapeHtml(ev.name)} (${escapeHtml(ev.level||'')})</option>`;
+/* ---------- Basic wiring ---------- */
+/* Sidebar buttons: they have data-target attributes */
+document.querySelectorAll('.sidebar [data-target]').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
+    document.querySelectorAll('#panels > section').forEach(s => s.classList.add('d-none'));
+    const id = btn.getAttribute('data-target');
+    const panel = document.querySelector(id);
+    if(panel) panel.classList.remove('d-none');
+    // active state
+    document.querySelectorAll('.sidebar .nav-item button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  if(current) sel.value = current;
+});
+// Open students by default (if button exists)
+if($('btnStudents')) $('btnStudents').click();
+
+// logout
+$('logoutBtn')?.addEventListener('click', ()=> { sessionStorage.clear(); location.href='index.html'; });
+
+/* ---------- Global render orchestrator ---------- */
+function renderAll(){
+  populateDropdowns();
+  renderStudents();
+  renderTeams();
+  renderEvents();
+  renderAttendanceSessions();
+  renderApprovals();
+  renderResults();
+  renderReports();
 }
 
-/* ---------- When leader selects event: show members (filtered by level) ---------- */
-$('leaderEventSelect').addEventListener('change', ()=>{
-  const evId = $('leaderEventSelect').value;
-  const ev = CACHE.events.find(e => String(e.id) === String(evId));
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leaderTeamId') || null;
-  const membersWrap = $('participantsWrap'); membersWrap.innerHTML = '';
-  if(!ev){
-    $('eventMeta').textContent = 'Level: — · Type: — · Limits: —';
+/* ---------- Students ---------- */
+function studentIdExists(id){ return CACHE.students.some(s => String(s.id) === String(id)); }
+function studentNameExists(name){ if(!name) return false; const n = String(name).trim().toLowerCase(); return CACHE.students.some(s => String(s.name||'').trim().toLowerCase() === n); }
+
+/* Excel preview & import (students) */
+let studentsPreviewRows = [];
+$('previewStudents')?.addEventListener('click', ()=> {
+  const f = $('studentFile')?.files?.[0];
+  if(!f) return toast('Select students Excel','danger');
+  const r = new FileReader();
+  r.onload = e => {
+    const wb = XLSX.read(e.target.result, { type:'binary' });
+    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' });
+    studentsPreviewRows = json.slice(0,500);
+    renderStudentsPreview();
+  };
+  r.readAsBinaryString(f);
+});
+function renderStudentsPreview(){
+  const wrap = $('studentsPreview'); if(!wrap) return;
+  if(!studentsPreviewRows.length){ wrap.innerHTML = '<div class="muted">No preview</div>'; return; }
+  let html = `<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>`;
+  studentsPreviewRows.forEach(r => {
+    const chess = (r['Chess']||r['Chess Number']||r['ID']||'').toString();
+    const name = (r['Name']||r['name']||'').toString();
+    const level = (r['Level']||r['level']||'Senior').toString();
+    const team = (r['Team']||r['team']||'').toString();
+    html += `<tr><td>${escapeHtml(chess)}</td><td>${escapeHtml(name)}</td><td>${escapeHtml(level)}</td><td>${escapeHtml(team)}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+$('importStudents')?.addEventListener('click', async ()=>{
+  if(!studentsPreviewRows.length) return toast('No preview','danger');
+  const teamNameToId = {}; CACHE.teams.forEach(t => { if(t.name) teamNameToId[String(t.name).trim().toLowerCase()] = t.id; });
+  const updates = {}; let imported=0, skipped=0;
+  studentsPreviewRows.forEach(r=>{
+    const chessRaw = (r['Chess']||r['Chess Number']||r['ID']||'').toString().trim();
+    const nameRaw = (r['Name']||r['name']||'').toString().trim();
+    const levelRaw = (r['Level']||r['level']||'Senior').toString().trim();
+    if(!chessRaw || !nameRaw){ skipped++; return; }
+    const chess = chessRaw, name = nameRaw;
+    if(studentIdExists(chess) || studentNameExists(name)){ skipped++; return; }
+    const teamName = (r['Team']||r['team']||'').toString().trim();
+    const teamId = teamName ? (teamNameToId[teamName.toLowerCase()] || null) : null;
+    updates[`students/${encodeKey(chess)}`] = { id: chess, name, level: levelRaw||'Senior', teamId: teamId ? String(teamId) : null };
+    imported++;
+  });
+  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+  studentsPreviewRows = []; $('studentsPreview') && ($('studentsPreview').innerHTML=''); $('studentFile') && ($('studentFile').value='');
+  toast(`Imported ${imported}, skipped ${skipped}`);
+});
+
+/* Manual add student */
+$('addManualStudent')?.addEventListener('click', async ()=>{
+  const chess = $('manualChess')?.value?.trim();
+  const name = $('manualName')?.value?.trim();
+  const level = $('manualLevel')?.value || 'Senior';
+  const teamId = $('manualTeam')?.value || null;
+  if(!chess || !name) return toast('Enter chess & name','danger');
+  if(studentIdExists(chess)) return toast('Chess already exists','danger');
+  if(studentNameExists(name)) return toast('Name already exists','danger');
+  await set(ref(db, `students/${encodeKey(chess)}`), { id: chess, name, level, teamId: teamId ? String(teamId) : null });
+  $('manualChess') && ($('manualChess').value='');
+  $('manualName') && ($('manualName').value='');
+  $('manualTeam') && ($('manualTeam').value='');
+  toast('Student saved');
+});
+
+/* Render students table */
+function renderStudents(){
+  const tbody = $('studentsTable');
+  if(!tbody) return;
+  const q = ($('searchStudents')?.value || '').trim().toLowerCase();
+  if(!CACHE.students.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No students</td></tr>'; return; }
+  CACHE.students.sort((a,b)=> String(a.id).localeCompare(String(b.id)));
+  const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t.name);
+  let html = '';
+  CACHE.students.forEach(s => {
+    const team = s.teamId ? (teamMap[s.teamId] || 'Unknown') : 'Unassigned';
+    const text = `${s.id} ${s.name} ${team} ${s.level||''}`.toLowerCase();
+    if(q && !text.includes(q)) return;
+    html += `<tr data-key="${encodeKey(s.id)}"><td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.level||'Senior')}</td><td>${escapeHtml(team)}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-student">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-student">Delete</button></td></tr>`;
+  });
+  tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No students</td></tr>';
+}
+
+/* Students action handlers (edit / delete) */
+$('studentsTable')?.addEventListener('click', async (e)=>{
+  const tr = e.target.closest('tr'); if(!tr) return;
+  const dbKey = tr.dataset.key;
+  if(e.target.classList.contains('btn-delete-student')){
+    if(!confirm('Delete student?')) return;
+    await remove(ref(db, `students/${dbKey}`));
+    toast('Deleted student');
+    return;
+  } else if(e.target.classList.contains('btn-edit-student')){
+    const snap = await get(ref(db, `students/${dbKey}`));
+    const s = snap.val();
+    if(!s) return toast('Student not found','danger');
+    $('editStudentDbKey') && ($('editStudentDbKey').value = dbKey);
+    $('editChess') && ($('editChess').value = s.id || '');
+    $('editName') && ($('editName').value = s.name || '');
+    $('editLevel') && ($('editLevel').value = s.level || 'Senior');
+    populateDropdowns();
+    setTimeout(()=> $('editTeam') && ($('editTeam').value = s.teamId || ''), 60);
+    new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+  }
+});
+
+/* Edit student save/delete handled in Part 3 HTML bindings (IDs are present) */
+$('editStudentForm')?.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = $('editStudentDbKey')?.value;
+  if(!dbKey) return toast('Missing key','danger');
+  const newName = $('editName')?.value?.trim();
+  const newLevel = $('editLevel')?.value || 'Senior';
+  const newTeam = $('editTeam')?.value || null;
+  if(!newName) return toast('Name required','danger');
+  const curSnap = await get(ref(db, `students/${dbKey}`));
+  const cur = curSnap.val();
+  if(!cur) return toast('Not found','danger');
+  if(String(newName).trim().toLowerCase() !== String(cur.name||'').trim().toLowerCase()){
+    if(studentNameExists(newName)) return toast('Name exists','danger');
+  }
+  await update(ref(db, `students/${dbKey}`), { name: newName, level: newLevel, teamId: newTeam ? String(newTeam) : null });
+  toast('Student updated');
+  bootstrap.Modal.getInstance(document.getElementById('editStudentModal'))?.hide();
+});
+$('deleteStudentBtn')?.addEventListener('click', async ()=>{
+  if(!confirm('Delete student?')) return;
+  const dbKey = $('editStudentDbKey')?.value;
+  if(!dbKey) return toast('Missing');
+  await remove(ref(db, `students/${dbKey}`));
+  toast('Deleted');
+  bootstrap.Modal.getInstance(document.getElementById('editStudentModal'))?.hide();
+});
+
+/* ---------- Teams ---------- */
+/* Create team */
+$('saveTeam')?.addEventListener('click', async ()=>{
+  const name = $('teamName')?.value?.trim();
+  const leader = $('teamLeader')?.value || null;
+  const pwd = $('teamPassword')?.value?.trim() || '';
+  if(!name) return toast('Team name required','danger');
+  const p = push(ref(db, 'teams'));
+  const id = Date.now().toString() + Math.floor(Math.random()*9999);
+  await set(p, { id, name, leaderId: leader ? String(leader) : null, password: pwd, locked:false, score:0 });
+  $('teamName') && ($('teamName').value=''); $('teamLeader') && ($('teamLeader').value=''); $('teamPassword') && ($('teamPassword').value='');
+  toast('Team created');
+});
+
+/* Render teams with attendance % and edit/delete buttons */
+function computeTeamAttendancePct(teamId){
+  const attend = CACHE.attendance || {};
+  const members = CACHE.students.filter(s => String(s.teamId) === String(teamId)).map(s => String(s.id));
+  if(!members.length) return 0;
+  let total=0, present=0;
+  for(const k in attend){
+    const s = attend[k];
+    if(!s || !s.students) continue;
+    members.forEach(m => {
+      if(s.students && s.students[m] !== undefined){
+        total++;
+        if(String(s.students[m]).toLowerCase() === 'present') present++;
+      }
+    });
+  }
+  return total ? Math.round((present/total)*100) : 0;
+}
+function renderTeams(){
+  const tbody = $('teamsTable');
+  if(!tbody) return;
+  if(!CACHE.teams.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No teams</td></tr>'; return; }
+  CACHE.teams.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+  let html='';
+  CACHE.teams.forEach(t=>{
+    const leader = CACHE.students.find(s => String(s.id) === String(t.leaderId));
+    const members = CACHE.students.filter(s => String(s.teamId) === String(t.id)).length;
+    const pct = computeTeamAttendancePct(t.id);
+    const lockBadge = t.locked ? ' <span class="badge bg-danger">Locked</span>' : '';
+    html += `<tr data-key="${t.id}"><td>${escapeHtml(t.name)}${lockBadge}</td><td>${leader ? escapeHtml(leader.name+' ('+leader.id+')') : '-'}</td><td>${members}</td><td>${pct}%</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-team" data-key="${t.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-team" data-key="${t.id}">Delete</button></td></tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+/* Team actions: edit / delete */
+$('teamsTable')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const id = btn.dataset.key;
+  if(btn.classList.contains('btn-delete-team')){
+    if(!confirm('Delete team?')) return;
+    const dbKey = KEYMAP.teams[id] || id;
+    if(dbKey) await remove(ref(db, `teams/${dbKey}`));
+    // unassign members
+    const updates = {};
+    CACHE.students.filter(s => String(s.teamId) === String(id)).forEach(s => updates[`students/${encodeKey(s.id)}/teamId`] = null);
+    if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+    toast('Team deleted');
+    return;
+  } else if(btn.classList.contains('btn-edit-team')){
+    const dbKey = KEYMAP.teams[id] || id;
+    const snap = await get(ref(db, `teams/${dbKey}`));
+    const t = snap.val();
+    if(!t) return toast('Team not found','danger');
+    // Put values into modal inputs (modal ids from Part 3)
+    $('fullEditTeamDbKey') && ($('fullEditTeamDbKey').value = dbKey);
+    $('fullEditTeamId') && ($('fullEditTeamId').value = t.id || id);
+    $('editTeamName') && ($('editTeamName').value = t.name || '');
+    $('editTeamLeader') && ($('editTeamLeader').value = t.leaderId || '');
+    $('editTeamPassword') && ($('editTeamPassword').value = t.password || '');
+    $('editTeamLock') && ($('editTeamLock').checked = !!t.locked);
+    const membersWrap = $('editTeamMembers'); if(membersWrap){
+      membersWrap.innerHTML = '';
+      const members = CACHE.students.filter(s => String(s.teamId) === String(t.id));
+      if(!members.length) membersWrap.innerHTML = '<div class="muted">No members</div>';
+      else members.forEach(m => membersWrap.innerHTML += `<div style="padding:6px 4px;border-bottom:1px solid #f2f6ff">${escapeHtml(m.name)} <span class="muted">(${escapeHtml(m.id)})</span></div>`);
+    }
+    new bootstrap.Modal(document.getElementById('fullEditTeamModal')).show();
+  }
+});
+
+/* Submit team edit from modal */
+$('fullEditTeamForm')?.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = $('fullEditTeamDbKey')?.value;
+  if(!dbKey) return toast('Missing key','danger');
+  const name = $('editTeamName')?.value?.trim() || '';
+  const leader = $('editTeamLeader')?.value || null;
+  const pwd = $('editTeamPassword')?.value || '';
+  const locked = !!$('editTeamLock')?.checked;
+  await update(ref(db, `teams/${dbKey}`), { name, leaderId: leader ? String(leader) : null, password: pwd, locked });
+  toast('Team updated');
+  bootstrap.Modal.getInstance(document.getElementById('fullEditTeamModal'))?.hide();
+});
+$('deleteTeamBtnModal')?.addEventListener('click', async ()=>{
+  if(!confirm('Delete this team?')) return;
+  const dbKey = $('fullEditTeamDbKey')?.value;
+  const teamId = $('fullEditTeamId')?.value;
+  if(!dbKey) return toast('Missing key','danger');
+  await remove(ref(db, `teams/${dbKey}`));
+  const updates = {};
+  CACHE.students.filter(s => String(s.teamId) === String(teamId)).forEach(s => updates[`students/${encodeKey(s.id)}/teamId`] = null);
+  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+  toast('Team deleted');
+  bootstrap.Modal.getInstance(document.getElementById('fullEditTeamModal'))?.hide();
+});
+
+/* ---------- Events ---------- */
+/* We will allow same name if level/type differ by generating unique key id and storing name/type/level.
+   However to avoid duplicates on import/creation we check for exact name+type+level match. */
+
+$('saveEvent')?.addEventListener('click', async ()=>{
+  const name = $('eventName')?.value?.trim();
+  const type = $('eventType')?.value || 'Non-Stage';
+  const level = $('eventLevel')?.value || 'General';
+  const desc = $('eventDescription')?.value?.trim() || '';
+  if(!name) return toast('Event name required','danger');
+  // check uniqueness by name+type+level
+  const exists = CACHE.events.some(ev => String(ev.name||'').trim().toLowerCase() === name.toLowerCase() &&
+    String(ev.type||'') === String(type) && String(ev.level||'') === String(level));
+  if(exists) return toast('Event already exists (same name/type/level)','danger');
+  const p = push(ref(db, 'events'));
+  const id = Date.now().toString() + Math.floor(Math.random()*9999);
+  await set(p, { id, name, type, level, description: desc, status:'Open', createdAt: Date.now() });
+  $('eventName') && ($('eventName').value=''); $('eventDescription') && ($('eventDescription').value='');
+  toast('Event added');
+});
+
+/* import events preview/import (allows same name if level/type differ) */
+let eventsPreviewRows = [];
+$('previewEvents')?.addEventListener('click', ()=> {
+  const f = $('eventFile')?.files?.[0];
+  if(!f) return toast('Choose file','danger');
+  const r = new FileReader();
+  r.onload = e => {
+    const wb = XLSX.read(e.target.result, { type:'binary' });
+    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' }).slice(0,500);
+    eventsPreviewRows = json;
+    let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th></tr></thead><tbody>';
+    json.forEach(rw => html += `<tr><td>${escapeHtml(rw['Name']||rw['Event']||rw['name']||'')}</td><td>${escapeHtml(rw['Type']||rw['type']||'')}</td><td>${escapeHtml(rw['Level']||rw['level']||'')}</td><td>${escapeHtml(rw['Description']||rw['description']||'')}</td></tr>`);
+    html += '</tbody></table>';
+    $('eventsPreview') && ($('eventsPreview').innerHTML = html);
+  };
+  r.readAsBinaryString(f);
+});
+$('importEvents')?.addEventListener('click', async ()=>{
+  if(!eventsPreviewRows.length) return toast('No preview','danger');
+  const updates = {}; let imported=0, skipped=0;
+  eventsPreviewRows.forEach(rw=>{
+    const name = (rw['Name']||rw['Event']||rw['name']||'').toString().trim();
+    if(!name){ skipped++; return; }
+    const type = (rw['Type']||rw['type']||'Non-Stage').toString();
+    const level = (rw['Level']||rw['level']||'General').toString();
+    const desc = (rw['Description']||rw['description']||'').toString();
+    // check exact duplicate
+    const exists = CACHE.events.some(ev => String(ev.name||'').trim().toLowerCase() === name.toLowerCase()
+                      && String(ev.type||'') === String(type) && String(ev.level||'') === String(level));
+    if(exists){ skipped++; return; }
+    const id = Date.now().toString() + Math.floor(Math.random()*9999);
+    updates[`events/${id}`] = { id, name, type, level, description: desc, status:'Open', createdAt: Date.now() };
+    imported++;
+  });
+  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+  eventsPreviewRows = []; $('eventFile') && ($('eventFile').value=''); $('eventsPreview') && ($('eventsPreview').innerHTML='');
+  toast(`Imported ${imported}, skipped ${skipped}`);
+});
+
+/* Events search by type and level (if inputs present in UI) */
+function getEventSearchFilters(){
+  const q = ($('searchEvents')?.value || '').trim().toLowerCase();
+  const type = ($('filterEventType')?.value || '').trim();
+  const level = ($('filterEventLevel')?.value || '').trim();
+  return { q, type, level };
+}
+
+function renderEvents(){
+  const tbody = $('eventsTable');
+  if(!tbody) return;
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No events</td></tr>'; return; }
+  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+  const { q, type, level } = getEventSearchFilters();
+  // Build set of events that already have uploaded (published OR draft results exist) to highlight
+  const eventsWithResults = new Set(CACHE.results.map(r => String(r.eventId)));
+  let html = '';
+  CACHE.events.forEach(ev=>{
+    if(type && String(ev.type||'').toLowerCase() !== String(type).toLowerCase()) return;
+    if(level && String(ev.level||'').toLowerCase() !== String(level).toLowerCase()) return;
+    const text = `${ev.name} ${ev.type} ${ev.level} ${(ev.description||'')}`.toLowerCase();
+    if(q && !text.includes(q)) return;
+    const participated = CACHE.participations.some(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase() === 'approved');
+    const rowClass = participated ? 'participated-row' : '';
+    const highlight = eventsWithResults.has(String(ev.id)) ? 'style="background:#fff4d6"' : '';
+    html += `<tr class="${rowClass}" ${highlight} data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'General')}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event" data-key="${ev.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event" data-key="${ev.id}">Delete</button></td></tr>`;
+  });
+  tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No events</td></tr>';
+}
+
+/* events actions: edit & delete */
+$('eventsTable')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const id = btn.dataset.key;
+  if(btn.classList.contains('btn-delete-event')){
+    if(!confirm('Delete event?')) return;
+    const dbKey = KEYMAP.events[id] || id;
+    if(dbKey) await remove(ref(db, `events/${dbKey}`));
+    toast('Event removed');
+  } else if(btn.classList.contains('btn-edit-event')){
+    const dbKey = KEYMAP.events[id] || id;
+    const snap = await get(ref(db, `events/${dbKey}`));
+    const ev = snap.val();
+    if(!ev) return toast('Event not found','danger');
+    $('editEventId') && ($('editEventId').value = dbKey);
+    $('editEventName') && ($('editEventName').value = ev.name || '');
+    $('editEventType') && ($('editEventType').value = ev.type || 'Non-Stage');
+    $('editEventLevel') && ($('editEventLevel').value = ev.level || 'General');
+    $('editEventDesc') && ($('editEventDesc').value = ev.description || '');
+    new bootstrap.Modal(document.getElementById('editEventModal')).show();
+  }
+});
+$('editEventForm')?.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = $('editEventId')?.value;
+  if(!dbKey) return toast('Missing key','danger');
+  const name = $('editEventName')?.value?.trim();
+  const type = $('editEventType')?.value || 'Non-Stage';
+  const level = $('editEventLevel')?.value || 'General';
+  const desc = $('editEventDesc')?.value?.trim() || '';
+  if(!name) return toast('Name required','danger');
+  // uniqueness check excluding current
+  const other = CACHE.events.find(e => String(e.name||'').trim().toLowerCase() === name.toLowerCase() && KEYMAP.events[e.id] !== dbKey && String(e.type||'')===type && String(e.level||'')===level);
+  if(other) return toast('Another event exists with same name/type/level','danger');
+  await update(ref(db, `events/${dbKey}`), { name, type, level, description: desc });
+  toast('Event updated');
+  bootstrap.Modal.getInstance(document.getElementById('editEventModal'))?.hide();
+});
+
+/* ---------- Attendance ---------- */
+/* Load students into attendance box — grouped by team for 'all' */
+$('attMethod')?.addEventListener('change', ()=> $('attTeamWrap')?.classList.toggle('d-none', $('attMethod').value !== 'team'));
+$('loadAttendance')?.addEventListener('click', ()=> {
+  const method = $('attMethod')?.value || 'all';
+  const teamId = $('attTeam')?.value;
+  let list = [];
+  if(method === 'all') list = CACHE.students.slice();
+  else list = CACHE.students.filter(s => String(s.teamId) === String(teamId));
+  const wrap = $('attendanceBoxes'); if(!wrap) return; wrap.innerHTML = '';
+  if(method === 'all'){
+    // group by team and produce small sections per-team
+    const teamsMap = {}; CACHE.teams.forEach(t => teamsMap[t.id] = t.name);
+    const byTeam = {};
+    list.forEach(s => { const tid = s.teamId || '__unassigned'; if(!byTeam[tid]) byTeam[tid] = []; byTeam[tid].push(s); });
+    Object.keys(byTeam).forEach(tid => {
+      const title = document.createElement('div'); title.innerHTML = `<div style="font-weight:700;margin:8px 0">${escapeHtml(teamsMap[tid] || 'Unassigned')}</div>`;
+      wrap.appendChild(title);
+      const boxRow = document.createElement('div'); boxRow.style.marginBottom = '12px';
+      byTeam[tid].forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'small-box absent';
+        div.dataset.key = encodeKey(s.id);
+        div.dataset.name = s.name || '';
+        div.textContent = s.id;
+        div.title = s.name || '';
+        div.style.display = 'inline-flex';
+        div.addEventListener('click', ()=> toggleAttendanceBox(div));
+        boxRow.appendChild(div);
+      });
+      wrap.appendChild(boxRow);
+    });
+  } else {
+    list.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'small-box absent';
+      div.dataset.key = encodeKey(s.id);
+      div.dataset.name = s.name || '';
+      div.textContent = s.id;
+      div.title = s.name || '';
+      div.addEventListener('click', ()=> toggleAttendanceBox(div));
+      wrap.appendChild(div);
+    });
+  }
+  $('attendanceMarkCard') && ($('attendanceMarkCard').style.display = list.length ? 'block' : 'none');
+  $('toggleAll') && ($('toggleAll').textContent = 'Set All Present');
+});
+
+/* toggle single attendance box (flip present/absent) */
+function toggleAttendanceBox(el){
+  if(!el) return;
+  if(el.classList.contains('present')){ el.classList.remove('present'); el.classList.add('absent'); }
+  else if(el.classList.contains('absent')){ el.classList.remove('absent'); el.classList.add('present'); }
+  else el.classList.add('present');
+}
+
+/* toggle all */
+$('toggleAll')?.addEventListener('click', ()=>{
+  const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box'));
+  if(!boxes.length) return;
+  const anyAbsent = boxes.some(b => b.classList.contains('absent') || !b.classList.contains('present'));
+  if(anyAbsent){
+    boxes.forEach(b => { b.classList.remove('absent'); b.classList.add('present'); });
+    $('toggleAll').textContent = 'Set All Absent';
+  } else {
+    boxes.forEach(b => { b.classList.remove('present'); b.classList.add('absent'); });
+    $('toggleAll').textContent = 'Set All Present';
+  }
+});
+
+/* Save attendance session */
+$('saveAttendance')?.addEventListener('click', async ()=>{
+  const date = $('attDate')?.value;
+  const time = $('attTime')?.value || '';
+  if(!date) return toast('Select date','danger');
+  const desc = $('attDesc')?.value || '';
+  const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box'));
+  if(!boxes.length) return toast('Load students first','danger');
+  const studentsObj = {};
+  boxes.forEach(b => {
+    const id = decodeKey(b.dataset.key);
+    studentsObj[id] = b.classList.contains('present') ? 'Present' : 'Absent';
+  });
+  const payload = { date, time, description: desc, students: studentsObj, savedAt: Date.now() };
+  const editingKey = $('attendanceMarkCard')?.dataset.editKey;
+  if(editingKey){
+    await set(ref(db, `attendance/${editingKey}`), payload);
+    delete $('attendanceMarkCard').dataset.editKey;
+    toast('Attendance updated');
+  } else {
+    const p = push(ref(db, 'attendance'));
+    await set(p, payload);
+    toast('Attendance saved');
+  }
+  $('attendanceMarkCard') && ($('attendanceMarkCard').style.display = 'none');
+});
+
+/* render attendance sessions list */
+function renderAttendanceSessions(){
+  const tbody = $('attendanceSessions');
+  if(!tbody) return;
+  const att = CACHE.attendance || {};
+  const rows = Object.entries(att);
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No sessions</td></tr>'; return; }
+  rows.sort((a,b)=> (b[1].savedAt||0) - (a[1].savedAt||0));
+  let html='';
+  rows.forEach(([k,v])=>{
+    const count = v.students ? Object.keys(v.students).length : 0;
+    html += `<tr data-db="${k}"><td>${escapeHtml(v.date||'')}</td><td>${escapeHtml(v.time||'')}</td><td>${escapeHtml(v.description||'')}</td><td>${count}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-view-att" data-db="${k}">View</button> <button class="btn btn-sm btn-outline-secondary btn-edit-att" data-db="${k}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-att" data-db="${k}">Delete</button></td></tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+/* attendance session actions: view absentees / edit / delete */
+$('attendanceSessions')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const dbKey = btn.dataset.db;
+  const snap = await get(ref(db, `attendance/${dbKey}`));
+  const s = snap.val();
+  if(!s) return toast('Session not found','danger');
+  if(btn.classList.contains('btn-view-att')){
+    const abs = [];
+    if(s.students) for(const id in s.students) if(String(s.students[id]).toLowerCase() !== 'present') abs.push({ id, status: s.students[id] });
+    const container = $('attendanceViewContent'); if(!container) return;
+    container.innerHTML = '';
+    const title = document.createElement('div');
+    title.innerHTML = `<div style="font-weight:700">Date: ${escapeHtml(s.date)} ${escapeHtml(s.time||'')}</div><div class="muted">${escapeHtml(s.description||'')}</div><hr>`;
+    container.appendChild(title);
+    if(!abs.length) container.innerHTML += '<div class="muted">No absentees — all present</div>';
+    else {
+      const ol = document.createElement('ol');
+      abs.forEach(a => {
+        const st = CACHE.students.find(st => String(st.id) === String(a.id));
+        ol.innerHTML += `<li style="margin-bottom:6px;font-size:14px">${escapeHtml(st ? st.name : a.id)} <span class="muted">(${escapeHtml(a.id)})</span></li>`;
+      });
+      container.appendChild(ol);
+    }
+    // set PDF download
+    $('downloadAbsenteesPdf').onclick = ()=> { html2pdf().from(container).set({margin:10,filename:`absentees_${s.date}.pdf`}).save(); };
+    new bootstrap.Modal(document.getElementById('attendanceViewModal')).show();
+  } else if(btn.classList.contains('btn-edit-att')){
+    $('attendanceMarkCard') && ($('attendanceMarkCard').style.display = 'block');
+    $('attendanceMarkCard') && ($('attendanceMarkCard').dataset.editKey = dbKey);
+    $('attDate') && ($('attDate').value = s.date || '');
+    $('attTime') && ($('attTime').value = s.time || '');
+    $('attDesc') && ($('attDesc').value = s.description || '');
+    const wrap = $('attendanceBoxes'); if(!wrap) return; wrap.innerHTML = '';
+    // populate boxes for all students but set status as per saved session
+    const byTeam = {};
+    CACHE.students.forEach(st => {
+      const status = (s.students && s.students[st.id]) ? s.students[st.id] : 'Absent';
+      const div = document.createElement('div');
+      div.className = 'small-box ' + (status === 'Present' ? 'present' : 'absent');
+      div.dataset.key = encodeKey(st.id);
+      div.dataset.name = st.name || '';
+      div.textContent = st.id;
+      div.title = st.name || '';
+      div.addEventListener('click', ()=> toggleAttendanceBox(div));
+      wrap.appendChild(div);
+    });
+    toast('Loaded session — edit and Save');
+  } else if(btn.classList.contains('btn-delete-att')){
+    if(!confirm('Delete session?')) return;
+    await remove(ref(db, `attendance/${dbKey}`));
+    toast('Deleted');
+  }
+});
+
+/* ---------- Approvals (leader-submitted participations) ---------- */
+function renderApprovals(){
+  const tbody = $('approvalsTable'); if(!tbody) return;
+  const q = ($('searchApprovals')?.value || '').trim().toLowerCase();
+  const parts = CACHE.participations || [];
+  const rows = [];
+  parts.forEach(p => {
+    if(String(p.status).toLowerCase() !== 'pending') return;
+    const ev = CACHE.events.find(e => String(e.id) === String(p.eventId)) || {};
+    const student = CACHE.students.find(s => String(s.id) === String(p.studentId)) || { name: p.studentId };
+    const team = CACHE.teams.find(t => String(t.id) === String(p.teamId)) || {};
+    const text = `${ev.name||''} ${student.name||''} ${team.name||''}`.toLowerCase();
+    if(q && !text.includes(q)) return;
+    rows.push(`<tr data-key="${p.id}"><td>${escapeHtml(ev.name||p.eventId)}</td><td>${escapeHtml(student.name||p.studentId)}</td><td>${escapeHtml(team.name||p.teamId)}</td><td>${new Date(p.submittedAt||0).toLocaleString()}</td><td class="text-end"><button class="btn btn-sm btn-success btn-approve" data-key="${p.id}">Approve</button> <button class="btn btn-sm btn-danger btn-reject" data-key="${p.id}">Reject</button></td></tr>`);
+  });
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="5" class="text-center muted">No pending participations</td></tr>';
+}
+
+/* Approvals actions: approve / reject; approved entries become visible in results and can be exported */
+$('approvalsTable')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const key = btn.dataset.key; if(!key) return;
+  const dbKey = KEYMAP.participations[key] || key;
+  if(btn.classList.contains('btn-approve')){
+    await update(ref(db, `participations/${dbKey}`), { status: 'approved', approvedAt: Date.now() });
+    toast('Approved');
+  } else if(btn.classList.contains('btn-reject')){
+    await update(ref(db, `participations/${dbKey}`), { status: 'rejected', rejectedAt: Date.now() });
+    toast('Rejected');
+  }
+});
+
+/* ---------- Results ---------- */
+/* When an event is selected in the Add Results area, automatically populate participant select with approved participants */
+$('resultEvent')?.addEventListener('change', ()=>{
+  const ev = $('resultEvent')?.value;
+  const sel = $('resultSelectParticipant');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Select participant</option>';
+  if(!ev) return;
+  const participants = CACHE.participations.filter(p => String(p.eventId) === String(ev) && String(p.status||'').toLowerCase() === 'approved');
+  const map = {}; CACHE.students.forEach(s => map[s.id] = s.name);
+  participants.forEach(p => sel.innerHTML += `<option value="${escapeHtml(p.studentId)}">${escapeHtml(map[p.studentId] || p.studentId)} (${escapeHtml(p.studentId)})</option>`);
+});
+
+/* Save result (draft) as separate result rows. We'll store position as numeric 1/2/3 */
+$('saveResult')?.addEventListener('click', async ()=>{
+  const ev = $('resultEvent')?.value; if(!ev) return toast('Select event','danger');
+  const studentId = $('resultSelectParticipant')?.value; if(!studentId) return toast('Select participant','danger');
+  const pos = Number($('resultPosition')?.value); if(!pos || ![1,2,3].includes(pos)) return toast('Select position (1/2/3)','danger');
+  let pts = Number($('resultPoints')?.value) || 0; if(pts < 0) pts = 0; if(pts > 100) pts = 100;
+  // Save a result entry
+  const p = push(ref(db, 'results'));
+  const id = Date.now().toString() + Math.floor(Math.random()*9999);
+  await set(p, { id, eventId: ev, position: pos, studentId: studentId, points: pts, published:false, createdAt: Date.now() });
+  toast('Result saved (draft)');
+});
+
+/* Render results by grouping results per event, showing 1st/2nd/3rd, and providing Edit/Publish/Delete for each stored result */
+function renderResults(){
+  const tbody = $('resultsTable'); if(!tbody) return;
+  if(!CACHE.results.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No results</td></tr>'; return; }
+  // Build map eventId -> position -> resultObj
+  const map = {};
+  CACHE.results.forEach(r => {
+    if(!map[r.eventId]) map[r.eventId] = {};
+    // prefer latest created result for same event-position if duplicates exist (rare)
+    if(!map[r.eventId][r.position] || (r.createdAt || 0) > (map[r.eventId][r.position].createdAt || 0)) map[r.eventId][r.position] = r;
+  });
+  const rows = [];
+  Object.keys(map).forEach(eventId => {
+    const ev = CACHE.events.find(e => String(e.id) === String(eventId));
+    const pos = map[eventId];
+    const first = pos[1] ? (CACHE.students.find(s => String(s.id) === String(pos[1].studentId)) || { name: pos[1].studentId }) : { name:'' };
+    const second = pos[2] ? (CACHE.students.find(s => String(s.id) === String(pos[2].studentId)) || { name: pos[2].studentId }) : { name:'' };
+    const third = pos[3] ? (CACHE.students.find(s => String(s.id) === String(pos[3].studentId)) || { name: pos[3].studentId }) : { name:'' };
+    const published = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
+    const pubBadge = published ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
+    // actions: show Edit/Publish/Delete for each present result
+    let actions = '';
+    [1,2,3].forEach(pn => {
+      const r = pos[pn];
+      if(r) {
+        actions += `<div style="display:inline-block;margin-right:6px;margin-bottom:6px">
+          <button class="btn btn-sm btn-outline-primary btn-edit-result" data-key="${r.id}" data-pos="${pn}">Edit ${pn}</button>
+          <button class="btn btn-sm btn-outline-secondary btn-toggle-publish" data-key="${r.id}">${r.published ? 'Unpublish' : 'Publish'}</button>
+          <button class="btn btn-sm btn-outline-danger btn-delete-result" data-key="${r.id}">Delete</button>
+        </div>`;
+      }
+    });
+    rows.push(`<tr data-ev="${escapeHtml(eventId)}"><td>${escapeHtml(ev ? ev.name : 'Unknown')}</td><td>${escapeHtml(first.name||'')}</td><td>${escapeHtml(second.name||'')}</td><td>${escapeHtml(third.name||'')}</td><td>${pubBadge}</td><td class="text-end">${actions}</td></tr>`);
+  });
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="6" class="text-center muted">No results</td></tr>';
+}
+
+/* Results table actions (per-record) */
+$('resultsTable')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const key = btn.dataset.key;
+  if(!key) return;
+  // publish/unpublish
+  if(btn.classList.contains('btn-toggle-publish')){
+    const dbKey = KEYMAP.results[key] || key;
+    if(!dbKey) return toast('Result key not found','danger');
+    const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Result not found','danger');
+    const newVal = !r.published;
+    await update(ref(db, `results/${dbKey}`), { published: newVal, publishedAt: newVal ? Date.now() : null });
+    toast(newVal ? 'Published' : 'Unpublished');
+    // if publishing, add points to team
+    if(newVal){
+      const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+      if(stud && stud.teamId){
+        const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+        if(team){
+          const dbTeamKey = KEYMAP.teams[team.id];
+          const newScore = (Number(team.score)||0) + (Number(r.points)||0);
+          await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+        }
+      }
+    }
     return;
   }
-  // calculate limits per your rules:
-  // Senior: stage 3 / nonstage 4
-  // Junior: stage 2 / nonstage 3
-  // General & Special: unlimited (Option A)
-  let limitText = 'Unlimited';
-  if(ev.level === 'Senior'){
-    limitText = (ev.type === 'Stage') ? 'Max 3 (stage)' : 'Max 4 (non-stage)';
-  } else if(ev.level === 'Junior'){
-    limitText = (ev.type === 'Stage') ? 'Max 2 (stage)' : 'Max 3 (non-stage)';
+  // edit result -> open modal and populate selects (modal IDs exist in Part3)
+  if(btn.classList.contains('btn-edit-result')){
+    const dbKey = KEYMAP.results[key] || key;
+    const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Not found','danger');
+    const ev = CACHE.events.find(e => String(e.id) === String(r.eventId));
+    $('editResultEventName') && ($('editResultEventName').value = ev ? ev.name : '');
+    // fill participants select for the event from approved participations
+    const participants = CACHE.participations.filter(p => String(p.eventId) === String(r.eventId) && String(p.status||'').toLowerCase() === 'approved');
+    ['editResFirst','editResSecond','editResThird'].forEach(selId => {
+      const sel = $(selId);
+      if(!sel) return;
+      sel.innerHTML = '<option value="">Select</option>';
+      participants.forEach(p => {
+        const nm = (CACHE.students.find(s => String(s.id) === String(p.studentId)) || { name: p.studentId }).name;
+        sel.innerHTML += `<option value="${escapeHtml(p.studentId)}">${escapeHtml(nm)} (${escapeHtml(p.studentId)})</option>`;
+      });
+    });
+    // set values based on r.position
+    if(r.position === 1){ $('editResFirst') && ($('editResFirst').value = r.studentId); $('editPtsFirst') && ($('editPtsFirst').value = r.points || 0); }
+    if(r.position === 2){ $('editResSecond') && ($('editResSecond').value = r.studentId); $('editPtsSecond') && ($('editPtsSecond').value = r.points || 0); }
+    if(r.position === 3){ $('editResThird') && ($('editResThird').value = r.studentId); $('editPtsThird') && ($('editPtsThird').value = r.points || 0); }
+    document.getElementById('editResultForm') && (document.getElementById('editResultForm').dataset.editKey = dbKey);
+    new bootstrap.Modal(document.getElementById('editResultModal')).show();
+    return;
   }
-  $('eventMeta').textContent = `Level: ${ev.level || 'General'} · Type: ${ev.type || 'Non-Stage'} · Limits: ${limitText}`;
-
-  // choose candidate members
-  let candidates = CACHE.students.filter(s => String(s.teamId) === String(teamId));
-  if(ev.level === 'Junior') candidates = candidates.filter(s => String(s.level||'').toLowerCase() === 'junior');
-  else if(ev.level === 'Senior') candidates = candidates.filter(s => String(s.level||'').toLowerCase() === 'senior');
-  // General & Special -> no filtering (Option A)
-
-  // Build list with checkboxes; also mark already submitted participations for this event by this team
-  const existing = CACHE.participations.filter(p => String(p.eventId)===String(evId) && String(p.teamId)===String(teamId));
-  const submittedStudents = existing.map(x => String(x.studentId));
-  candidates.forEach(c => {
-    const checked = submittedStudents.includes(String(c.id)) ? 'checked' : '';
-    const disabled = submittedStudents.includes(String(c.id)) ? 'disabled' : '';
-    const html = `<div class="form-check" style="padding:6px;border-bottom:1px solid #f4f7ff">
-                    <input class="form-check-input participant-checkbox" type="checkbox" value="${escapeHtml(c.id)}" id="p_${escapeHtml(c.id)}" ${checked} ${disabled}>
-                    <label class="form-check-label" for="p_${escapeHtml(c.id)}"><span class="att-name">${escapeHtml(c.name)}</span> <span class="muted-small">(${escapeHtml(c.id)})</span></label>
-                  </div>`;
-    membersWrap.insertAdjacentHTML('beforeend', html);
-  });
-
-  // enforce selection limits live
-  enforceSelectionLimits(ev);
+  // delete result
+  if(btn.classList.contains('btn-delete-result')){
+    if(!confirm('Delete result?')) return;
+    const dbKey = KEYMAP.results[key] || key;
+    if(dbKey) await remove(ref(db, `results/${dbKey}`));
+    toast('Result deleted');
+    return;
+  }
 });
 
-/* enforce limits based on chosen event */
-function enforceSelectionLimits(ev){
-  const checkboxes = Array.from(document.querySelectorAll('#participantsWrap .participant-checkbox'));
-  if(!ev) return;
-  let max = Infinity;
-  if(ev.level === 'Senior') max = (ev.type === 'Stage') ? 3 : 4;
-  else if(ev.level === 'Junior') max = (ev.type === 'Stage') ? 2 : 3;
-  // general/special -> Infinity (Option A)
-  // disable checkboxes beyond allowed count
-  function update(){
-    const checked = checkboxes.filter(ch => ch.checked);
-    if(checked.length >= max){
-      checkboxes.forEach(ch => { if(!ch.checked) ch.disabled = true; });
+/* Edit result modal save/delete (Part3 modal buttons) */
+$('editResultForm')?.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = document.getElementById('editResultForm')?.dataset?.editKey;
+  if(!dbKey) return toast('Missing key','danger');
+  const curSnap = await get(ref(db, `results/${dbKey}`));
+  const cur = curSnap.val(); if(!cur) return toast('Not found','danger');
+  const pos = Number(cur.position);
+  let upd = {};
+  if(pos === 1){ upd.studentId = $('editResFirst')?.value || ''; upd.points = Number($('editPtsFirst')?.value) || 0; }
+  if(pos === 2){ upd.studentId = $('editResSecond')?.value || ''; upd.points = Number($('editPtsSecond')?.value) || 0; }
+  if(pos === 3){ upd.studentId = $('editResThird')?.value || ''; upd.points = Number($('editPtsThird')?.value) || 0; }
+  await update(ref(db, `results/${dbKey}`), upd);
+  toast('Result updated');
+  bootstrap.Modal.getInstance(document.getElementById('editResultModal'))?.hide();
+});
+$('deleteResultBtn')?.addEventListener('click', async ()=>{
+  const dbKey = document.getElementById('editResultForm')?.dataset?.editKey;
+  if(!dbKey) return toast('Missing key','danger');
+  if(!confirm('Delete result?')) return;
+  await remove(ref(db, `results/${dbKey}`));
+  toast('Deleted');
+  bootstrap.Modal.getInstance(document.getElementById('editResultModal'))?.hide();
+});
+
+/* ---------- Reports ---------- */
+function renderReports(){
+  const tbody = $('reportsTable'); if(!tbody) return;
+  const teams = CACHE.teams || [];
+  if(!teams.length){ tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">No data</td></tr>'; return; }
+  let html = '';
+  teams.forEach(t => {
+    const members = CACHE.students.filter(s => String(s.teamId) === String(t.id)).length;
+    const pct = computeTeamAttendancePct(t.id);
+    const score = Number(t.score) || 0;
+    html += `<tr><td>${escapeHtml(t.name)}</td><td>${members}</td><td>${pct}%</td><td>${score}</td></tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+/* ---------- Dropdowns & helpers ---------- */
+function populateDropdowns(){
+  // manualTeam
+  const manualTeam = $('manualTeam'); if(manualTeam){ manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t => manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  // teamLeader
+  const teamLeader = $('teamLeader'); if(teamLeader){ teamLeader.innerHTML = '<option value="">Choose leader (Chess #)</option>'; CACHE.students.forEach(s => teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
+  // attTeam
+  const attTeam = $('attTeam'); if(attTeam){ attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t => attTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  // editTeam (student edit modal)
+  const editTeam = $('editTeam'); if(editTeam){ editTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t => editTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  // editTeamLeader in full edit
+  const editTeamLeader = $('editTeamLeader'); if(editTeamLeader){ editTeamLeader.innerHTML = '<option value="">Select leader</option>'; CACHE.students.forEach(s => editTeamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
+  // resultEvent select
+  const resEv = $('resultEvent'); if(resEv){ resEv.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e => resEv.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)} (${escapeHtml(e.level||'')})</option>`); }
+}
+
+/* ---------- Search handlers ---------- */
+$('searchStudents')?.addEventListener('input', ()=> renderStudents());
+$('searchApprovals')?.addEventListener('input', ()=> renderApprovals());
+$('searchEvents')?.addEventListener && $('searchEvents').addEventListener('input', ()=> renderEvents());
+$('filterEventType')?.addEventListener && $('filterEventType').addEventListener('change', ()=> renderEvents());
+$('filterEventLevel')?.addEventListener && $('filterEventLevel').addEventListener('change', ()=> renderEvents());
+
+/* ---------- PDF exports (generic) ---------- */
+function downloadHtmlAsPdf(elementOrHtml, filename='export.pdf'){
+  try {
+    if(typeof elementOrHtml === 'string'){
+      const wrapper = document.createElement('div'); wrapper.innerHTML = elementOrHtml;
+      html2pdf().from(wrapper).set({ margin:10, filename }).save();
     } else {
-      checkboxes.forEach(ch => { ch.disabled = false; });
-      // keep those which were originally disabled because already submitted disabled:
-      const evId = $('leaderEventSelect').value;
-      const teamId = $('leaderTeamId').value;
-      const existing = CACHE.participations.filter(p => String(p.eventId)===String(evId) && String(p.teamId)===String(teamId));
-      const submittedStudents = existing.map(x => String(x.studentId));
-      checkboxes.forEach(ch => { if(submittedStudents.includes(String(ch.value))) ch.disabled = true; });
+      html2pdf().from(elementOrHtml).set({ margin:10, filename }).save();
     }
+  } catch(e){
+    toast('PDF generation failed','danger');
+    console.error(e);
   }
-  checkboxes.forEach(ch => ch.addEventListener('change', update));
-  update();
 }
 
-/* Submit participation (creates participation records with status 'pending') */
-$('submitParticipation').addEventListener('click', async ()=>{
-  const evId = $('leaderEventSelect').value;
-  if(!evId) return toast('Choose event','danger');
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leaderTeamId');
-  if(!teamId) return toast('Missing team id','danger');
-  const selBoxes = Array.from(document.querySelectorAll('#participantsWrap .participant-checkbox')).filter(ch => ch.checked && !ch.disabled);
-  if(!selBoxes.length) return toast('Select at least 1 member','danger');
+/* Students PDF */
+function generateStudentsPdf(){
+  let html = `<h3>Students</h3><table><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>`;
+  const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t.name);
+  CACHE.students.forEach(s => html += `<tr><td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.level||'')}</td><td>${escapeHtml(teamMap[s.teamId]||'Unassigned')}</td></tr>`);
+  html += '</tbody></table>';
+  downloadHtmlAsPdf(html, `students_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+$('btnExportStudents')?.addEventListener('click', generateStudentsPdf);
+$('downloadStudentsPdf')?.addEventListener('click', generateStudentsPdf);
 
-  // Show confirmation
-  const ev = CACHE.events.find(e => String(e.id)===String(evId));
-  const listHtml = '<ul>' + selBoxes.map(ch => {
-    const st = CACHE.students.find(s => String(s.id) === String(ch.value));
-    return `<li>${escapeHtml(st?st.name:ch.value)} (${escapeHtml(ch.value)})</li>`;
-  }).join('') + '</ul>';
-  $('confirmParticipationBody').innerHTML = `<div>Event: <b>${escapeHtml(ev.name)}</b></div><div class="muted-small">Level: ${escapeHtml(ev.level)} · Type: ${escapeHtml(ev.type)}</div><hr>${listHtml}`;
-  const modal = new bootstrap.Modal(document.getElementById('confirmParticipationModal'));
-  modal.show();
-
-  $('confirmParticipationBtn').onclick = async ()=>{
-    modal.hide();
-    // create participations
-    for(const ch of selBoxes){
-      const id = Date.now().toString() + Math.floor(Math.random()*9999);
-      const pRef = push(ref(db, 'participations'));
-      await set(pRef, { id, eventId: evId, teamId: teamId, studentId: ch.value, status: 'pending', submittedAt: Date.now() });
-    }
-    toast('Submission saved — waiting admin approval');
-    // refresh UI
-    populateEventSelect();
-    renderTeamMembers();
-  };
+/* Events PDF */
+$('downloadEventsPdf')?.addEventListener('click', ()=> {
+  let html = `<h3>Events</h3><table><thead><tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th></tr></thead><tbody>`;
+  CACHE.events.forEach(e => html += `<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.type)}</td><td>${escapeHtml(e.level||'')}</td><td>${escapeHtml(e.description||'')}</td></tr>`);
+  html += '</tbody></table>';
+  downloadHtmlAsPdf(html, `events_${new Date().toISOString().slice(0,10)}.pdf`);
 });
 
-/* Clear selection */
-$('clearSelection').addEventListener('click', ()=> {
-  document.querySelectorAll('#participantsWrap .participant-checkbox').forEach(ch=> { ch.checked=false; ch.disabled=false; });
+/* Approvals PDF (approved participations grouped by event) */
+$('downloadApprovalsPdf')?.addEventListener('click', ()=> {
+  let html = `<h3>Approved Participations</h3>`;
+  CACHE.events.forEach(ev => {
+    const approved = CACHE.participations.filter(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase() === 'approved');
+    if(!approved.length) return;
+    html += `<h4>${escapeHtml(ev.name)}</h4><ol>`;
+    approved.forEach(p => {
+      const s = CACHE.students.find(st => String(st.id) === String(p.studentId));
+      html += `<li>${escapeHtml(s ? s.name : p.studentId)} ${s ? `(${escapeHtml(s.id)})` : ''}</li>`;
+    });
+    html += `</ol>`;
+  });
+  downloadHtmlAsPdf(html, `approved_participations_${new Date().toISOString().slice(0,10)}.pdf`);
 });
 
-/* render team members (right column) */
-function renderTeamMembers(){
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leaderTeamId');
-  const wrap = $('teamMembersList'); if(!wrap) return;
-  wrap.innerHTML = '';
-  const members = CACHE.students.filter(s => String(s.teamId) === String(teamId));
-  if(!members.length){ wrap.innerHTML = '<div class="muted">No members</div>'; return; }
-  members.forEach(m => {
-    const status = '';
-    const html = `<div style="padding:8px;border-bottom:1px solid #f4f7ff"><div style="font-weight:700">${escapeHtml(m.name)}</div><div class="muted-small">${escapeHtml(m.id)} · ${escapeHtml(m.level||'')}</div></div>`;
-    wrap.insertAdjacentHTML('beforeend', html);
-  });
-  // update leader meta
-  const leader = $('leaderId').value || sessionStorage.getItem('leaderId');
-  const leaderSt = CACHE.students.find(s => String(s.id) === String(leader));
-  $('leaderName').textContent = leaderSt? leaderSt.name : leader;
-  $('leaderMeta').textContent = `Team: ${teamId || '—'} · Members: ${members.length}`;
-}
+/* ---------- Init ---------- */
+setTimeout(()=> {
+  try{ document.getElementById('current-year') && (document.getElementById('current-year').textContent = new Date().getFullYear()); }catch(e){}
+  renderAll();
+}, 400);
 
-/* ---------- Events list (readonly) ---------- */
-$('searchEventByName')?.addEventListener('input', renderEventsList);
-$('filterByType')?.addEventListener('change', renderEventsList);
-$('filterByLevel')?.addEventListener('change', renderEventsList);
-
-function renderEventsList(){
-  const wrap = $('eventsListWrap'); if(!wrap) return;
-  const q = ($('searchEventByName')?.value || '').trim().toLowerCase();
-  const typeF = $('filterByType')?.value || '';
-  const levelF = $('filterByLevel')?.value || '';
-  wrap.innerHTML = '';
-  const rows = CACHE.events.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-  if(!rows.length){ wrap.innerHTML = '<div class="muted">No events</div>'; return; }
-  rows.forEach(ev => {
-    if(q && !((ev.name||'').toLowerCase().includes(q))) return;
-    if(typeF && (ev.type||'') !== typeF) return;
-    if(levelF && (ev.level||'') !== levelF) return;
-    const html = `<div style="padding:10px;border-bottom:1px solid #f4f7ff">
-                    <div style="display:flex;justify-content:space-between;align-items:center">
-                      <div><div style="font-weight:700">${escapeHtml(ev.name)}</div><div class="muted-small">${escapeHtml(ev.level||'')} · ${escapeHtml(ev.type||'')}</div></div>
-                      <div><button class="btn btn-sm btn-outline-primary" data-ev="${escapeHtml(ev.id)}" onclick="alert('Event: ${escapeHtml(ev.name)}')">View</button></div>
-                    </div>
-                  </div>`;
-    wrap.insertAdjacentHTML('beforeend', html);
-  });
-}
-
-/* ---------- Leader results view (shows published/draft for events involving this team) ---------- */
-function renderLeaderResults(){
-  const wrap = $('leaderResultsWrap'); if(!wrap) return;
-  wrap.innerHTML = '';
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leaderTeamId');
-  // build map event -> positions from results where event participants belong to team's students
-  const teamStudentIds = new Set(CACHE.students.filter(s => String(s.teamId) === String(teamId)).map(s => String(s.id)));
-  const eventMap = {}; // eventId -> {1:{studentId,points,published},2:...,3:...}
-  CACHE.results.forEach(r => {
-    if(!eventMap[r.eventId]) eventMap[r.eventId] = {};
-    eventMap[r.eventId][r.position] = r;
-  });
-
-  const events = Object.keys(eventMap);
-  if(!events.length){ wrap.innerHTML = '<div class="muted">No results yet</div>'; return; }
-
-  events.forEach(evId => {
-    const ev = CACHE.events.find(e => String(e.id) === String(evId)) || { name: 'Unknown' };
-    // read positions
-    const p = eventMap[evId];
-    const first = p[1] ? { id: p[1].studentId, pts: p[1].points, published: p[1].published } : null;
-    const second = p[2] ? { id: p[2].studentId, pts: p[2].points, published: p[2].published } : null;
-    const third = p[3] ? { id: p[3].studentId, pts: p[3].points, published: p[3].published } : null;
-    // only show events where at least one of the winners belongs to the leader's team or just show all (choose show all)
-    // We'll render all but highlight rows where this team is involved.
-    const involved = [first,second,third].some(x => x && teamStudentIds.has(String(x.id)));
-    const highlight = involved ? 'box-shadow:0 6px 16px rgba(16,185,129,0.08);border-left:4px solid #10b981;padding:10px;margin-bottom:8px' : 'padding:10px;border-bottom:1px solid #f4f7ff;margin-bottom:8px';
-
-    const nameFor = id => { const s = CACHE.students.find(st=>String(st.id)===String(id)); return s? `${s.name} (${s.id})` : id; };
-    const pubBadge = (r) => r && r.published ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
-
-    let html = `<div style="${highlight}"><div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${escapeHtml(ev.name)}</strong> <div class="muted-small">${escapeHtml(ev.level||'')} · ${escapeHtml(ev.type||'')}</div></div><div>${pubBadge(first)||''}</div></div><div style="margin-top:8px">`;
-    html += `<div>🥇 ${first? escapeHtml(nameFor(first.id)) + ' — ' + (first.pts||0) + ' pts ' + (first.published? '': '(draft)') : '<span class="muted">—</span>'}</div>`;
-    html += `<div>🥈 ${second? escapeHtml(nameFor(second.id)) + ' — ' + (second.pts||0) + ' pts ' : '<span class="muted">—</span>'}</div>`;
-    html += `<div>🥉 ${third? escapeHtml(nameFor(third.id)) + ' — ' + (third.pts||0) + ' pts ' : '<span class="muted">—</span>'}</div>`;
-    html += `</div></div>`;
-    wrap.insertAdjacentHTML('beforeend', html);
-  });
-}
-
-/* ---------- Misc helpers ---------- */
-/* When leader clicks logout */
-$('leaderLogout').addEventListener('click', ()=> { sessionStorage.clear(); location.href = 'index.html'; });
-
-/* expose a safe method for template buttons used in renderEventsList view */
-window.alert = window.alert || function(s){ toast(String(s),'info'); };
-
+console.log('Admin Part4 loaded — Firebase listeners active');
 </script>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
