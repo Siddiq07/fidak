@@ -31,7 +31,7 @@
       color: #0f172a;
     }
 
-    /* FIX MAIN LAYOUT (IMPORTANT) --------------------------- */
+    /* MAIN LAYOUT FIX ------------------------------------- */
     .app {
       display: flex;
       flex-direction: row;
@@ -106,13 +106,15 @@
 
     /* MAIN CONTENT ---------------------------------------- */
     .content {
-      margin-left: 80px !important; /* Align beside sidebar */
+      margin-left: 80px !important;           /* ALWAYS start beside sidebar */
       padding: 20px;
       width: calc(100% - 80px) !important;
       min-height: 100vh;
+      position: relative;
+      z-index: 5;
     }
 
-    main,
+    /* REMOVE OLD WRAPPERS — FIXED */
     .container-wide,
     .page-wrapper,
     .wrapper,
@@ -141,6 +143,7 @@
       color: #6b7280;
     }
 
+    /* RESPONSIVE ------------------------------------------- */
     @media (max-width: 900px) {
       .sidebar {
         width: 70px;
@@ -219,7 +222,7 @@
 
   </aside>
 
-  <!-- Content Start -->
+  <!-- CONTENT START -->
   <main class="content">
     <div class="topbar">
       <div>
