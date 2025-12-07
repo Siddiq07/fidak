@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Panel — Art Fest (Final)</title>
+  <title>Admin Panel — Art Fest (Updated)</title>
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -36,6 +36,22 @@
     }
     .teams-group { margin-bottom:10px; padding:8px; border-radius:8px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.03) }
     .teams-group h6{margin:0 0 8px 0}
+    /* Floating tooltip for attendance */
+    .attendance-tooltip {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      background: #111827;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: 0 6px 20px rgba(2,6,23,0.2);
+      z-index: 99999;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .attendance-tooltip.show { opacity: 1; transform: translate(-50%, -110%); }
   </style>
 </head>
 <body>
@@ -46,11 +62,11 @@
       <span class="badge text-bg-primary rounded-pill"><i class="bi bi-award"></i></span>
       <div>
         <div style="font-weight:700">Admin Panel</div>
-        <div class="small-muted">Students · Teams · Events · Attendance · Approvals · Results · Reports</div>
+        <div class="small-muted">(Students · Teams · Events · Attendance · Approvals · Results · Reports)</div>
       </div>
     </div>
     <div class="d-flex gap-2 align-items-center">
-      <button id="exportStudentsPdf" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Students PDF</button>
+      <!-- Removed duplicate header text and removed the top Students PDF button as requested -->
       <button id="logoutBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i></button>
     </div>
   </div>
@@ -117,13 +133,12 @@
           </div>
         </div>
       </section>
-
-      <!-- TEAMS -->
+            <!-- TEAMS -->
       <section id="panel-teams" class="panel d-none">
         <div class="row">
           <div class="col-lg-5">
             <div class="card-neo mb-3">
-              <div class="section-title">Add / Edit Team</div>
+              <div class="section-title">Add Team</div>
               <input id="teamName" class="form-control mb-2" placeholder="Team name">
               <select id="teamLeader" class="form-select mb-2"><option value="">Leader (Chess#)</option></select>
               <input id="teamPassword" class="form-control mb-2" placeholder="Password (optional)">
@@ -212,8 +227,8 @@
 
         <div class="card-neo mb-3" id="attendanceMarkCard" style="display:none">
           <div class="section-title">Mark Attendance</div>
-          <div class="small-muted mb-2">Click chess number to toggle present/absent. Click again to see name.</div>
-          <div id="attendanceBoxes" style="padding:12px"></div>
+          <div class="small-muted mb-2">Click chess number to toggle present/absent. Tooltip will show name near clicked box.</div>
+          <div id="attendanceBoxes" style="padding:12px; position:relative"></div>
         </div>
 
         <div class="card-neo">
@@ -226,8 +241,7 @@
           </div>
         </div>
       </section>
-
-      <!-- APPROVALS -->
+            <!-- APPROVALS -->
       <section id="panel-approvals" class="panel d-none">
         <div class="card-neo mb-3">
           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -306,8 +320,61 @@
   </div>
 </main>
 
-<div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
+<!-- Full Edit Team Modal (Option 2) -->
+<div class="modal fade" id="fullEditTeamModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form id="fullEditTeamForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Team</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body row">
+        <div class="col-md-6">
+          <label class="form-label">Team Name</label>
+          <input id="editTeamName" class="form-control mb-2" required>
+          <label class="form-label">Leader (Chess#)</label>
+          <select id="editTeamLeader" class="form-select mb-2"></select>
+          <label class="form-label">Password</label>
+          <input id="editTeamPassword" class="form-control mb-2" placeholder="Password (optional)">
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="editTeamLock">
+            <label class="form-check-label" for="editTeamLock">Lock team (prevent login)</label>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Members (read only)</label>
+          <div id="editTeamMembers" style="max-height:260px; overflow:auto; padding:8px; border:1px solid #eee; border-radius:8px; background:#fafafa"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="deleteTeamBtnModal" class="btn btn-danger">Delete Team</button>
+        <button type="submit" class="btn btn-primary">Save Team</button>
+      </div>
+    </form>
+  </div>
+</div>
 
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editStudentForm" class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Student</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <label class="form-label">Chess Number (read-only)</label>
+        <input id="editChess" class="form-control mb-2" readonly>
+        <label class="form-label">Name</label>
+        <input id="editName" class="form-control mb-2" required>
+        <label class="form-label">Level</label>
+        <select id="editLevel" class="form-select mb-2"><option>Senior</option><option>Junior</option></select>
+        <label class="form-label">Team</label>
+        <select id="editTeam" class="form-select mb-2"><option value="">Unassigned</option></select>
+      </div>
+      <div class="modal-footer"><button type="button" id="deleteStudentBtn" class="btn btn-danger">Delete</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  </div>
+</div>
+
+<div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -331,7 +398,7 @@ const db = getDatabase(app);
 
 /* ---------------- Helpers ---------------- */
 const $ = id => document.getElementById(id);
-function toast(msg,type='success'){ const el=document.createElement('div'); el.className=`toast text-bg-${type} border-0`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); new bootstrap.Toast(el,{delay:2500}).show(); el.addEventListener('hidden.bs.toast',()=>el.remove()); }
+function toast(msg,type='success'){ const el=document.createElement('div'); el.className=`toast text-bg-${type} border-0`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); new bootstrap.Toast(el,{delay:2200}).show(); el.addEventListener('hidden.bs.toast',()=>el.remove()); }
 function escapeHtml(s){ if(s===undefined||s===null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 function encodeKey(k){ return encodeURIComponent(String(k)); }
 function debounce(fn, wait=200){ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); }; }
@@ -367,15 +434,7 @@ document.querySelectorAll('#tabs [data-target]').forEach(btn=>{
 
 /* ---------------- RENDERERS ---------------- */
 function renderAll(){
-  renderStudents();
-  renderTeams();
-  renderEvents();
-  renderAttendanceSessions();
-  renderApprovals();
-  renderApprovedGroups();
-  renderResults();
-  renderReports();
-  populateDropdowns();
+  renderStudents(); renderTeams(); renderEvents(); renderAttendanceSessions(); renderApprovals(); renderApprovedGroups(); renderResults(); renderReports(); populateDropdowns();
 }
 
 /* Students */
@@ -410,8 +469,7 @@ function computeTeamAttendancePct(teamId){
   return total ? Math.round((present/total)*100) : 0;
 }
 function renderTeams(){
-  const rows = [];
-  const studentsById = {}; CACHE.students.forEach(s=> studentsById[s.id]=s);
+  const rows = []; const studentsById = {}; CACHE.students.forEach(s=> studentsById[s.id]=s);
   CACHE.teams.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||'')).forEach(t=>{
     const leader = t.leaderId ? studentsById[t.leaderId] : null;
     const members = CACHE.students.filter(s=> String(s.teamId)===String(t.id)).length;
@@ -444,8 +502,7 @@ function renderEvents(){
 
 /* Attendance sessions list */
 function renderAttendanceSessions(){
-  const rows = [];
-  const att = CACHE.attendance || {};
+  const rows = []; const att = CACHE.attendance || {};
   const items = Object.entries(att).sort((a,b)=> (b[1].savedAt||0)-(a[1].savedAt||0));
   for(const [k,v] of items){
     const count = v.students ? Object.keys(v.students).length : 0;
@@ -476,14 +533,11 @@ function renderApprovals(){
   $('approvalsTable').innerHTML = rows.join('') || '<tr><td colspan="5" class="text-center muted">No pending participations</td></tr>';
 }
 
-/* Approved groups (grouped by event) */
+/* Approved groups */
 function renderApprovedGroups(){
   const approved = (CACHE.participations||[]).filter(p => p.status==='approved');
   const groups = {};
-  for(const p of approved){
-    groups[p.eventId] = groups[p.eventId] || [];
-    groups[p.eventId].push(p);
-  }
+  for(const p of approved){ groups[p.eventId] = groups[p.eventId] || []; groups[p.eventId].push(p); }
   const wrap = $('approvedGroups');
   if(!Object.keys(groups).length){ wrap.innerHTML = '<div class="muted p-3">No approved participants yet.</div>'; return; }
   let html = '';
@@ -491,7 +545,7 @@ function renderApprovedGroups(){
     const ev = CACHE.events.find(e=> e.id==evId) || { name: evId };
     html += `<div class="teams-group"><div class="d-flex justify-content-between align-items-center"><h6>${escapeHtml(ev.name)}</h6><div><button class="btn btn-sm btn-outline-secondary btn-download-approved" data-event="${escapeHtml(evId)}">PDF</button></div></div><ol>`;
     groups[evId].forEach(p => {
-      const st = CACHE.students.find(s=> s.id==p.studentId) || { name: p.studentId };
+      const st = CACHE.students.find(s=> s.id==p.studentId) || {};
       html += `<li>${escapeHtml(st.name || p.studentId)} (${escapeHtml(p.studentId)}) — ${escapeHtml((CACHE.teams.find(t=> t.id==p.teamId)||{}).name||'')}</li>`;
     });
     html += `</ol></div>`;
@@ -501,8 +555,7 @@ function renderApprovedGroups(){
 
 /* Results */
 function renderResults(){
-  const rows = [];
-  const results = (CACHE.results||[]).slice().sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
+  const rows = []; const results = (CACHE.results||[]).slice().sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
   for(const r of results){
     const ev = CACHE.events.find(e=> e.id==r.eventId) || {};
     const p1 = CACHE.participations.find(p=> p.id==r.first) || {};
@@ -527,7 +580,6 @@ function computeTeamScore(teamId){
   let sum = 0;
   for(const r of CACHE.results || []){
     if(!r.published) continue;
-    // add points to team if published and belongs to team (via participation record)
     const ids = [r.first, r.second, r.third].filter(Boolean);
     const points = [Number(r.pFirst)||0, Number(r.pSecond)||0, Number(r.pThird)||0];
     ids.forEach((pid, i) => {
@@ -553,12 +605,9 @@ function populateDropdowns(){
   const manualTeam = $('manualTeam'); manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`);
   const teamLeader = $('teamLeader'); teamLeader.innerHTML = '<option value="">Leader (Chess#)</option>'; CACHE.students.forEach(s=> teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`);
   const attTeam = $('attTeam'); attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t=> attTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`);
-  const resultEvent = $('resultEvent'); resultEvent.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e=> resultEvent.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`);
-  // result participant fill on event change
+  const editTeamLeader = $('editTeamLeader'); if(editTeamLeader){ editTeamLeader.innerHTML = '<option value="">Select leader</option>'; CACHE.students.forEach(s=> editTeamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
+  const resultEvent = $('resultEvent'); if(resultEvent){ resultEvent.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e=> resultEvent.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`); }
 }
-
-/* ---------------- Initial render call ---------------- */
-setTimeout(()=> scheduleRender(), 200);
 
 /* ---------------- Event wiring ---------------- */
 
@@ -622,15 +671,36 @@ document.getElementById('studentsTable').addEventListener('click', async (e)=>{
   if(btn.classList.contains('btn-delete-student')){ if(!confirm('Delete student?')) return; await remove(ref(db, `students/${encodeKey(id)}`)); toast('Deleted'); }
   else if(btn.classList.contains('btn-edit-student')){
     const dbKey = KEYMAP.students[id]; const snap = await get(ref(db, `students/${dbKey}`)); const s = snap.val(); if(!s) return toast('Not found','danger');
-    const newName = prompt('Edit name', s.name); if(newName===null) return; if(!newName.trim()) return toast('Name required','danger');
-    const newTeam = prompt('Team id (leave blank to unassign)', s.teamId||'');
-    const newLevel = prompt('Level (Senior/Junior)', s.level||'Senior');
-    await update(ref(db, `students/${dbKey}`), { name: newName.trim(), teamId: newTeam?String(newTeam):null, level: newLevel||s.level||'Senior' });
-    toast('Student updated');
+    $('editChess').value = s.id; $('editName').value = s.name||''; $('editLevel').value = s.level||'Senior';
+    populateDropdowns();
+    setTimeout(()=> { $('editTeam').value = s.teamId||''; }, 80);
+    document.getElementById('editStudentModal').dataset.dbKey = dbKey;
+    new bootstrap.Modal(document.getElementById('editStudentModal')).show();
   }
 });
 
-/* Teams save / edit / delete / lock toggle */
+/* Save edited student modal */
+document.getElementById('editStudentForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = document.getElementById('editStudentModal').dataset.dbKey; if(!dbKey) return toast('Missing key','danger');
+  const newName = $('editName').value.trim(); const newTeam = $('editTeam').value || null; const newLevel = $('editLevel').value || 'Senior';
+  if(!newName) return toast('Name required','danger');
+  const curSnap = await get(ref(db, `students/${dbKey}`)); const cur = curSnap.val(); if(!cur) return toast('Student not found','danger');
+  if(String(newName).trim().toLowerCase() !== String(cur.name||'').trim().toLowerCase()){
+    if(CACHE.students.some(s=> String(s.name||'').trim().toLowerCase()===String(newName).trim().toLowerCase())) return toast('Name already exists','danger');
+  }
+  await update(ref(db, `students/${dbKey}`), { name: newName, teamId: newTeam ? String(newTeam) : null, level: newLevel });
+  toast('Student updated'); bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+});
+
+/* Delete student from modal */
+$('deleteStudentBtn').addEventListener('click', async ()=>{
+  if(!confirm('Delete this student?')) return;
+  const dbKey = document.getElementById('editStudentModal').dataset.dbKey; if(!dbKey) return toast('Missing key','danger');
+  await remove(ref(db, `students/${dbKey}`)); toast('Student deleted'); bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+});
+
+/* Team save */
 $('saveTeam').addEventListener('click', async ()=>{
   const name = $('teamName').value.trim(); const leader = $('teamLeader').value||null; const pwd = $('teamPassword').value.trim()||'';
   if(!name) return toast('Team name required','danger');
@@ -641,19 +711,25 @@ $('saveTeam').addEventListener('click', async ()=>{
   toast('Team saved');
 });
 
+/* Teams table delegation: edit opens full modal, delete, lock toggle */
 document.getElementById('teamsTable').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return;
-  const id = btn.dataset.id;
-  if(btn.classList.contains('btn-delete-team')){ if(!confirm('Delete team?')) return; const dbKey = KEYMAP.teams[id]; if(dbKey) await remove(ref(db, `teams/${dbKey}`)); const updates = {}; CACHE.students.filter(s=> String(s.teamId)===String(id)).forEach(s=> updates[`students/${KEYMAP.students[s.id]}/teamId`] = null); if(Object.keys(updates).length) await update(ref(db,'/'), updates); toast('Team deleted'); }
+  const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
+  if(btn.classList.contains('btn-delete-team')){ if(!confirm('Delete team?')) return; const dbKey = KEYMAP.teams[id]; if(dbKey) await remove(ref(db, `teams/${dbKey}`)); const updates = {}; CACHE.students.filter(s=> String(s.teamId)===String(id)).forEach(s=> updates[`students/${encodeKey(s.id)}/teamId`] = null); if(Object.keys(updates).length) await update(ref(db,'/'), updates); toast('Team deleted'); }
   else if(btn.classList.contains('btn-edit-team')){
     const dbKey = KEYMAP.teams[id]; const snap = await get(ref(db, `teams/${dbKey}`)); const t = snap.val(); if(!t) return toast('Not found','danger');
-    const newName = prompt('Team name', t.name); if(newName===null) return; const newLeader = prompt('Leader Chess#', t.leaderId||''); const newPwd = prompt('Password (leave empty to keep)', '');
-    await update(ref(db, `teams/${dbKey}`), { name: newName.trim(), leaderId: newLeader?String(newLeader):null, password: newPwd?newPwd:t.password||'' });
-    toast('Team updated');
+    $('editTeamName').value = t.name||''; $('editTeamPassword').value = t.password||''; $('editTeamLock').checked = !!t.locked;
+    populateDropdowns();
+    setTimeout(()=> { $('editTeamLeader').value = t.leaderId || ''; }, 80);
+    // fill member list
+    const members = CACHE.students.filter(s=> String(s.teamId)===String(t.id)).sort((a,b)=> String(a.id).localeCompare(String(b.id)));
+    $('editTeamMembers').innerHTML = members.length ? members.map(m=>`<div>${escapeHtml(m.name)} (${escapeHtml(m.id)})</div>`).join('') : '<div class="muted">No members</div>';
+    document.getElementById('fullEditTeamModal').dataset.dbKey = dbKey;
+    document.getElementById('fullEditTeamModal').dataset.teamId = t.id;
+    new bootstrap.Modal(document.getElementById('fullEditTeamModal')).show();
   }
 });
 
-/* Team lock toggle checkbox delegation */
+/* Lock toggle change (checkbox inside table) */
 document.getElementById('teamsTable').addEventListener('change', async (e)=>{
   const cb = e.target.closest('input.lock-team'); if(!cb) return;
   const id = cb.dataset.id; const dbKey = KEYMAP.teams[id];
@@ -662,7 +738,27 @@ document.getElementById('teamsTable').addEventListener('change', async (e)=>{
   toast(cb.checked ? 'Team locked' : 'Team unlocked');
 });
 
-/* Events: create/import/edit/delete */
+/* Full edit team modal: save & delete handlers */
+document.getElementById('fullEditTeamForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = document.getElementById('fullEditTeamModal').dataset.dbKey; const teamId = document.getElementById('fullEditTeamModal').dataset.teamId;
+  if(!dbKey) return toast('Missing team key','danger');
+  const name = $('editTeamName').value.trim(); const leader = $('editTeamLeader').value||null; const pwd = $('editTeamPassword').value||''; const locked = !!$('editTeamLock').checked;
+  if(!name) return toast('Name required','danger');
+  await update(ref(db, `teams/${dbKey}`), { name, leaderId: leader ? String(leader) : null, password: pwd, locked });
+  toast('Team updated'); bootstrap.Modal.getInstance(document.getElementById('fullEditTeamModal')).hide();
+});
+document.getElementById('deleteTeamBtnModal').addEventListener('click', async ()=>{
+  if(!confirm('Delete this team?')) return;
+  const dbKey = document.getElementById('fullEditTeamModal').dataset.dbKey; const teamId = document.getElementById('fullEditTeamModal').dataset.teamId;
+  if(!dbKey) return toast('Missing team key','danger');
+  await remove(ref(db, `teams/${dbKey}`));
+  const updates = {}; CACHE.students.filter(s=> String(s.teamId)===String(teamId)).forEach(s=> updates[`students/${encodeKey(s.id)}/teamId`] = null);
+  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+  toast('Team deleted'); bootstrap.Modal.getInstance(document.getElementById('fullEditTeamModal')).hide();
+});
+
+/* Events: create/import/edit/delete (similar to earlier) */
 $('saveEvent').addEventListener('click', async ()=>{
   const name = $('eventName').value.trim(); const type = $('eventType').value; const desc = $('eventDescription').value.trim();
   if(!name) return toast('Event name required','danger');
@@ -691,10 +787,10 @@ $('importEvents').addEventListener('click', ()=>{
 document.getElementById('eventsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
   if(btn.classList.contains('btn-delete-event')){ if(!confirm('Delete event?')) return; await remove(ref(db, `events/${KEYMAP.events[id]}`)); toast('Event removed'); }
-  else if(btn.classList.contains('btn-edit-event')){ const dbKey = KEYMAP.events[id]; const snap = await get(ref(db, `events/${dbKey}`)); const ev = snap.val(); if(!ev) return toast('Not found'); const newName = prompt('Event name', ev.name); if(newName===null) return; const newType = prompt('Type', ev.type||'Non-Stage'); const newDesc = prompt('Description', ev.description||''); await update(ref(db, `events/${dbKey}`), { name: newName.trim(), type: newType||ev.type, description: newDesc||ev.description }); toast('Event updated'); }
+  else if(btn.classList.contains('btn-edit-event')){ const dbKey = KEYMAP.events[id]; const snap = await get(ref(db, `events/${dbKey}`)); const ev = snap.val(); if(!ev) return toast('Not found'); const modalName = prompt('Event name', ev.name); if(modalName===null) return; const newType = prompt('Type', ev.type||'Non-Stage'); const newDesc = prompt('Description', ev.description||''); await update(ref(db, `events/${dbKey}`), { name: modalName.trim(), type: newType||ev.type, description: newDesc||ev.description }); toast('Event updated'); }
 });
 
-/* Approvals: approve/reject -> approved group generation with PDF per event */
+/* Approvals: approve/reject and PDF download per event handled below */
 document.getElementById('approvalsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
   if(btn.classList.contains('btn-approve')){ const dbKey = KEYMAP.participations[id]; await update(ref(db, `participations/${dbKey}`), { status: 'approved', approvedAt: Date.now() }); toast('Approved'); }
@@ -703,9 +799,9 @@ document.getElementById('approvalsTable').addEventListener('click', async (e)=>{
 
 /* Download approved per event */
 document.getElementById('approvedGroups').addEventListener('click', (e)=>{
-  const btn = e.target.closest('button.btn-download-approved'); if(!btn) return;
-  const evId = btn.dataset.event; const eventObj = CACHE.events.find(x=> x.id==evId) || {};
+  const btn = e.target.closest('button.btn-download-approved'); if(!btn) return; const evId = btn.dataset.event; const eventObj = CACHE.events.find(x=> x.id==evId) || {};
   const approved = (CACHE.participations||[]).filter(p=> p.eventId==evId && p.status==='approved');
+  if(!approved.length) return toast('No approved participants for this event','warning');
   let html = `<h3>${escapeHtml(eventObj.name||evId)}</h3><ol>`;
   approved.forEach(p => { const st = CACHE.students.find(s=> s.id==p.studentId) || {}; html += `<li>${escapeHtml(st.name || p.studentId)}</li>`; });
   html += '</ol>';
@@ -713,20 +809,20 @@ document.getElementById('approvedGroups').addEventListener('click', (e)=>{
   html2pdf().from(container).set({margin:0.3, filename:`approved-${(eventObj.name||evId).replace(/\s+/g,'_')}.pdf`}).save().then(()=> container.remove());
 });
 
-/* Approvals PDF (all pending) */
+/* Approvals all PDF */
 $('approvalsPdfBtn').addEventListener('click', ()=> {
   const rows = (CACHE.participations||[]).filter(p=> p.status==='pending').map(p => {
     const ev = CACHE.events.find(e=> e.id==p.eventId) || {}; const st = CACHE.students.find(s=> s.id==p.studentId) || {};
     const tname = (CACHE.teams.find(t=> t.id==p.teamId)||{}).name||'';
     return `<tr><td>${escapeHtml(ev.name||p.eventId)}</td><td>${escapeHtml(st.name||p.studentId)}</td><td>${escapeHtml(tname)}</td><td>${new Date(p.submittedAt||0).toLocaleString()}</td></tr>`;
   }).join('');
-  const html = `<table class="table table-sm"><thead><tr><th>Event</th><th>Student</th><th>Team</th><th>Submitted</th></tr></thead><tbody>${rows}</tbody></table>`;
   if(!rows) return toast('No pending participations','warning');
-  const d = document.createElement('div'); d.style.padding='12px'; d.innerHTML = `<h3>Pending Participations</h3>` + html; document.body.appendChild(d);
+  const html = `<table class="table table-sm"><thead><tr><th>Event</th><th>Student</th><th>Team</th><th>Submitted</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const d = document.createElement('div'); d.style.padding='12px'; d.innerHTML=`<h3>Pending Participations</h3>` + html; document.body.appendChild(d);
   html2pdf().from(d).set({margin:0.3, filename:'pending_participations.pdf'}).save().then(()=> d.remove());
 });
 
-/* Results: on event select, populate participants (only approved) */
+/* Results: populate participants when event selected */
 $('resultEvent').addEventListener('change', ()=>{
   const ev = $('resultEvent').value; const participants = (CACHE.participations||[]).filter(p=> String(p.eventId)===String(ev) && p.status==='approved');
   const map = {}; CACHE.students.forEach(s=> map[s.id] = s.name);
@@ -745,6 +841,7 @@ $('addResult').addEventListener('click', async ()=>{
   toast('Result added');
 });
 
+/* Results table delegation (edit uses prompt for quick edit of participant IDs; this can be changed to modal if you want) */
 document.getElementById('resultsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
   if(btn.classList.contains('btn-delete-result')){ if(!confirm('Delete result?')) return; await remove(ref(db, `results/${KEYMAP.results[id]}`)); toast('Deleted'); }
@@ -752,9 +849,23 @@ document.getElementById('resultsTable').addEventListener('click', async (e)=>{
   else if(btn.classList.contains('btn-publish-result')){ const dbKey = KEYMAP.results[id]; const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Not found'); const newv = !r.published; await update(ref(db, `results/${dbKey}`), { published: newv, publishedAt: newv?Date.now():null }); toast(newv ? 'Published' : 'Unpublished'); }
 });
 
-/* Results published checkbox previously handled by publish button above. */
-
 /* Attendance: load / toggle / save / view only absents / by team grouping */
+/* Floating tooltip implementation: create element once */
+const attTooltip = document.createElement('div'); attTooltip.className = 'attendance-tooltip'; document.body.appendChild(attTooltip);
+let attTooltipTimer = null;
+function showAttendanceTooltip(el, text){
+  clearTimeout(attTooltipTimer);
+  attTooltip.textContent = text;
+  // position above element center
+  const rect = el.getBoundingClientRect();
+  const x = rect.left + rect.width/2 + window.scrollX;
+  const y = rect.top + window.scrollY;
+  attTooltip.style.left = x + 'px';
+  attTooltip.style.top = (y - 6) + 'px';
+  attTooltip.classList.add('show');
+  attTooltipTimer = setTimeout(()=> attTooltip.classList.remove('show'), 1500);
+}
+
 let attendanceEditKey = null;
 $('attMethod').addEventListener('change', ()=> $('attTeamWrap').classList.toggle('d-none', $('attMethod').value!=='team'));
 
@@ -764,9 +875,8 @@ $('loadAttendance').addEventListener('click', ()=>{
   if(mode==='team'){
     const members = CACHE.students.filter(s=> String(s.teamId)===String(teamId)).sort((a,b)=> String(a.id).localeCompare(String(b.id)));
     members.forEach(s => {
-      const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = s.id; div.title = s.name; div.textContent = s.id;
-      div.addEventListener('click', ()=> { if(div.classList.contains('present')){ div.classList.remove('present'); div.classList.add('absent'); } else { div.classList.remove('absent'); div.classList.add('present'); } });
-      div.addEventListener('dblclick', ()=> alert(`${s.id} — ${s.name}`)); // quick name view
+      const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = s.id; div.dataset.name = s.name||''; div.textContent = s.id;
+      div.addEventListener('click', ()=> { div.classList.toggle('present'); div.classList.toggle('absent'); showAttendanceTooltip(div, `${s.name} (${s.id})`); });
       wrap.appendChild(div);
     });
   } else {
@@ -778,9 +888,8 @@ $('loadAttendance').addEventListener('click', ()=>{
       const members = CACHE.students.filter(s=> String(s.teamId)===String(team.id)).sort((a,b)=> String(a.id).localeCompare(String(b.id)));
       const inner = document.createElement('div');
       members.forEach(s => {
-        const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = s.id; div.title = s.name; div.textContent = s.id;
-        div.addEventListener('click', ()=> { if(div.classList.contains('present')){ div.classList.remove('present'); div.classList.add('absent'); } else { div.classList.remove('absent'); div.classList.add('present'); } });
-        div.addEventListener('dblclick', ()=> alert(`${s.id} — ${s.name}`));
+        const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = s.id; div.dataset.name = s.name||''; div.textContent = s.id;
+        div.addEventListener('click', ()=> { div.classList.toggle('present'); div.classList.toggle('absent'); showAttendanceTooltip(div, `${s.name} (${s.id})`); });
         inner.appendChild(div);
       });
       group.appendChild(inner); wrap.appendChild(group);
@@ -789,12 +898,14 @@ $('loadAttendance').addEventListener('click', ()=>{
   $('attendanceMarkCard').style.display = wrap.children.length ? 'block' : 'none';
 });
 
+/* Toggle all */
 $('toggleAll').addEventListener('click', ()=>{
   const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box')); if(!boxes.length) return;
   const allPresent = boxes.every(b=> b.classList.contains('present'));
   boxes.forEach(b=> { b.classList.toggle('present', !allPresent); b.classList.toggle('absent', allPresent); });
 });
 
+/* Save attendance */
 $('saveAttendance').addEventListener('click', async ()=>{
   const date = $('attDate').value; const time = $('attTime').value||''; const desc = $('attDesc').value||'';
   if(!date) return toast('Select date','danger');
@@ -805,24 +916,22 @@ $('saveAttendance').addEventListener('click', async ()=>{
   $('attendanceMarkCard').style.display = 'none';
 });
 
-/* View/Edit attendance session: View shows absentees only */
+/* Attendance sessions view/edit */
 document.getElementById('attendanceSessions').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return; const key = btn.dataset.key;
   const snap = await get(ref(db, `attendance/${key}`)); const s = snap.val(); if(!s) return toast('Not found','danger');
   if(btn.classList.contains('btn-view-att')){
-    // show absentees only
+    // show absentees only in alert
     const abs = []; for(const id in s.students){ if(String(s.students[id]).toLowerCase()!=='present') abs.push(`${id} — ${((CACHE.students.find(st=> st.id==id)||{}).name||'')}`); }
-    if(!abs.length) return alert('No absentees — all present');
-    alert('Absentees:\n\n' + abs.join('\n'));
+    if(!abs.length) return alert('No absentees — all present'); alert('Absentees:\n\n' + abs.join('\n'));
   } else if(btn.classList.contains('btn-edit-att')){
     attendanceEditKey = key; $('attDate').value = s.date||''; $('attTime').value = s.time||''; $('attDesc').value = s.description||'';
     const wrap = $('attendanceBoxes'); wrap.innerHTML = '';
     for(const id in s.students){
       const st = CACHE.students.find(x=> x.id==id) || {}; const div = document.createElement('div');
       div.className = s.students[id]==='Present' ? 'small-box present' : 'small-box absent';
-      div.dataset.key = id; div.title = st.name||''; div.textContent = id;
-      div.addEventListener('click', ()=> { div.classList.toggle('present'); div.classList.toggle('absent'); });
-      div.addEventListener('dblclick', ()=> alert(`${id} — ${st.name||''}`));
+      div.dataset.key = id; div.dataset.name = st.name||''; div.textContent = id;
+      div.addEventListener('click', ()=> { div.classList.toggle('present'); div.classList.toggle('absent'); showAttendanceTooltip(div, `${st.name} (${id})`); });
       wrap.appendChild(div);
     }
     $('attendanceMarkCard').style.display = 'block';
@@ -830,14 +939,12 @@ document.getElementById('attendanceSessions').addEventListener('click', async (e
   }
 });
 
-/* Results helper: when adding result we already implemented above */
-/* Delete/Edit handled above */
-
-/* PDF exports: Students, Events, Approvals All */
+/* PDF exports: Students & Events */
 $('studentsPdfBtn').addEventListener('click', ()=>{
   const rows = CACHE.students.map(s=> `<tr><td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.level||'')}</td><td>${escapeHtml((CACHE.teams.find(t=> t.id==s.teamId)||{}).name||'')}</td></tr>`).join('');
   if(!rows) return toast('No students','warning');
-  const html = `<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>${rows}</tbody></table>`; const d=document.createElement('div'); d.style.padding='12px'; d.innerHTML=`<h3>Students</h3>${html}`; document.body.appendChild(d); html2pdf().from(d).set({margin:0.3, filename:'students.pdf'}).save().then(()=> d.remove());
+  const html = `<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const d=document.createElement('div'); d.style.padding='12px'; d.innerHTML=`<h3>Students</h3>${html}`; document.body.appendChild(d); html2pdf().from(d).set({margin:0.3, filename:'students.pdf'}).save().then(()=> d.remove());
 });
 $('eventsPdfBtn').addEventListener('click', ()=>{
   const rows = CACHE.events.map(e=> `<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.type)}</td><td>${escapeHtml(e.description||'')}</td></tr>`).join('');
@@ -850,14 +957,11 @@ $('searchStudents').addEventListener('input', debounce(()=> renderStudents(), 18
 $('searchEvents').addEventListener('input', debounce(()=> renderEvents(), 180));
 $('searchApprovals').addEventListener('input', debounce(()=> renderApprovals(), 180));
 
-/* Approvals table re-render when approvals change (onValue handles it) */
-function renderApprovalsAndGroupsAssistant(){ renderApprovals(); renderApprovedGroups(); } // called via scheduleRender
-
 /* Logout */
 $('logoutBtn').addEventListener('click', ()=> { sessionStorage.clear(); location.href='index.html'; });
 
-/* Small helper: on clicking attendance boxes show name (single click toggle present/absent already implemented), double-click shows name alert (set above). */
-/* Everything else is delegated so buttons won't be missing. */
+/* Initial render */
+setTimeout(()=> scheduleRender(), 250);
 
 </script>
 </body>
