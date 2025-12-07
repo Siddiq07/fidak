@@ -446,7 +446,7 @@ function selectEvent(evId){
   else if(levelFilter === 'senior') members = members.filter(m => String(m.level||'').toLowerCase() === 'senior');
 
   // limits per level/type
-  const limits = { Senior: { Stage:3, 'Non-Stage':4 }, Junior: { Stage:2, 'Non-Stage':3 } };
+  const limits = { Senior: { Stage:3, 'Off-Stage':4 }, Junior: { Stage:2, 'Off-Stage':3 } };
   // build UI boxes
   const wrap = $('membersSelection'); wrap.innerHTML = '';
   members.forEach(s => {
@@ -470,7 +470,7 @@ function toggleMemberSelect(el, ev){
   if(el.classList.contains('selected')) { el.classList.remove('selected'); updateSelectionInfo(); return; }
 
   const level = el.dataset.level || 'Senior';
-  const evType = ev.type || 'Non-Stage';
+  const evType = ev.type || 'Off-Stage';
   const allowed = (limitsLookup(level, evType));
   // count existing selected with same level
   const sel = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
@@ -480,7 +480,7 @@ function toggleMemberSelect(el, ev){
   updateSelectionInfo();
 }
 function limitsLookup(level, evType){
-  const limits = { Senior: { Stage:3, 'Non-Stage':4 }, Junior: { Stage:2, 'Non-Stage':3 } };
+  const limits = { Senior: { Stage:3, 'Off-Stage':4 }, Junior: { Stage:2, 'Off-Stage':3 } };
   if(limits[level] && limits[level][evType]) return limits[level][evType];
   // fallback
   return evType === 'Stage' ? 3 : 4;
