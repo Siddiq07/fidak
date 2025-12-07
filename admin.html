@@ -14,63 +14,90 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* --- Classic White Sidebar Style (Responsive) --- */
-    :root{
-      --bg: #f5f8ff;
-      --card: #ffffff;
-      --muted: #6b7280;
-      --accent: #2563eb;
-      --success: #10b981;
-      --danger: #ef4444;
-    }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#0f172a;background:var(--bg)}
-    .app {display:flex;min-height:100vh}
-    /* --- Compact Vertical Sidebar --- */
+    /* ======================================================
+   GLOBAL COLORS + THEME
+   ====================================================== */
+:root{
+  --bg: #f5f8ff;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-dark: #1d4ed8;
+  --success: #10b981;
+  --danger: #ef4444;
+  --shadow: rgba(15,23,42,0.06);
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+  background:var(--bg);
+  color:#0f172a;
+  overflow-x:hidden;
+}
+
+/* ======================================================
+   LAYOUT
+   ====================================================== */
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ======================================================
+   SIDEBAR (Compact Icon Menu)
+   ====================================================== */
 .sidebar{
   width:80px;
   background:#ffffff;
   border-right:1px solid #e6eefc;
-  padding:12px 10px;
+  padding:16px 10px;
   box-sizing:border-box;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:16px;
+  gap:18px;
 }
 
 .sidebar .logo{
-  font-weight:700;
+  font-size:26px;
   color:var(--accent);
-  font-size:14px;
-  text-align:center;
   margin-bottom:4px;
+  font-weight:700;
 }
 
+/* Menu items */
 .nav-item{
   width:100%;
 }
 
 .nav-item button{
   width:100%;
-  background:#f4f7ff;
-  border-radius:12px;
   border:0;
+  border-radius:14px;
   padding:14px 0;
+  font-size:22px;
+  background:#f4f7ff;
+  color:#475569;
   display:flex;
   justify-content:center;
-  align-items:center;
-  font-size:20px;
+  transition:0.2s ease;
+}
+
+.nav-item button:hover{
+  background:#e5ecff;
+  transform:translateY(-2px);
 }
 
 .nav-item button.active{
   background:linear-gradient(180deg,#5b8bff,#7a5bff);
   color:white;
+  box-shadow:0 4px 12px rgba(90,130,255,0.3);
 }
 
-.text-label{
-  display:none !important;
-}
-
+/* Logout button */
 .logout-box{
   margin-top:auto;
   width:100%;
@@ -78,23 +105,174 @@
 
 .logout-box button{
   width:100%;
+  padding:14px 0;
   border-radius:14px;
-  padding:12px 0;
+  font-size:18px;
 }
+
+/* ======================================================
+   CONTENT AREA
+   ====================================================== */
 .content{
   flex:1;
-  padding:20px;
-  margin-left:0;
+  padding:22px;
 }
-    @media (max-width:900px){
-      .sidebar{width:72px;padding:10px}
-      .sidebar .text-label{display:none}
-    }
-    /* table smaller font on mobile */
-    @media (max-width:600px) {
-      table{font-size:13px}
-      .small-box{width:44px;height:34px;font-size:12px}
-    }
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.topbar h2{
+  font-weight:800;
+  margin:0;
+}
+
+.year-label{
+  font-size:18px;
+  font-weight:600;
+  color:var(--muted);
+}
+
+.export-btn{
+  border:1px solid #d0d7ff;
+  background:white;
+  padding:10px 20px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-weight:600;
+  transition:0.2s;
+}
+
+.export-btn:hover{
+  background:#eef3ff;
+}
+
+/* ======================================================
+   CARDS
+   ====================================================== */
+.card-neo{
+  background:var(--card);
+  padding:16px;
+  border-radius:14px;
+  box-shadow:0 6px 20px var(--shadow);
+}
+
+.section-title{
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.muted{
+  color:var(--muted);
+}
+
+/* ======================================================
+   BUTTONS
+   ====================================================== */
+.btn-accent{
+  background:linear-gradient(90deg,var(--accent),var(--accent-dark));
+  border:0;
+  color:white;
+}
+
+.btn-accent:hover{
+  opacity:0.9;
+}
+
+.btn-success{
+  background:var(--success);
+  border:0;
+}
+
+.btn-danger{
+  background:var(--danger);
+  border:0;
+}
+
+/* ======================================================
+   TABLES
+   ====================================================== */
+table{
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+table thead{
+  background:#f2f6ff;
+}
+
+table td, table th{
+  padding:12px 10px !important;
+}
+
+.participated-row{
+  background:#e8fff0 !important;
+}
+
+/* ======================================================
+   ATTENDANCE BOXES
+   ====================================================== */
+.small-box{
+  width:56px;
+  height:36px;
+  background:#eef3ff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:6px;
+  margin:6px;
+  cursor:pointer;
+  font-weight:700;
+  transition:0.2s;
+}
+
+.small-box.present{
+  background:var(--success);
+  color:white;
+}
+
+.small-box.absent{
+  background:var(--danger);
+  color:white;
+}
+
+.small-box:hover{
+  transform:scale(1.06);
+}
+
+/* ======================================================
+   MOBILE DESIGN
+   ====================================================== */
+@media(max-width:900px){
+  .sidebar{
+    width:70px;
+    padding:12px 6px;
+  }
+  .nav-item button{
+    font-size:20px;
+    padding:12px 0;
+  }
+}
+
+@media(max-width:600px){
+  .content{
+    padding:16px;
+  }
+  table{
+    font-size:13px;
+  }
+  .small-box{
+    width:42px;
+    height:32px;
+    font-size:12px;
+  }
+}
   </style>
 </head>
 <body>
