@@ -32,7 +32,7 @@
     .muted{color:var(--muted)}
     .muted-small{color:var(--muted);font-size:13px}
     .btn-accent{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;border:0}
-    .small-box{width:56px;height:36px;border-radius:6px;background:#f1f5ff;display:inline-flex;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700}
+    .small-box{width:56px;height:36px;border-radius:6px;background:#f1f5ff;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700}
     .small-box.selected{background:var(--accent);color:#fff}
     .small-box.present{background:var(--success);color:#fff}
     .small-box.absent{background:var(--danger);color:#fff}
@@ -50,8 +50,9 @@
       .small-box{width:44px;height:34px;font-size:12px}
       .stats-grid{flex-direction:column}
     }
-    /* remove extra whitespace nearby nav */
     .nav-btn.active { box-shadow: inset 0 -3px 0 rgba(38,99,235,0.12); }
+    /* name popup small modal content */
+    .name-popup { padding:10px; font-weight:700; font-size:15px; }
   </style>
 </head>
 <body>
@@ -94,7 +95,7 @@
         </div>
       </div>
     </div>
-    <!-- PART 2 -->
+        <!-- PART 2 -->
 <!-- DASHBOARD -->
 <section id="panel-dashboard" class="card-neo">
   <div class="d-flex justify-content-between align-items-start">
@@ -224,6 +225,15 @@
 <input type="hidden" id="leaderTeamId">
 <input type="hidden" id="leaderStudentId">
 
+<!-- small name popup modal -->
+<div class="modal fade" id="namePopupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body name-popup" id="namePopupContent"></div>
+    </div>
+  </div>
+</div>
+
 <!-- View participation status modal -->
 <div class="modal fade" id="participationStatusModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -257,7 +267,7 @@ const db = getDatabase(app);
 
 /* helpers */
 const $ = id => document.getElementById(id);
-function toast(msg, type='success'){ const el=document.createElement('div'); el.className=`toast align-items-center text-bg-${type} border-0`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); const t=new bootstrap.Toast(el,{delay:3000}); t.show(); el.addEventListener('hidden.bs.toast', ()=> el.remove()); }
+function toast(msg, type='success'){ const el=document.createElement('div'); el.className=`toast align-items-center text-bg-${type} border-0 mb-2`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); const t=new bootstrap.Toast(el,{delay:3000}); t.show(); el.addEventListener('hidden.bs.toast', ()=> el.remove()); }
 function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 function encodeKey(k){ return encodeURIComponent(String(k)); }
 function decodeKey(k){ return decodeURIComponent(String(k)); }
@@ -294,7 +304,7 @@ document.querySelectorAll('[data-target]').forEach(btn=>{
   });
 });
 
-/* leader auto-detect & selector */
+/* leader select */
 function populateLeaderSelect(){
   const sel = $('leaderSelect');
   sel.innerHTML = '<option value="">— Choose leader / team —</option>';
@@ -313,12 +323,10 @@ function autoDetectLeader(){
   const url = new URL(location.href);
   const q = url.searchParams.get('leader') || sessionStorage.getItem('leaderId') || '';
   if(q){
-    // if matches existing student/team, apply
     const student = CACHE.students.find(s => String(s.id) === String(q));
     const team = CACHE.teams.find(t => String(t.leaderId) === String(q));
     if(student && team){
       actAsLeader(q, team.id);
-      // pre-select in dropdown
       setTimeout(()=> { $('leaderSelect').value = q; }, 200);
       return;
     }
@@ -370,7 +378,6 @@ $('btnActAsLeader').addEventListener('click', ()=> {
 /* reset button (clear session) */
 $('leaderLogout').addEventListener('click', ()=> {
   sessionStorage.removeItem('leaderId');
-  // also unselect
   $('leaderSelect').value = '';
   $('btnClearLeader').click();
 });
@@ -378,7 +385,6 @@ $('leaderLogout').addEventListener('click', ()=> {
 /* main renderAll */
 function renderAll(){
   populateLeaderSelect();
-  // auto-detect after populating
   autoDetectLeader();
   populateEventsList();
   renderLeaderDashboard();
@@ -388,7 +394,7 @@ function renderAll(){
   computeQuickStats();
 }
 
-/* ---------- EVENTS list with search/filter (only UI search fixes) ---------- */
+/* ---------- EVENTS list with search/filter ---------- */
 function populateEventsList(){
   const tbody = $('eventsList');
   const q = ($('eventSearch')?.value||'').trim().toLowerCase();
@@ -430,7 +436,6 @@ function selectEvent(evId){
   $('selectedEventMeta').textContent = `${ev.type} — ${ev.level || 'General'}`;
   $('selectedEventWrap').classList.remove('muted-small');
 
-  // must have leader selected
   if(!LEADER.active || !LEADER.teamId) {
     $('membersSelection').innerHTML = '<div class="muted-small">Act as a leader to nominate members (use selector above or ?leader=CHESS)</div>';
     return;
@@ -445,45 +450,51 @@ function selectEvent(evId){
   if(levelFilter === 'junior') members = members.filter(m => String(m.level||'').toLowerCase() === 'junior');
   else if(levelFilter === 'senior') members = members.filter(m => String(m.level||'').toLowerCase() === 'senior');
 
-  // limits per level/type
+  // limits per level/type (adjust numbers here if you want hard "2" for Stage etc)
   const limits = { Senior: { Stage:3, 'Off-Stage':4 }, Junior: { Stage:2, 'Off-Stage':3 } };
-  // build UI boxes
+
   const wrap = $('membersSelection'); wrap.innerHTML = '';
   members.forEach(s => {
     const div = document.createElement('div');
     div.className = 'small-box';
     div.dataset.id = s.id;
     div.dataset.level = s.level || '';
-    div.title = s.name || s.id;
-    div.innerHTML = `<div style="text-align:center;font-weight:700">${escapeHtml(s.id)}</div><div style="font-size:11px;margin-top:4px">${escapeHtml(s.name)}</div>`;
-    div.addEventListener('click', ()=> toggleMemberSelect(div, ev));
+    div.title = s.name || s.id; // hover shows name
+    // show only chess number visually; name visible on hover; double-click shows popup
+    div.innerHTML = `<div style="text-align:center;font-weight:700">${escapeHtml(s.id)}</div>`;
+    div.addEventListener('click', ()=> toggleMemberSelect(div, ev, limits));
+    div.addEventListener('dblclick', ()=> showNamePopup(s.name || s.id));
     wrap.appendChild(div);
   });
   $('membersSelection').dataset.evId = evId;
   updateSelectionInfo();
 }
 
+/* name popup */
+function showNamePopup(name){
+  $('namePopupContent').textContent = name;
+  const modal = new bootstrap.Modal(document.getElementById('namePopupModal'));
+  modal.show();
+}
+
 /* toggle selection enforcing per-level limits */
-function toggleMemberSelect(el, ev){
+function toggleMemberSelect(el, ev, limitsTable){
   if(!LEADER.active) return toast('Act as a leader to select members','warning');
   if(!el) return;
   if(el.classList.contains('selected')) { el.classList.remove('selected'); updateSelectionInfo(); return; }
 
   const level = el.dataset.level || 'Senior';
   const evType = ev.type || 'Off-Stage';
-  const allowed = (limitsLookup(level, evType));
+  // lookup allowed
+  const allowed = ((limitsTable[level] && limitsTable[level][evType]) ? limitsTable[level][evType] : (evType === 'Stage' ? 3 : 4));
   // count existing selected with same level
   const sel = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
   const sameLevelCount = sel.filter(b => (b.dataset.level||'') === (level||'')).length;
   if(sameLevelCount + 1 > allowed) return toast(`Limit reached for ${level} in ${ev.type} (max ${allowed})`,'danger');
+
+  // Ensure this team hasn't already submitted the same event for this student (prevent duplicates on submit too)
   el.classList.add('selected');
   updateSelectionInfo();
-}
-function limitsLookup(level, evType){
-  const limits = { Senior: { Stage:3, 'Off-Stage':4 }, Junior: { Stage:2, 'Off-Stage':3 } };
-  if(limits[level] && limits[level][evType]) return limits[level][evType];
-  // fallback
-  return evType === 'Stage' ? 3 : 4;
 }
 function updateSelectionInfo(){
   const sel = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
@@ -608,7 +619,7 @@ function renderAllStudentsBox(){
   wrap.innerHTML = '';
   CACHE.students.slice(0,200).forEach(s => {
     const div = document.createElement('div'); div.style.padding='4px'; div.style.borderBottom='1px solid #f1f5ff';
-    div.innerHTML = `<div style="font-weight:600">${escapeHtml(s.name)} <span class="muted-small">(${escapeHtml(s.id)})</span></div><div class="muted-small">Team: ${escapeHtml((CACHE.teams.find(t=>t.id===s.teamId)||{}).name||'Unassigned')}</div>`;
+    div.innerHTML = `<div style="font-weight:600">${escapeHtml(s.name)} <span class="muted-small">(${escapeHtml(s.id)})</span></div><div class="muted-small">Team: ${escapeHtml((CACHE.teams.find(t=>String(t.id)===String(s.teamId))||{}).name||'Unassigned')}</div>`;
     wrap.appendChild(div);
   });
 }
@@ -617,7 +628,6 @@ function renderAllStudentsBox(){
 function renderResultsTable(){
   const tbody = $('leaderResultsTable');
   if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="5" class="muted-small">No events</td></tr>'; return; }
-  // build map event->positions
   const evMap = {};
   CACHE.results.forEach(r => {
     if(!evMap[r.eventId]) evMap[r.eventId] = {};
@@ -670,7 +680,6 @@ $('btnDownloadTeamPdf').addEventListener('click', ()=>{
 
 /* ---------- INITIALIZE ---------- */
 setTimeout(()=> {
-  // default to dashboard visible
   document.querySelector('[data-target="#panel-dashboard"]').click();
   try{ $('current-year').textContent = new Date().getFullYear(); }catch(e){}
   renderAll();
