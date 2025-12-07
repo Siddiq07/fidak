@@ -14,285 +14,245 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* ======================================================
-   GLOBAL COLORS + THEME
-   ====================================================== */
-:root{
-  --bg: #f5f8ff;
-  --card: #ffffff;
-  --muted: #6b7280;
-  --accent: #2563eb;
-  --accent-dark: #1d4ed8;
-  --success: #10b981;
-  --danger: #ef4444;
-  --shadow: rgba(15,23,42,0.06);
+    
+
+/* RESET & BASE ---------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html,body{
-  height:100%;
-  margin:0;
-  padding:0;
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-  background:var(--bg);
-  color:#0f172a;
-  overflow-x:hidden;
-}
-/* REMOVE OLD SIDEBAR GAP COMPLETELY */
-.app, body, html {
-    margin: 0 !important;
-    padding: 0 !important;
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #f4f6ff;
+  font-family: Inter, system-ui, sans-serif;
+  overflow-x: hidden;
+  color: #0f172a;
 }
 
-.main-wrapper, .page-wrapper, .container-wide, main {
-    margin-left: 0 !important;
-    padding-left: 0 !important;
+/* SIDEBAR --------------------------------------------- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e3e8ef;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  z-index: 200;
 }
 
-/* CONTENT FULL WIDTH */
+/* Sidebar Logo */
+.sidebar .logo {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+/* Sidebar Buttons */
+.nav-item {
+  width: 100%;
+}
+
+.nav-item button {
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 14px;
+  background: #f1f5ff;
+  color: #3b4252;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: 0.2s ease;
+}
+
+.nav-item button.active {
+  background: linear-gradient(180deg, #597bff, #7a5bff);
+  color: white;
+}
+
+/* Logout Button */
+.logout-box {
+  margin-top: auto;
+  width: 100%;
+}
+
+.logout-box button {
+  width: 100%;
+  height: 60px;
+  border-radius: 14px;
+  border: 2px solid #ef4444;
+  background: white;
+  color: #ef4444;
+  font-size: 22px;
+}
+
+/* MAIN CONTENT ---------------------------------------- */
 .content {
-    flex: 1;
-    padding: 20px;
-    margin: 0 !important;
+  margin-left: 80px !important;     /* Align beside sidebar */
+  padding: 20px;
+  width: calc(100% - 80px) !important;
+  min-height: 100vh;
 }
 
-/* Also remove old white panel line */
-.content::before {
-    display: none !important;
+/* Remove space created by wrappers */
+main,
+.container-wide,
+.page-wrapper,
+.wrapper,
+.admin-container {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
 }
 
-/* ======================================================
-   LAYOUT
-   ====================================================== */
-.app{
-  display:flex;
-  min-height:100vh;
+/* DASHBOARD TOPBAR ------------------------------------ */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-/* ======================================================
-   SIDEBAR (Compact Icon Menu)
-   ====================================================== */
-.sidebar{
-  width:80px;
-  background:#ffffff;
-  border-right:1px solid #e6eefc;
-  padding:16px 10px;
-  box-sizing:border-box;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:18px;
+.topbar-title {
+  font-size: 32px;
+  font-weight: 800;
 }
 
-.sidebar .logo{
-  font-size:26px;
-  color:var(--accent);
-  margin-bottom:4px;
-  font-weight:700;
+.topbar-sub {
+  color: #6b7280;
+  margin-top: -6px;
 }
 
-/* Menu items */
-.nav-item{
-  width:100%;
+/* CARDS ------------------------------------------------ */
+.card-neo {
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+  margin-bottom: 16px;
 }
 
-.nav-item button{
-  width:100%;
-  border:0;
-  border-radius:14px;
-  padding:14px 0;
-  font-size:22px;
-  background:#f4f7ff;
-  color:#475569;
-  display:flex;
-  justify-content:center;
-  transition:0.2s ease;
+.section-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 8px;
 }
 
-.nav-item button:hover{
-  background:#e5ecff;
-  transform:translateY(-2px);
+.muted {
+  color: #6b7280;
 }
 
-.nav-item button.active{
-  background:linear-gradient(180deg,#5b8bff,#7a5bff);
-  color:white;
-  box-shadow:0 4px 12px rgba(90,130,255,0.3);
+/* TABLES ---------------------------------------------- */
+.table thead {
+  background: #eef1ff;
 }
 
-/* Logout button */
-.logout-box{
-  margin-top:auto;
-  width:100%;
+.table td, .table th {
+  vertical-align: middle;
 }
 
-.logout-box button{
-  width:100%;
-  padding:14px 0;
-  border-radius:14px;
-  font-size:18px;
+/* Green highlight for participated rows */
+.participated-row {
+  background: #e6ffe9;
 }
 
-/* ======================================================
-   CONTENT AREA
-   ====================================================== */
-.content{
-  flex:1;
-  padding:22px;
+/* BUTTONS --------------------------------------------- */
+.btn-accent {
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  color: white;
+  border: none;
 }
 
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:14px;
+.btn-danger {
+  background: #ef4444;
+  border: none;
+  color: white;
 }
 
-.topbar h2{
-  font-weight:800;
-  margin:0;
+.btn-success {
+  background: #10b981;
+  border: none;
+  color: white;
 }
 
-.year-label{
-  font-size:18px;
-  font-weight:600;
-  color:var(--muted);
+/* ATTENDANCE BOXES ------------------------------------ */
+.small-box {
+  width: 58px;
+  height: 40px;
+  border-radius: 6px;
+  background: #eef2ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.export-btn{
-  border:1px solid #d0d7ff;
-  background:white;
-  padding:10px 20px;
-  border-radius:12px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-weight:600;
-  transition:0.2s;
+.small-box.present {
+  background: #22c55e;
+  color: white;
 }
 
-.export-btn:hover{
-  background:#eef3ff;
+.small-box.absent {
+  background: #ef4444;
+  color: white;
 }
 
-/* ======================================================
-   CARDS
-   ====================================================== */
-.card-neo{
-  background:var(--card);
-  padding:16px;
-  border-radius:14px;
-  box-shadow:0 6px 20px var(--shadow);
+/* REPORT CARDS ---------------------------------------- */
+.report-card {
+  padding: 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
-.section-title{
-  font-weight:700;
-  margin-bottom:10px;
-}
-
-.muted{
-  color:var(--muted);
-}
-
-/* ======================================================
-   BUTTONS
-   ====================================================== */
-.btn-accent{
-  background:linear-gradient(90deg,var(--accent),var(--accent-dark));
-  border:0;
-  color:white;
-}
-
-.btn-accent:hover{
-  opacity:0.9;
-}
-
-.btn-success{
-  background:var(--success);
-  border:0;
-}
-
-.btn-danger{
-  background:var(--danger);
-  border:0;
-}
-
-/* ======================================================
-   TABLES
-   ====================================================== */
-table{
-  background:white;
-  border-radius:12px;
-  overflow:hidden;
-}
-
-table thead{
-  background:#f2f6ff;
-}
-
-table td, table th{
-  padding:12px 10px !important;
-}
-
-.participated-row{
-  background:#e8fff0 !important;
-}
-
-/* ======================================================
-   ATTENDANCE BOXES
-   ====================================================== */
-.small-box{
-  width:56px;
-  height:36px;
-  background:#eef3ff;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:6px;
-  margin:6px;
-  cursor:pointer;
-  font-weight:700;
-  transition:0.2s;
-}
-
-.small-box.present{
-  background:var(--success);
-  color:white;
-}
-
-.small-box.absent{
-  background:var(--danger);
-  color:white;
-}
-
-.small-box:hover{
-  transform:scale(1.06);
-}
-
-/* ======================================================
-   MOBILE DESIGN
-   ====================================================== */
-@media(max-width:900px){
-  .sidebar{
-    width:70px;
-    padding:12px 6px;
+/* MOBILE RESPONSIVE ----------------------------------- */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 70px;
+    padding: 10px;
   }
-  .nav-item button{
-    font-size:20px;
-    padding:12px 0;
+
+  .content {
+    margin-left: 70px !important;
+    width: calc(100% - 70px) !important;
+  }
+
+  .nav-item button {
+    height: 50px;
+  }
+
+  .small-box {
+    width: 44px;
+    height: 34px;
+    font-size: 12px;
+  }
+
+  .table {
+    font-size: 13px;
   }
 }
 
-@media(max-width:600px){
-  .content{
-    padding:16px;
+@media (max-width: 600px) {
+  .topbar-title {
+    font-size: 24px;
   }
-  table{
-    font-size:13px;
-  }
-  .small-box{
-    width:42px;
-    height:32px;
-    font-size:12px;
+
+  .content {
+    padding: 14px;
   }
 }
   </style>
