@@ -1,153 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Art Fest — Leader Login</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Art Fest — Entry</title>
 
-<!-- Bootstrap + Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<style>
-:root{
-  --accent:#2563eb;
-  --accent2:#7c3aed;
-  --bg:#f5f8ff;
-  --card:#ffffff;
-  --muted:#6b7280;
-}
-body{
-  background:var(--bg);
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-}
-.login-container{
-  max-width:380px;
-  margin:60px auto;
-  padding:22px;
-}
-.card-neo{
-  background:var(--card);
-  padding:22px;
-  border-radius:14px;
-  box-shadow:0 10px 32px rgba(0,0,0,0.06);
-}
-.brand{
-  font-weight:800;
-  font-size:26px;
-  color:var(--accent);
-}
-.btn-accent{
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:#fff;
-  border:0;
-  font-weight:600;
-}
-.input-icon{
-  position:absolute;
-  left:12px;
-  top:50%;
-  transform:translateY(-50%);
-  color:var(--muted);
-}
-.input-with-icon{
-  padding-left:38px;
-}
-.small-text{font-size:13px;color:var(--muted);}
-</style>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    body { background: #f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto; }
+
+    .hero { padding: 3.5rem 0; text-align:center; background: #eaf2ff; border-radius: 8px; margin-bottom: 20px; }
+
+    .role-card { border-radius: 12px; transition: .18s ease; }
+    .role-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    /* scoreboard */
+    .scoreboard-panel {
+      background: white; border-radius: 12px;
+      padding: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+    }
+    .score-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 12px; }
+
+    .team-card {
+      background: #ffffff;
+      border-radius: 10px; padding: 14px;
+      border: 1px solid #eaeaea;
+      transition: .25s ease;
+    }
+    .team-card:hover { transform: translateY(-6px); box-shadow:0 14px 30px rgba(0,0,0,.08); }
+
+    .team-name { font-weight:700; font-size:18px; }
+    .team-leader { color:#475569; font-size:13px; }
+    .score-number { font-weight:900; font-size:34px; }
+
+    .flash { animation: flashAnim .7s ease; }
+    @keyframes flashAnim {
+      0%{ transform: scale(1); }
+      40%{ transform: scale(1.05); }
+      100%{ transform: scale(1); }
+    }
+
+    footer { margin-top: 28px; color:#6b7280; text-align:center; padding: 20px; }
+
+    .small-muted { color:#6b7280; font-size:13px; }
+  </style>
 </head>
-
 <body>
 
-<div class="login-container">
-  <div class="text-center mb-4">
-    <div class="brand"><i class="bi bi-palette-fill"></i> Art Fest</div>
-    <div class="small-text">Leader Login</div>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-primary" href="#">Art Fest Management</a>
+      <div class="ms-auto small-muted">Connected: <span id="connStatus">—</span></div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+
+    <header class="hero">
+      <h1 class="display-5 fw-bold">Welcome to Art Fest</h1>
+      <p class="lead text-muted">Choose your portal — Admin, Team Leader or Participant</p>
+    </header>
+
+    <section class="row g-4 justify-content-center">
+
+      <!-- ADMIN -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card role-card shadow-sm p-4 text-center">
+          <i class="bi bi-shield-lock display-3 text-primary mb-3"></i>
+          <h4 class="mb-2">Admin Portal</h4>
+          <p class="text-muted">Manage everything centrally.</p>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal"
+                  data-role="Admin" data-page="admin.html">Login as Admin</button>
+        </div>
+      </div>
+
+      <!-- LEADER -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card role-card shadow-sm p-4 text-center">
+          <i class="bi bi-people-fill display-3 text-success mb-3"></i>
+          <h4 class="mb-2">Team Leader Portal</h4>
+          <p class="text-muted">Login with Chess # & Team Password.</p>
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#loginModal"
+                  data-role="Leader" data-page="leader.html">Login as Leader</button>
+        </div>
+      </div>
+
+      <!-- PARTICIPANT -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card role-card shadow-sm p-4 text-center">
+          <i class="bi bi-person-fill display-3 text-info mb-3"></i>
+          <h4 class="mb-2">Participant Portal</h4>
+          <p class="text-muted">Enter your Chess Number</p>
+          <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#loginModal"
+                  data-role="Participant" data-page="participant.html">Login as Participant</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCOREBOARD -->
+    <section class="mt-4 scoreboard-panel">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="m-0">Live Team Scores</h5>
+        <div class="small-muted">Last Update: <span id="lastUpdate">—</span></div>
+      </div>
+
+      <div id="scoreGrid" class="score-grid"></div>
+    </section>
+
+    <footer>&copy; <span id="current-year"></span> Art Fest</footer>
+  </main>
+
+  <!-- LOGIN MODAL -->
+  <div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="loginForm">
+          <div class="modal-header">
+            <h5 id="loginModalLabel">Login</h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+
+            <input type="hidden" id="login-role">
+            <input type="hidden" id="login-page">
+
+            <!-- Admin fields -->
+            <div id="adminFields" class="d-none">
+              <label>Admin Username</label>
+              <input id="adminUsername" class="form-control mb-3">
+              <label>Password</label>
+              <input id="adminPassword" type="password" class="form-control mb-3">
+            </div>
+
+            <!-- Leader fields -->
+            <div id="leaderFields" class="d-none">
+              <label>Chess Number</label>
+              <input id="leaderChess" class="form-control mb-3" placeholder="Example: 101">
+              <label>Team Password</label>
+              <input id="leaderPassword" type="password" class="form-control mb-3">
+            </div>
+
+            <!-- Participant -->
+            <div id="participantFields" class="d-none">
+              <label>Chess Number</label>
+              <input id="participantChess" class="form-control mb-3">
+            </div>
+
+            <div id="loginError" class="text-danger small d-none"></div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button id="loginBtn" class="btn btn-primary" type="submit">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
-  <div class="card-neo">
+  <div id="toastRoot" style="position:fixed; right:18px; bottom:18px;"></div>
 
-    <label class="form-label">Chess Number</label>
-    <div style="position:relative">
-      <i class="bi bi-person input-icon"></i>
-      <input id="loginChess" class="form-control input-with-icon" placeholder="Enter Chess #" autocomplete="off">
-    </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <label class="form-label mt-3">Team Password</label>
-    <div style="position:relative">
-      <i class="bi bi-lock input-icon"></i>
-      <input id="loginPassword" type="password" class="form-control input-with-icon" placeholder="Team password">
-    </div>
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    <button id="loginBtn" class="btn btn-accent w-100 mt-4 py-2">Login</button>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
+      authDomain: "gen7-3e139.firebaseapp.com",
+      databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
+      projectId: "gen7-3e139",
+      storageBucket: "gen7-3e139.firebasestorage.app",
+      messagingSenderId: "578412378966",
+      appId: "1:578412378966:web:f76c1e69a01a4bbfbd74f7"
+    };
 
-    <div id="loginMsg" class="text-danger small-text mt-3"></div>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  </div>
-</div>
+    const $ = id => document.getElementById(id);
 
-<!-- Firebase + Login Script -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    /* SCOREBOARD LISTENER */
+    let TEAMS = {};
+    onValue(ref(db, "teams"), snap => {
+      TEAMS = snap.val() || {};
+      renderScoreboard();
+      $("connStatus").textContent = "Connected";
+      $("lastUpdate").textContent = new Date().toLocaleTimeString();
+    });
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
-  authDomain: "gen7-3e139.firebaseapp.com",
-  databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
-  projectId: "gen7-3e139",
-  storageBucket: "gen7-3e139.firebasestorage.app",
-  messagingSenderId: "578412378966",
-  appId: "1:578412378966:web:f76c1e69a01a4bbfbd74f7"
-};
+    function renderScoreboard() {
+      const grid = $("scoreGrid");
+      grid.innerHTML = "";
+      const arr = Object.values(TEAMS)
+        .sort((a,b)=> Number(b.score||0) - Number(a.score||0));
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-const $ = id => document.getElementById(id);
-
-$('loginBtn').addEventListener('click', loginLeader);
-
-async function loginLeader(){
-  const chess = $('loginChess').value.trim();
-  const pass = $('loginPassword').value.trim();
-  const msg = $('loginMsg');
-  msg.innerHTML = "";
-
-  if(!chess || !pass){
-    msg.innerHTML = "Enter Chess # and Password.";
-    return;
-  }
-
-  const teamsSnap = await get(ref(db, 'teams'));
-  const teams = teamsSnap.val() || {};
-
-  let teamFound = null;
-
-  // find team with leader ID match
-  Object.values(teams).forEach(t => {
-    if(String(t.leaderId) === chess){
-      teamFound = t;
+      arr.forEach(team => {
+        const card = document.createElement("div");
+        card.className = "team-card";
+        card.innerHTML = `
+          <div class="team-name">${team.name || team.id}</div>
+          <div class="team-leader">Leader: ${team.leaderId || "-"}</div>
+          <div class="score-number">${team.score || 0}</div>
+        `;
+        grid.appendChild(card);
+      });
     }
-  });
 
-  if(!teamFound){
-    msg.innerHTML = "Leader not found.";
-    return;
-  }
+    /* LOGIN HANDLING */
+    document.querySelectorAll("[data-bs-target='#loginModal']").forEach(btn => {
+      btn.onclick = () => {
+        const role = btn.dataset.role;
+        const page = btn.dataset.page;
+        $("login-role").value = role;
+        $("login-page").value = page;
 
-  if((teamFound.password || "") !== pass){
-    msg.innerHTML = "Incorrect password.";
-    return;
-  }
+        $("adminFields").classList.add("d-none");
+        $("leaderFields").classList.add("d-none");
+        $("participantFields").classList.add("d-none");
 
-  // ✔ store to session
-  sessionStorage.setItem("leaderId", chess);
+        if(role === "Admin") $("adminFields").classList.remove("d-none");
+        else if(role === "Leader") $("leaderFields").classList.remove("d-none");
+        else $("participantFields").classList.remove("d-none");
+      };
+    });
 
-  // ✔ redirect leader to his team only
-  window.location.href = "leader.html?leader=" + encodeURIComponent(chess);
-}
-</script>
+    $("loginForm").onsubmit = async (e) => {
+      e.preventDefault();
+
+      const role = $("login-role").value;
+      const page = $("login-page").value;
+
+      if(role === "Admin") {
+        if($("adminUsername").value === "admin" && $("adminPassword").value === "1234") {
+          window.location = page;
+        } else $("loginError").textContent = "Invalid admin login.";
+        $("loginError").classList.remove("d-none");
+        return;
+      }
+
+      if(role === "Leader") {
+        const chess = $("leaderChess").value.trim();
+        const pass = $("leaderPassword").value.trim();
+
+        let foundTeam = null;
+
+        Object.values(TEAMS).forEach(t => {
+          if(String(t.leaderId) === chess && String(t.password) === pass) {
+            foundTeam = t;
+          }
+        });
+
+        if(foundTeam) {
+          window.location = `leader.html?leader=${encodeURIComponent(chess)}`;
+          return;
+        } else {
+          $("loginError").textContent = "Invalid Chess # or Password.";
+          $("loginError").classList.remove("d-none");
+          return;
+        }
+      }
+
+      if(role === "Participant") {
+        window.location = `participant.html?chess=${encodeURIComponent($("participantChess").value.trim())}`;
+      }
+    };
+
+    $("current-year").textContent = new Date().getFullYear();
+  </script>
 
 </body>
 </html>
