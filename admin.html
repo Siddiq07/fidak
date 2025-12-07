@@ -376,10 +376,18 @@
 
 <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
 <!-- Bootstrap JS -->
+<!-- PART 4: Full JS (paste before </body>) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-/* ---------------- Firebase ---------------- */
+/* ===========================
+   Admin: Part 4 - Full JS
+   ===========================
+   Paste this block at the end of admin.html (before </body>).
+   It replaces previous script code and wires all UI.
+*/
+
+/* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
@@ -396,32 +404,72 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ---------------- Helpers ---------------- */
+/* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
-function toast(msg,type='success'){ const el=document.createElement('div'); el.className=`toast text-bg-${type} border-0`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); new bootstrap.Toast(el,{delay:2200}).show(); el.addEventListener('hidden.bs.toast',()=>el.remove()); }
+function toast(msg, type='success'){
+  const root = $('toastRoot');
+  const el = document.createElement('div');
+  el.className = `toast align-items-center text-bg-${type} border-0`;
+  el.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+  root.appendChild(el);
+  const t = new bootstrap.Toast(el, { delay: 3000 });
+  t.show();
+  el.addEventListener('hidden.bs.toast', ()=> el.remove());
+}
 function escapeHtml(s){ if(s===undefined||s===null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 function encodeKey(k){ return encodeURIComponent(String(k)); }
-function debounce(fn, wait=200){ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); }; }
+function debounce(fn, wait=180){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); }; }
 
-/* ---------------- Caches ---------------- */
-let CACHE = { students:[], teams:[], events:[], participations:[], results:[], attendance:{} };
-let KEYMAP = { students:{}, teams:{}, events:{}, participations:{}, results:{} };
+/* ---------- caches & maps ---------- */
+let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
+let KEYMAP = { students: {}, teams: {}, events: {}, participations: {}, results: {} };
 
-/* ---------------- DB listeners (throttled UI render) ---------------- */
-function scheduleRender(){
-  if(window._adminRenderScheduled) return;
-  window._adminRenderScheduled = true;
-  setTimeout(()=>{ window._adminRenderScheduled=false; renderAll(); }, 120);
-}
+/* ---------- db refs & listeners ---------- */
+const studentsRef = ref(db, 'students');
+const teamsRef = ref(db, 'teams');
+const eventsRef = ref(db, 'events');
+const partsRef = ref(db, 'participations');
+const resultsRef = ref(db, 'results');
+const attendanceRef = ref(db, 'attendance');
 
-onValue(ref(db,'students'), snap => { const obj = snap.val()||{}; CACHE.students = Object.values(obj); KEYMAP.students = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.students[v.id]=k; }); scheduleRender(); });
-onValue(ref(db,'teams'), snap => { const obj = snap.val()||{}; CACHE.teams = Object.values(obj); KEYMAP.teams = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.teams[v.id]=k; }); scheduleRender(); });
-onValue(ref(db,'events'), snap => { const obj = snap.val()||{}; CACHE.events = Object.values(obj); KEYMAP.events = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.events[v.id]=k; }); scheduleRender(); });
-onValue(ref(db,'participations'), snap => { const obj = snap.val()||{}; CACHE.participations = Object.values(obj); KEYMAP.participations = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.participations[v.id]=k; }); scheduleRender(); });
-onValue(ref(db,'results'), snap => { const obj = snap.val()||{}; CACHE.results = Object.values(obj); KEYMAP.results = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id!==undefined) KEYMAP.results[v.id]=k; }); scheduleRender(); });
-onValue(ref(db,'attendance'), snap => { CACHE.attendance = snap.val()||{}; scheduleRender(); });
+function scheduleRender(){ if(window._renderPending) return; window._renderPending = true; setTimeout(()=>{ window._renderPending=false; renderAll(); }, 120); }
 
-/* ---------------- UI Tabs ---------------- */
+onValue(studentsRef, snap => {
+  const obj = snap.val() || {};
+  CACHE.students = Object.values(obj);
+  KEYMAP.students = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id !== undefined) KEYMAP.students[v.id] = k; });
+  scheduleRender();
+});
+onValue(teamsRef, snap => {
+  const obj = snap.val() || {};
+  CACHE.teams = Object.values(obj);
+  KEYMAP.teams = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id !== undefined) KEYMAP.teams[v.id] = k; });
+  scheduleRender();
+});
+onValue(eventsRef, snap => {
+  const obj = snap.val() || {};
+  CACHE.events = Object.values(obj);
+  KEYMAP.events = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id !== undefined) KEYMAP.events[v.id] = k; });
+  scheduleRender();
+});
+onValue(partsRef, snap => {
+  const obj = snap.val() || {};
+  CACHE.participations = Object.values(obj);
+  KEYMAP.participations = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id !== undefined) KEYMAP.participations[v.id] = k; });
+  scheduleRender();
+});
+onValue(resultsRef, snap => {
+  const obj = snap.val() || {};
+  CACHE.results = Object.values(obj);
+  KEYMAP.results = {}; Object.entries(obj).forEach(([k,v])=> { if(v && v.id !== undefined) KEYMAP.results[v.id] = k; });
+  scheduleRender();
+});
+onValue(attendanceRef, snap => {
+  CACHE.attendance = snap.val() || {};
+  scheduleRender();
+});
+
+/* ---------- UI: tabs ---------- */
 document.querySelectorAll('#tabs [data-target]').forEach(btn=>{
   btn.addEventListener('click', ()=> {
     document.querySelectorAll('.panel').forEach(p => p.classList.add('d-none'));
@@ -432,15 +480,27 @@ document.querySelectorAll('#tabs [data-target]').forEach(btn=>{
   });
 });
 
-/* ---------------- RENDERERS ---------------- */
+/* shortcut nav */
+$('logoutBtn')?.addEventListener('click', ()=> { sessionStorage.clear(); location.href='index.html'; });
+
+/* ---------- Renderers ---------- */
+
 function renderAll(){
-  renderStudents(); renderTeams(); renderEvents(); renderAttendanceSessions(); renderApprovals(); renderApprovedGroups(); renderResults(); renderReports(); populateDropdowns();
+  renderStudents();
+  renderTeams();
+  renderEvents();
+  renderAttendanceSessions();
+  renderApprovals();
+  renderApprovedGroups();
+  renderResults();
+  renderReports();
+  populateDropdowns();
 }
 
 /* Students */
 function renderStudents(){
-  const q = ($('searchStudents').value||'').trim().toLowerCase();
-  const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
+  const q = ($('searchStudents')?.value||'').trim().toLowerCase();
+  const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t.name);
   const rows = [];
   CACHE.students.slice().sort((a,b)=> String(a.id).localeCompare(String(b.id))).forEach(s=>{
     const team = s.teamId ? (teamMap[s.teamId]||'Unknown') : 'Unassigned';
@@ -456,20 +516,21 @@ function renderStudents(){
 
 /* Teams */
 function computeTeamAttendancePct(teamId){
-  const mems = CACHE.students.filter(s=> String(s.teamId)===String(teamId)).map(s=> s.id);
-  if(!mems.length) return 0;
+  const members = CACHE.students.filter(s=> String(s.teamId)===String(teamId)).map(s=> s.id);
+  if(!members.length) return 0;
   let total=0, present=0;
-  for(const k in (CACHE.attendance||{})){
+  for(const k in (CACHE.attendance || {})){
     const sess = CACHE.attendance[k];
     if(!sess || !sess.students) continue;
-    for(const m of mems){
+    members.forEach(m=>{
       if(sess.students[m] !== undefined){ total++; if(String(sess.students[m]).toLowerCase()==='present') present++; }
-    }
+    });
   }
   return total ? Math.round((present/total)*100) : 0;
 }
 function renderTeams(){
-  const rows = []; const studentsById = {}; CACHE.students.forEach(s=> studentsById[s.id]=s);
+  const rows = [];
+  const studentsById = {}; CACHE.students.forEach(s => studentsById[s.id] = s);
   CACHE.teams.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||'')).forEach(t=>{
     const leader = t.leaderId ? studentsById[t.leaderId] : null;
     const members = CACHE.students.filter(s=> String(s.teamId)===String(t.id)).length;
@@ -486,10 +547,10 @@ function renderTeams(){
 
 /* Events */
 function renderEvents(){
-  const q = ($('searchEvents').value||'').trim().toLowerCase();
+  const q = ($('searchEvents')?.value||'').trim().toLowerCase();
   const rows = [];
   CACHE.events.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||'')).forEach(ev=>{
-    const participated = CACHE.participations && CACHE.participations.some(p=> String(p.eventId)===String(ev.id) && p.status==='approved');
+    const participated = CACHE.participations && CACHE.participations.some(p => String(p.eventId) === String(ev.id) && p.status === 'approved');
     const cls = participated ? 'participated-row' : '';
     if(q && !(`${ev.name} ${ev.type} ${ev.description||''}`.toLowerCase().includes(q))) return;
     rows.push(`<tr class="${cls}" data-id="${escapeHtml(ev.id)}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end">
@@ -514,15 +575,15 @@ function renderAttendanceSessions(){
   $('attendanceSessions').innerHTML = rows.join('') || '<tr><td colspan="5" class="text-center muted">No sessions</td></tr>';
 }
 
-/* Approvals - pending */
+/* Approvals (pending) */
 function renderApprovals(){
-  const q = ($('searchApprovals').value||'').trim().toLowerCase();
+  const q = ($('searchApprovals')?.value||'').trim().toLowerCase();
   const rows = [];
-  const parts = (CACHE.participations||[]).filter(p => p.status==='pending');
+  const parts = (CACHE.participations || []).filter(p => p.status === 'pending');
   for(const p of parts){
-    const ev = CACHE.events.find(e=> e.id==p.eventId) || {};
-    const st = CACHE.students.find(s=> s.id==p.studentId) || { name: p.studentId };
-    const team = CACHE.teams.find(t=> t.id==p.teamId) || {};
+    const ev = CACHE.events.find(e => e.id == p.eventId) || {};
+    const st = CACHE.students.find(s => s.id == p.studentId) || { name: p.studentId };
+    const team = CACHE.teams.find(t => t.id == p.teamId) || {};
     const text = `${ev.name||''} ${st.name||''} ${team.name||''}`.toLowerCase();
     if(q && !text.includes(q)) continue;
     rows.push(`<tr data-id="${escapeHtml(p.id)}"><td>${escapeHtml(ev.name||p.eventId)}</td><td>${escapeHtml(st.name||p.studentId)}</td><td>${escapeHtml(team.name||p.teamId)}</td><td>${new Date(p.submittedAt||0).toLocaleString()}</td><td class="text-end">
@@ -533,11 +594,11 @@ function renderApprovals(){
   $('approvalsTable').innerHTML = rows.join('') || '<tr><td colspan="5" class="text-center muted">No pending participations</td></tr>';
 }
 
-/* Approved groups */
+/* Approved groups for PDF */
 function renderApprovedGroups(){
-  const approved = (CACHE.participations||[]).filter(p => p.status==='approved');
+  const approved = (CACHE.participations || []).filter(p => p.status === 'approved');
   const groups = {};
-  for(const p of approved){ groups[p.eventId] = groups[p.eventId] || []; groups[p.eventId].push(p); }
+  for(const p of approved){ (groups[p.eventId] = groups[p.eventId] || []).push(p); }
   const wrap = $('approvedGroups');
   if(!Object.keys(groups).length){ wrap.innerHTML = '<div class="muted p-3">No approved participants yet.</div>'; return; }
   let html = '';
@@ -546,24 +607,23 @@ function renderApprovedGroups(){
     html += `<div class="teams-group"><div class="d-flex justify-content-between align-items-center"><h6>${escapeHtml(ev.name)}</h6><div><button class="btn btn-sm btn-outline-secondary btn-download-approved" data-event="${escapeHtml(evId)}">PDF</button></div></div><ol>`;
     groups[evId].forEach(p => {
       const st = CACHE.students.find(s=> s.id==p.studentId) || {};
-      html += `<li>${escapeHtml(st.name || p.studentId)} (${escapeHtml(p.studentId)}) — ${escapeHtml((CACHE.teams.find(t=> t.id==p.teamId)||{}).name||'')}</li>`;
+      const tname = (CACHE.teams.find(t=> t.id==p.teamId)||{}).name||'';
+      html += `<li>${escapeHtml(st.name || p.studentId)} (${escapeHtml(p.studentId)}) — ${escapeHtml(tname)}</li>`;
     });
     html += `</ol></div>`;
   }
   wrap.innerHTML = html;
 }
 
-/* Results */
+/* Results & Reports */
 function renderResults(){
-  const rows = []; const results = (CACHE.results||[]).slice().sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
+  const rows = []; const results = (CACHE.results || []).slice().sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
+  const findParticipation = id => (CACHE.participations||[]).find(p=> p.id==id) || {};
+  const findStudent = id => (CACHE.students||[]).find(s=> s.id==id) || {};
   for(const r of results){
     const ev = CACHE.events.find(e=> e.id==r.eventId) || {};
-    const p1 = CACHE.participations.find(p=> p.id==r.first) || {};
-    const p2 = CACHE.participations.find(p=> p.id==r.second) || {};
-    const p3 = CACHE.participations.find(p=> p.id==r.third) || {};
-    const s1 = CACHE.students.find(s=> s.id==p1.studentId) || {};
-    const s2 = CACHE.students.find(s=> s.id==p2.studentId) || {};
-    const s3 = CACHE.students.find(s=> s.id==p3.studentId) || {};
+    const p1 = findParticipation(r.first); const p2 = findParticipation(r.second); const p3 = findParticipation(r.third);
+    const s1 = findStudent(p1.studentId); const s2 = findStudent(p2.studentId); const s3 = findStudent(p3.studentId);
     const pts = `${r.pFirst||0}/${r.pSecond||0}/${r.pThird||0}`;
     const pub = r.published ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-secondary">No</span>';
     rows.push(`<tr data-id="${escapeHtml(r.id)}"><td>${escapeHtml(ev.name||'')}</td><td>${escapeHtml(s1.name||'')}</td><td>${escapeHtml(s2.name||'')}</td><td>${escapeHtml(s3.name||'')}</td><td>${escapeHtml(pts)}</td><td>${pub}</td><td class="text-end">
@@ -575,16 +635,18 @@ function renderResults(){
   $('resultsTable').innerHTML = rows.join('') || '<tr><td colspan="7" class="text-center muted">No results</td></tr>';
 }
 
-/* Reports */
 function computeTeamScore(teamId){
   let sum = 0;
   for(const r of CACHE.results || []){
     if(!r.published) continue;
-    const ids = [r.first, r.second, r.third].filter(Boolean);
-    const points = [Number(r.pFirst)||0, Number(r.pSecond)||0, Number(r.pThird)||0];
-    ids.forEach((pid, i) => {
-      const p = (CACHE.participations||[]).find(x=> x.id==pid);
-      if(p && String(p.teamId)===String(teamId)) sum += points[i]||0;
+    const arr = [
+      { pid: r.first, pts: Number(r.pFirst)||0 },
+      { pid: r.second, pts: Number(r.pSecond)||0 },
+      { pid: r.third, pts: Number(r.pThird)||0 }
+    ];
+    arr.forEach(a => {
+      const p = (CACHE.participations||[]).find(x=> x.id==a.pid);
+      if(p && String(p.teamId) === String(teamId)) sum += a.pts;
     });
   }
   return sum;
@@ -600,23 +662,21 @@ function renderReports(){
   $('reportsTable').innerHTML = rows.join('') || '<tr><td colspan="4" class="text-center muted">No teams</td></tr>';
 }
 
-/* ---------------- Populate dropdowns ---------------- */
+/* populate dropdowns */
 function populateDropdowns(){
-  const manualTeam = $('manualTeam'); manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`);
-  const teamLeader = $('teamLeader'); teamLeader.innerHTML = '<option value="">Leader (Chess#)</option>'; CACHE.students.forEach(s=> teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`);
-  const attTeam = $('attTeam'); attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t=> attTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`);
+  const manualTeam = $('manualTeam'); if(manualTeam){ manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  const teamLeader = $('teamLeader'); if(teamLeader){ teamLeader.innerHTML = '<option value="">Leader (Chess#)</option>'; CACHE.students.forEach(s=> teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
+  const attTeam = $('attTeam'); if(attTeam){ attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t=> attTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  const editTeam = $('editTeam'); if(editTeam){ editTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> editTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
   const editTeamLeader = $('editTeamLeader'); if(editTeamLeader){ editTeamLeader.innerHTML = '<option value="">Select leader</option>'; CACHE.students.forEach(s=> editTeamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
-  const resultEvent = $('resultEvent'); if(resultEvent){ resultEvent.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e=> resultEvent.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`); }
+  const resEv = $('resultEvent'); if(resEv){ resEv.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e => resEv.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`); }
 }
 
-/* ---------------- Event wiring ---------------- */
-
-/* Students: preview/import/add/edit/delete */
+/* ---------- wiring: Students ---------- */
 let studentsPreviewRows = [];
-$('previewStudents').addEventListener('click', ()=>{
+$('previewStudents')?.addEventListener('click', ()=>{
   const f = $('studentFile').files[0]; if(!f) return toast('Select Excel file','danger');
-  const r = new FileReader();
-  r.onload = e => {
+  const r = new FileReader(); r.onload = e => {
     const wb = XLSX.read(e.target.result, { type:'binary' });
     const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' });
     studentsPreviewRows = json.slice(0,1000);
@@ -630,11 +690,9 @@ $('previewStudents').addEventListener('click', ()=>{
     });
     html += '</tbody></table>';
     $('studentsPreview').innerHTML = html;
-  };
-  r.readAsBinaryString(f);
+  }; r.readAsBinaryString(f);
 });
-
-$('importStudents').addEventListener('click', async ()=>{
+$('importStudents')?.addEventListener('click', async ()=>{
   if(!studentsPreviewRows.length) return toast('No preview','danger');
   const teamNameMap = {}; CACHE.teams.forEach(t=> teamNameMap[String(t.name).trim().toLowerCase()]=t.id);
   const updates = {}; let imported=0, skipped=0;
@@ -645,7 +703,7 @@ $('importStudents').addEventListener('click', async ()=>{
     if(!chess || !name){ skipped++; return; }
     if(CACHE.students.some(s=> String(s.id)===String(chess) || String(s.name||'').trim().toLowerCase()===String(name).trim().toLowerCase())) { skipped++; return; }
     const teamName = (rw['Team']||rw['team']||'').toString().trim();
-    const teamId = teamName ? teamNameMap[teamName.toLowerCase()]||null : null;
+    const teamId = teamName ? teamNameMap[teamName.toLowerCase()] || null : null;
     updates[`students/${encodeKey(chess)}`] = { id: chess, name, level, teamId: teamId?String(teamId):null };
     imported++;
   });
@@ -653,8 +711,7 @@ $('importStudents').addEventListener('click', async ()=>{
   studentsPreviewRows=[]; $('studentsPreview').innerHTML=''; $('studentFile').value='';
   toast(`Imported ${imported}, skipped ${skipped}`);
 });
-
-$('addManualStudent').addEventListener('click', async ()=>{
+$('addManualStudent')?.addEventListener('click', async ()=>{
   const chess = $('manualChess').value.trim(); const name = $('manualName').value.trim(); const level = $('manualLevel').value||'Senior'; const teamId = $('manualTeam').value || null;
   if(!chess || !name) return toast('Enter chess & name','danger');
   if(CACHE.students.some(s=> String(s.id)===String(chess))) return toast('Chess ID exists','danger');
@@ -663,9 +720,7 @@ $('addManualStudent').addEventListener('click', async ()=>{
   $('manualChess').value=''; $('manualName').value=''; $('manualTeam').value='';
   toast('Student added');
 });
-
-/* Students table delegation */
-document.getElementById('studentsTable').addEventListener('click', async (e)=>{
+$('studentsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return;
   const id = btn.dataset.id;
   if(btn.classList.contains('btn-delete-student')){ if(!confirm('Delete student?')) return; await remove(ref(db, `students/${encodeKey(id)}`)); toast('Deleted'); }
@@ -678,9 +733,7 @@ document.getElementById('studentsTable').addEventListener('click', async (e)=>{
     new bootstrap.Modal(document.getElementById('editStudentModal')).show();
   }
 });
-
-/* Save edited student modal */
-document.getElementById('editStudentForm').addEventListener('submit', async (ev)=>{
+document.getElementById('editStudentForm')?.addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const dbKey = document.getElementById('editStudentModal').dataset.dbKey; if(!dbKey) return toast('Missing key','danger');
   const newName = $('editName').value.trim(); const newTeam = $('editTeam').value || null; const newLevel = $('editLevel').value || 'Senior';
@@ -692,35 +745,36 @@ document.getElementById('editStudentForm').addEventListener('submit', async (ev)
   await update(ref(db, `students/${dbKey}`), { name: newName, teamId: newTeam ? String(newTeam) : null, level: newLevel });
   toast('Student updated'); bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
 });
-
-/* Delete student from modal */
-$('deleteStudentBtn').addEventListener('click', async ()=>{
+$('deleteStudentBtn')?.addEventListener('click', async ()=>{
   if(!confirm('Delete this student?')) return;
   const dbKey = document.getElementById('editStudentModal').dataset.dbKey; if(!dbKey) return toast('Missing key','danger');
   await remove(ref(db, `students/${dbKey}`)); toast('Student deleted'); bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
 });
 
-/* Team save */
-$('saveTeam').addEventListener('click', async ()=>{
-  const name = $('teamName').value.trim(); const leader = $('teamLeader').value||null; const pwd = $('teamPassword').value.trim()||'';
+/* ---------- Teams ---------- */
+$('saveTeam')?.addEventListener('click', async ()=>{
+  const name = $('teamName').value.trim(); const leader = $('teamLeader').value || null; const pwd = $('teamPassword').value.trim()||'';
   if(!name) return toast('Team name required','danger');
   if(CACHE.teams.some(t=> String(t.name||'').trim().toLowerCase()===name.toLowerCase())) return toast('Team exists','danger');
-  const p = push(ref(db,'teams')); const id = Date.now().toString();
+  const p = push(ref(db, 'teams')); const id = Date.now().toString();
   await set(p, { id, name, leaderId: leader?String(leader):null, password: pwd, score: 0, locked: false });
   $('teamName').value=''; $('teamLeader').value=''; $('teamPassword').value='';
   toast('Team saved');
 });
-
-/* Teams table delegation: edit opens full modal, delete, lock toggle */
-document.getElementById('teamsTable').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
-  if(btn.classList.contains('btn-delete-team')){ if(!confirm('Delete team?')) return; const dbKey = KEYMAP.teams[id]; if(dbKey) await remove(ref(db, `teams/${dbKey}`)); const updates = {}; CACHE.students.filter(s=> String(s.teamId)===String(id)).forEach(s=> updates[`students/${encodeKey(s.id)}/teamId`] = null); if(Object.keys(updates).length) await update(ref(db,'/'), updates); toast('Team deleted'); }
-  else if(btn.classList.contains('btn-edit-team')){
+$('teamsTable').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const id = btn.dataset.id;
+  if(btn.classList.contains('btn-delete-team')){
+    if(!confirm('Delete team?')) return;
+    const dbKey = KEYMAP.teams[id]; if(dbKey) await remove(ref(db, `teams/${dbKey}`));
+    const updates = {}; CACHE.students.filter(s=> String(s.teamId)===String(id)).forEach(s => updates[`students/${encodeKey(s.id)}/teamId`] = null);
+    if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+    toast('Team deleted');
+  } else if(btn.classList.contains('btn-edit-team')){
     const dbKey = KEYMAP.teams[id]; const snap = await get(ref(db, `teams/${dbKey}`)); const t = snap.val(); if(!t) return toast('Not found','danger');
     $('editTeamName').value = t.name||''; $('editTeamPassword').value = t.password||''; $('editTeamLock').checked = !!t.locked;
     populateDropdowns();
     setTimeout(()=> { $('editTeamLeader').value = t.leaderId || ''; }, 80);
-    // fill member list
     const members = CACHE.students.filter(s=> String(s.teamId)===String(t.id)).sort((a,b)=> String(a.id).localeCompare(String(b.id)));
     $('editTeamMembers').innerHTML = members.length ? members.map(m=>`<div>${escapeHtml(m.name)} (${escapeHtml(m.id)})</div>`).join('') : '<div class="muted">No members</div>';
     document.getElementById('fullEditTeamModal').dataset.dbKey = dbKey;
@@ -728,27 +782,22 @@ document.getElementById('teamsTable').addEventListener('click', async (e)=>{
     new bootstrap.Modal(document.getElementById('fullEditTeamModal')).show();
   }
 });
-
-/* Lock toggle change (checkbox inside table) */
-document.getElementById('teamsTable').addEventListener('change', async (e)=>{
+$('teamsTable').addEventListener('change', async (e)=>{
   const cb = e.target.closest('input.lock-team'); if(!cb) return;
-  const id = cb.dataset.id; const dbKey = KEYMAP.teams[id];
-  if(!dbKey) return toast('Team key missing','danger');
-  await update(ref(db, `teams/${dbKey}`), { locked: cb.checked });
+  const id = cb.dataset.id; const dbKey = KEYMAP.teams[id]; if(!dbKey) return toast('Team key missing','danger');
+  await update(ref(db, `teams/${dbKey}`), { locked: !!cb.checked });
   toast(cb.checked ? 'Team locked' : 'Team unlocked');
 });
-
-/* Full edit team modal: save & delete handlers */
-document.getElementById('fullEditTeamForm').addEventListener('submit', async (ev)=>{
+document.getElementById('fullEditTeamForm')?.addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const dbKey = document.getElementById('fullEditTeamModal').dataset.dbKey; const teamId = document.getElementById('fullEditTeamModal').dataset.teamId;
   if(!dbKey) return toast('Missing team key','danger');
-  const name = $('editTeamName').value.trim(); const leader = $('editTeamLeader').value||null; const pwd = $('editTeamPassword').value||''; const locked = !!$('editTeamLock').checked;
+  const name = $('editTeamName').value.trim(); const leader = $('editTeamLeader').value || null; const pwd = $('editTeamPassword').value||''; const locked = !!$('editTeamLock').checked;
   if(!name) return toast('Name required','danger');
   await update(ref(db, `teams/${dbKey}`), { name, leaderId: leader ? String(leader) : null, password: pwd, locked });
   toast('Team updated'); bootstrap.Modal.getInstance(document.getElementById('fullEditTeamModal')).hide();
 });
-document.getElementById('deleteTeamBtnModal').addEventListener('click', async ()=>{
+$('deleteTeamBtnModal')?.addEventListener('click', async ()=>{
   if(!confirm('Delete this team?')) return;
   const dbKey = document.getElementById('fullEditTeamModal').dataset.dbKey; const teamId = document.getElementById('fullEditTeamModal').dataset.teamId;
   if(!dbKey) return toast('Missing team key','danger');
@@ -758,8 +807,8 @@ document.getElementById('deleteTeamBtnModal').addEventListener('click', async ()
   toast('Team deleted'); bootstrap.Modal.getInstance(document.getElementById('fullEditTeamModal')).hide();
 });
 
-/* Events: create/import/edit/delete (similar to earlier) */
-$('saveEvent').addEventListener('click', async ()=>{
+/* ---------- Events ---------- */
+$('saveEvent')?.addEventListener('click', async ()=>{
   const name = $('eventName').value.trim(); const type = $('eventType').value; const desc = $('eventDescription').value.trim();
   if(!name) return toast('Event name required','danger');
   if(CACHE.events.some(e=> String(e.name||'').trim().toLowerCase()===name.toLowerCase())) return toast('Event exists','danger');
@@ -768,95 +817,248 @@ $('saveEvent').addEventListener('click', async ()=>{
   $('eventName').value=''; $('eventDescription').value=''; toast('Event added');
 });
 
-$('previewEvents').addEventListener('click', ()=>{
+/* Events import/preview (XLSX) */
+$('previewEvents')?.addEventListener('click', ()=>{
   const f = $('eventFile').files[0]; if(!f) return toast('Choose file','danger');
-  const r = new FileReader(); r.onload = e => { const wb = XLSX.read(e.target.result,{type:'binary'}); const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).slice(0,500); let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>'; json.forEach(rw=> html+=`<tr><td>${escapeHtml(rw['Name']||rw['Event']||'')}</td><td>${escapeHtml(rw['Type']||'')}</td><td>${escapeHtml(rw['Description']||'')}</td></tr>`); html+='</tbody></table>'; $('eventsPreview').innerHTML = html; }; r.readAsBinaryString(f);
+  const r = new FileReader(); r.onload = e => {
+    const wb = XLSX.read(e.target.result,{type:'binary'});
+    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' }).slice(0,500);
+    let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>';
+    json.forEach(rw => html += `<tr><td>${escapeHtml(rw['Name']||rw['Event']||'')}</td><td>${escapeHtml(rw['Type']||'')}</td><td>${escapeHtml(rw['Description']||'')}</td></tr>`);
+    html += '</tbody></table>';
+    $('eventsPreview').innerHTML = html;
+  }; r.readAsBinaryString(f);
 });
-
-$('importEvents').addEventListener('click', ()=>{
+$('importEvents')?.addEventListener('click', ()=>{
   const f = $('eventFile').files[0]; if(!f) return toast('Choose file','danger');
-  const r = new FileReader(); r.onload = async e => {
-    const wb = XLSX.read(e.target.result,{type:'binary'}); const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}).slice(0,500);
+  const r = new FileReader(); r.onload = async e=>{
+    const wb = XLSX.read(e.target.result,{type:'binary'});
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' }).slice(0,500);
     const updates = {}; let imported=0, skipped=0;
-    for(const rw of rows){ const name=(rw['Name']||rw['Event']||'').toString().trim(); if(!name){skipped++;continue;} if(CACHE.events.some(ev=> String(ev.name||'').trim().toLowerCase()===name.toLowerCase())){skipped++;continue;} const type=(rw['Type']||'Non-Stage').toString(); const desc=(rw['Description']||'').toString(); const id = Date.now().toString()+Math.floor(Math.random()*9999); updates[`events/${id}`] = { id, name, type, description: desc, status:'Open' }; imported++; }
+    for(const rw of rows){
+      const name = (rw['Name']||rw['Event']||rw['name']||'').toString().trim(); if(!name){ skipped++; continue; }
+      if(CACHE.events.some(ev=> String(ev.name||'').trim().toLowerCase()===name.toLowerCase())){ skipped++; continue; }
+      const type = (rw['Type']||'Non-Stage').toString(); const desc = (rw['Description']||'').toString();
+      const id = Date.now().toString() + Math.floor(Math.random()*9999);
+      updates[`events/${id}`] = { id, name, type, description: desc, status: 'Open' };
+      imported++;
+    }
     if(Object.keys(updates).length) await update(ref(db,'/'), updates);
     $('eventFile').value=''; $('eventsPreview').innerHTML=''; toast(`Imported ${imported}, skipped ${skipped}`);
   }; r.readAsBinaryString(f);
 });
 
-document.getElementById('eventsTable').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
-  if(btn.classList.contains('btn-delete-event')){ if(!confirm('Delete event?')) return; await remove(ref(db, `events/${KEYMAP.events[id]}`)); toast('Event removed'); }
-  else if(btn.classList.contains('btn-edit-event')){ const dbKey = KEYMAP.events[id]; const snap = await get(ref(db, `events/${dbKey}`)); const ev = snap.val(); if(!ev) return toast('Not found'); const modalName = prompt('Event name', ev.name); if(modalName===null) return; const newType = prompt('Type', ev.type||'Non-Stage'); const newDesc = prompt('Description', ev.description||''); await update(ref(db, `events/${dbKey}`), { name: modalName.trim(), type: newType||ev.type, description: newDesc||ev.description }); toast('Event updated'); }
+/* Events table buttons: edit uses modal, delete uses remove */
+document.getElementById('eventsTable')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const id = btn.dataset.id;
+  if(btn.classList.contains('btn-delete-event')){
+    if(!confirm('Delete event?')) return;
+    const dbKey = KEYMAP.events[id]; if(dbKey) await remove(ref(db, `events/${dbKey}`));
+    toast('Event removed');
+  } else if(btn.classList.contains('btn-edit-event')){
+    const dbKey = KEYMAP.events[id];
+    const snap = await get(ref(db, `events/${dbKey}`)); const ev = snap.val();
+    if(!ev) return toast('Event not found','danger');
+    // Fill and open editEventModal (modal HTML must exist in Part-3)
+    if($('editEventId')){ // if modal exists
+      $('editEventId').value = dbKey;
+      $('editEventName').value = ev.name || '';
+      $('editEventType').value = ev.type || 'Non-Stage';
+      $('editEventDesc').value = ev.description || '';
+      new bootstrap.Modal(document.getElementById('editEventModal')).show();
+    } else {
+      toast('Edit Event modal not found. Please paste the modal HTML (see instructions).','danger');
+    }
+  }
 });
 
-/* Approvals: approve/reject and PDF download per event handled below */
-document.getElementById('approvalsTable').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
-  if(btn.classList.contains('btn-approve')){ const dbKey = KEYMAP.participations[id]; await update(ref(db, `participations/${dbKey}`), { status: 'approved', approvedAt: Date.now() }); toast('Approved'); }
-  else if(btn.classList.contains('btn-reject')){ const dbKey = KEYMAP.participations[id]; await update(ref(db, `participations/${dbKey}`), { status: 'rejected', rejectedAt: Date.now() }); toast('Rejected'); }
+/* Edit event modal save & delete */
+document.getElementById('editEventForm')?.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const dbKey = $('editEventId').value; const name = $('editEventName').value.trim(); const type = $('editEventType').value; const desc = $('editEventDesc').value.trim();
+  if(!dbKey) return toast('Missing event key','danger');
+  if(!name) return toast('Event name required','danger');
+  // ensure unique name (allow same if same dbKey)
+  if(CACHE.events.some(e => String(e.name||'').trim().toLowerCase() === name.toLowerCase() && KEYMAP.events[e.id] !== dbKey)) return toast('Event name already exists','danger');
+  await update(ref(db, `events/${dbKey}`), { name, type, description: desc });
+  toast('Event updated'); bootstrap.Modal.getInstance(document.getElementById('editEventModal')).hide();
+});
+$('deleteEventBtn')?.addEventListener('click', async ()=>{
+  if(!confirm('Delete this event?')) return;
+  const dbKey = $('editEventId').value; if(!dbKey) return toast('Missing event key','danger');
+  await remove(ref(db, `events/${dbKey}`));
+  toast('Event deleted'); bootstrap.Modal.getInstance(document.getElementById('editEventModal')).hide();
 });
 
-/* Download approved per event */
-document.getElementById('approvedGroups').addEventListener('click', (e)=>{
-  const btn = e.target.closest('button.btn-download-approved'); if(!btn) return; const evId = btn.dataset.event; const eventObj = CACHE.events.find(x=> x.id==evId) || {};
+/* ---------- Approvals (approve/reject + PDFs) ---------- */
+$('approvalsTable')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
+  if(btn.classList.contains('btn-approve')){
+    const dbKey = KEYMAP.participations[id];
+    await update(ref(db, `participations/${dbKey}`), { status: 'approved', approvedAt: Date.now() });
+    toast('Approved');
+  } else if(btn.classList.contains('btn-reject')){
+    const dbKey = KEYMAP.participations[id];
+    await update(ref(db, `participations/${dbKey}`), { status: 'rejected', rejectedAt: Date.now() });
+    toast('Rejected');
+  }
+});
+
+/* download approved per event (HTML->pdf) */
+$('approvedGroups')?.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button.btn-download-approved'); if(!btn) return; const evId = btn.dataset.event;
+  const evObj = CACHE.events.find(x=> x.id==evId) || {};
   const approved = (CACHE.participations||[]).filter(p=> p.eventId==evId && p.status==='approved');
-  if(!approved.length) return toast('No approved participants for this event','warning');
-  let html = `<h3>${escapeHtml(eventObj.name||evId)}</h3><ol>`;
-  approved.forEach(p => { const st = CACHE.students.find(s=> s.id==p.studentId) || {}; html += `<li>${escapeHtml(st.name || p.studentId)}</li>`; });
+  if(!approved.length) return toast('No approved participants','warning');
+  let html = `<h3>${escapeHtml(evObj.name||evId)}</h3><ol>`;
+  approved.forEach(p => { const st = CACHE.students.find(s=> s.id==p.studentId) || {}; html += `<li>${escapeHtml(st.name || p.studentId)} (${escapeHtml(p.studentId)})</li>`; });
   html += '</ol>';
-  const container = document.createElement('div'); container.style.padding='10px'; container.innerHTML = html; document.body.appendChild(container);
-  html2pdf().from(container).set({margin:0.3, filename:`approved-${(eventObj.name||evId).replace(/\s+/g,'_')}.pdf`}).save().then(()=> container.remove());
+  const container = document.createElement('div'); container.style.padding='12px'; container.innerHTML = html; document.body.appendChild(container);
+  /* html2pdf is loaded in Part-1; ensure you have it referenced. */
+  html2pdf().from(container).set({margin:0.3, filename:`approved-${(evObj.name||evId).replace(/\s+/g,'_')}.pdf`}).save().then(()=> container.remove());
 });
-
-/* Approvals all PDF */
-$('approvalsPdfBtn').addEventListener('click', ()=> {
-  const rows = (CACHE.participations||[]).filter(p=> p.status==='pending').map(p => {
+$('approvalsPdfBtn')?.addEventListener('click', ()=>{
+  const rows = (CACHE.participations||[]).filter(p=> p.status==='pending').map(p=>{
     const ev = CACHE.events.find(e=> e.id==p.eventId) || {}; const st = CACHE.students.find(s=> s.id==p.studentId) || {};
     const tname = (CACHE.teams.find(t=> t.id==p.teamId)||{}).name||'';
     return `<tr><td>${escapeHtml(ev.name||p.eventId)}</td><td>${escapeHtml(st.name||p.studentId)}</td><td>${escapeHtml(tname)}</td><td>${new Date(p.submittedAt||0).toLocaleString()}</td></tr>`;
   }).join('');
   if(!rows) return toast('No pending participations','warning');
   const html = `<table class="table table-sm"><thead><tr><th>Event</th><th>Student</th><th>Team</th><th>Submitted</th></tr></thead><tbody>${rows}</tbody></table>`;
-  const d = document.createElement('div'); d.style.padding='12px'; d.innerHTML=`<h3>Pending Participations</h3>` + html; document.body.appendChild(d);
+  const d = document.createElement('div'); d.style.padding='12px'; d.innerHTML = `<h3>Pending Participations</h3>${html}`; document.body.appendChild(d);
   html2pdf().from(d).set({margin:0.3, filename:'pending_participations.pdf'}).save().then(()=> d.remove());
 });
 
-/* Results: populate participants when event selected */
-$('resultEvent').addEventListener('change', ()=>{
-  const ev = $('resultEvent').value; const participants = (CACHE.participations||[]).filter(p=> String(p.eventId)===String(ev) && p.status==='approved');
+/* ---------- Results: add/edit/publish/delete ---------- */
+$('resultEvent')?.addEventListener('change', ()=>{
+  const ev = $('resultEvent').value;
+  const participants = (CACHE.participations||[]).filter(p=> String(p.eventId)===String(ev) && p.status==='approved');
   const map = {}; CACHE.students.forEach(s=> map[s.id] = s.name);
   ['resFirst','resSecond','resThird'].forEach(id=>{
-    const sel = $(id); sel.innerHTML = '<option value="">Select</option>';
+    const sel = $(id); if(!sel) return; sel.innerHTML = '<option value="">Select</option>';
     participants.forEach(p => sel.innerHTML += `<option value="${escapeHtml(p.id)}">${escapeHtml(map[p.studentId]||p.studentId)} (${escapeHtml(p.studentId)})</option>`);
   });
 });
-
-$('addResult').addEventListener('click', async ()=>{
+$('addResult')?.addEventListener('click', async ()=>{
   const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
   const first = $('resFirst').value || ''; const second = $('resSecond').value || ''; const third = $('resThird').value || '';
   const p1 = Number($('ptsFirst').value)||0, p2 = Number($('ptsSecond').value)||0, p3 = Number($('ptsThird').value)||0;
-  const id = Date.now().toString(); const p = push(ref(db,'results'));
+  const p = push(ref(db,'results')); const id = Date.now().toString();
   await set(p, { id, eventId: ev, first, second, third, pFirst: p1, pSecond: p2, pThird: p3, published:false, createdAt: Date.now() });
   toast('Result added');
 });
 
-/* Results table delegation (edit uses prompt for quick edit of participant IDs; this can be changed to modal if you want) */
-document.getElementById('resultsTable').addEventListener('click', async (e)=>{
+/* Results table actions */
+$('resultsTable')?.addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id;
-  if(btn.classList.contains('btn-delete-result')){ if(!confirm('Delete result?')) return; await remove(ref(db, `results/${KEYMAP.results[id]}`)); toast('Deleted'); }
-  else if(btn.classList.contains('btn-edit-result')){ const dbKey = KEYMAP.results[id]; const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Not found','danger'); const nf = prompt('First participation id', r.first||''); if(nf===null) return; const ns = prompt('Second participation id', r.second||''); if(ns===null) return; const nt = prompt('Third participation id', r.third||''); if(nt===null) return; const p1 = Number(prompt('Points for 1st', r.pFirst||0))||0; const p2 = Number(prompt('Points for 2nd', r.pSecond||0))||0; const p3 = Number(prompt('Points for 3rd', r.pThird||0))||0; await update(ref(db, `results/${dbKey}`), { first: nf||'', second: ns||'', third: nt||'', pFirst: p1, pSecond: p2, pThird: p3 }); toast('Result updated'); }
-  else if(btn.classList.contains('btn-publish-result')){ const dbKey = KEYMAP.results[id]; const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Not found'); const newv = !r.published; await update(ref(db, `results/${dbKey}`), { published: newv, publishedAt: newv?Date.now():null }); toast(newv ? 'Published' : 'Unpublished'); }
+  if(btn.classList.contains('btn-delete-result')){ if(!confirm('Delete result?')) return; const dbKey = KEYMAP.results[id]; if(dbKey) await remove(ref(db, `results/${dbKey}`)); toast('Deleted'); }
+  else if(btn.classList.contains('btn-edit-result')){
+    const dbKey = KEYMAP.results[id]; const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Not found','danger');
+    // build and show modal to edit result (dynamic modal)
+    openEditResultModal(r, dbKey);
+  }
+  else if(btn.classList.contains('btn-publish-result')){
+    const dbKey = KEYMAP.results[id]; const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Not found','danger');
+    const newv = !r.published; await update(ref(db, `results/${dbKey}`), { published: newv, publishedAt: newv?Date.now():null });
+    toast(newv ? 'Published' : 'Unpublished');
+  }
 });
 
-/* Attendance: load / toggle / save / view only absents / by team grouping */
-/* Floating tooltip implementation: create element once */
+/* dynamic result edit modal creation and handler */
+function openEditResultModal(resultObj, dbKey){
+  // remove existing dynamic modal if present
+  const existing = document.getElementById('dynamicEditResultModal'); if(existing) existing.remove();
+  // create modal DOM
+  const modalHtml = `
+  <div class="modal fade" id="dynamicEditResultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <form id="dynamicEditResultForm" class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Edit Result</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" id="dynResDbKey" value="${escapeHtml(dbKey)}">
+          <div class="mb-2">
+            <label class="form-label">Event</label>
+            <input class="form-control" id="dynResEventName" readonly value="${escapeHtml((CACHE.events.find(e=> e.id==resultObj.eventId)||{}).name || '')}">
+          </div>
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label">1st (participation id)</label>
+              <select id="dynResFirst" class="form-select"></select>
+            </div>
+            <div class="col-md-2"><label class="form-label">Points</label><input id="dynPtsFirst" type="number" class="form-control" value="${escapeHtml(resultObj.pFirst||0)}"></div>
+
+            <div class="col-md-4">
+              <label class="form-label">2nd</label>
+              <select id="dynResSecond" class="form-select"></select>
+            </div>
+            <div class="col-md-2"><label class="form-label">Points</label><input id="dynPtsSecond" type="number" class="form-control" value="${escapeHtml(resultObj.pSecond||0)}"></div>
+
+            <div class="col-md-4">
+              <label class="form-label">3rd</label>
+              <select id="dynResThird" class="form-select"></select>
+            </div>
+            <div class="col-md-2"><label class="form-label">Points</label><input id="dynPtsThird" type="number" class="form-control" value="${escapeHtml(resultObj.pThird||0)}"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="dynDeleteResultBtn" class="btn btn-danger">Delete</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+  const div = document.createElement('div'); div.innerHTML = modalHtml; document.body.appendChild(div.firstElementChild);
+  // populate selects with approved participants for that event
+  const participants = (CACHE.participations||[]).filter(p=> String(p.eventId) === String(resultObj.eventId) && p.status === 'approved');
+  const map = {}; CACHE.students.forEach(s => map[s.id] = s.name);
+  ['dynResFirst','dynResSecond','dynResThird'].forEach(id => {
+    const sel = document.getElementById(id); if(!sel) return;
+    sel.innerHTML = '<option value="">Select</option>';
+    participants.forEach(p => sel.innerHTML += `<option value="${escapeHtml(p.id)}">${escapeHtml(map[p.studentId]||p.studentId)} (${escapeHtml(p.studentId)})</option>`);
+  });
+  // set current values
+  setTimeout(()=> {
+    document.getElementById('dynResFirst').value = resultObj.first || '';
+    document.getElementById('dynResSecond').value = resultObj.second || '';
+    document.getElementById('dynResThird').value = resultObj.third || '';
+  }, 60);
+
+  // show modal
+  const bsModal = new bootstrap.Modal(document.getElementById('dynamicEditResultModal'));
+  bsModal.show();
+
+  // submit handler
+  document.getElementById('dynamicEditResultForm').addEventListener('submit', async (ev)=>{
+    ev.preventDefault();
+    const dbk = document.getElementById('dynResDbKey').value;
+    const nf = document.getElementById('dynResFirst').value || '';
+    const ns = document.getElementById('dynResSecond').value || '';
+    const nt = document.getElementById('dynResThird').value || '';
+    const p1 = Number(document.getElementById('dynPtsFirst').value)||0;
+    const p2 = Number(document.getElementById('dynPtsSecond').value)||0;
+    const p3 = Number(document.getElementById('dynPtsThird').value)||0;
+    await update(ref(db, `results/${dbk}`), { first: nf, second: ns, third: nt, pFirst: p1, pSecond: p2, pThird: p3 });
+    toast('Result updated');
+    bsModal.hide();
+  }, { once: true });
+
+  document.getElementById('dynDeleteResultBtn').addEventListener('click', async ()=>{
+    if(!confirm('Delete this result?')) return;
+    const dbk = document.getElementById('dynResDbKey').value;
+    await remove(ref(db, `results/${dbk}`));
+    toast('Result deleted');
+    bsModal.hide();
+  }, { once: true });
+}
+
+/* ---------- Attendance: tooltip + load + save + edit ---------- */
+/* floating tooltip */
 const attTooltip = document.createElement('div'); attTooltip.className = 'attendance-tooltip'; document.body.appendChild(attTooltip);
 let attTooltipTimer = null;
 function showAttendanceTooltip(el, text){
   clearTimeout(attTooltipTimer);
   attTooltip.textContent = text;
-  // position above element center
   const rect = el.getBoundingClientRect();
   const x = rect.left + rect.width/2 + window.scrollX;
   const y = rect.top + window.scrollY;
@@ -867,14 +1069,14 @@ function showAttendanceTooltip(el, text){
 }
 
 let attendanceEditKey = null;
-$('attMethod').addEventListener('change', ()=> $('attTeamWrap').classList.toggle('d-none', $('attMethod').value!=='team'));
+$('attMethod')?.addEventListener('change', ()=> $('attTeamWrap').classList.toggle('d-none', $('attMethod').value!=='team'));
 
-$('loadAttendance').addEventListener('click', ()=>{
+$('loadAttendance')?.addEventListener('click', ()=>{
   const mode = $('attMethod').value; const teamId = $('attTeam').value;
   const wrap = $('attendanceBoxes'); wrap.innerHTML = '';
-  if(mode==='team'){
+  if(mode === 'team'){
     const members = CACHE.students.filter(s=> String(s.teamId)===String(teamId)).sort((a,b)=> String(a.id).localeCompare(String(b.id)));
-    members.forEach(s => {
+    members.forEach(s=>{
       const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = s.id; div.dataset.name = s.name||''; div.textContent = s.id;
       div.addEventListener('click', ()=> { div.classList.toggle('present'); div.classList.toggle('absent'); showAttendanceTooltip(div, `${s.name} (${s.id})`); });
       wrap.appendChild(div);
@@ -882,12 +1084,12 @@ $('loadAttendance').addEventListener('click', ()=>{
   } else {
     // group by team
     const teams = CACHE.teams.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-    teams.forEach(team => {
+    teams.forEach(team=>{
       const group = document.createElement('div'); group.className = 'teams-group';
       const h = document.createElement('h6'); h.textContent = team.name; group.appendChild(h);
-      const members = CACHE.students.filter(s=> String(s.teamId)===String(team.id)).sort((a,b)=> String(a.id).localeCompare(String(b.id)));
       const inner = document.createElement('div');
-      members.forEach(s => {
+      const members = CACHE.students.filter(s=> String(s.teamId)===String(team.id)).sort((a,b)=> String(a.id).localeCompare(String(b.id)));
+      members.forEach(s=>{
         const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = s.id; div.dataset.name = s.name||''; div.textContent = s.id;
         div.addEventListener('click', ()=> { div.classList.toggle('present'); div.classList.toggle('absent'); showAttendanceTooltip(div, `${s.name} (${s.id})`); });
         inner.appendChild(div);
@@ -898,69 +1100,68 @@ $('loadAttendance').addEventListener('click', ()=>{
   $('attendanceMarkCard').style.display = wrap.children.length ? 'block' : 'none';
 });
 
-/* Toggle all */
-$('toggleAll').addEventListener('click', ()=>{
+$('toggleAll')?.addEventListener('click', ()=>{
   const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box')); if(!boxes.length) return;
   const allPresent = boxes.every(b=> b.classList.contains('present'));
   boxes.forEach(b=> { b.classList.toggle('present', !allPresent); b.classList.toggle('absent', allPresent); });
 });
 
-/* Save attendance */
-$('saveAttendance').addEventListener('click', async ()=>{
+$('saveAttendance')?.addEventListener('click', async ()=>{
   const date = $('attDate').value; const time = $('attTime').value||''; const desc = $('attDesc').value||'';
   if(!date) return toast('Select date','danger');
   const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box')); if(!boxes.length) return toast('Load students first','danger');
   const studObj = {}; boxes.forEach(b=> studObj[b.dataset.key] = b.classList.contains('present') ? 'Present' : 'Absent');
   const payload = { date, time, description: desc, students: studObj, savedAt: Date.now() };
-  if(attendanceEditKey){ await set(ref(db, `attendance/${attendanceEditKey}`), payload); attendanceEditKey = null; toast('Attendance updated'); } else { const p = push(ref(db,'attendance')); await set(p, payload); toast('Attendance saved'); }
+  if(attendanceEditKey){
+    await set(ref(db, `attendance/${attendanceEditKey}`), payload);
+    attendanceEditKey = null; toast('Attendance updated');
+  } else {
+    const p = push(ref(db,'attendance')); await set(p, payload); toast('Attendance saved');
+  }
   $('attendanceMarkCard').style.display = 'none';
 });
 
-/* Attendance sessions view/edit */
-document.getElementById('attendanceSessions').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return; const key = btn.dataset.key;
-  const snap = await get(ref(db, `attendance/${key}`)); const s = snap.val(); if(!s) return toast('Not found','danger');
+/* view/edit saved attendance */
+$('attendanceSessions')?.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const key = btn.dataset.key; const snap = await get(ref(db, `attendance/${key}`)); const s = snap.val(); if(!s) return toast('Not found','danger');
   if(btn.classList.contains('btn-view-att')){
-    // show absentees only in alert
-    const abs = []; for(const id in s.students){ if(String(s.students[id]).toLowerCase()!=='present') abs.push(`${id} — ${((CACHE.students.find(st=> st.id==id)||{}).name||'')}`); }
+    const abs = []; for(const id in s.students){ if(String(s.students[id]).toLowerCase() !== 'present') abs.push(`${id} — ${((CACHE.students.find(st=> st.id==id)||{}).name||'')}`); }
     if(!abs.length) return alert('No absentees — all present'); alert('Absentees:\n\n' + abs.join('\n'));
   } else if(btn.classList.contains('btn-edit-att')){
     attendanceEditKey = key; $('attDate').value = s.date||''; $('attTime').value = s.time||''; $('attDesc').value = s.description||'';
     const wrap = $('attendanceBoxes'); wrap.innerHTML = '';
     for(const id in s.students){
       const st = CACHE.students.find(x=> x.id==id) || {}; const div = document.createElement('div');
-      div.className = s.students[id]==='Present' ? 'small-box present' : 'small-box absent';
+      div.className = s.students[id] === 'Present' ? 'small-box present' : 'small-box absent';
       div.dataset.key = id; div.dataset.name = st.name||''; div.textContent = id;
       div.addEventListener('click', ()=> { div.classList.toggle('present'); div.classList.toggle('absent'); showAttendanceTooltip(div, `${st.name} (${id})`); });
       wrap.appendChild(div);
     }
-    $('attendanceMarkCard').style.display = 'block';
-    toast('Session loaded for edit');
+    $('attendanceMarkCard').style.display = 'block'; toast('Session loaded for edit');
   }
 });
 
-/* PDF exports: Students & Events */
-$('studentsPdfBtn').addEventListener('click', ()=>{
+/* ---------- PDF exports ---------- */
+$('studentsPdfBtn')?.addEventListener('click', ()=>{
   const rows = CACHE.students.map(s=> `<tr><td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.level||'')}</td><td>${escapeHtml((CACHE.teams.find(t=> t.id==s.teamId)||{}).name||'')}</td></tr>`).join('');
   if(!rows) return toast('No students','warning');
   const html = `<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>${rows}</tbody></table>`;
-  const d=document.createElement('div'); d.style.padding='12px'; d.innerHTML=`<h3>Students</h3>${html}`; document.body.appendChild(d); html2pdf().from(d).set({margin:0.3, filename:'students.pdf'}).save().then(()=> d.remove());
+  const d=document.createElement('div'); d.style.padding='12px'; d.innerHTML=`<h3>Students</h3>${html}`; document.body.appendChild(d);
+  html2pdf().from(d).set({margin:0.3, filename:'students.pdf'}).save().then(()=> d.remove());
 });
-$('eventsPdfBtn').addEventListener('click', ()=>{
+$('eventsPdfBtn')?.addEventListener('click', ()=>{
   const rows = CACHE.events.map(e=> `<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.type)}</td><td>${escapeHtml(e.description||'')}</td></tr>`).join('');
   if(!rows) return toast('No events','warning');
   const html = `<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table>`; const d=document.createElement('div'); d.style.padding='12px'; d.innerHTML=`<h3>Events</h3>${html}`; document.body.appendChild(d); html2pdf().from(d).set({margin:0.3, filename:'events.pdf'}).save().then(()=> d.remove());
 });
 
-/* Search inputs debounce */
-$('searchStudents').addEventListener('input', debounce(()=> renderStudents(), 180));
-$('searchEvents').addEventListener('input', debounce(()=> renderEvents(), 180));
-$('searchApprovals').addEventListener('input', debounce(()=> renderApprovals(), 180));
+/* ---------- search debounces ---------- */
+$('searchStudents')?.addEventListener('input', debounce(()=> renderStudents()));
+$('searchEvents')?.addEventListener('input', debounce(()=> renderEvents()));
+$('searchApprovals')?.addEventListener('input', debounce(()=> renderApprovals()));
 
-/* Logout */
-$('logoutBtn').addEventListener('click', ()=> { sessionStorage.clear(); location.href='index.html'; });
-
-/* Initial render */
+/* ---------- initial render ---------- */
 setTimeout(()=> scheduleRender(), 250);
 
 </script>
