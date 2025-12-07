@@ -1,4 +1,4 @@
-<!-- PART 1: leader.html — HEAD + TOP NAV + LOGIN -->
+<!-- PART 1 -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -10,243 +10,241 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-  <!-- utilities -->
+  <!-- spreadsheets + pdf -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     :root{
-      --bg:#f5f8ff; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --accent-2:#7c3aed; --success:#10b981; --danger:#ef4444;
+      --bg: #f5f8ff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #7c3aed;
+      --success: #10b981;
+      --danger: #ef4444;
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#0f172a;background:var(--bg)}
     .container-wide{max-width:1100px;margin:14px auto;padding:0 12px}
-    .top-nav{background:#fff;border-bottom:1px solid #e8eefb;box-shadow:0 4px 12px rgba(12,20,60,0.03)}
-    .brand{font-weight:800;color:var(--accent);font-size:18px}
     .card-neo{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 6px 18px rgba(15,23,42,0.05);margin-bottom:14px}
     .section-title{font-weight:700;margin-bottom:8px}
     .muted{color:var(--muted)}
     .btn-accent{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;border:0}
     .small-box{width:56px;height:36px;border-radius:6px;background:#f1f5ff;display:inline-flex;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700}
+    .small-box.selected{background:var(--accent);color:#fff}
     .small-box.present{background:var(--success);color:#fff}
     .small-box.absent{background:var(--danger);color:#fff}
-    .participated-row{background:#e8fff0 !important}
-    /* top spacing & responsiveness */
+    .locked-banner{background:#fff7f7;border:1px solid #ffd7d7;color:var(--danger);padding:10px;border-radius:8px;margin-bottom:12px}
+    .top-nav{background:#fff;border-bottom:1px solid #e8eefb;box-shadow:0 4px 12px rgba(12,20,60,0.03)}
+    .brand{font-weight:800;color:var(--accent);font-size:18px}
+    .leader-info {display:flex;gap:12px;align-items:center}
+    .leader-avatar{width:48px;height:48px;border-radius:8px;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)}
+    .muted-small{color:var(--muted);font-size:13px}
+    .participated-row{background:#e8fff0}
     main{margin-top:0;padding-top:12px}
-    @media (max-width:900px){ .container-wide{padding:0 8px} .small-box{width:44px;height:34px;font-size:12px} }
+    @media (max-width:900px){
+      .small-box{width:44px;height:34px;font-size:12px}
+    }
   </style>
 </head>
 <body>
-
-<!-- TOP NAV -->
-<nav class="top-nav">
-  <div class="container container-wide d-flex align-items-center justify-content-between py-2">
-    <div class="d-flex align-items-center gap-3">
-      <div class="brand d-flex align-items-center gap-2"><span class="badge bg-primary rounded-pill"><i class="bi bi-palette-fill"></i></span> Art Fest</div>
-      <div class="d-none d-md-flex align-items-center muted" style="font-size:14px">Leader Panel — Submit participants · View status · Results · Attendance</div>
-    </div>
-
-    <div class="d-flex gap-2 align-items-center topbar-actions">
-      <div class="d-none d-md-block muted">Year <span id="current-year"></span></div>
-      <button id="logoutBtn" class="btn btn-outline-danger nav-btn"><i class="bi bi-box-arrow-right"></i> Logout</button>
-    </div>
-  </div>
-
-  <!-- second-row quick tabs -->
-  <div class="container container-wide d-flex gap-2 py-2">
-    <button class="btn btn-light nav-btn" data-target="#panel-login">Login</button>
-    <button class="btn btn-light nav-btn" data-target="#panel-submit">Submit Participants</button>
-    <button class="btn btn-light nav-btn" data-target="#panel-mylist">My Submissions</button>
-    <button class="btn btn-light nav-btn" data-target="#panel-attendance">Attendance</button>
-    <button class="btn btn-light nav-btn" data-target="#panel-results">Results</button>
-  </div>
-</nav>
-
-<main class="container container-wide">
-  <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
-
-  <!-- PANELS wrapper -->
-  <div id="panels-wrapper"></div>
-</main>
-<!-- PART 2: PANELS HTML -->
-<div id="panels" class="mt-2">
-
-  <!-- LOGIN -->
-  <section id="panel-login" class="card-neo">
-    <div class="row g-3 align-items-center">
-      <div class="col-md-6">
-        <div class="section-title">Leader Login</div>
-        <div class="muted mb-2">Choose your team (Team Name — Leader)</div>
-        <select id="loginTeam" class="form-select mb-2">
-          <option value="">Select team</option>
-        </select>
-        <input id="loginPassword" type="password" class="form-control mb-2" placeholder="Password">
-        <div class="form-text muted mb-2">If the team is locked, login will be blocked.</div>
-        <div class="d-flex gap-2">
-          <button id="btnLogin" class="btn btn-accent">Login</button>
-          <button id="btnGuest" class="btn btn-outline-secondary">Continue as Guest (view-only)</button>
-        </div>
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <div class="container container-wide d-flex align-items-center justify-content-between py-2">
+      <div class="d-flex align-items-center gap-3">
+        <div class="brand d-flex align-items-center gap-2"><span class="badge bg-primary rounded-pill"><i class="bi bi-palette-fill"></i></span> Art Fest</div>
+        <div class="muted-small d-none d-md-block">Leader Panel — Manage your team's submissions</div>
       </div>
 
-      <div class="col-md-6">
-        <div class="card-neo">
-          <div class="section-title">Logged in</div>
-          <div id="loggedInfo" class="muted">Not logged in</div>
-        </div>
+      <div class="d-flex gap-2 align-items-center">
+        <div class="muted-small">Year <span id="current-year"></span></div>
+        <button id="leaderLogout" class="btn btn-outline-danger ms-2">Logout</button>
       </div>
     </div>
-  </section>
 
-  <!-- SUBMIT PARTICIPANTS -->
-  <section id="panel-submit" class="card-neo d-none">
-    <div class="row g-3">
-      <div class="col-lg-5">
-        <div class="card-neo">
-          <div class="section-title">Select Event & Rules</div>
-          <select id="selectEventForSubmit" class="form-select mb-2"><option value="">Select event</option></select>
-          <div class="d-flex gap-2 mb-2">
-            <select id="filterSubmitType" class="form-select"><option value="">All Types</option><option>Stage</option><option>Non-Stage</option></select>
-            <select id="filterSubmitLevel" class="form-select"><option value="">All Levels</option><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
-          </div>
-          <div id="submitRules" class="muted mb-2">Pick an event to see participant restrictions.</div>
-          <div class="d-flex gap-2">
-            <button id="btnFilterEventsSubmit" class="btn btn-outline-secondary">Filter Events</button>
-            <button id="btnReloadEventsSubmit" class="btn btn-outline-primary">Reload Events</button>
-          </div>
-        </div>
-
-        <div class="card-neo mt-3">
-          <div class="section-title">Eligible Team Members</div>
-          <div class="muted mb-2">Select up to the required number.</div>
-          <div id="eligibleMembersList" style="max-height:360px;overflow:auto"></div>
-          <div class="mt-2 d-flex gap-2">
-            <button id="btnSelectAllEligible" class="btn btn-outline-secondary">Select All (within limit)</button>
-            <button id="btnSubmitParticipation" class="btn btn-success">Submit Participation</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-7">
-        <div class="card-neo">
-          <div class="section-title">Event Details</div>
-          <div id="eventDetailBox" class="muted">Select an event to view description & rules.</div>
-          <hr>
-          <div class="section-title">Quick Preview</div>
-          <div id="quickPreview" class="muted">No selection</div>
-        </div>
-      </div>
+    <div class="container container-wide d-flex gap-2 py-2">
+      <button class="btn btn-light nav-btn active" data-target="#panel-login">Login</button>
+      <button class="btn btn-light nav-btn" data-target="#panel-dashboard">Dashboard</button>
+      <button class="btn btn-light nav-btn" data-target="#panel-events">Events</button>
+      <button class="btn btn-light nav-btn" data-target="#panel-results">Results</button>
+      <button class="btn btn-light nav-btn" data-target="#panel-team">Team</button>
     </div>
-  </section>
+  </nav>
 
-  <!-- MY SUBMISSIONS -->
-  <section id="panel-mylist" class="card-neo d-none">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <div class="section-title">My Team Submissions</div>
+  <main class="container container-wide">
+    <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
+
+    <!-- Panels wrapper -->
+    <div id="panels-wrapper">
+      <!-- PART 2 will insert panels here -->
+    </div>
+  </main>
+  <!-- PART 2 -->
+<!-- LOGIN PANEL -->
+<section id="panel-login" class="card-neo">
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="section-title">Leader Login</div>
+      <div class="muted mb-2">Sign in using your Chess # (leader) and your team's password.</div>
+      <input id="leaderChess" class="form-control mb-2" placeholder="Leader Chess #">
+      <input id="leaderPassword" class="form-control mb-2" placeholder="Team Password">
       <div class="d-flex gap-2">
-        <input id="searchMySubs" class="form-control" placeholder="Search event or student">
-        <button id="downloadMySubsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+        <button id="btnLeaderLogin" class="btn btn-accent">Sign in</button>
+        <button id="btnGuest" class="btn btn-outline-secondary">Continue as guest (view only)</button>
       </div>
+      <div id="loginNotice" class="mt-3 muted-small"></div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead class="table-light"><tr><th>Event</th><th>Student</th><th>Level</th><th>Submitted</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
-        <tbody id="mySubmissionsTable"></tbody>
-      </table>
+    <div class="col-lg-6">
+      <div class="section-title">Quick Help</div>
+      <ul class="muted-small">
+        <li>If your team is locked by admin you will not be able to log in.</li>
+        <li>After login choose an event → tick members → Submit Participation (admin approval required).</li>
+        <li>Results published by admin appear in the Results panel.</li>
+      </ul>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ATTENDANCE -->
-  <section id="panel-attendance" class="card-neo d-none">
-    <div class="section-title">Team Attendance Overview</div>
-    <div class="row g-3">
-      <div class="col-md-6">
-        <div class="card-neo">
-          <div class="muted">Overall Attendance % (all saved sessions)</div>
-          <div id="teamAttendancePct" style="font-size:28px;font-weight:700">-</div>
+<!-- DASHBOARD (visible after login) -->
+<section id="panel-dashboard" class="card-neo d-none">
+  <div class="d-flex justify-content-between align-items-start">
+    <div>
+      <div class="leader-info">
+        <div id="leaderAvatar" class="leader-avatar">L</div>
+        <div>
+          <div id="leaderName" style="font-weight:800">Guest</div>
+          <div id="leaderTeamName" class="muted-small">Team: -</div>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="card-neo">
-          <div class="muted">Latest Absentees</div>
-          <div id="teamLatestAbsentees" style="max-height:220px;overflow:auto" class="mt-2 muted">No data</div>
-          <div class="mt-2">
-            <button id="btnDownloadAbsenteesPdf" class="btn btn-outline-secondary">Download Absentees PDF</button>
-          </div>
+      <div id="lockedBanner" class="locked-banner d-none mt-3">Your team is locked by admin. Please contact admin.</div>
+    </div>
+
+    <div class="text-end">
+      <button id="btnDownloadTeamPdf" class="btn btn-outline-secondary">Export Team PDF</button>
+    </div>
+  </div>
+
+  <hr>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card-neo">
+        <div class="section-title">Your Team Members</div>
+        <div id="teamMembersList" style="max-height:320px;overflow:auto"></div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card-neo">
+        <div class="section-title">Quick Actions</div>
+        <div class="d-flex gap-2">
+          <button id="openEvents" class="btn btn-accent">Open Events</button>
+          <button id="openResults" class="btn btn-outline-secondary">Open Results</button>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- RESULTS -->
-  <section id="panel-results" class="card-neo d-none">
-    <div class="card-neo mb-3">
-      <div class="section-title">Event Results (preview)</div>
-      <div class="d-flex gap-2 mb-2">
-        <select id="resultsEventSelect" class="form-select"><option value="">Select event</option></select>
-        <button id="btnReloadResults" class="btn btn-outline-primary">Reload</button>
+<!-- EVENTS PANEL -->
+<section id="panel-events" class="card-neo d-none">
+  <div class="section-title">Events — choose and submit participants</div>
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <div class="card-neo">
+        <label class="form-label muted-small">Filter</label>
+        <div class="d-flex gap-2 mb-2">
+          <select id="filterType" class="form-select"><option value="">All Types</option><option>Stage</option><option>Non-Stage</option></select>
+          <select id="filterLevel" class="form-select"><option value="">All Levels</option><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
+          <button id="btnFilterEvents" class="btn btn-outline-secondary">Search</button>
+        </div>
+
+        <div class="section-title">Available Events</div>
+        <div class="table-responsive" style="max-height:360px;overflow:auto">
+          <table class="table table-sm">
+            <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Level</th><th></th></tr></thead>
+            <tbody id="eventsList"></tbody>
+          </table>
+        </div>
       </div>
-      <div id="resultsPreview" class="muted">Select an event to fetch results.</div>
     </div>
 
-    <div class="card-neo">
-      <div class="section-title">Results Table</div>
-      <div class="muted mb-2">Rows highlighted indicate event has uploaded results; winners from your team are emphasized.</div>
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead class="table-light"><tr><th>Event</th><th>1st (pts)</th><th>2nd (pts)</th><th>3rd (pts)</th><th>Published</th></tr></thead>
-          <tbody id="leaderResultsTable"></tbody>
-        </table>
+    <div class="col-lg-7">
+      <div class="card-neo">
+        <div class="section-title">Selected Event</div>
+        <div id="selectedEventWrap" class="muted-small mb-2">Select an event to load team members for nomination.</div>
+        <div id="selectedEventName" style="font-weight:800"></div>
+        <div id="selectedEventMeta" class="muted-small mb-3"></div>
+
+        <div class="section-title">Team members (click to select)</div>
+        <div id="membersSelection" style="min-height:180px;max-height:360px;overflow:auto;padding:6px"></div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button id="btnSubmitParticipation" class="btn btn-accent">Submit Participation</button>
+          <button id="btnClearSelection" class="btn btn-outline-secondary">Clear</button>
+          <div class="ms-auto muted-small align-self-center" id="selectionInfo">0 selected</div>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-</div>
-<!-- end panels -->
-<!-- PART 3: MODALS & HIDDEN INPUTS -->
-<!-- bookkeeping -->
+<!-- RESULTS PANEL -->
+<section id="panel-results" class="card-neo d-none">
+  <div class="section-title">Results (Published)</div>
+  <div class="muted-small mb-2">Published results are visible to leaders. Light rows indicate event has some results uploaded (draft or published).</div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead class="table-light"><tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th><th>Published</th></tr></thead>
+      <tbody id="leaderResultsTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TEAM PANEL -->
+<section id="panel-team" class="card-neo d-none">
+  <div class="section-title">Team Info</div>
+  <div id="teamInfoWrap" class="muted-small mb-2"></div>
+  <div class="section-title">Members</div>
+  <div id="teamMembersSmall" style="max-height:360px;overflow:auto"></div>
+</section>
+<!-- PART 3 -->
+<!-- Hidden state -->
+<input type="hidden" id="leaderTeamDbKey">
 <input type="hidden" id="leaderTeamId">
-<input type="hidden" id="leaderId"> <!-- leader student's chess id -->
-<input type="hidden" id="leaderName">
+<input type="hidden" id="leaderStudentId">
 
-<!-- Confirmation Modal -->
+<!-- Confirm modal (reusable) -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-sm">
     <div class="modal-content">
-      <div class="modal-header"><h5 id="confirmTitle" class="modal-title">Confirm</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header"><h5 class="modal-title">Confirm</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body" id="confirmBody">Are you sure?</div>
       <div class="modal-footer">
-        <button id="confirmCancel" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button id="confirmOk" class="btn btn-primary">OK</button>
+        <button id="confirmNo" class="btn btn-outline-secondary" data-bs-dismiss="modal">No</button>
+        <button id="confirmYes" class="btn btn-accent">Yes</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Small result detail modal -->
-<div class="modal fade" id="resultDetailModal" tabindex="-1" aria-hidden="true">
+<!-- View participation status modal -->
+<div class="modal fade" id="participationStatusModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Event Results</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body" id="resultDetailBody"></div>
-      <div class="modal-footer"><button class="btn btn-primary" data-bs-dismiss="modal">Close</button></div>
+      <div class="modal-header"><h5 class="modal-title">Your Submissions</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="yourSubmissionsList" style="max-height:420px;overflow:auto"></div>
+      </div>
     </div>
   </div>
 </div>
-<!-- PART 4: SCRIPT (Firebase + UI) -->
+<!-- PART 4 -->
 <script type="module">
-/* leader.html — Firebase + UI wiring
-   - Login by team (Team Name (Leader: Name))
-   - Submit participants (restricted per event)
-   - View team submissions
-   - Attendance overview for team
-   - Results preview & highlight team winners
-*/
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* Firebase config — same as admin */
+/* Firebase config - same as admin */
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
   authDomain: "gen7-3e139.firebaseapp.com",
@@ -260,7 +258,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* short helpers */
+/* simple helpers */
 const $ = id => document.getElementById(id);
 function toast(msg, type='success'){ const el=document.createElement('div'); el.className=`toast align-items-center text-bg-${type} border-0`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); const t=new bootstrap.Toast(el,{delay:3000}); t.show(); el.addEventListener('hidden.bs.toast', ()=>el.remove()); }
 function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
@@ -271,442 +269,356 @@ function decodeKey(k){ return decodeURIComponent(String(k)); }
 let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
 let KEYMAP = { students: {}, teams: {}, events: {}, participations: {}, results: {} };
 
-/* db refs */
+/* DB refs */
 const studentsRef = ref(db, 'students');
 const teamsRef = ref(db, 'teams');
 const eventsRef = ref(db, 'events');
 const partsRef = ref(db, 'participations');
 const resultsRef = ref(db, 'results');
-const attendanceRef = ref(db, 'attendance');
 
 /* realtime listeners */
-onValue(studentsRef, snap => { const obj = snap.val() || {}; CACHE.students = Object.values(obj); KEYMAP.students = {}; Object.entries(obj).forEach(([k,v])=>{ if(v && v.id!==undefined) KEYMAP.students[String(v.id)] = k; }); postRenderAll(); });
-onValue(teamsRef, snap => { const obj = snap.val() || {}; CACHE.teams = Object.values(obj); KEYMAP.teams = {}; Object.entries(obj).forEach(([k,v])=>{ if(v && v.id!==undefined) KEYMAP.teams[String(v.id)] = k; }); postRenderAll(); });
-onValue(eventsRef, snap => { const obj = snap.val() || {}; CACHE.events = Object.values(obj); KEYMAP.events = {}; Object.entries(obj).forEach(([k,v])=>{ if(v && v.id!==undefined) KEYMAP.events[String(v.id)] = k; }); postRenderAll(); });
-onValue(partsRef, snap => { const obj = snap.val() || {}; CACHE.participations = Object.values(obj); KEYMAP.participations = {}; Object.entries(obj).forEach(([k,v])=>{ if(v && v.id!==undefined) KEYMAP.participations[String(v.id)] = k; }); postRenderAll(); });
-onValue(resultsRef, snap => { const obj = snap.val() || {}; CACHE.results = Object.values(obj); KEYMAP.results = {}; Object.entries(obj).forEach(([k,v])=>{ if(v && v.id!==undefined) KEYMAP.results[String(v.id)] = k; }); postRenderAll(); });
-onValue(attendanceRef, snap => { CACHE.attendance = snap.val() || {}; postRenderAll(); });
+onValue(studentsRef, snap => { const obj = snap.val() || {}; CACHE.students = Object.values(obj); KEYMAP.students = {}; Object.entries(obj).forEach(([k,v])=> v && v.id !== undefined && (KEYMAP.students[String(v.id)] = k)); renderAll(); });
+onValue(teamsRef, snap => { const obj = snap.val() || {}; CACHE.teams = Object.values(obj); KEYMAP.teams = {}; Object.entries(obj).forEach(([k,v])=> v && v.id !== undefined && (KEYMAP.teams[String(v.id)] = k)); renderAll(); });
+onValue(eventsRef, snap => { const obj = snap.val() || {}; CACHE.events = Object.values(obj); KEYMAP.events = {}; Object.entries(obj).forEach(([k,v])=> v && v.id !== undefined && (KEYMAP.events[String(v.id)] = k)); renderAll(); });
+onValue(partsRef, snap => { const obj = snap.val() || {}; CACHE.participations = Object.values(obj); KEYMAP.participations = {}; Object.entries(obj).forEach(([k,v])=> v && v.id !== undefined && (KEYMAP.participations[String(v.id)] = k)); renderAll(); });
+onValue(resultsRef, snap => { const obj = snap.val() || {}; CACHE.results = Object.values(obj); KEYMAP.results = {}; Object.entries(obj).forEach(([k,v])=> v && v.id !== undefined && (KEYMAP.results[String(v.id)] = k)); renderAll(); });
 
-/* UI tab wiring (top buttons) */
+/* navigation wiring */
 document.querySelectorAll('[data-target]').forEach(btn=>{
   btn.addEventListener('click', ()=> {
-    document.querySelectorAll('#panels > section').forEach(s => s.classList.add('d-none'));
-    const id = btn.getAttribute('data-target');
-    const panel = document.querySelector(id);
+    document.querySelectorAll('main > section, main > div.card-neo, #panels-wrapper > section').forEach(s => s.classList.add('d-none'));
+    const target = btn.dataset.target;
+    const panel = document.querySelector(target);
     if(panel) panel.classList.remove('d-none');
-    document.querySelectorAll('.top-nav .nav-btn, .top-nav .btn').forEach(b=> b.classList.remove('active'));
+    document.querySelectorAll('.top-nav .nav-btn').forEach(b=> b.classList.remove('active'));
     btn.classList.add('active');
-    window.scrollTo({top:0,behavior:'smooth'});
   });
 });
+document.querySelector('[data-target="#panel-login"]').click();
 
-/* quick defaults */
-setTimeout(()=> { document.querySelector('[data-target="#panel-login"]').click(); try{ $('current-year').textContent = new Date().getFullYear(); }catch(e){} }, 200);
+/* local leader state */
+let LEADER = { loggedIn: false, studentId: null, teamId: null, teamDbKey: null };
 
-/* post render all — populates dropdowns & UI */
-function postRenderAll(){
-  populateTeamDropdown();
-  populateEventSelects();
-  renderMySubmissions();
-  renderAttendanceOverview();
-  renderLeaderResults();
-}
+/* boot */
+setTimeout(()=> { try{ $('current-year').textContent = new Date().getFullYear(); }catch(e){} renderAll(); }, 400);
 
-/* ---------- POPULATE DROPDOWNS ---------- */
-function populateTeamDropdown(){
-  const sel = $('loginTeam'); if(!sel) return;
-  sel.innerHTML = '<option value="">Select team</option>';
-  // show Team Name (Leader: LeaderName) — leaderName fetched from students using leaderId
-  CACHE.teams.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-  CACHE.teams.forEach(t => {
-    const leader = CACHE.students.find(s => String(s.id) === String(t.leaderId));
-    const label = `${t.name}${ leader ? ' — ' + leader.name : '' }`;
-    sel.innerHTML += `<option value="${encodeKey(t.id)}" data-password="${escapeHtml(t.password||'')}" data-locked="${t.locked?1:0}" data-leaderid="${escapeHtml(t.leaderId||'')}">${escapeHtml(label)}</option>`;
-  });
-}
-
-/* populate event selects */
-function populateEventSelects(){
-  const sel1 = $('selectEventForSubmit'); const sel2 = $('resultsEventSelect'); const sel3 = $('resultsEventSelect');
-  [sel1, $('resultsEventSelect')].forEach(s => { if(!s) return; s.innerHTML = '<option value="">Select event</option>'; CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||'')); CACHE.events.forEach(e => s.innerHTML += `<option value="${encodeURIComponent(e.id)}">${escapeHtml(e.name)} — ${escapeHtml(e.type)} — ${escapeHtml(e.level)}</option>`); });
+/* renderAll: populate panels + lists */
+function renderAll(){
+  populateEventsList();
+  renderLeaderDashboard();
+  renderResultsTable();
+  populateTeamLists();
 }
 
 /* ---------- LOGIN ---------- */
-$('btnLogin').addEventListener('click', ()=> {
-  const sel = $('loginTeam'); const opt = sel.options[sel.selectedIndex];
-  if(!opt || !sel.value) return toast('Select team','danger');
-  const teamId = decodeKey(sel.value);
-  const locked = opt.dataset.locked === '1';
-  const leaderId = opt.dataset.leaderid || '';
-  const pwd = $('loginPassword').value || '';
-  // password check only if password exists
-  const teamObj = CACHE.teams.find(t => String(t.id) === String(teamId));
-  if(!teamObj) return toast('Team not found','danger');
-  if(teamObj.password && String(teamObj.password) !== String(pwd)) return toast('Password incorrect','danger');
-  if(teamObj.locked) return toast('This team is locked. Login not allowed.','danger');
-  // set session
-  sessionStorage.setItem('leader_teamId', teamId);
-  sessionStorage.setItem('leader_teamName', teamObj.name || '');
-  sessionStorage.setItem('leader_leaderId', leaderId || '');
-  // find leader name
-  const leaderStudent = CACHE.students.find(s => String(s.id) === String(leaderId));
-  const leaderName = leaderStudent ? leaderStudent.name : '';
-  sessionStorage.setItem('leader_name', leaderName);
-  // populate hidden inputs
-  $('leaderTeamId').value = teamId; $('leaderId').value = leaderId; $('leaderName').value = leaderName;
-  $('loggedInfo').innerHTML = `<div><strong>${escapeHtml(teamObj.name)}</strong> — Leader: ${escapeHtml(leaderName || '—')}</div>`;
-  // show submit panel
-  document.querySelector('[data-target="#panel-submit"]').click();
+$('btnLeaderLogin').addEventListener('click', async ()=>{
+  const chess = ($('leaderChess').value||'').trim();
+  const pwd = ($('leaderPassword').value||'').trim();
+  if(!chess) return toast('Enter your Chess #','danger');
+  // find student record
+  const student = CACHE.students.find(s => String(s.id) === String(chess));
+  if(!student) return toast('Leader not found','danger');
+  // find team where this student is leader
+  const team = CACHE.teams.find(t => String(t.leaderId) === String(chess));
+  if(!team) return toast('You are not configured as a team leader','danger');
+  // password check (allow blank password)
+  const passOk = (String(team.password||'') === String(pwd||''));
+  if(!passOk) return toast('Invalid password','danger');
+  if(team.locked){
+    // locked behavior: set state but show locked banner and prevent actions
+    LEADER = { loggedIn:false, studentId:chess, teamId: team.id, teamDbKey: KEYMAP.teams[team.id] || null };
+    $('loginNotice').innerHTML = `<div class="locked-banner">Your team is locked by admin. Please contact admin.</div>`;
+    return;
+  }
+  // all good — set leader state
+  LEADER = { loggedIn:true, studentId:chess, teamId: team.id, teamDbKey: KEYMAP.teams[team.id] || null };
+  $('leaderStudentId').value = chess;
+  $('leaderTeamId').value = team.id;
+  $('leaderTeamDbKey').value = LEADER.teamDbKey;
+  $('leaderName').textContent = student.name || chess;
+  $('leaderAvatar').textContent = (student.name||'L').slice(0,1).toUpperCase();
+  $('leaderTeamName').textContent = `Team: ${team.name || ''}`;
+  $('loginNotice').textContent = '';
+  $('panel-login').classList.add('d-none');
+  document.querySelector('[data-target="#panel-dashboard"]').click();
   toast('Logged in');
+  renderLeaderDashboard();
 });
 
-/* guest continuation (view only) */
+/* guest button */
 $('btnGuest').addEventListener('click', ()=> {
-  sessionStorage.removeItem('leader_teamId');
-  sessionStorage.removeItem('leader_name');
-  $('leaderTeamId').value = ''; $('leaderId').value = ''; $('leaderName').value = '';
-  $('loggedInfo').textContent = 'Guest (view-only)';
-  document.querySelector('[data-target="#panel-submit"]').click();
-  toast('Guest mode (view-only)');
+  LEADER = { loggedIn:false, studentId: null, teamId: null, teamDbKey: null };
+  $('leaderName').textContent = 'Guest';
+  $('leaderAvatar').textContent = 'G';
+  $('leaderTeamName').textContent = 'Team: -';
+  $('panel-login').classList.add('d-none');
+  document.querySelector('[data-target="#panel-dashboard"]').click();
 });
 
 /* logout */
-$('logoutBtn').addEventListener('click', ()=> {
-  sessionStorage.clear(); location.reload();
+$('leaderLogout').addEventListener('click', ()=> {
+  LEADER = { loggedIn:false, studentId: null, teamId: null, teamDbKey: null };
+  $('leaderName').textContent = 'Guest';
+  document.querySelector('[data-target="#panel-login"]').click();
+  toast('Logged out');
 });
 
-/* on load — restore session if any */
-function restoreSession(){
-  const teamId = sessionStorage.getItem('leader_teamId');
-  if(teamId){
-    const team = CACHE.teams.find(t => String(t.id) === String(teamId));
-    const leaderName = sessionStorage.getItem('leader_name') || '';
-    $('leaderTeamId').value = teamId;
-    $('leaderName').value = leaderName;
-    $('leaderId').value = sessionStorage.getItem('leader_leaderId') || '';
-    $('loggedInfo').innerHTML = `<div><strong>${escapeHtml(team?team.name:'—')}</strong> — Leader: ${escapeHtml(leaderName||'—')}</div>`;
-  }
-}
-setTimeout(restoreSession, 500);
-
-/* ---------- SUBMIT PARTICIPATION LOGIC ---------- */
-
-/* helper: required participants for event */
-function requiredCountFor(eventObj){
-  // Senior: stage 3, non-stage 4
-  // Junior: stage 2, non-stage 3
-  const level = (eventObj.level||'').toLowerCase();
-  const type = (eventObj.type||'').toLowerCase();
-  if(level === 'senior'){
-    return type === 'stage' ? 3 : 4;
-  } else if(level === 'junior'){
-    return type === 'stage' ? 2 : 3;
-  }
-  // General/Special: treat as both allowed; default choose 3
-  return 3;
-}
-
-/* helper: build eligible members UI */
-function buildEligibleMembers(teamId, eventObj){
-  const wrap = $('eligibleMembersList'); wrap.innerHTML = '';
-  if(!teamId) { wrap.innerHTML = '<div class="muted">Please login as a team leader or select a team.</div>'; return; }
-  const required = requiredCountFor(eventObj);
-  // members of this team with matching level (if event level specific)
-  const members = CACHE.students.filter(s => String(s.teamId) === String(teamId));
-  // allowed if level matches or event level is general/special
-  const allowed = members.filter(m => {
-    const el = (eventObj.level||'').toLowerCase();
-    if(!el || el === 'general' || el === 'special') return true;
-    return String((m.level||'').toLowerCase()) === el;
-  });
-  if(!allowed.length) { wrap.innerHTML = '<div class="muted">No eligible members for this event.</div>'; return; }
-  // render checkboxes with limit enforcement
-  const list = document.createElement('div');
-  allowed.forEach(m => {
-    const id = encodeKey(m.id);
-    const row = document.createElement('div'); row.className='d-flex align-items-center gap-2'; row.style.padding='6px 4px';
-    row.innerHTML = `<div class="form-check"><input class="form-check-input eligible-check" type="checkbox" id="chk_${id}" data-id="${escapeHtml(m.id)}"><label class="form-check-label" for="chk_${id}">${escapeHtml(m.name)} <span class="muted">(${escapeHtml(m.id)})</span></label></div>`;
-    list.appendChild(row);
-  });
-  // info
-  wrap.appendChild(document.createElement('div')).innerHTML = `<div class="muted">Required: <strong>${required}</strong> — Selected: <span id="eligibleSelectedCount">0</span></div>`;
-  wrap.appendChild(list);
-
-  // enforce selection limit
-  const checkboxes = Array.from(wrap.querySelectorAll('.eligible-check'));
-  function updateCount(){
-    const selected = checkboxes.filter(c => c.checked);
-    $('eligibleSelectedCount').textContent = selected.length;
-    // disable unchecked if limit reached
-    if(selected.length >= required) checkboxes.filter(c => !c.checked).forEach(c=> c.disabled = true);
-    else checkboxes.forEach(c=> c.disabled = false);
-  }
-  checkboxes.forEach(c => c.addEventListener('change', updateCount));
-  // prelimit
-  updateCount();
-}
-
-/* when event selection changes */
-$('selectEventForSubmit').addEventListener('change', ()=>{
-  const v = $('selectEventForSubmit').value;
-  if(!v){ $('submitRules').textContent = 'Pick an event to see participant restrictions.'; $('eventDetailBox').textContent = 'Select an event to view description & rules.'; $('eligibleMembersList').innerHTML=''; return; }
-  const evId = decodeURIComponent(v);
-  const ev = CACHE.events.find(e => String(e.id) === String(evId));
-  if(!ev) return;
-  const req = requiredCountFor(ev);
-  $('submitRules').innerHTML = `Event requires <strong>${req}</strong> participants (based on level & type).`;
-  $('eventDetailBox').innerHTML = `<div style="font-weight:700">${escapeHtml(ev.name)}</div><div class="muted">${escapeHtml(ev.type)} — ${escapeHtml(ev.level)}</div><div style="margin-top:8px">${escapeHtml(ev.description||'')}</div>`;
-  // build eligible members (team from session)
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leader_teamId');
-  buildEligibleMembers(teamId, ev);
-});
-
-/* filter events in submit area */
-$('btnFilterEventsSubmit').addEventListener('click', ()=> {
-  const t = $('filterSubmitType').value; const l = $('filterSubmitLevel').value;
-  const sel = $('selectEventForSubmit'); sel.innerHTML = '<option value="">Select event</option>';
-  CACHE.events.forEach(e => {
-    if(t && e.type !== t) return;
-    if(l && e.level !== l) return;
-    sel.innerHTML += `<option value="${encodeURIComponent(e.id)}">${escapeHtml(e.name)} — ${escapeHtml(e.type)} — ${escapeHtml(e.level)}</option>`;
-  });
-  toast('Filtered events');
-});
-$('btnReloadEventsSubmit').addEventListener('click', ()=> populateEventSelects());
-
-/* select all eligible within limit */
-$('btnSelectAllEligible').addEventListener('click', ()=> {
-  const checks = Array.from(document.querySelectorAll('#eligibleMembersList .eligible-check'));
-  if(!checks.length) return;
-  const max = Number(document.querySelector('#eligibleMembersList #eligibleSelectedCount') ? Infinity : Infinity); // not used directly
-  // get required count from selected event
-  const evVal = $('selectEventForSubmit').value; if(!evVal) return toast('Select event first','danger');
-  const ev = CACHE.events.find(e => String(e.id) === String(decodeURIComponent(evVal)));
-  const req = requiredCountFor(ev);
-  // select up to req unchecked
-  const unchecked = checks.filter(c => !c.checked);
-  for(let c of unchecked){
-    const selectedNow = checks.filter(x=> x.checked).length;
-    if(selectedNow >= req) break;
-    c.checked = true;
-  }
-  // trigger change events
-  checks.forEach(c => c.dispatchEvent(new Event('change')));
-});
-
-/* submit participation handler */
-$('btnSubmitParticipation').addEventListener('click', async ()=>{
-  const evVal = $('selectEventForSubmit').value; if(!evVal) return toast('Select event','danger');
-  const evId = decodeURIComponent(evVal); const ev = CACHE.events.find(e=> String(e.id) === String(evId));
-  if(!ev) return toast('Event not found','danger');
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leader_teamId');
-  if(!teamId) return toast('You must login as a team leader to submit','danger');
-  const checks = Array.from(document.querySelectorAll('#eligibleMembersList .eligible-check')).filter(c => c.checked);
-  const required = requiredCountFor(ev);
-  if(checks.length < required) return toast(`Select ${required} participants (you have ${checks.length})`,'danger');
-
-  // prepare push: for each student selected, create participation if not duplicate (same studentId+eventId)
-  const updates = {};
-  let added = 0, skipped = 0;
-  const now = Date.now();
-  for(const c of checks){
-    const studentId = c.dataset.id;
-    // check if existing participation for same student+event
-    const exists = CACHE.participations.find(p => String(p.eventId) === String(evId) && String(p.studentId) === String(studentId));
-    if(exists){ skipped++; continue; }
-    const id = `${now}${Math.floor(Math.random()*9999)}${studentId}`;
-    updates[`participations/${id}`] = { id, eventId: evId, studentId, teamId, status:'pending', submittedAt: now };
-    added++;
-  }
-  if(Object.keys(updates).length){
-    await update(ref(db, '/'), updates);
-    toast(`Submitted ${added} (skipped ${skipped} duplicates)`);
-  } else {
-    toast('No new submissions (duplicates skipped)','warning');
-  }
-  // refresh my submissions view
-  renderMySubmissions();
-});
-
-/* ---------- MY SUBMISSIONS ---------- */
-function renderMySubmissions(){
-  const tbody = $('mySubmissionsTable'); const q = ($('searchMySubs')?.value||'').trim().toLowerCase();
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leader_teamId');
-  if(!teamId){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">Login required to view team submissions</td></tr>'; return; }
-  const myParts = (CACHE.participations || []).filter(p => String(p.teamId) === String(teamId));
-  if(!myParts.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No submissions</td></tr>'; return; }
-  const rows = myParts.sort((a,b)=> (b.submittedAt||0)-(a.submittedAt||0)).map(p => {
-    const ev = CACHE.events.find(e => String(e.id)===String(p.eventId)) || {};
-    const student = CACHE.students.find(s => String(s.id) === String(p.studentId)) || { name: p.studentId, level: '' };
-    const status = (p.status||'pending');
-    const badge = status==='approved' ? '<span class="badge bg-success">Approved</span>' : (status==='rejected' ? '<span class="badge bg-danger">Rejected</span>' : '<span class="badge bg-secondary">Pending</span>');
-    const date = p.submittedAt ? new Date(p.submittedAt).toLocaleString() : '';
-    return `<tr data-key="${escapeHtml(p.id)}"><td>${escapeHtml(ev.name||p.eventId)}</td><td>${escapeHtml(student.name)} (${escapeHtml(student.id||'')})</td><td>${escapeHtml(student.level||'')}</td><td>${escapeHtml(date)}</td><td>${badge}</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary btn-view-part" data-key="${escapeHtml(p.id)}">View</button> <button class="btn btn-sm btn-outline-danger btn-cancel-part" data-key="${escapeHtml(p.id)}">Cancel</button></td></tr>`;
-  });
-  tbody.innerHTML = rows.join('');
-}
-
-/* cancel participation (only if pending) */
-$('mySubmissionsTable').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return;
-  const key = btn.dataset.key;
-  const part = (CACHE.participations||[]).find(p => String(p.id) === String(key));
-  if(!part) return toast('Not found','danger');
-  if(btn.classList.contains('btn-cancel-part')){
-    if(part.status !== 'pending') return toast('Only pending participations can be cancelled','danger');
-    if(!confirm('Cancel this participation?')) return;
-    const dbKey = KEYMAP.participations[part.id] || part.id;
-    await remove(ref(db, `participations/${dbKey}`));
-    toast('Cancelled');
-  } else if(btn.classList.contains('btn-view-part')){
-    const ev = CACHE.events.find(e => String(e.id) === String(part.eventId)) || {};
-    const st = CACHE.students.find(s => String(s.id) === String(part.studentId)) || {};
-    const body = document.createElement('div');
-    body.innerHTML = `<div><strong>Event:</strong> ${escapeHtml(ev.name||part.eventId)}</div><div><strong>Student:</strong> ${escapeHtml(st.name||part.studentId)} (${escapeHtml(part.studentId)})</div><div class="muted">Status: ${escapeHtml(part.status||'')}</div>`;
-    document.getElementById('resultDetailBody').innerHTML = ''; document.getElementById('resultDetailBody').appendChild(body);
-    new bootstrap.Modal(document.getElementById('resultDetailModal')).show();
-  }
-});
-
-/* PDF for my submissions */
-$('downloadMySubsPdf').addEventListener('click', ()=> {
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leader_teamId'); if(!teamId) return toast('Login required','danger');
-  let html = `<h3>Team Submissions</h3>`;
-  const myParts = (CACHE.participations || []).filter(p => String(p.teamId) === String(teamId));
-  if(!myParts.length) return toast('No submissions','warning');
-  myParts.forEach(p => {
-    const ev = CACHE.events.find(e => String(e.id)===String(p.eventId)) || {};
-    const st = CACHE.students.find(s => String(s.id) === String(p.studentId)) || {};
-    html += `<div style="margin-bottom:6px"><strong>${escapeHtml(ev.name||p.eventId)}</strong> — ${escapeHtml(st.name||p.studentId)} (${escapeHtml(p.studentId)}) — ${escapeHtml(p.status||'')}</div>`;
-  });
-  html2pdf().from(html).set({margin:10,filename:`submissions_${new Date().toISOString().slice(0,10)}.pdf`}).save();
-});
-
-/* ---------- ATTENDANCE OVERVIEW ---------- */
-function computeTeamAttendancePct(teamId){
-  const attend = CACHE.attendance || {};
-  const members = CACHE.students.filter(s => String(s.teamId) === String(teamId)).map(s => String(s.id));
-  if(!members.length) return 0;
-  let total=0, present=0;
-  for(const k in attend){
-    const sess = attend[k];
-    if(!sess || !sess.students) continue;
-    members.forEach(m => { if(sess.students && sess.students[m] !== undefined){ total++; if(String(sess.students[m]).toLowerCase() === 'present') present++; } });
-  }
-  return total ? Math.round((present/total)*100) : 0;
-}
-function renderAttendanceOverview(){
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leader_teamId');
-  if(!teamId){ $('teamAttendancePct').textContent = '-'; $('teamLatestAbsentees').textContent = 'Login required to view'; return; }
-  const pct = computeTeamAttendancePct(teamId);
-  $('teamAttendancePct').textContent = pct + '%';
-  // find latest session with absentees
-  const att = CACHE.attendance || {};
-  const sessions = Object.entries(att).map(([k,v])=>({k,v})).sort((a,b)=> (b.v.savedAt||0) - (a.v.savedAt||0));
-  if(!sessions.length){ $('teamLatestAbsentees').innerHTML = '<div class="muted">No sessions</div>'; return; }
-  const latest = sessions[0].v;
-  const abs = []; if(latest.students) for(const id in latest.students) if(String(latest.students[id]).toLowerCase() !== 'present') abs.push(id);
-  if(!abs.length) $('teamLatestAbsentees').innerHTML = '<div class="muted">No absentees — all present</div>';
-  else {
-    const list = document.createElement('div');
-    abs.forEach(a => {
-      const st = CACHE.students.find(s => String(s.id) === String(a));
-      const row = document.createElement('div'); row.style.padding='6px 4px'; row.style.borderBottom='1px solid #f1f5ff';
-      row.innerHTML = `<div style="font-size:14px">${escapeHtml(st?st.name:a)} <span class="muted" style="font-size:12px">(${escapeHtml(a)})</span></div>`;
-      list.appendChild(row);
-    });
-    $('teamLatestAbsentees').innerHTML = ''; $('teamLatestAbsentees').appendChild(list);
-  }
-  $('btnDownloadAbsenteesPdf').onclick = ()=> {
-    const el = $('teamLatestAbsentees').innerHTML || '<div>No absentees</div>';
-    html2pdf().from(`<h3>Latest Absentees</h3>${el}`).set({margin:10,filename:`absentees_${new Date().toISOString().slice(0,10)}.pdf`}).save();
-  };
-}
-
-/* ---------- RESULTS PREVIEW ---------- */
-$('resultsEventSelect').addEventListener('change', ()=> renderLeaderResults(true));
-$('btnReloadResults').addEventListener('click', ()=> renderLeaderResults(true));
-
-function renderLeaderResults(showModal=false){
-  const tbody = $('leaderResultsTable'); tbody.innerHTML = '';
-  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No events</td></tr>'; return; }
-  // map results by eventId
-  const map = {};
-  (CACHE.results||[]).forEach(r => { if(!map[r.eventId]) map[r.eventId] = {}; map[r.eventId][r.position] = r; });
-  const teamId = $('leaderTeamId').value || sessionStorage.getItem('leader_teamId');
-
-  // if specific event selected, just show that
-  const selectedEvent = $('resultsEventSelect').value ? decodeURIComponent($('resultsEventSelect').value) : null;
-  const eventsToShow = selectedEvent ? CACHE.events.filter(e => String(e.id)===String(selectedEvent)) : CACHE.events;
-
-  eventsToShow.sort((a,b)=> (a.name||'').localeCompare(b.name||'')).forEach(ev => {
-    const pos = map[ev.id] || {};
-    const first = pos[1] ? (CACHE.students.find(s => String(s.id) === String(pos[1].studentId)) || { name: pos[1].studentId, id: pos[1].studentId }) : { name:'', id:'' };
-    const second = pos[2] ? (CACHE.students.find(s => String(s.id) === String(pos[2].studentId)) || { name: pos[2].studentId, id: pos[2].studentId }) : { name:'', id:'' };
-    const third = pos[3] ? (CACHE.students.find(s => String(s.id) === String(pos[3].studentId)) || { name: pos[3].studentId, id: pos[3].studentId }) : { name:'', id:'' };
-    const anyUploaded = !!pos[1] || !!pos[2] || !!pos[3];
-    const published = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
-    const pubBadge = published ? '<span class="badge bg-success">Published</span>' : (anyUploaded ? '<span class="badge bg-secondary">Draft</span>' : '<span class="badge bg-light muted">No results</span>');
-    // highlight winners from your team
-    function formatCell(p){
-      if(!p || !p.studentId) return '';
-      const s = CACHE.students.find(x => String(x.id) === String(p.studentId));
-      const belongs = s && String(s.teamId) === String(teamId);
-      const name = s ? s.name : p.studentId;
-      const pts = p.points ? ` (${p.points})` : '';
-      return `<div style="${belongs? 'font-weight:800;color:var(--accent);' : ''}">${escapeHtml(name)} <span class="muted">(${escapeHtml(p.studentId||'')})</span>${escapeHtml(pts)}</div>`;
-    }
+/* ---------- POPULATE EVENTS LIST ---------- */
+function populateEventsList(){
+  const tbody = $('eventsList');
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="4" class="muted-small">No events</td></tr>'; return; }
+  const fType = $('filterType').value || '';
+  const fLevel = $('filterLevel').value || '';
+  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+  let html = '';
+  CACHE.events.forEach(ev => {
+    if(fType && ev.type !== fType) return;
+    if(fLevel && ev.level !== fLevel) return;
+    const anyUploaded = CACHE.results.some(r => String(r.eventId) === String(ev.id));
     const rowClass = anyUploaded ? 'participated-row' : '';
-    const html = `<tr class="${rowClass}"><td>${escapeHtml(ev.name)} — <span class="muted">${escapeHtml(ev.type)} / ${escapeHtml(ev.level)}</span></td><td>${formatCell(pos[1])}</td><td>${formatCell(pos[2])}</td><td>${formatCell(pos[3])}</td><td>${pubBadge}</td></tr>`;
-    tbody.insertAdjacentHTML('beforeend', html);
+    html += `<tr class="${rowClass}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'')}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-select-event" data-id="${ev.id}">Select</button></td></tr>`;
+  });
+  tbody.innerHTML = html || '<tr><td colspan="4" class="muted-small">No events match</td></tr>';
+}
+$('btnFilterEvents').addEventListener('click', populateEventsList);
+
+/* when leader clicks Select on event */
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('.btn-select-event');
+  if(!b) return;
+  const evId = b.dataset.id;
+  selectEvent(evId);
+});
+
+/* selectEvent: loads event details and candidate members (based on team and event level) */
+function selectEvent(evId){
+  const ev = CACHE.events.find(x => String(x.id) === String(evId));
+  if(!ev) return toast('Event not found','danger');
+  $('selectedEventName').textContent = ev.name;
+  $('selectedEventMeta').textContent = `${ev.type} — ${ev.level || 'General'}`;
+  $('selectedEventWrap').classList.remove('muted-small');
+  // choose candidate pool:
+  // - If event.level is Junior => include only junior students in the leader's team
+  // - If Senior => only senior students
+  // - If General or Special => include all team members
+  const teamId = LEADER.teamId;
+  let candidates = [];
+  if(!teamId) return toast('Login as leader to nominate members','warning');
+  const allMembers = CACHE.students.filter(s => String(s.teamId) === String(teamId));
+  if(!allMembers.length) { $('membersSelection').innerHTML = '<div class="muted-small">No members in your team</div>'; return; }
+  if(String(ev.level||'').toLowerCase() === 'junior'){
+    candidates = allMembers.filter(s => String(s.level||'').toLowerCase() === 'junior');
+  } else if(String(ev.level||'').toLowerCase() === 'senior'){
+    candidates = allMembers.filter(s => String(s.level||'').toLowerCase() === 'senior');
+  } else {
+    // General or Special => include all
+    candidates = allMembers.slice();
+  }
+
+  // compute maximum allowed per-student-level for this event's type
+  const limits = { Senior: { Stage:3, 'Non-Stage':4 }, Junior: { Stage:2, 'Non-Stage':3 } };
+  const maxPer = s => {
+    const lvl = s.level || 'Senior';
+    const typ = ev.type || 'Non-Stage';
+    return (limits[lvl] && limits[lvl][typ]) ? limits[lvl][typ] : (typ==='Stage'?3:4);
+  };
+
+  // Build UI: show a small-box for each candidate with name (small) and chess #
+  const wrap = $('membersSelection'); wrap.innerHTML = '';
+  candidates.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'small-box';
+    div.dataset.id = s.id;
+    div.dataset.level = s.level || '';
+    div.title = s.name || s.id;
+    // show chess# in box and name below (small)
+    div.innerHTML = `<div style="text-align:center">${escapeHtml(s.id)}</div><div style="font-size:11px;margin-top:4px">${escapeHtml(s.name)}</div>`;
+    div.addEventListener('click', ()=> toggleMemberSelect(div, ev));
+    wrap.appendChild(div);
   });
 
-  if(showModal){
-    const sel = $('resultsEventSelect').value;
-    if(sel){
-      const ev = CACHE.events.find(e => String(e.id) === String(decodeURIComponent(sel)));
-      const pos = map[ev.id] || {};
-      const detail = document.createElement('div');
-      detail.innerHTML = `<h4>${escapeHtml(ev.name)}</h4><div class="muted">${escapeHtml(ev.type)} / ${escapeHtml(ev.level)}</div><hr>`;
-      ['1st','2nd','3rd'].forEach((lab,idx)=>{
-        const r = pos[idx+1];
-        if(r){
-          const s = CACHE.students.find(x=> String(x.id)===String(r.studentId));
-          detail.innerHTML += `<div><strong>${lab}:</strong> ${escapeHtml(s? s.name : r.studentId)} (${escapeHtml(r.studentId)}) — Points: ${escapeHtml(String(r.points||0))} — ${r.published? 'Published':'Draft'}</div>`;
-        } else {
-          detail.innerHTML += `<div><strong>${lab}:</strong> —</div>`;
-        }
-      });
-      document.getElementById('resultDetailBody').innerHTML = ''; document.getElementById('resultDetailBody').appendChild(detail);
-      new bootstrap.Modal(document.getElementById('resultDetailModal')).show();
-    }
+  // store selected event id on the container
+  $('membersSelection').dataset.evId = evId;
+  updateSelectionInfo();
+}
+
+/* toggle selection: enforce per-level max counts */
+function toggleMemberSelect(el, ev){
+  if(!LEADER.loggedIn) return toast('Only leaders can select & submit','warning');
+  if(!el) return;
+  // toggle selected class
+  const selected = el.classList.contains('selected');
+  if(selected) { el.classList.remove('selected'); updateSelectionInfo(); return; }
+
+  // compute how many already selected per level
+  const boxes = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
+  const level = el.dataset.level || '';
+  // count currently selected with same level
+  const sameLevelCount = boxes.filter(b => (b.dataset.level||'') === (level||'')).length;
+  // find one student sample object to get max
+  const studentObj = CACHE.students.find(s => String(s.id) === String(el.dataset.id));
+  const limits = { Senior: { Stage:3, 'Non-Stage':4 }, Junior: { Stage:2, 'Non-Stage':3 } };
+  const evType = ev.type || 'Non-Stage';
+  const maxAllowed = (limits[studentObj.level] && limits[studentObj.level][evType]) ? limits[studentObj.level][evType] : (evType==='Stage'?3:4);
+
+  if(sameLevelCount + 1 > maxAllowed){
+    return toast(`Limit reached for ${studentObj.level} in ${ev.type} (max ${maxAllowed})`,'danger');
   }
+  el.classList.add('selected');
+  updateSelectionInfo();
 }
 
-/* ---------- UTIL: refresh sections on data change ---------- */
-function refreshAllViews(){
-  populateEventSelects();
-  populateTeamDropdown();
-  renderMySubmissions();
-  renderAttendanceOverview();
-  renderLeaderResults();
+/* update selection info label */
+function updateSelectionInfo(){
+  const sel = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
+  $('selectionInfo').textContent = `${sel.length} selected`;
 }
-setInterval(()=>{ /* small safety-refresh */ refreshAllViews(); }, 25000);
 
-/* ---------- SEARCH handlers ---------- */
-$('searchMySubs')?.addEventListener('input', ()=> renderMySubmissions());
+/* clear selection */
+$('btnClearSelection').addEventListener('click', ()=>{
+  document.querySelectorAll('#membersSelection .small-box.selected').forEach(b => b.classList.remove('selected'));
+  updateSelectionInfo();
+});
 
-/* finalize boot */
-setTimeout(()=> {
-  populateTeamDropdown();
-  populateEventSelects();
-  renderMySubmissions();
-  renderAttendanceOverview();
-  renderLeaderResults();
-}, 800);
+/* submit participation */
+$('btnSubmitParticipation').addEventListener('click', async ()=>{
+  if(!LEADER.loggedIn) return toast('You must be logged in to submit','danger');
+  const evId = $('membersSelection').dataset.evId;
+  if(!evId) return toast('Select an event first','danger');
+  const sel = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
+  if(!sel.length) return toast('Select members to participate','danger');
+  // For each selected student create a participation record (if not already submitted for same event)
+  let created = 0, skipped = 0;
+  for(const b of sel){
+    const studId = b.dataset.id;
+    // check duplicate: same student, same event existing (any status)
+    const duplicate = CACHE.participations.find(p => String(p.eventId) === String(evId) && String(p.studentId) === String(studId));
+    if(duplicate){
+      skipped++;
+      continue;
+    }
+    const p = push(ref(db, 'participations'));
+    const id = Date.now().toString() + Math.floor(Math.random()*9999);
+    await set(p, { id, eventId: evId, studentId: studId, teamId: LEADER.teamId || null, status:'pending', submittedAt: Date.now() });
+    created++;
+  }
+  if(created) toast(`Submitted ${created} participation(s).`); else toast('No new submissions','warning');
+  if(skipped) toast(`${skipped} already submitted earlier (skipped)`, 'warning');
+  // clear selection
+  $('btnClearSelection').click();
+});
 
-console.log('Leader panel loaded');
+/* ---------- DASHBOARD & TEAM ---------- */
+function renderLeaderDashboard(){
+  // leader info
+  if(LEADER.loggedIn){
+    const leader = CACHE.students.find(s=> String(s.id)===String(LEADER.studentId));
+    const team = CACHE.teams.find(t => String(t.id) === String(LEADER.teamId));
+    if(leader) { $('leaderName').textContent = leader.name; $('leaderAvatar').textContent = String(leader.name||'L').slice(0,1).toUpperCase(); }
+    if(team) {
+      $('leaderTeamName').textContent = `Team: ${team.name||''}`;
+      if(team.locked){ $('lockedBanner').classList.remove('d-none'); } else { $('lockedBanner').classList.add('d-none'); }
+    }
+  } else {
+    $('leaderName').textContent = 'Guest'; $('leaderAvatar').textContent = 'G'; $('leaderTeamName').textContent = 'Team: -';
+    $('lockedBanner').classList.add('d-none');
+  }
 
+  // team members list
+  populateTeamLists();
+}
+
+/* populate team lists */
+function populateTeamLists(){
+  const teamWrap = $('teamMembersList');
+  const smallWrap = $('teamMembersSmall');
+  teamWrap.innerHTML = ''; smallWrap.innerHTML = '';
+  if(!LEADER.teamId){
+    teamWrap.innerHTML = '<div class="muted-small">Login to see team members</div>';
+    smallWrap.innerHTML = '<div class="muted-small">Login to see team members</div>';
+    return;
+  }
+  const members = CACHE.students.filter(s => String(s.teamId) === String(LEADER.teamId));
+  if(!members.length){ teamWrap.innerHTML = '<div class="muted-small">No members</div>'; smallWrap.innerHTML = '<div class="muted-small">No members</div>'; return; }
+  members.forEach(m => {
+    const row = document.createElement('div'); row.style.padding='6px 4px'; row.style.borderBottom='1px solid #f1f5ff';
+    row.innerHTML = `<div style="font-weight:700">${escapeHtml(m.name)} <span class="muted-small">(${escapeHtml(m.id)})</span></div><div class="muted-small">Level: ${escapeHtml(m.level||'')}</div>`;
+    teamWrap.appendChild(row);
+    const small = document.createElement('div'); small.style.padding='6px 4px'; small.style.borderBottom='1px solid #f1f5ff';
+    small.innerHTML = `<div>${escapeHtml(m.name)} <span class="muted-small">(${escapeHtml(m.id)})</span></div>`;
+    smallWrap.appendChild(small);
+  });
+}
+
+/* export team pdf */
+$('btnDownloadTeamPdf').addEventListener('click', ()=>{
+  if(!LEADER.teamId) return toast('Login to export team','danger');
+  const members = CACHE.students.filter(s => String(s.teamId) === String(LEADER.teamId));
+  let html = `<h3>Team Members</h3><table><thead><tr><th>Chess</th><th>Name</th><th>Level</th></tr></thead><tbody>`;
+  members.forEach(m => html += `<tr><td>${escapeHtml(m.id)}</td><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.level||'')}</td></tr>`);
+  html += '</tbody></table>';
+  html2pdf().from(html).set({margin:10,filename:`team_${new Date().toISOString().slice(0,10)}.pdf`}).save();
+});
+
+/* quick open events/results */
+$('openEvents').addEventListener('click', ()=> document.querySelector('[data-target="#panel-events"]').click());
+$('openResults').addEventListener('click', ()=> document.querySelector('[data-target="#panel-results"]').click());
+
+/* ---------- RESULTS VIEW FOR LEADERS ---------- */
+function renderResultsTable(){
+  const tbody = $('leaderResultsTable');
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="5" class="muted-small">No events</td></tr>'; return; }
+  // build map event->positions
+  const evMap = {};
+  CACHE.results.forEach(r => {
+    if(!evMap[r.eventId]) evMap[r.eventId] = {};
+    evMap[r.eventId][r.position] = r;
+  });
+  let rows = [];
+  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+  CACHE.events.forEach(ev => {
+    const pos = evMap[ev.id] || {};
+    const first = pos[1] ? (CACHE.students.find(s=>String(s.id)===String(pos[1].studentId))||{name:pos[1].studentId,id:pos[1].studentId}) : {name:'', id:''};
+    const second = pos[2] ? (CACHE.students.find(s=>String(s.id)===String(pos[2].studentId))||{name:pos[2].studentId,id:pos[2].studentId}) : {name:'', id:''};
+    const third = pos[3] ? (CACHE.students.find(s=>String(s.id)===String(pos[3].studentId))||{name:pos[3].studentId,id:pos[3].studentId}) : {name:'', id:''};
+    const anyUploaded = !!pos[1] || !!pos[2] || !!pos[3];
+    const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
+    const pubBadge = pub ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
+    const rowClass = anyUploaded ? 'participated-row' : '';
+    rows.push(`<tr class="${rowClass}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(first.name)} ${first.id?`(${escapeHtml(first.id)})`:''}</td><td>${escapeHtml(second.name)} ${second.id?`(${escapeHtml(second.id)})`:''}</td><td>${escapeHtml(third.name)} ${third.id?`(${escapeHtml(third.id)})`:''}</td><td>${pubBadge}</td></tr>`);
+  });
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="5" class="muted-small">No results yet</td></tr>';
+}
+
+/* ---------- YOUR SUBMISSIONS (optional) ---------- */
+function renderYourSubmissions(){
+  const wrap = $('yourSubmissionsList'); wrap.innerHTML = '';
+  if(!LEADER.teamId) { wrap.innerHTML = '<div class="muted-small">Login to view your submissions</div>'; return; }
+  const subs = CACHE.participations.filter(p => String(p.teamId) === String(LEADER.teamId));
+  if(!subs.length) { wrap.innerHTML = '<div class="muted-small">No submissions</div>'; return; }
+  subs.sort((a,b)=> (b.submittedAt||0) - (a.submittedAt||0));
+  subs.forEach(s => {
+    const ev = CACHE.events.find(e => String(e.id) === String(s.eventId)) || {};
+    const stud = CACHE.students.find(st => String(st.id) === String(s.studentId)) || { name: s.studentId };
+    const status = s.status || 'pending';
+    const row = document.createElement('div'); row.style.padding='8px'; row.style.borderBottom='1px solid #f1f5ff';
+    row.innerHTML = `<div style="font-weight:700">${escapeHtml(ev.name||s.eventId)}</div><div class="muted-small">${escapeHtml(stud.name)} (${escapeHtml(s.studentId)}) — ${escapeHtml(status)}</div>`;
+    wrap.appendChild(row);
+  });
+}
+document.getElementById('participationStatusModal')?.addEventListener('show.bs.modal', renderYourSubmissions);
+
+/* ---------- SEARCH / small helpers ---------- */
+$('filterType')?.addEventListener('change', populateEventsList);
+$('filterLevel')?.addEventListener('change', populateEventsList);
+
+/* global small keyboard support */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') { document.querySelectorAll('.modal.show').forEach(m => bootstrap.Modal.getInstance(m).hide()); }
+});
+
+/* finished */
+console.log('Leader panel script loaded');
 </script>
 
 <!-- Bootstrap JS -->
