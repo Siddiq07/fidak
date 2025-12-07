@@ -1,868 +1,420 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin Panel — Art Fest</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Art Fest (Sidebar)</title>
 
-<!-- BOOTSTRAP -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Bootstrap + icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<!-- EXCEL + PDF LIBRARIES (UI-only; logic in Part 4) -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- spreadsheets + pdf -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<style>
-:root{
-  --bg:#f4f7fb;
-  --card:#fff;
-  --muted:#6b7280;
-  --accent:#4f46e5;
-  --success:#10b981;
-  --danger:#ef4444;
-  --glass: rgba(255,255,255,0.6);
-}
-*{box-sizing:border-box}
-body{
-  background:var(--bg);
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-  color:#0f172a;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  margin:0;
-}
-.container-wide{max-width:1200px;margin:18px auto;padding:0 12px}
-.card-neo{
-  background:var(--card);
-  border-radius:12px;
-  padding:14px;
-  box-shadow:0 8px 22px rgba(12,20,40,0.06);
-  border: 1px solid rgba(15,23,42,0.03);
-}
-.section-title{font-weight:700;margin-bottom:8px;font-size:15px}
-.small-box{
-  width:60px;height:38px;background:#eef2ff;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;margin:6px;cursor:pointer;font-weight:700;color:#0b1220;
-  user-select:none;font-size:14px;
-}
-.small-box.present{background:var(--success);color:#fff}
-.small-box.absent{background:var(--danger);color:#fff}
-.btn-accent{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#fff;border:0}
-.table thead{background:#fbfbff}
-.muted{color:var(--muted);font-size:13px}
-.participated-row{background:#e8fff0}
-.nav-pill-sm .nav-link{padding:.4rem .8rem;font-size:14px}
-
-/* modals */
-.modal-content{border-radius:12px;border:0}
-.modal-header{background:#f6f9ff;border-bottom:0;border-radius:12px 12px 0 0}
-.modal-title{font-weight:700}
-.modal-body .form-label{font-weight:600}
-
-/* small device tweaks */
-@media (max-width:640px){
-  .small-box{width:48px;height:32px;font-size:13px;margin:4px}
-  .container-wide{padding:0 10px}
-  .nav-pill-sm .nav-link{font-size:13px;padding:.35rem .6rem}
-}
-
-/* attendance tooltip */
-.attendance-tooltip{
-  position:fixed;pointer-events:none;background:rgba(0,0,0,0.75);color:#fff;padding:6px 8px;border-radius:6px;font-size:13px;transform:translate(-50%,-120%);
-  transition:opacity .18s ease;opacity:0;z-index:40000;
-}
-.attendance-tooltip.show{opacity:1}
-</style>
+  <style>
+    /* --- Classic White Sidebar Style (Responsive) --- */
+    :root{
+      --bg: #f5f8ff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#0f172a;background:var(--bg)}
+    .app {display:flex;min-height:100vh}
+    .sidebar{
+      width:260px;background:linear-gradient(180deg,#fff,#f8fbff);border-right:1px solid #e6eefc;padding:18px;box-sizing:border-box;
+    }
+    .sidebar .logo{font-weight:800;color:var(--accent);font-size:18px;margin-bottom:12px}
+    .nav-item {margin-bottom:6px}
+    .nav-item button{width:100%;text-align:left;border-radius:8px;padding:10px 12px}
+    .nav-item button.active{background:linear-gradient(90deg,var(--accent),#7c3aed);color:white}
+    .content {flex:1;padding:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .card-neo{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 6px 18px rgba(15,23,42,0.05);margin-bottom:12px}
+    .section-title{font-weight:700;margin-bottom:8px}
+    .muted{color:var(--muted)}
+    .small-box{width:56px;height:36px;background:#f1f5ff;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;margin:6px;cursor:pointer;font-weight:700}
+    .small-box.present{background:var(--success);color:#fff}
+    .small-box.absent{background:var(--danger);color:#fff}
+    .btn-accent{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#fff;border:0}
+    .participated-row{background:#e8fff0}
+    @media (max-width:900px){
+      .sidebar{width:72px;padding:10px}
+      .sidebar .text-label{display:none}
+    }
+    /* table smaller font on mobile */
+    @media (max-width:600px) {
+      table{font-size:13px}
+      .small-box{width:44px;height:34px;font-size:12px}
+    }
+  </style>
 </head>
 <body>
+<div class="app">
 
-<!-- NAVBAR -->
-<nav class="navbar shadow-sm mb-3 bg-white">
-  <div class="container container-wide d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center gap-3">
-      <span class="badge text-bg-primary rounded-pill p-2"><i class="bi bi-award"></i></span>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo d-flex align-items-center gap-2">
+      <span class="badge bg-primary rounded-pill"><i class="bi bi-palette-fill"></i></span>
       <div>
-        <div style="font-weight:800;font-size:16px">Art Fest — Admin Panel</div>
-        <div class="muted" style="font-size:13px">Manage Students · Teams · Events · Attendance · Results</div>
+        <div style="font-size:14px">Art Fest</div>
+        <div class="muted" style="font-size:11px">Admin Panel</div>
       </div>
     </div>
 
-    <div class="d-flex gap-2 align-items-center">
-      <button id="openStudents" class="btn btn-outline-secondary">Students</button>
-      <button id="openTeams" class="btn btn-outline-secondary">Teams</button>
-      <button id="openEvents" class="btn btn-outline-secondary">Events</button>
-      <button id="openAttendance" class="btn btn-outline-secondary">Attendance</button>
-      <button id="openApprovals" class="btn btn-outline-secondary">Approvals</button>
-      <button id="openResults" class="btn btn-outline-secondary">Results</button>
-      <button id="openReports" class="btn btn-outline-secondary">Reports</button>
-      <button id="logoutBtn" class="btn btn-outline-danger" title="Logout"><i class="bi bi-box-arrow-right"></i></button>
+    <nav class="mt-3">
+      <div class="nav-item"><button id="btnStudents" class="btn btn-light" data-target="#panel-students"><i class="bi bi-people-fill me-2"></i><span class="text-label">Students</span></button></div>
+      <div class="nav-item"><button id="btnTeams" class="btn btn-light" data-target="#panel-teams"><i class="bi bi-people"></i><span class="text-label"> Teams</span></button></div>
+      <div class="nav-item"><button id="btnEvents" class="btn btn-light" data-target="#panel-events"><i class="bi bi-calendar-event"></i><span class="text-label"> Events</span></button></div>
+      <div class="nav-item"><button id="btnAttendance" class="btn btn-light" data-target="#panel-attendance"><i class="bi bi-check2-all"></i><span class="text-label"> Attendance</span></button></div>
+      <div class="nav-item"><button id="btnApprovals" class="btn btn-light" data-target="#panel-approvals"><i class="bi bi-card-checklist"></i><span class="text-label"> Approvals</span></button></div>
+      <div class="nav-item"><button id="btnResults" class="btn btn-light" data-target="#panel-results"><i class="bi bi-list-ol"></i><span class="text-label"> Results</span></button></div>
+      <div class="nav-item"><button id="btnReports" class="btn btn-light" data-target="#panel-reports"><i class="bi bi-bar-chart-line"></i><span class="text-label"> Reports</span></button></div>
+    </nav>
+
+    <div style="position: absolute; bottom:16px; left:18px; right:18px">
+      <button id="logoutBtn" class="btn btn-outline-danger w-100"><i class="bi bi-box-arrow-right"></i> <span class="text-label"> Logout</span></button>
     </div>
-  </div>
-</nav>
+  </aside>
 
-<!-- TABS + PANELS WRAPPER -->
-<main class="container container-wide">
-  <div class="card-neo mb-3">
-
-    <ul class="nav nav-pills nav-pill-sm" id="tabs" role="tablist">
-      <li class="nav-item"><button class="nav-link active" data-target="panel-students" type="button">Students</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-teams" type="button">Teams</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-events" type="button">Events</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-attendance" type="button">Attendance</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-approvals" type="button">Approvals</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-results" type="button">Results</button></li>
-      <li class="nav-item"><button class="nav-link" data-target="panel-reports" type="button">Reports</button></li>
-    </ul>
-
-    <div id="panels" class="mt-3">
-      <!-- Panels (Student/Team/Event/Attendance/Approvals/Results/Reports) -->
-      <!-- (Actual panel HTML content to be placed in Part 2 & Part 3) -->
-      <!-- Keep this wrapper — Part 2 & 3 will fill panels -->
+  <!-- Content -->
+  <main class="content">
+    <div class="topbar">
+      <div>
+        <h3 style="margin:0">Admin Dashboard</h3>
+        <div class="muted">Manage Students · Teams · Events · Attendance · Results</div>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <button id="btnExportStudents" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i> Export Students PDF</button>
+        <div class="ms-2 muted">Year <span id="current-year"></span></div>
+      </div>
     </div>
-  </div>
-</main>
 
-<!-- ===========================
-     ALL MODALS (Edit Student, Full Team Edit, Edit Event, Confirm/Toasts)
-     Place BEFORE Firebase script (Part 4 will use these)
-     =========================== -->
+    <!-- Panels wrapper (replace with Part 2 content) -->
+    <div id="panels-wrapper"></div>
 
-<!-- EDIT STUDENT MODAL -->
-<div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <form id="editStudentForm" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Student</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-        <input type="hidden" id="editStudentDbKey">
-
-        <label class="form-label">Chess Number</label>
-        <input id="editChess" class="form-control mb-2" readonly>
-
-        <label class="form-label">Name</label>
-        <input id="editName" class="form-control mb-2" required>
-
-        <label class="form-label">Level</label>
-        <select id="editLevel" class="form-select mb-2">
-          <option value="Senior">Senior</option>
-          <option value="Junior">Junior</option>
-        </select>
-
-        <label class="form-label">Team</label>
-        <select id="editTeam" class="form-select mb-2">
-          <option value="">Unassigned</option>
-        </select>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" id="deleteStudentBtn" class="btn btn-danger">Delete</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-    </form>
-  </div>
+    <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
+  </main>
 </div>
+<!-- =========================
+     PANELS HTML (Part 2)
+     ========================= -->
+<div id="panels" class="mt-2">
 
-<!-- FULL EDIT TEAM MODAL -->
-<div class="modal fade" id="fullEditTeamModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <form id="fullEditTeamForm" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Team</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <!-- STUDENTS -->
+  <section id="panel-students" class="card-neo">
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="card-neo">
+          <div class="section-title">Import Students (Excel)</div>
+          <div class="muted mb-2">Columns: Chess, Name, Level (Senior/Junior), Team (optional)</div>
+          <input id="studentFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
+          <div class="d-flex gap-2 mb-2">
+            <button id="previewStudents" class="btn btn-outline-primary">Preview</button>
+            <button id="importStudents" class="btn btn-accent">Import</button>
+          </div>
+          <hr>
+          <div class="section-title">Add Student Manually</div>
+          <input id="manualChess" class="form-control mb-2" placeholder="Chess ID (alphanumeric)">
+          <input id="manualName" class="form-control mb-2" placeholder="Full Name">
+          <select id="manualLevel" class="form-select mb-2"><option>Senior</option><option>Junior</option></select>
+          <select id="manualTeam" class="form-select mb-2"><option value="">Unassigned</option></select>
+          <button id="addManualStudent" class="btn btn-success w-100">Add Student</button>
+          <hr>
+          <div class="section-title">Preview</div>
+          <div id="studentsPreview" style="max-height:260px;overflow:auto"></div>
+        </div>
       </div>
 
-      <div class="modal-body">
-        <input type="hidden" id="fullEditTeamDbKey">
-        <input type="hidden" id="fullEditTeamId">
-
-        <div class="row g-2">
-          <div class="col-md-6">
-            <label class="form-label">Team Name</label>
-            <input id="editTeamName" class="form-control mb-2" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Leader (Chess#)</label>
-            <select id="editTeamLeader" class="form-select mb-2">
-              <option value="">Select leader</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Password (for leader)</label>
-            <input id="editTeamPassword" class="form-control mb-2" placeholder="optional">
-          </div>
-          <div class="col-md-6 d-flex align-items-center">
-            <div class="form-check ms-1 mt-2">
-              <input class="form-check-input" type="checkbox" id="editTeamLock">
-              <label class="form-check-label muted" for="editTeamLock">Lock team (disable login)</label>
+      <div class="col-lg-8">
+        <div class="card-neo">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="section-title">All Students</div>
+            <div class="d-flex gap-2">
+              <input id="searchStudents" class="form-control" placeholder="Search name or chess #">
+              <button id="downloadStudentsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i></button>
             </div>
           </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light"><tr><th>Chess #</th><th>Name</th><th>Level</th><th>Team</th><th class="text-end">Actions</th></tr></thead>
+              <tbody id="studentsTable"></tbody>
+            </table>
+          </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <hr>
-        <div>
-          <label class="form-label">Members</label>
-          <div id="editTeamMembers" style="max-height:240px; overflow:auto; border:1px dashed #eef2ff; padding:10px; border-radius:8px">
-            <div class="muted">Members will be listed here</div>
+  <!-- TEAMS -->
+  <section id="panel-teams" class="card-neo d-none">
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="card-neo">
+          <div class="section-title">Create Team</div>
+          <input id="teamName" class="form-control mb-2" placeholder="Team Name">
+          <select id="teamLeader" class="form-select mb-2"><option value="">Choose leader (Chess #)</option></select>
+          <input id="teamPassword" class="form-control mb-2" placeholder="Password (optional)">
+          <div class="d-flex gap-2">
+            <button id="saveTeam" class="btn btn-success">Save Team</button>
+            <button id="clearTeam" class="btn btn-outline-secondary">Clear</button>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" id="deleteTeamBtnModal" class="btn btn-danger">Delete Team</button>
-        <button type="submit" class="btn btn-primary">Save Team</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- EDIT EVENT MODAL (G2 layout: Type -> Level -> Description) -->
-<div class="modal fade" id="editEventModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <form id="editEventForm" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Event</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-        <input type="hidden" id="editEventId">
-
-        <label class="form-label">Event Name</label>
-        <input id="editEventName" class="form-control mb-2" required>
-
-        <div class="row g-2">
-          <div class="col-md-6">
-            <label class="form-label">Type</label>
-            <select id="editEventType" class="form-select mb-2">
-              <option>Stage</option>
-              <option>Non-Stage</option>
-            </select>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">Level</label>
-            <select id="editEventLevel" class="form-select mb-2">
-              <option>Junior</option>
-              <option>Senior</option>
-              <option>General</option>
-              <option>Special</option>
-            </select>
+      <div class="col-lg-8">
+        <div class="card-neo">
+          <div class="section-title">Teams & Attendance</div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light"><tr><th>Team</th><th>Leader</th><th>Members</th><th>Attendance %</th><th class="text-end">Actions</th></tr></thead>
+              <tbody id="teamsTable"></tbody>
+            </table>
           </div>
         </div>
-
-        <label class="form-label">Description / Rules</label>
-        <textarea id="editEventDesc" class="form-control mb-2" rows="4" placeholder="Write rules, time limit, materials, etc."></textarea>
-      </div>
-
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Save Event</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- DYNAMIC SMALL CONFIRM/INFO MODAL (re-usable) -->
-<div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body text-center p-3" id="infoModalBody">
-        <!-- Filled by JS -->
       </div>
     </div>
-  </div>
-</div>
+  </section>
 
-<!-- Approved list container (for PDF rendering) -->
-<div style="display:none" id="approvedGroupsContainer"></div>
-
-<!-- Attendance tooltip element -->
-<div class="attendance-tooltip" id="attendanceTooltip" role="tooltip" style="left:0;top:0;opacity:0"></div>
-
-<!-- Toast root -->
-<div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:30000"></div>
-
-<!-- Keep page open — Firebase & logic scripts will be added in Part 4 -->
-<!-- ============================
-     PART 2 — ALL PANELS UI
-     ============================ -->
-
-<!-- ============================
-     STUDENTS PANEL
-     ============================ -->
-<section id="panel-students" class="panel">
-  <div class="row g-3">
-
-    <!-- LEFT SIDE: IMPORT + MANUAL ADD -->
-    <div class="col-lg-5">
-      <div class="card-neo mb-3">
-        <div class="section-title">Import Students (Excel)</div>
-        <div class="muted mb-2">Columns: Chess, Name, Level, Team (optional)</div>
-
-        <input id="studentFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
-
-        <div class="d-flex gap-2 mb-2">
-          <button id="previewStudents" class="btn btn-outline-primary">Preview</button>
-          <button id="importStudents" class="btn btn-accent">Import</button>
+  <!-- EVENTS -->
+  <section id="panel-events" class="card-neo d-none">
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="card-neo mb-3">
+          <div class="section-title">Add Event</div>
+          <input id="eventName" class="form-control mb-2" placeholder="Event Name">
+          <select id="eventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option></select>
+          <select id="eventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
+          <textarea id="eventDescription" class="form-control mb-2" rows="3" placeholder="Description / rules"></textarea>
+          <div class="d-flex gap-2"><button id="saveEvent" class="btn btn-warning">Save Event</button><button id="downloadEventsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i></button></div>
         </div>
 
-        <hr>
-
-        <div class="section-title">Add Student Manually</div>
-
-        <input id="manualChess" class="form-control mb-2" placeholder="Chess Number (alphanumeric)">
-        <input id="manualName" class="form-control mb-2" placeholder="Full Name">
-
-        <select id="manualLevel" class="form-select mb-2">
-          <option>Senior</option>
-          <option>Junior</option>
-        </select>
-
-        <select id="manualTeam" class="form-select mb-2">
-          <option value="">Unassigned</option>
-        </select>
-
-        <button id="addManualStudent" class="btn btn-success w-100">Add Student</button>
-
-        <hr>
-
-        <div class="section-title">Preview</div>
-        <div id="studentsPreview" style="max-height:260px; overflow:auto"></div>
-      </div>
-    </div>
-
-    <!-- RIGHT SIDE: STUDENT LIST -->
-    <div class="col-lg-7">
-      <div class="card-neo">
-        <div class="d-flex justify-content-between mb-2">
-          <div class="section-title">All Students</div>
-          <input id="searchStudents" class="form-control w-50" placeholder="Search name or chess #">
-        </div>
-
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Chess #</th>
-                <th>Name</th>
-                <th>Level</th>
-                <th>Team</th>
-                <th class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="studentsTable"></tbody>
-          </table>
+        <div class="card-neo">
+          <div class="section-title">Import Events (Excel)</div>
+          <input id="eventFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
+          <div class="d-flex gap-2"><button id="previewEvents" class="btn btn-outline-primary">Preview</button><button id="importEvents" class="btn btn-accent">Import</button></div>
+          <div id="eventsPreview" style="max-height:220px;overflow:auto" class="mt-2"></div>
         </div>
       </div>
-    </div>
 
-  </div>
-</section>
-
-<!-- ============================
-     TEAMS PANEL
-     ============================ -->
-<section id="panel-teams" class="panel d-none">
-  <div class="row g-3">
-
-    <div class="col-lg-5">
-      <div class="card-neo">
-        <div class="section-title">Create Team</div>
-
-        <input id="teamName" class="form-control mb-2" placeholder="Team Name">
-
-        <select id="teamLeader" class="form-select mb-2">
-          <option value="">Choose leader (Chess #)</option>
-        </select>
-
-        <input id="teamPassword" class="form-control mb-2" placeholder="Password">
-
-        <button id="saveTeam" class="btn btn-success w-100">Save Team</button>
-      </div>
-    </div>
-
-    <div class="col-lg-7">
-      <div class="card-neo">
-        <div class="section-title">Teams Overview</div>
-
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Team</th>
-                <th>Leader</th>
-                <th>Members</th>
-                <th>Attendance %</th>
-                <th class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="teamsTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ============================
-     EVENTS PANEL
-     ============================ -->
-<section id="panel-events" class="panel d-none">
-  <div class="row g-3">
-
-    <div class="col-lg-5">
-      <div class="card-neo mb-3">
-        <div class="section-title">Add Event</div>
-
-        <input id="eventName" class="form-control mb-2" placeholder="Event Name">
-
-        <div class="row g-2">
-          <div class="col-md-6">
-            <select id="eventType" class="form-select mb-2">
-              <option>Stage</option>
-              <option>Non-Stage</option>
-            </select>
-          </div>
-
-          <div class="col-md-6">
-            <select id="eventLevel" class="form-select mb-2">
-              <option>Junior</option>
-              <option>Senior</option>
-              <option>General</option>
-              <option>Special</option>
-            </select>
+      <div class="col-lg-8">
+        <div class="card-neo">
+          <div class="section-title">Events List</div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th><th class="text-end">Actions</th></tr></thead>
+              <tbody id="eventsTable"></tbody>
+            </table>
           </div>
         </div>
-
-        <textarea id="eventDescription" class="form-control mb-2" rows="3"
-          placeholder="Description / rules"></textarea>
-
-        <button id="saveEvent" class="btn btn-warning w-100">Add Event</button>
-      </div>
-
-      <!-- Import Events -->
-      <div class="card-neo">
-        <div class="section-title">Import Events (Excel)</div>
-
-        <input id="eventFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
-
-        <div class="d-flex gap-2 mb-2">
-          <button id="previewEvents" class="btn btn-outline-primary">Preview</button>
-          <button id="importEvents" class="btn btn-accent">Import</button>
-        </div>
-
-        <div id="eventsPreview" style="max-height:220px; overflow:auto"></div>
       </div>
     </div>
+  </section>
 
-    <div class="col-lg-7">
-      <div class="card-neo">
-        <div class="section-title">Events List</div>
-
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Level</th>
-                <th>Description</th>
-                <th class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="eventsTable"></tbody>
-          </table>
-        </div>
+  <!-- ATTENDANCE -->
+  <section id="panel-attendance" class="card-neo d-none">
+    <div class="card-neo mb-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-2"><input id="attDate" type="date" class="form-control"></div>
+        <div class="col-md-2"><input id="attTime" type="time" class="form-control"></div>
+        <div class="col-md-4"><input id="attDesc" class="form-control" placeholder="Description"></div>
+        <div class="col-md-2"><select id="attMethod" class="form-select"><option value="all">All</option><option value="team">By Team</option></select></div>
+        <div class="col-md-2 d-none" id="attTeamWrap"><select id="attTeam" class="form-select"></select></div>
       </div>
+      <div class="mt-3 d-flex gap-2"><button id="loadAttendance" class="btn btn-info">Load Students</button><button id="toggleAll" class="btn btn-outline-secondary">Toggle All</button><button id="saveAttendance" class="btn btn-success">Save Session</button></div>
     </div>
 
-  </div>
-</section>
-
-<!-- ============================
-     ATTENDANCE PANEL
-     ============================ -->
-<section id="panel-attendance" class="panel d-none">
-  <div class="card-neo mb-3">
-
-    <div class="row g-2 align-items-center">
-      <div class="col-md-2">
-        <input id="attDate" type="date" class="form-control">
-      </div>
-      <div class="col-md-2">
-        <input id="attTime" type="time" class="form-control">
-      </div>
-      <div class="col-md-4">
-        <input id="attDesc" class="form-control" placeholder="Description">
-      </div>
-
-      <div class="col-md-2">
-        <select id="attMethod" class="form-select">
-          <option value="all">All</option>
-          <option value="team">By Team</option>
-        </select>
-      </div>
-
-      <div class="col-md-2 d-none" id="attTeamWrap">
-        <select id="attTeam" class="form-select"></select>
-      </div>
+    <div id="attendanceMarkCard" class="card-neo" style="display:none">
+      <div class="section-title">Mark Attendance</div>
+      <div class="muted mb-2">Click a box to toggle Present/Absent. Hover to see name.</div>
+      <div id="attendanceBoxes" style="padding:12px"></div>
     </div>
 
-    <div class="mt-3 d-flex gap-2">
-      <button id="loadAttendance" class="btn btn-info">Load Students</button>
-      <button id="toggleAll" class="btn btn-outline-secondary">Toggle All</button>
-      <button id="saveAttendance" class="btn btn-success">Save Session</button>
+    <div class="card-neo">
+      <div class="section-title">Saved Sessions</div>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead class="table-light"><tr><th>Date</th><th>Time</th><th>Description</th><th>Count</th><th class="text-end">Actions</th></tr></thead>
+          <tbody id="attendanceSessions"></tbody>
+        </table>
+      </div>
     </div>
+  </section>
 
-  </div>
-
-  <div class="card-neo mb-3" id="attendanceMarkCard" style="display:none">
-    <div class="section-title">Mark Attendance</div>
-    <div class="muted mb-2">Tap a box to toggle Present/Absent</div>
-    <div id="attendanceBoxes" style="padding:12px;"></div>
-  </div>
-
-  <div class="card-neo">
-    <div class="section-title">Saved Sessions</div>
-
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Description</th>
-            <th>Count</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="attendanceSessions"></tbody>
-      </table>
-    </div>
-
-  </div>
-</section>
-
-<!-- ============================
-     APPROVALS PANEL
-     ============================ -->
-<section id="panel-approvals" class="panel d-none">
-  <div class="card-neo">
-    <div class="d-flex justify-content-between">
+  <!-- APPROVALS -->
+  <section id="panel-approvals" class="card-neo d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
       <div>
-        <div class="section-title">Pending Approvals</div>
-        <div class="muted">Approve or reject participants submitted by leaders</div>
+        <div class="section-title">Pending Participations</div>
+        <div class="muted">Approve or reject leader submissions</div>
       </div>
-
-      <input id="searchApprovals" class="form-control w-50" placeholder="Search...">
+      <div class="d-flex gap-2">
+        <input id="searchApprovals" class="form-control" placeholder="Search...">
+        <button id="downloadApprovalsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i></button>
+      </div>
     </div>
 
-    <div class="table-responsive mt-3" style="max-height:420px; overflow:auto">
+    <div class="table-responsive" style="max-height:420px;overflow:auto">
       <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Student</th>
-            <th>Team</th>
-            <th>Submitted</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Event</th><th>Student</th><th>Team</th><th>Submitted At</th><th class="text-end">Actions</th></tr></thead>
         <tbody id="approvalsTable"></tbody>
       </table>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================
-     RESULTS PANEL
-     ============================ -->
-<section id="panel-results" class="panel d-none">
-  <div class="card-neo">
-    <div class="section-title">Results — Add & Publish</div>
-
-    <div class="row g-2 mb-3">
-      <div class="col-md-4">
-        <select id="resultEvent" class="form-select">
-          <option value="">Select Event</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <select id="resultPosition" class="form-select">
-          <option value="">Position</option>
-          <option value="1">1st — (Gold)</option>
-          <option value="2">2nd — (Silver)</option>
-          <option value="3">3rd — (Bronze)</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <input id="resultPoints" type="number" class="form-control" placeholder="Points">
-      </div>
-      <div class="col-md-2">
-        <button id="saveResult" class="btn btn-success w-100">Save</button>
+  <!-- RESULTS -->
+  <section id="panel-results" class="card-neo d-none">
+    <div class="card-neo">
+      <div class="section-title">Add Results</div>
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <select id="resultEvent" class="form-select"><option value="">Select event</option></select>
+        </div>
+        <div class="col-md-3">
+          <select id="resultSelectParticipant" class="form-select"><option value="">Select participant</option></select>
+        </div>
+        <div class="col-md-2">
+          <select id="resultPosition" class="form-select"><option value="">Position</option><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option></select>
+        </div>
+        <div class="col-md-2"><input id="resultPoints" type="number" class="form-control" placeholder="Points (max 100)"></div>
+        <div class="col-md-1"><button id="saveResult" class="btn btn-success w-100">Add</button></div>
       </div>
     </div>
 
-    <div class="section-title">All Results</div>
-
-    <div class="table-responsive">
-      <table class="table align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Event</th>
-            <th>1st</th>
-            <th>2nd</th>
-            <th>3rd</th>
-            <th>Published</th>
-            <th class="text-end">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="resultsTable"></tbody>
-      </table>
+    <div class="card-neo mt-3">
+      <div class="section-title">Results List</div>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead class="table-light"><tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th><th>Published</th><th class="text-end">Actions</th></tr></thead>
+          <tbody id="resultsTable"></tbody>
+        </table>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================
-     REPORTS PANEL
-     ============================ -->
-<section id="panel-reports" class="panel d-none">
-  <div class="card-neo">
-    <div class="section-title">Team Attendance Report</div>
-
+  <!-- REPORTS -->
+  <section id="panel-reports" class="card-neo d-none">
+    <div class="section-title">Team Reports</div>
     <div class="table-responsive">
       <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Team</th>
-            <th>Members</th>
-            <th>Attendance %</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Team</th><th>Members</th><th>Attendance %</th><th>Score</th></tr></thead>
         <tbody id="reportsTable"></tbody>
       </table>
     </div>
-  </div>
-</section>
-<!-- ====================================================
-     PART 3 — ALL MODALS / POPUPS
-     ==================================================== -->
+  </section>
 
-<!-- ============================
-     EDIT STUDENT MODAL
-     ============================ -->
+</div>
+<!-- =========================
+     MODALS (Part 3)
+     ========================= -->
+
+<!-- Hidden inputs for modal bookkeeping -->
+<input type="hidden" id="editStudentDbKey">
+<input type="hidden" id="editEventId">
+<input type="hidden" id="fullEditTeamDbKey">
+<input type="hidden" id="fullEditTeamId">
+
+<!-- Edit Student Modal -->
 <div class="modal fade" id="editStudentModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form id="editStudentForm" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Student</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
+      <div class="modal-header"><h5 class="modal-title">Edit Student</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
-
-        <label class="form-label">Chess Number</label>
+        <label class="form-label">Chess #</label>
         <input id="editChess" class="form-control mb-2" readonly>
-
-        <label class="form-label">Full Name</label>
+        <label class="form-label">Name</label>
         <input id="editName" class="form-control mb-2" required>
-
         <label class="form-label">Level</label>
-        <select id="editLevel" class="form-select mb-2">
-          <option>Senior</option>
-          <option>Junior</option>
-        </select>
-
+        <select id="editLevel" class="form-select mb-2"><option>Senior</option><option>Junior</option></select>
         <label class="form-label">Team</label>
-        <select id="editTeam" class="form-select mb-2">
-          <option value="">Unassigned</option>
-        </select>
-
+        <select id="editTeam" class="form-select mb-2"><option value="">Unassigned</option></select>
       </div>
-
-      <div class="modal-footer">
-        <button type="button" id="deleteStudentBtn" class="btn btn-danger">Delete</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-
+      <div class="modal-footer"><button type="button" id="deleteStudentBtn" class="btn btn-danger">Delete</button><button type="submit" class="btn btn-primary">Save</button></div>
     </form>
   </div>
 </div>
 
-<!-- ============================
-     EDIT EVENT MODAL (UPDATED)
-     ============================ -->
+<!-- Edit Event Modal -->
 <div class="modal fade" id="editEventModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form id="editEventForm" class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Event</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
+      <div class="modal-header"><h5 class="modal-title">Edit Event</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
         <label class="form-label">Event Name</label>
         <input id="editEventName" class="form-control mb-2" required>
-
-        <label class="form-label">Event Type</label>
-        <select id="editEventType" class="form-select mb-2">
-          <option>Stage</option>
-          <option>Non-Stage</option>
-        </select>
-
-        <label class="form-label">Category</label>
-        <select id="editEventLevel" class="form-select mb-2">
-          <option>Junior</option>
-          <option>Senior</option>
-          <option>General</option>
-          <option>Special</option>
-        </select>
-
+        <label class="form-label">Type</label>
+        <select id="editEventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option></select>
+        <label class="form-label">Level</label>
+        <select id="editEventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
         <label class="form-label">Description</label>
         <textarea id="editEventDesc" class="form-control mb-2" rows="4"></textarea>
       </div>
-
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-      </div>
-
+      <div class="modal-footer"><button type="submit" class="btn btn-primary">Save Event</button></div>
     </form>
   </div>
 </div>
 
-<!-- ============================
-     EDIT TEAM MODAL + LOCK SYSTEM
-     ============================ -->
-<div class="modal fade" id="editTeamModal" tabindex="-1" aria-hidden="true">
+<!-- Full Edit Team Modal (members view + lock) -->
+<div class="modal fade" id="fullEditTeamModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
-    <form id="editTeamForm" class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Team</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
+    <form id="fullEditTeamForm" class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Edit Team</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
-
-        <label class="form-label">Team Name</label>
-        <input id="editTeamName" class="form-control mb-2" required>
-
-        <label class="form-label">Leader (Chess #)</label>
-        <select id="editTeamLeader" class="form-select mb-2">
-          <option value="">Select Leader</option>
-        </select>
-
-        <label class="form-label">Password</label>
-        <input id="editTeamPassword" class="form-control mb-2">
-
-        <div class="form-check mt-2">
-          <input class="form-check-input" type="checkbox" id="teamLocked">
-          <label class="form-check-label">Lock Team (leader cannot login)</label>
-        </div>
-
+        <label class="form-label">Team Name</label><input id="editTeamName" class="form-control mb-2" required>
+        <label class="form-label">Leader (Chess#)</label><select id="editTeamLeader" class="form-select mb-2"></select>
+        <label class="form-label">Password</label><input id="editTeamPassword" class="form-control mb-2">
+        <div class="form-check mb-2"><input id="editTeamLock" class="form-check-input" type="checkbox"><label class="form-check-label">Lock Team (leader cannot login)</label></div>
+        <div class="section-title">Members</div><div id="editTeamMembers" style="max-height:180px;overflow:auto"></div>
       </div>
-
-      <div class="modal-footer">
-        <button type="button" id="deleteTeamBtn" class="btn btn-danger">Delete Team</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-
+      <div class="modal-footer"><button type="button" id="deleteTeamBtnModal" class="btn btn-danger">Delete Team</button><button type="submit" class="btn btn-primary">Save</button></div>
     </form>
   </div>
 </div>
 
-<!-- ============================
-     VIEW ATTENDANCE (ABSENTEES ONLY)
-     ============================ -->
+<!-- Attendance View Modal (absentees) -->
 <div class="modal fade" id="attendanceViewModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Attendance Details</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-
-        <div id="attendanceViewContent"></div>
-
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-primary" id="downloadAbsenteesPdf">Download PDF</button>
-      </div>
-
+      <div class="modal-header"><h5 class="modal-title">Attendance Absentees</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><div id="attendanceViewContent"></div></div>
+      <div class="modal-footer"><button id="downloadAbsenteesPdf" class="btn btn-primary">Download PDF</button></div>
     </div>
   </div>
 </div>
 
-<!-- ============================
-     RESULT VIEW / EDIT MODAL
-     ============================ -->
+<!-- Edit Result Modal -->
 <div class="modal fade" id="editResultModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form id="editResultForm" class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Result</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
+      <div class="modal-header"><h5 class="modal-title">Edit Result</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
-
-        <label class="form-label">Event</label>
-        <input id="editResultEventName" class="form-control mb-2" readonly>
-
-        <label class="form-label">1st Place</label>
-        <select id="editResFirst" class="form-select mb-2"></select>
-
-        <label class="form-label">Points</label>
-        <input id="editPtsFirst" type="number" class="form-control mb-2">
-
-        <label class="form-label">2nd Place</label>
-        <select id="editResSecond" class="form-select mb-2"></select>
-
-        <label class="form-label">Points</label>
-        <input id="editPtsSecond" type="number" class="form-control mb-2">
-
-        <label class="form-label">3rd Place</label>
-        <select id="editResThird" class="form-select mb-2"></select>
-
-        <label class="form-label">Points</label>
-        <input id="editPtsThird" type="number" class="form-control mb-2">
-
+        <label class="form-label">Event</label><input id="editResultEventName" class="form-control mb-2" readonly>
+        <label class="form-label">1st</label><select id="editResFirst" class="form-select mb-2"></select><input id="editPtsFirst" type="number" class="form-control mb-2" placeholder="Points">
+        <label class="form-label">2nd</label><select id="editResSecond" class="form-select mb-2"></select><input id="editPtsSecond" type="number" class="form-control mb-2" placeholder="Points">
+        <label class="form-label">3rd</label><select id="editResThird" class="form-select mb-2"></select><input id="editPtsThird" type="number" class="form-control mb-2" placeholder="Points">
       </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-danger" id="deleteResultBtn">Delete</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-
+      <div class="modal-footer"><button type="button" id="deleteResultBtn" class="btn btn-danger">Delete</button><button type="submit" class="btn btn-primary">Save</button></div>
     </form>
   </div>
 </div>
 <script type="module">
-/*
-  Part 4 — Firebase logic (Admin)
-  - Realtime listeners for students, teams, events, participations, results, attendance
-  - CRUD operations
-  - Approvals (approve/reject)
-  - Attendance marking, view absentees & PDF
-  - Results add / edit / publish
-  - Team lock system
-  - PDF exports for lists
+/* Admin — Full Firebase logic (Part 4)
+   - Realtime listeners
+   - Student / Team / Event CRUD
+   - Attendance (grouped by team)
+   - Approvals (approve/reject)
+   - Results (auto-fetch participants)
+   - PDF exports
 */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import {
-  getDatabase, ref, push, set, update, onValue, get, remove
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
   authDomain: "gen7-3e139.firebaseapp.com",
@@ -876,26 +428,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* Utility helpers */
+/* --- Utilities --- */
 const $ = id => document.getElementById(id);
-function toast(msg, type='success'){
-  const el = document.createElement('div');
-  el.className = `toast align-items-center text-bg-${type} border-0`;
-  el.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-  $('toastRoot').appendChild(el);
-  const t = new bootstrap.Toast(el, { delay: 3000 });
-  t.show();
-  el.addEventListener('hidden.bs.toast', ()=> el.remove());
-}
+function toast(msg, type='success'){ const el=document.createElement('div'); el.className=`toast align-items-center text-bg-${type} border-0`; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; $('toastRoot').appendChild(el); const t=new bootstrap.Toast(el,{delay:3000}); t.show(); el.addEventListener('hidden.bs.toast', ()=>el.remove()); }
 function encodeKey(k){ return encodeURIComponent(String(k)); }
 function decodeKey(k){ return decodeURIComponent(String(k)); }
 function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-/* Local caches */
+/* --- caches & keymaps --- */
 let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
 let KEYMAP = { students: {}, teams: {}, events: {}, participations: {}, results: {} };
 
-/* DB refs */
+/* --- DB refs --- */
 const studentsRef = ref(db, 'students');
 const teamsRef = ref(db, 'teams');
 const eventsRef = ref(db, 'events');
@@ -903,7 +447,7 @@ const partsRef = ref(db, 'participations');
 const resultsRef = ref(db, 'results');
 const attendanceRef = ref(db, 'attendance');
 
-/* realtime listeners */
+/* --- realtime listeners --- */
 onValue(studentsRef, snap => {
   const obj = snap.val() || {};
   CACHE.students = Object.values(obj);
@@ -944,27 +488,26 @@ onValue(attendanceRef, snap => {
   renderAll();
 });
 
-/* UI tab wiring */
-document.querySelectorAll('#tabs [data-target]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
+/* --- Tab wiring (sidebar) --- */
+document.querySelectorAll('.sidebar [data-target]').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
     document.querySelectorAll('#panels > section').forEach(s => s.classList.add('d-none'));
     const id = btn.getAttribute('data-target');
-    $(id).classList.remove('d-none');
-    document.querySelectorAll('#tabs .nav-link').forEach(n => n.classList.remove('active'));
+    const panel = document.querySelector(id);
+    if(panel) panel.classList.remove('d-none');
+    document.querySelectorAll('.sidebar button').forEach(b=> b.classList.remove('active'));
     btn.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
   });
 });
-$('openStudents').addEventListener('click', ()=> document.querySelector('[data-target="panel-students"]').click());
-$('openTeams').addEventListener('click', ()=> document.querySelector('[data-target="panel-teams"]').click());
-$('openEvents').addEventListener('click', ()=> document.querySelector('[data-target="panel-events"]').click());
-$('openAttendance').addEventListener('click', ()=> document.querySelector('[data-target="panel-attendance"]').click());
-$('openApprovals').addEventListener('click', ()=> document.querySelector('[data-target="panel-approvals"]').click());
-$('openResults').addEventListener('click', ()=> document.querySelector('[data-target="panel-results"]').click());
-$('openReports').addEventListener('click', ()=> document.querySelector('[data-target="panel-reports"]').click());
-$('logoutBtn').addEventListener('click', ()=> { sessionStorage.clear(); location.href='index.html'; });
+$('btnStudents').click(); // open students by default
 
-/* Render everything */
+$('logoutBtn').addEventListener('click', ()=> { sessionStorage.clear(); location.href='index.html'; });
+$('btnExportStudents')?.addEventListener('click', ()=> generateStudentsPdf());
+
+/* --- Renderers and helpers --- */
 function renderAll(){
+  populateDropdowns();
   renderStudents();
   renderTeams();
   renderEvents();
@@ -972,16 +515,13 @@ function renderAll(){
   renderApprovals();
   renderResults();
   renderReports();
-  populateDropdowns();
 }
 
-/* ---------------------------
-   STUDENTS
-   --------------------------- */
+/* ---------- STUDENTS ---------- */
 function studentIdExists(id){ return CACHE.students.some(s => String(s.id) === String(id)); }
-function studentNameExists(name){ if(!name) return false; const n = String(name).trim().toLowerCase(); return CACHE.students.some(s => String(s.name||'').trim().toLowerCase() === n); }
+function studentNameExists(name){ if(!name) return false; const n=String(name).trim().toLowerCase(); return CACHE.students.some(s => String(s.name||'').trim().toLowerCase() === n); }
 
-/* Excel preview/import for students */
+/* Excel preview */
 let studentsPreviewRows = [];
 $('previewStudents').addEventListener('click', ()=> {
   const f = $('studentFile').files[0];
@@ -1032,28 +572,28 @@ $('importStudents').addEventListener('click', async ()=>{
   toast(`Imported ${imported}, skipped ${skipped}`);
 });
 
-/* manual add student */
+/* manual add */
 $('addManualStudent').addEventListener('click', async ()=>{
-  const chessRaw = $('manualChess').value.trim();
+  const chess = $('manualChess').value.trim();
   const name = $('manualName').value.trim();
   const level = $('manualLevel').value || 'Senior';
   const teamId = $('manualTeam').value || null;
-  if(!chessRaw || !name) return toast('Enter chess ID and name','danger');
-  if(studentIdExists(chessRaw)) return toast('Chess ID already exists','danger');
+  if(!chess || !name) return toast('Enter chess & name','danger');
+  if(studentIdExists(chess)) return toast('Chess already exists','danger');
   if(studentNameExists(name)) return toast('Name already exists','danger');
-  await set(ref(db, `students/${encodeKey(chessRaw)}`), { id: chessRaw, name, level, teamId: teamId ? String(teamId) : null });
+  await set(ref(db, `students/${encodeKey(chess)}`), { id: chess, name, level, teamId: teamId ? String(teamId) : null });
   $('manualChess').value=''; $('manualName').value=''; $('manualTeam').value='';
   toast('Student saved');
 });
 
-/* render students list */
+/* render students */
 function renderStudents(){
   const tbody = $('studentsTable');
   const q = ($('searchStudents')?.value||'').trim().toLowerCase();
   if(!CACHE.students.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No students</td></tr>'; return; }
   CACHE.students.sort((a,b)=> String(a.id).localeCompare(String(b.id)));
   const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
-  let html = '';
+  let html='';
   CACHE.students.forEach(s=>{
     const team = s.teamId ? (teamMap[s.teamId]||'Unknown') : 'Unassigned';
     const text = `${s.id} ${s.name} ${team}`.toLowerCase();
@@ -1063,7 +603,7 @@ function renderStudents(){
   tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No students</td></tr>';
 }
 
-/* student actions (edit/delete) */
+/* students table actions */
 $('studentsTable').addEventListener('click', async (e)=>{
   const tr = e.target.closest('tr'); if(!tr) return;
   const dbKey = tr.dataset.key;
@@ -1071,22 +611,21 @@ $('studentsTable').addEventListener('click', async (e)=>{
     if(!confirm('Delete student?')) return;
     await remove(ref(db, `students/${dbKey}`));
     toast('Student deleted');
-    return;
   } else if(e.target.classList.contains('btn-edit-student')){
     const snap = await get(ref(db, `students/${dbKey}`));
     const s = snap.val();
-    if(!s) return toast('Student not found','danger');
+    if(!s) return toast('Not found','danger');
     $('editStudentDbKey').value = dbKey;
     $('editChess').value = s.id;
     $('editName').value = s.name || '';
     $('editLevel').value = s.level || 'Senior';
     populateDropdowns();
-    setTimeout(()=> { $('editTeam').value = s.teamId || ''; }, 50);
+    setTimeout(()=> $('editTeam').value = s.teamId || '',50);
     new bootstrap.Modal(document.getElementById('editStudentModal')).show();
   }
 });
 
-/* edit student save / delete */
+/* edit student form */
 $('editStudentForm').addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const dbKey = $('editStudentDbKey').value;
@@ -1097,26 +636,23 @@ $('editStudentForm').addEventListener('submit', async (ev)=>{
   if(!newName) return toast('Name required','danger');
   const curSnap = await get(ref(db, `students/${dbKey}`));
   const cur = curSnap.val();
-  if(!cur) return toast('Student not found','danger');
+  if(!cur) return toast('Not found','danger');
   if(String(newName).trim().toLowerCase() !== String(cur.name||'').trim().toLowerCase()){
-    if(studentNameExists(newName)) return toast('Name already exists','danger');
+    if(studentNameExists(newName)) return toast('Name exists','danger');
   }
   await update(ref(db, `students/${dbKey}`), { name: newName, level: newLevel, teamId: newTeam ? String(newTeam) : null });
   toast('Student updated');
   bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
 });
 $('deleteStudentBtn').addEventListener('click', async ()=>{
-  if(!confirm('Delete this student?')) return;
+  if(!confirm('Delete?')) return;
   const dbKey = $('editStudentDbKey').value;
-  if(!dbKey) return toast('Missing key','danger');
   await remove(ref(db, `students/${dbKey}`));
-  toast('Student deleted');
+  toast('Deleted');
   bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
 });
 
-/* ---------------------------
-   TEAMS
-   --------------------------- */
+/* ---------- TEAMS ---------- */
 $('saveTeam').addEventListener('click', async ()=>{
   const name = $('teamName').value.trim();
   const leader = $('teamLeader').value || null;
@@ -1124,7 +660,7 @@ $('saveTeam').addEventListener('click', async ()=>{
   if(!name) return toast('Team name required','danger');
   const id = Date.now().toString();
   const p = push(ref(db, 'teams'));
-  await set(p, { id, name, leaderId: leader ? String(leader) : null, password: pwd, locked: false, score: 0 });
+  await set(p, { id, name, leaderId: leader ? String(leader) : null, password: pwd, locked:false, score:0 });
   $('teamName').value=''; $('teamLeader').value=''; $('teamPassword').value='';
   toast('Team saved');
 });
@@ -1156,16 +692,13 @@ function renderTeams(){
     const leader = CACHE.students.find(s => String(s.id) === String(t.leaderId));
     const members = CACHE.students.filter(s => String(s.teamId) === String(t.id)).length;
     const pct = computeTeamAttendancePct(t.id);
-    const lockBadge = t.locked ? '<span class="badge bg-danger">Locked</span>' : '';
-    html += `<tr data-key="${t.id}"><td>${escapeHtml(t.name)} ${lockBadge}</td><td>${leader?escapeHtml(leader.name+' ('+leader.id+')'):'-'}</td><td>${members}</td><td>${pct}%</td><td class="text-end">
-      <button class="btn btn-sm btn-outline-primary btn-edit-team" data-key="${t.id}">Edit</button>
-      <button class="btn btn-sm btn-outline-danger btn-delete-team" data-key="${t.id}">Delete</button>
-    </td></tr>`;
+    const lockBadge = t.locked ? ' <span class="badge bg-danger">Locked</span>' : '';
+    html += `<tr data-key="${t.id}"><td>${escapeHtml(t.name)}${lockBadge}</td><td>${leader?escapeHtml(leader.name+' ('+leader.id+')'):'-'}</td><td>${members}</td><td>${pct}%</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-team" data-key="${t.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-team" data-key="${t.id}">Delete</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
-/* teams actions */
+/* team actions */
 $('teamsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return;
   const id = btn.dataset.key;
@@ -1173,7 +706,6 @@ $('teamsTable').addEventListener('click', async (e)=>{
     if(!confirm('Delete team?')) return;
     const dbKey = KEYMAP.teams[id] || id;
     if(dbKey) await remove(ref(db, `teams/${dbKey}`));
-    // unassign members
     const updates = {};
     CACHE.students.filter(s => String(s.teamId) === String(id)).forEach(s => updates[`students/${encodeKey(s.id)}/teamId`] = null);
     if(Object.keys(updates).length) await update(ref(db,'/'), updates);
@@ -1189,8 +721,7 @@ $('teamsTable').addEventListener('click', async (e)=>{
     $('editTeamLeader').value = t.leaderId || '';
     $('editTeamPassword').value = t.password || '';
     $('editTeamLock').checked = !!t.locked;
-    // members list
-    const membersWrap = $('editTeamMembers'); membersWrap.innerHTML = '';
+    const membersWrap = $('editTeamMembers'); membersWrap.innerHTML='';
     const members = CACHE.students.filter(s => String(s.teamId) === String(t.id));
     if(!members.length) membersWrap.innerHTML = '<div class="muted">No members</div>';
     else members.forEach(m => membersWrap.innerHTML += `<div style="padding:6px 4px;border-bottom:1px solid #f2f6ff">${escapeHtml(m.name)} <span class="muted">(${escapeHtml(m.id)})</span></div>`);
@@ -1198,7 +729,7 @@ $('teamsTable').addEventListener('click', async (e)=>{
   }
 });
 
-/* full edit team modal save/delete */
+/* fullEditTeamForm submit & delete */
 $('fullEditTeamForm').addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const dbKey = $('fullEditTeamDbKey').value;
@@ -1215,7 +746,7 @@ $('deleteTeamBtnModal').addEventListener('click', async ()=>{
   if(!confirm('Delete this team?')) return;
   const dbKey = $('fullEditTeamDbKey').value;
   const teamId = $('fullEditTeamId').value;
-  if(!dbKey) return toast('Missing team key','danger');
+  if(!dbKey) return toast('Missing key','danger');
   await remove(ref(db, `teams/${dbKey}`));
   const updates = {};
   CACHE.students.filter(s => String(s.teamId) === String(teamId)).forEach(s => updates[`students/${encodeKey(s.id)}/teamId`] = null);
@@ -1224,28 +755,26 @@ $('deleteTeamBtnModal').addEventListener('click', async ()=>{
   bootstrap.Modal.getInstance(document.getElementById('fullEditTeamModal')).hide();
 });
 
-/* ---------------------------
-   EVENTS
-   --------------------------- */
+/* ---------- EVENTS ---------- */
 $('saveEvent').addEventListener('click', async ()=>{
   const name = $('eventName').value.trim();
   const type = $('eventType').value;
   const level = $('eventLevel').value;
   const desc = $('eventDescription').value.trim();
   if(!name) return toast('Event name required','danger');
-  if(CACHE.events.some(e => String(e.name||'').trim().toLowerCase() === name.toLowerCase())) return toast('Event name already exists','danger');
+  if(CACHE.events.some(e => String(e.name||'').trim().toLowerCase() === name.toLowerCase())) return toast('Event exists','danger');
   const p = push(ref(db, 'events'));
   const id = Date.now().toString();
-  await set(p, { id, name, type, level, description: desc, status: 'Open', createdAt: Date.now() });
+  await set(p, { id, name, type, level, description: desc, status:'Open', createdAt: Date.now() });
   $('eventName').value=''; $('eventDescription').value='';
   toast('Event added');
 });
 
-/* preview/import events Excel */
+/* events import/preview */
 let eventsPreviewRows = [];
 $('previewEvents').addEventListener('click', ()=> {
   const f = $('eventFile').files[0];
-  if(!f) return toast('Choose event Excel','danger');
+  if(!f) return toast('Choose file','danger');
   const r = new FileReader();
   r.onload = e => {
     const wb = XLSX.read(e.target.result, { type:'binary' });
@@ -1274,7 +803,7 @@ $('importEvents').addEventListener('click', async ()=>{
   });
   if(Object.keys(updates).length) await update(ref(db,'/'), updates);
   toast(`Imported ${imported}, skipped ${skipped}`);
-  $('eventFile').value=''; $('eventsPreview').innerHTML=''; eventsPreviewRows = [];
+  $('eventFile').value=''; $('eventsPreview').innerHTML=''; eventsPreviewRows=[];
 });
 
 /* render events */
@@ -1286,15 +815,12 @@ function renderEvents(){
   CACHE.events.forEach(ev=>{
     const participated = CACHE.participations.some(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved');
     const rowClass = participated ? 'participated-row' : '';
-    html += `<tr class="${rowClass}" data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'General')}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end">
-      <button class="btn btn-sm btn-outline-primary btn-edit-event" data-key="${ev.id}">Edit</button>
-      <button class="btn btn-sm btn-outline-danger btn-delete-event" data-key="${ev.id}">Delete</button>
-    </td></tr>`;
+    html += `<tr class="${rowClass}" data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'General')}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event" data-key="${ev.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event" data-key="${ev.id}">Delete</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
-/* event actions (edit/delete) */
+/* event actions */
 $('eventsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return;
   const id = btn.dataset.key;
@@ -1307,7 +833,7 @@ $('eventsTable').addEventListener('click', async (e)=>{
     const dbKey = KEYMAP.events[id] || id;
     const snap = await get(ref(db, `events/${dbKey}`));
     const ev = snap.val();
-    if(!ev) return toast('Event not found','danger');
+    if(!ev) return toast('Not found','danger');
     $('editEventId').value = dbKey;
     $('editEventName').value = ev.name || '';
     $('editEventType').value = ev.type || 'Non-Stage';
@@ -1319,26 +845,21 @@ $('eventsTable').addEventListener('click', async (e)=>{
 $('editEventForm').addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const dbKey = $('editEventId').value;
-  if(!dbKey) return toast('Missing event key','danger');
+  if(!dbKey) return toast('Missing key','danger');
   const name = $('editEventName').value.trim();
   const type = $('editEventType').value;
   const level = $('editEventLevel').value;
   const desc = $('editEventDesc').value.trim();
   if(!name) return toast('Name required','danger');
-  // ensure unique name (excluding current)
+  // check uniqueness excluding current
   const other = CACHE.events.find(e => String(e.name||'').trim().toLowerCase() === name.toLowerCase() && KEYMAP.events[e.id] !== dbKey);
   if(other) return toast('Event name exists','danger');
-  await update(ref(db, `${dbKey.startsWith('events')? dbKey : 'events/'+dbKey}`), {}); // try to normalize (some keys may be raw ids)
-  // safer update using path: if dbKey is actual firebase key (contains % etc) we stored KEYMAP mapping differently; simpler: directly update dbKey path if it exists
-  // Try to update using full key:
   await update(ref(db, `events/${dbKey}`), { name, type, level, description: desc });
   toast('Event updated');
   bootstrap.Modal.getInstance(document.getElementById('editEventModal')).hide();
 });
 
-/* ---------------------------
-   ATTENDANCE
-   --------------------------- */
+/* ---------- ATTENDANCE ---------- */
 let attendanceToggleState = 'none';
 let editingAttendanceDbKey = null;
 
@@ -1350,26 +871,17 @@ $('loadAttendance').addEventListener('click', ()=> {
   if(method === 'all') list = CACHE.students.slice();
   else list = CACHE.students.filter(s => String(s.teamId) === String(teamId));
   const wrap = $('attendanceBoxes'); wrap.innerHTML = '';
-  // group by team: create separate small container for each team if method=all
+
   if(method === 'all'){
-    const teamsMap = {};
-    CACHE.teams.forEach(t => teamsMap[t.id] = t.name);
-    // group students by teamId
+    const teamsMap = {}; CACHE.teams.forEach(t => teamsMap[t.id] = t.name);
     const byTeam = {};
-    list.forEach(s => {
-      const tid = s.teamId || '__unassigned';
-      if(!byTeam[tid]) byTeam[tid] = [];
-      byTeam[tid].push(s);
-    });
+    list.forEach(s => { const tid = s.teamId || '__unassigned'; if(!byTeam[tid]) byTeam[tid] = []; byTeam[tid].push(s); });
     Object.keys(byTeam).forEach(tid => {
-      const groupTitle = document.createElement('div');
-      groupTitle.innerHTML = `<div style="font-weight:700;margin:8px 0">${escapeHtml(teamsMap[tid]||'Unassigned')}</div>`;
-      wrap.appendChild(groupTitle);
-      const groupBox = document.createElement('div');
-      groupBox.style.marginBottom = '12px';
+      const groupTitle = document.createElement('div'); groupTitle.innerHTML = `<div style="font-weight:700;margin:8px 0">${escapeHtml(teamsMap[tid]||'Unassigned')}</div>`; wrap.appendChild(groupTitle);
+      const groupBox = document.createElement('div'); groupBox.style.marginBottom='12px';
       byTeam[tid].forEach(s => {
         const div = document.createElement('div');
-        div.className = 'small-box';
+        div.className = 'small-box absent';
         div.dataset.key = encodeKey(s.id);
         div.dataset.name = s.name || '';
         div.textContent = s.id;
@@ -1382,7 +894,7 @@ $('loadAttendance').addEventListener('click', ()=> {
   } else {
     list.forEach(s => {
       const div = document.createElement('div');
-      div.className = 'small-box';
+      div.className = 'small-box absent';
       div.dataset.key = encodeKey(s.id);
       div.dataset.name = s.name || '';
       div.textContent = s.id;
@@ -1391,8 +903,7 @@ $('loadAttendance').addEventListener('click', ()=> {
       wrap.appendChild(div);
     });
   }
-  // init: make all absent by default (red)
-  Array.from(wrap.querySelectorAll('.small-box')).forEach(b => { b.classList.remove('present'); b.classList.add('absent'); });
+
   $('attendanceMarkCard').style.display = list.length ? 'block' : 'none';
   attendanceToggleState = 'absent'; $('toggleAll').textContent = 'Set All Present';
   editingAttendanceDbKey = null;
@@ -1416,8 +927,7 @@ $('toggleAll').addEventListener('click', ()=>{
 });
 
 $('saveAttendance').addEventListener('click', async ()=>{
-  const date = $('attDate').value;
-  const time = $('attTime').value || '';
+  const date = $('attDate').value; const time = $('attTime').value || '';
   if(!date) return toast('Select date','danger');
   const desc = $('attDesc').value || '';
   const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box'));
@@ -1441,7 +951,7 @@ $('saveAttendance').addEventListener('click', async ()=>{
   $('attendanceMarkCard').style.display = 'none';
 });
 
-/* attendance sessions list render & actions */
+/* attendance sessions render */
 function renderAttendanceSessions(){
   const tbody = $('attendanceSessions');
   const att = CACHE.attendance || {};
@@ -1451,11 +961,7 @@ function renderAttendanceSessions(){
   let html = '';
   rows.forEach(([k,v])=>{
     const count = v.students ? Object.keys(v.students).length : 0;
-    html += `<tr data-db="${k}"><td>${escapeHtml(v.date||'')}</td><td>${escapeHtml(v.time||'')}</td><td>${escapeHtml(v.description||'')}</td><td>${count}</td><td class="text-end">
-      <button class="btn btn-sm btn-outline-primary btn-view-att" data-db="${k}">View</button>
-      <button class="btn btn-sm btn-outline-secondary btn-edit-att" data-db="${k}">Edit</button>
-      <button class="btn btn-sm btn-outline-danger btn-delete-att" data-db="${k}">Delete</button>
-    </td></tr>`;
+    html += `<tr data-db="${k}"><td>${escapeHtml(v.date||'')}</td><td>${escapeHtml(v.time||'')}</td><td>${escapeHtml(v.description||'')}</td><td>${count}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-view-att" data-db="${k}">View</button> <button class="btn btn-sm btn-outline-secondary btn-edit-att" data-db="${k}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-att" data-db="${k}">Delete</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
@@ -1466,27 +972,22 @@ $('attendanceSessions').addEventListener('click', async (e)=>{
   const s = snap.val();
   if(!s) return toast('Session not found','danger');
   if(btn.classList.contains('btn-view-att')){
-    // show only absentees in modal
     const abs = [];
     if(s.students) for(const id in s.students) if(String(s.students[id]).toLowerCase() !== 'present') abs.push({ id, status: s.students[id] });
     const container = $('attendanceViewContent'); container.innerHTML = '';
     const title = document.createElement('div'); title.innerHTML = `<div style="font-weight:700">Date: ${escapeHtml(s.date)} ${escapeHtml(s.time||'')}</div><div class="muted">${escapeHtml(s.description||'')}</div><hr>`;
     container.appendChild(title);
-    if(!abs.length) container.innerHTML += '<div class="muted">No absentees — everyone present</div>';
+    if(!abs.length) container.innerHTML += '<div class="muted">No absentees — all present</div>';
     else {
-      const ul = document.createElement('ol');
+      const ol = document.createElement('ol');
       abs.forEach(a => {
-        const student = CACHE.students.find(st => String(st.id) === String(a.id));
-        ul.innerHTML += `<li>${escapeHtml(student?student.name:a.id)} <span class="muted">(${escapeHtml(a.id)})</span></li>`;
+        const st = CACHE.students.find(st => String(st.id) === String(a.id));
+        ol.innerHTML += `<li>${escapeHtml(st?st.name:a.id)} <span class="muted">(${escapeHtml(a.id)})</span></li>`;
       });
-      container.appendChild(ul);
+      container.appendChild(ol);
     }
     new bootstrap.Modal(document.getElementById('attendanceViewModal')).show();
-    // setup pdf download button
-    $('downloadAbsenteesPdf').onclick = () => {
-      const el = container;
-      html2pdf().from(el).set({ margin:10, filename:`absentees_${s.date}.pdf` }).save();
-    };
+    $('downloadAbsenteesPdf').onclick = ()=> { html2pdf().from(container).set({margin:10,filename:`absentees_${s.date}.pdf`}).save(); };
   } else if(btn.classList.contains('btn-edit-att')){
     editingAttendanceDbKey = dbKey;
     $('attDate').value = s.date || '';
@@ -1504,19 +1005,15 @@ $('attendanceSessions').addEventListener('click', async (e)=>{
       wrap.appendChild(div);
     });
     $('attendanceMarkCard').style.display = 'block';
-    toast('Loaded session for edit — change and Save');
+    toast('Loaded session for edit');
   } else if(btn.classList.contains('btn-delete-att')){
-    if(!confirm('Delete this attendance session?')) return;
+    if(!confirm('Delete session?')) return;
     await remove(ref(db, `attendance/${dbKey}`));
-    toast('Session removed');
+    toast('Deleted');
   }
 });
 
-/* ---------------------------
-   APPROVALS (participations)
-   --------------------------- */
-
-/* Helper: leader will submit participations under /participations with status 'pending' — admin approves/rejects here */
+/* ---------- APPROVALS ---------- */
 function renderApprovals(){
   const tbody = $('approvalsTable');
   const q = ($('searchApprovals')?.value||'').trim().toLowerCase();
@@ -1535,92 +1032,84 @@ function renderApprovals(){
 }
 $('approvalsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return;
-  const key = btn.dataset.key;
-  const dbKey = KEYMAP.participations[key] || key;
+  const key = btn.dataset.key; const dbKey = KEYMAP.participations[key] || key;
   if(btn.classList.contains('btn-approve')){
-    await update(ref(db, `participations/${dbKey}`), { status: 'approved', approvedAt: Date.now() });
+    await update(ref(db, `participations/${dbKey}`), { status:'approved', approvedAt: Date.now() });
     toast('Approved');
-    // optionally auto-add to approved list (we already set status)
   } else if(btn.classList.contains('btn-reject')){
-    await update(ref(db, `participations/${dbKey}`), { status: 'rejected', rejectedAt: Date.now() });
+    await update(ref(db, `participations/${dbKey}`), { status:'rejected', rejectedAt: Date.now() });
     toast('Rejected');
   }
 });
 
-/* ---------------------------
-   RESULTS
-   --------------------------- */
-
-/* Load participants for selected event into result selectors (only approved) */
+/* ---------- RESULTS ---------- */
+/* When an event is selected, auto-load its approved participants into participant select */
 $('resultEvent').addEventListener('change', ()=> {
-  // nothing automatic here; user will choose position and save
-});
-$('refreshParticipants')?.addEventListener('click', ()=> {
-  const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
+  const ev = $('resultEvent').value; if(!ev){ $('resultSelectParticipant').innerHTML = '<option value="">Select participant</option>'; return; }
   const participants = CACHE.participations.filter(p => String(p.eventId) === String(ev) && String(p.status||'').toLowerCase()==='approved');
   const map = {}; CACHE.students.forEach(s => map[s.id] = s.name);
-  const choices = participants.map(p => ({ id: p.studentId, name: map[p.studentId] || p.studentId }));
-  ['resFirst','resSecond','resThird'].forEach(id => {
-    const sel = $(id);
-    if(!sel) return;
-    sel.innerHTML = '<option value="">Select</option>';
-    choices.forEach(c=> sel.innerHTML += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)} (${escapeHtml(c.id)})</option>`);
-  });
+  const sel = $('resultSelectParticipant'); sel.innerHTML = '<option value="">Select participant</option>';
+  participants.forEach(p => sel.innerHTML += `<option value="${escapeHtml(p.studentId)}">${escapeHtml(map[p.studentId]||p.studentId)} (${escapeHtml(p.studentId)})</option>`);
 });
 
-/* Save result (supports giving a single position at a time) */
-$('saveResult')?.addEventListener('click', async ()=>{
+/* save result */
+$('saveResult').addEventListener('click', async ()=>{
   const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
-  const pos = $('resultPosition').value; if(!pos) return toast('Select position','danger');
-  const pts = Number($('resultPoints').value) || 0;
-  // need selected student for given position: we'll expect leader submitted participants and admin loaded appropriate select controls in UI (Part2 had a simple position flow)
-  // To keep flexible: fetch approved participants and if only one participant exists, assign them. Otherwise user must choose via resFirst/resSecond/resThird flow (handled via refreshParticipants)
-  // For simplicity if pos==1 try to read resFirst; if not present, prompt.
-  let studentId = '';
-  if(pos === '1') studentId = $('resFirst') ? $('resFirst').value : '';
-  if(pos === '2') studentId = $('resSecond') ? $('resSecond').value : '';
-  if(pos === '3') studentId = $('resThird') ? $('resThird').value : '';
-  if(!studentId) return toast('Choose participant for this position','danger');
+  const studentId = $('resultSelectParticipant').value; if(!studentId) return toast('Select participant','danger');
+  const pos = Number($('resultPosition').value); if(!pos) return toast('Select position','danger');
+  let pts = Number($('resultPoints').value) || 0; if(pts>100) pts = 100;
   const p = push(ref(db, 'results'));
   const id = Date.now().toString() + Math.floor(Math.random()*9999);
-  const payload = { id, eventId: ev, position: Number(pos), studentId, points: pts, published: false, createdAt: Date.now() };
-  await set(p, payload);
-  toast('Result saved (draft). Use the table to publish.');
+  await set(p, { id, eventId: ev, position: pos, studentId, points: pts, published:false, createdAt: Date.now() });
+  toast('Result saved (draft)');
 });
 
-/* render results list — group by event and positions */
+/* render results grouped into rows showing 1st/2nd/3rd per event (we assemble from results) */
 function renderResults(){
   const tbody = $('resultsTable');
   if(!CACHE.results.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No results</td></tr>'; return; }
-  // create grouped view: list events & their positions
-  // simpler: show most recent results rows
-  CACHE.results.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
-  let html='';
-  CACHE.results.forEach(r=>{
-    const ev = CACHE.events.find(e => String(e.id)===String(r.eventId));
-    const student = CACHE.students.find(s => String(s.id)===String(r.studentId)) || { name: r.studentId };
-    const pub = r.published ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
-    html += `<tr data-key="${r.id}"><td>${escapeHtml(ev?ev.name:'Unknown')}</td><td>${r.position===1?escapeHtml(student.name):''}</td><td>${r.position===2?escapeHtml(student.name):''}</td><td>${r.position===3?escapeHtml(student.name):''}</td><td>${pub}</td><td class="text-end">
-      <button class="btn btn-sm btn-outline-primary btn-edit-result" data-key="${r.id}">Edit</button>
-      <button class="btn btn-sm btn-outline-secondary btn-toggle-publish" data-key="${r.id}">${r.published? 'Unpublish' : 'Publish'}</button>
-      <button class="btn btn-sm btn-outline-danger btn-delete-result" data-key="${r.id}">Delete</button>
-    </td></tr>`;
+
+  // Build map: eventId -> positions
+  const map = {};
+  CACHE.results.forEach(r => {
+    if(!map[r.eventId]) map[r.eventId] = {};
+    map[r.eventId][r.position] = r;
   });
-  tbody.innerHTML = html;
+
+  const rows = [];
+  Object.keys(map).forEach(eventId => {
+    const ev = CACHE.events.find(e => String(e.id) === String(eventId));
+    const pos = map[eventId];
+    const first = pos[1] ? (CACHE.students.find(s => String(s.id) === String(pos[1].studentId)) || { name: pos[1].studentId }) : { name:'' };
+    const second = pos[2] ? (CACHE.students.find(s => String(s.id) === String(pos[2].studentId)) || { name: pos[2].studentId }) : { name:'' };
+    const third = pos[3] ? (CACHE.students.find(s => String(s.id) === String(pos[3].studentId)) || { name: pos[3].studentId }) : { name:'' };
+    const published = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
+    const pubBadge = published ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
+    // actions will manipulate each stored result individually; but for compact row we show buttons to manage each found record (we will show Edit/Publish/Delete for each position)
+    let actions = '';
+    [1,2,3].forEach(pn => {
+      const r = pos[pn];
+      if(r) actions += `<div style="display:inline-block;margin-right:6px"><button class="btn btn-sm btn-outline-primary btn-edit-result" data-key="${r.id}">Edit ${pn}</button> <button class="btn btn-sm btn-outline-secondary btn-toggle-publish" data-key="${r.id}">${r.published? 'Unpublish' : 'Publish'}</button> <button class="btn btn-sm btn-outline-danger btn-delete-result" data-key="${r.id}">Delete</button></div>`;
+    });
+    rows.push(`<tr data-ev="${escapeHtml(eventId)}"><td>${escapeHtml(ev?ev.name:'Unknown')}</td><td>${escapeHtml(first.name||'')}</td><td>${escapeHtml(second.name||'')}</td><td>${escapeHtml(third.name||'')}</td><td>${pubBadge}</td><td class="text-end">${actions}</td></tr>`);
+  });
+
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="6" class="text-center muted">No results</td></tr>';
 }
 
-/* result table actions */
+/* Results actions (edit/publish/delete) */
 $('resultsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return;
-  const id = btn.dataset.key;
-  const dbKey = KEYMAP.results[id] || id;
+  const key = btn.dataset.key;
   if(btn.classList.contains('btn-toggle-publish')){
+    const dbKey = KEYMAP.results[key] || key;
+    if(!dbKey) return toast('Result key not found','danger');
     const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Result not found','danger');
     const newVal = !r.published;
     await update(ref(db, `results/${dbKey}`), { published: newVal, publishedAt: newVal?Date.now():null });
     toast(newVal ? 'Published' : 'Unpublished');
-    // update team scores when published: add points to student's team
     if(newVal){
+      // assign points to team score (if student's team exists)
       const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
       if(stud && stud.teamId){
         const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
@@ -1632,28 +1121,28 @@ $('resultsTable').addEventListener('click', async (e)=>{
       }
     }
   } else if(btn.classList.contains('btn-edit-result')){
-    // open edit modal with result data
-    const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Result not found','danger');
+    const dbKey = KEYMAP.results[key] || key;
+    const snap = await get(ref(db, `results/${dbKey}`)); const r = snap.val(); if(!r) return toast('Not found','danger');
     const ev = CACHE.events.find(e => String(e.id)===String(r.eventId));
     $('editResultEventName').value = ev?ev.name:'';
-    // populate selects with participants
+    // populate participants selects with approved participants of that event
     const participants = CACHE.participations.filter(p => String(p.eventId) === String(r.eventId) && String(p.status||'').toLowerCase()==='approved');
     ['editResFirst','editResSecond','editResThird'].forEach(selId => {
       const sel = $(selId); sel.innerHTML = '<option value="">Select</option>';
-      participants.forEach(p => { const name = (CACHE.students.find(s => String(s.id)===String(p.studentId))||{name:p.studentId}).name; sel.innerHTML += `<option value="${escapeHtml(p.studentId)}">${escapeHtml(name)} (${escapeHtml(p.studentId)})</option>`; });
+      participants.forEach(p => {
+        const name = (CACHE.students.find(s => String(s.id)===String(p.studentId))||{name:p.studentId}).name;
+        sel.innerHTML += `<option value="${escapeHtml(p.studentId)}">${escapeHtml(name)} (${escapeHtml(p.studentId)})</option>`;
+      });
     });
-    $('editPtsFirst').value = r.position===1 ? (r.points||0) : 0;
-    $('editPtsSecond').value = r.position===2 ? (r.points||0) : 0;
-    $('editPtsThird').value = r.position===3 ? (r.points||0) : 0;
-    // select correct position
-    if(r.position===1) $('editResFirst').value = r.studentId;
-    if(r.position===2) $('editResSecond').value = r.studentId;
-    if(r.position===3) $('editResThird').value = r.studentId;
-    // store edit id on modal
+    // set values for whichever position r belongs to
+    if(r.position===1) $('editResFirst').value = r.studentId, $('editPtsFirst').value = r.points || 0;
+    if(r.position===2) $('editResSecond').value = r.studentId, $('editPtsSecond').value = r.points || 0;
+    if(r.position===3) $('editResThird').value = r.studentId, $('editPtsThird').value = r.points || 0;
     document.getElementById('editResultForm').dataset.editKey = dbKey;
     new bootstrap.Modal(document.getElementById('editResultModal')).show();
   } else if(btn.classList.contains('btn-delete-result')){
     if(!confirm('Delete result?')) return;
+    const dbKey = KEYMAP.results[key] || key;
     await remove(ref(db, `results/${dbKey}`));
     toast('Result deleted');
   }
@@ -1663,50 +1152,42 @@ $('resultsTable').addEventListener('click', async (e)=>{
 $('editResultForm').addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const dbKey = document.getElementById('editResultForm').dataset.editKey;
-  if(!dbKey) return toast('Missing result key','danger');
-  // determine which position has a student selected
-  const first = $('editResFirst').value || '';
-  const second = $('editResSecond').value || '';
-  const third = $('editResThird').value || '';
-  // prioritize the non-empty one matching previous position — we will update the stored result item (which stores position+student+points)
-  const curSnap = await get(ref(db, `results/${dbKey}`)); const cur = curSnap.val(); if(!cur) return toast('Result not found','danger');
+  if(!dbKey) return toast('Missing key','danger');
+  const curSnap = await get(ref(db, `results/${dbKey}`)); const cur = curSnap.val(); if(!cur) return toast('Not found','danger');
+  const pos = cur.position;
   let upd = {};
-  if(cur.position === 1){ upd.studentId = first; upd.points = Number($('editPtsFirst').value) || 0; }
-  else if(cur.position === 2){ upd.studentId = second; upd.points = Number($('editPtsSecond').value) || 0; }
-  else if(cur.position === 3){ upd.studentId = third; upd.points = Number($('editPtsThird').value) || 0; }
+  if(pos===1){ upd.studentId = $('editResFirst').value || ''; upd.points = Number($('editPtsFirst').value) || 0; }
+  if(pos===2){ upd.studentId = $('editResSecond').value || ''; upd.points = Number($('editPtsSecond').value) || 0; }
+  if(pos===3){ upd.studentId = $('editResThird').value || ''; upd.points = Number($('editPtsThird').value) || 0; }
   await update(ref(db, `results/${dbKey}`), upd);
   toast('Result updated');
   bootstrap.Modal.getInstance(document.getElementById('editResultModal')).hide();
 });
 $('deleteResultBtn').addEventListener('click', async ()=>{
   const dbKey = document.getElementById('editResultForm').dataset.editKey;
-  if(!dbKey) return toast('Missing result key','danger');
-  if(!confirm('Delete this result?')) return;
+  if(!dbKey) return toast('No key','danger');
+  if(!confirm('Delete result?')) return;
   await remove(ref(db, `results/${dbKey}`));
   toast('Deleted');
   bootstrap.Modal.getInstance(document.getElementById('editResultModal')).hide();
 });
 
-/* ---------------------------
-   REPORTS (team attendance & live score)
-   --------------------------- */
+/* ---------- REPORTS ---------- */
 function renderReports(){
   const tbody = $('reportsTable');
   const teams = CACHE.teams || [];
-  if(!teams.length){ tbody.innerHTML = '<tr><td colspan="3" class="text-center muted">No data</td></tr>'; return; }
+  if(!teams.length){ tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">No data</td></tr>'; return; }
   let html='';
   teams.forEach(t=>{
     const members = CACHE.students.filter(s => String(s.teamId) === String(t.id)).length;
     const pct = computeTeamAttendancePct(t.id);
     const score = Number(t.score)||0;
-    html += `<tr><td>${escapeHtml(t.name)}${t.locked? ' <span class="badge bg-danger">Locked</span>':''}</td><td>${members}</td><td>${pct}% — <small class="muted">Score: ${score}</small></td></tr>`;
+    html += `<tr><td>${escapeHtml(t.name)}</td><td>${members}</td><td>${pct}%</td><td>${score}</td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
-/* ---------------------------
-   POPULATE DROPDOWNS & MISC
-   --------------------------- */
+/* ---------- DROPDOWNS & POPULATE ---------- */
 function populateDropdowns(){
   const manualTeam = $('manualTeam'); if(manualTeam){ manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t => manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
   const teamLeader = $('teamLeader'); if(teamLeader){ teamLeader.innerHTML = '<option value="">Choose leader (Chess #)</option>'; CACHE.students.forEach(s => teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
@@ -1716,15 +1197,11 @@ function populateDropdowns(){
   const resEv = $('resultEvent'); if(resEv){ resEv.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e => resEv.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`); }
 }
 
-/* ---------------------------
-   SEARCH handlers
-   --------------------------- */
+/* ---------- SEARCH handlers ---------- */
 $('searchStudents')?.addEventListener('input', ()=> renderStudents());
 $('searchApprovals')?.addEventListener('input', ()=> renderApprovals());
 
-/* ---------------------------
-   PDF Exports
-   --------------------------- */
+/* ---------- PDF exports ---------- */
 function downloadHtmlAsPdf(elementOrHtml, filename='export.pdf'){
   if(typeof elementOrHtml === 'string'){
     const wrapper = document.createElement('div'); wrapper.innerHTML = elementOrHtml;
@@ -1733,8 +1210,6 @@ function downloadHtmlAsPdf(elementOrHtml, filename='export.pdf'){
     html2pdf().from(elementOrHtml).set({ margin:10, filename }).save();
   }
 }
-
-/* example: download students list as pdf */
 function generateStudentsPdf(){
   let html = `<h3>Students</h3><table><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>`;
   const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
@@ -1742,36 +1217,42 @@ function generateStudentsPdf(){
   html += '</tbody></table>';
   downloadHtmlAsPdf(html, `students_${new Date().toISOString().slice(0,10)}.pdf`);
 }
+$('downloadStudentsPdf').addEventListener('click', generateStudentsPdf);
 
-/* example: events pdf (approved participants per event) */
-function generateApprovedPdfForEvent(evId){
-  // build text with event name and approved participants
-  const ev = CACHE.events.find(e => String(e.id) === String(evId));
-  const approved = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status||'').toLowerCase()==='approved');
-  let html = `<h3>${escapeHtml(ev?ev.name:'Event')}</h3>`;
-  html += `<div>Participants (approved):</div><ol>`;
-  approved.forEach(p => {
-    const s = CACHE.students.find(st => String(st.id) === String(p.studentId));
-    html += `<li>${escapeHtml(s? s.name : p.studentId)} ${s ? `(${escapeHtml(s.id)})` : ''}</li>`;
+$('downloadEventsPdf').addEventListener('click', ()=> {
+  let html = `<h3>Events</h3><table><thead><tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th></tr></thead><tbody>`;
+  CACHE.events.forEach(e => html += `<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.type)}</td><td>${escapeHtml(e.level||'')}</td><td>${escapeHtml(e.description||'')}</td></tr>`);
+  html += '</tbody></table>'; downloadHtmlAsPdf(html, `events_${new Date().toISOString().slice(0,10)}.pdf`);
+});
+
+/* approvals pdf */
+$('downloadApprovalsPdf').addEventListener('click', ()=> {
+  // list all approved participations grouped by event
+  let html = `<h3>Approved Participations</h3>`;
+  CACHE.events.forEach(ev => {
+    const approved = CACHE.participations.filter(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved');
+    if(!approved.length) return;
+    html += `<h4>${escapeHtml(ev.name)}</h4><ol>`;
+    approved.forEach(p => {
+      const s = CACHE.students.find(st => String(st.id) === String(p.studentId));
+      html += `<li>${escapeHtml(s? s.name : p.studentId)} ${s? `(${escapeHtml(s.id)})` : ''}</li>`;
+    });
+    html += `</ol>`;
   });
-  html += `</ol>`;
-  downloadHtmlAsPdf(html, `${(ev?ev.name:'event')}_approved.pdf`);
-}
+  downloadHtmlAsPdf(html, `approved_participations_${new Date().toISOString().slice(0,10)}.pdf`);
+});
 
-/* Hook optional buttons: you may add dedicated buttons to trigger PDF exports; below examples if you want quick saving */
-window.generateStudentsPdf = generateStudentsPdf;
-window.generateApprovedPdfForEvent = generateApprovedPdfForEvent;
+/* ---------- bootstrapping ---------- */
+setTimeout(()=> {
+  renderAll();
+  try{ document.getElementById('current-year').textContent = new Date().getFullYear(); }catch(e){}
+}, 400);
 
-/* ---------------------------
-   INITIAL render
-   --------------------------- */
-setTimeout(()=> renderAll(), 300);
-
-/* ---------------------------
-   Final: small safety fixes
-   --------------------------- */
-console.log('Admin script loaded — Firebase connections active');
+console.log('Admin: UI + Firebase script loaded');
 
 </script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
