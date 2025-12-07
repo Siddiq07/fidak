@@ -206,6 +206,41 @@
           </div>
         </div>
       </section>
+      
+      <!-- EDIT EVENT MODAL -->
+<div class="modal fade" id="editEventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editEventForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Event</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="editEventId">
+
+        <label class="form-label">Event Name</label>
+        <input id="editEventName" class="form-control mb-2" required>
+
+        <label class="form-label">Event Type</label>
+        <select id="editEventType" class="form-select mb-2">
+          <option>Stage</option>
+          <option>Non-Stage</option>
+          <option>General</option>
+          <option>Special</option>
+        </select>
+
+        <label class="form-label">Description / Rules</label>
+        <textarea id="editEventDesc" class="form-control" rows="4"></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="deleteEventBtn" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
 
       <!-- ATTENDANCE -->
       <section id="panel-attendance" class="panel d-none">
