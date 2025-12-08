@@ -219,7 +219,7 @@
             <option>Stage</option><option>Off-Stage</option><option>Group</option><option>Open</option><option>Special</option>
           </select>
           <select id="eventLevel" class="form-select mb-2">
-            <option>Senior</option><option>Junior</option><option>General</option><option>Special</option>
+            <option>Senior</option><option>Junior</option><option>Open</option><option>Special</option>
           </select>
           <textarea id="eventDescription" class="form-control mb-2" rows="3" placeholder="Description / rules"></textarea>
           <div class="d-flex gap-2"><button id="saveEvent" class="btn btn-warning">Save Event</button><button id="downloadEventsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i></button></div>
@@ -232,7 +232,7 @@
           <div class="d-flex gap-2"><button id="previewEvents" class="btn btn-outline-primary">Preview</button><button id="importEvents" class="btn btn-accent">Import</button></div>
           <div class="mt-2 d-flex gap-2">
             <select id="filterEventType" class="form-select"><option value="">All Types</option><option>Stage</option><option>Off-Stage</option><option>Group</option><option>Open</option><option>Special</option></select>
-            <select id="filterEventLevel" class="form-select"><option value="">All Levels</option><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
+            <select id="filterEventLevel" class="form-select"><option value="">All Levels</option><option>Junior</option><option>Senior</option><option>Open</option><option>Special</option></select>
             <button id="filterEventsBtn" class="btn btn-outline-secondary">Search</button>
           </div>
           <div id="eventsPreview" style="max-height:220px;overflow:auto" class="mt-2"></div>
@@ -322,7 +322,7 @@
         <label class="form-label">Type</label>
         <select id="editEventType" class="form-select mb-2"><option>Stage</option><option>Off-Stage</option><option>Group</option><option>Open</option><option>Special</option></select>
         <label class="form-label">Level</label>
-        <select id="editEventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
+        <select id="editEventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>Open</option><option>Special</option></select>
         <label class="form-label">Description</label>
         <textarea id="editEventDesc" class="form-control mb-2" rows="4"></textarea>
       </div>
@@ -626,7 +626,7 @@ $('importEvents').addEventListener('click', async ()=> {
   const updates = {}; let imported=0, skipped=0;
   eventsPreviewRows.forEach(rw => {
     const name = (rw['Name']||rw['Event']||rw['name']||'').toString().trim(); if(!name){ skipped++; return; }
-    const type = (rw['Type']||rw['type']||'Off-Stage').toString().trim(); const level = (rw['Level']||rw['level']||'General').toString().trim();
+    const type = (rw['Type']||rw['type']||'Off-Stage').toString().trim(); const level = (rw['Level']||rw['level']||'Open').toString().trim();
     if(CACHE.events.some(ev => eventKey(ev.name,ev.type,ev.level) === eventKey(name,type,level))){ skipped++; return; }
     const desc = (rw['Description']||rw['description']||'').toString();
     const id = Date.now().toString() + Math.floor(Math.random()*9999);
@@ -652,7 +652,7 @@ function renderEvents(){
     if(filterLevel && ev.level !== filterLevel) return;
     const participated = CACHE.participations.some(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved');
     const rowClass = participated ? 'participated-row' : '';
-    html += `<tr class="${rowClass}" data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'General')}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event" data-key="${ev.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event" data-key="${ev.id}">Delete</button></td></tr>`;
+    html += `<tr class="${rowClass}" data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'Open')}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event" data-key="${ev.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event" data-key="${ev.id}">Delete</button></td></tr>`;
   });
   tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No events match filters</td></tr>';
 }
@@ -661,7 +661,7 @@ function renderEvents(){
 $('eventsTable').addEventListener('click', async (e)=>{
   const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.key;
   if(btn.classList.contains('btn-delete-event')){ if(!confirm('Delete event?')) return; const dbKey = KEYMAP.events[id] || id; if(dbKey) await remove(ref(db, `events/${dbKey}`)); toast('Event removed'); }
-  else if(btn.classList.contains('btn-edit-event')){ const dbKey = KEYMAP.events[id] || id; const snap = await get(ref(db, `events/${dbKey}`)); const ev = snap.val(); if(!ev) return toast('Not found','danger'); $('editEventDbKey').value = dbKey; $('editEventName').value = ev.name||''; $('editEventType').value = ev.type||'Off-Stage'; $('editEventLevel').value = ev.level||'General'; $('editEventDesc').value = ev.description||''; new bootstrap.Modal(document.getElementById('editEventModal')).show(); }
+  else if(btn.classList.contains('btn-edit-event')){ const dbKey = KEYMAP.events[id] || id; const snap = await get(ref(db, `events/${dbKey}`)); const ev = snap.val(); if(!ev) return toast('Not found','danger'); $('editEventDbKey').value = dbKey; $('editEventName').value = ev.name||''; $('editEventType').value = ev.type||'Off-Stage'; $('editEventLevel').value = ev.level||'Open'; $('editEventDesc').value = ev.description||''; new bootstrap.Modal(document.getElementById('editEventModal')).show(); }
 });
 $('editEventForm').addEventListener('submit', async (ev)=>{ ev.preventDefault(); const dbKey = $('editEventDbKey').value; if(!dbKey) return toast('Missing key','danger'); const name = $('editEventName').value.trim(); const type = $('editEventType').value; const level = $('editEventLevel').value; const desc = $('editEventDesc').value.trim(); if(!name) return toast('Name required','danger');
   const other = CACHE.events.find(e => eventKey(e.name,e.type,e.level) === eventKey(name,type,level) && KEYMAP.events[e.id] !== dbKey);
