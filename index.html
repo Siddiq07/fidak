@@ -9,38 +9,272 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
 <style>
+/* ================================
+   ROOT VARIABLES
+================================ */
 :root{
   --primary:#4f46e5;
+  --secondary:#22c55e;
+  --danger:#ef4444;
+  --dark:#0f172a;
+  --muted:#64748b;
+  --bg:#f5f8ff;
+  --card:#ffffff;
+  --radius:16px;
 }
-body{
-  min-height:100vh;
-  background:linear-gradient(160deg,#eef2ff,#ffffff);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+
+/* ================================
+   RESET & BASE
+================================ */
+*{
+  box-sizing:border-box;
 }
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+  background:var(--bg);
+  color:var(--dark);
+}
+a{ text-decoration:none }
+img{ max-width:100%; display:block }
+
+/* ================================
+   CONTAINERS
+================================ */
+.container-app{
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
+}
+
 .card-ui{
-  max-width:430px;
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:20px;
+  box-shadow:0 20px 50px rgba(15,23,42,.08);
+  margin-bottom:16px;
+}
+
+/* ================================
+   HEADER / NAV
+================================ */
+.top-nav{
   background:#fff;
-  border-radius:26px;
-  padding:28px;
-  box-shadow:0 30px 80px rgba(0,0,0,.12);
+  border-bottom:1px solid #e5e7eb;
+  position:sticky;
+  top:0;
+  z-index:1000;
 }
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-top:20px;
+.top-nav-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 18px;
 }
-.stat{
-  background:#f1f5f9;
+.brand{
+  font-weight:800;
+  font-size:20px;
+  color:var(--primary);
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.nav-actions{
+  display:flex;
+  gap:10px;
+}
+
+/* ================================
+   BUTTONS
+================================ */
+.btn-main{
+  background:linear-gradient(90deg,var(--primary),#7c3aed);
+  color:#fff;
+  border:none;
   border-radius:14px;
-  padding:12px;
+  padding:12px 18px;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn-outline{
+  background:#fff;
+  border:2px solid var(--primary);
+  color:var(--primary);
+  border-radius:14px;
+  padding:12px 18px;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn-danger{
+  background:var(--danger);
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  padding:12px 18px;
+}
+.btn-small{
+  padding:8px 12px;
+  border-radius:10px;
+  font-size:13px;
+}
+
+/* ================================
+   STATS / DASHBOARD BOXES
+================================ */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
+}
+.stat-box{
+  background:#f1f5ff;
+  border-radius:14px;
+  padding:16px;
   text-align:center;
+}
+.stat-box h3{
+  margin:0;
+  font-weight:900;
+  font-size:26px;
+}
+.stat-box span{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* ================================
+   SCOREBOARD
+================================ */
+.scoreboard{
+  margin-top:16px;
 }
 .score-item{
   display:flex;
   justify-content:space-between;
-  padding:6px 0;
-  border-bottom:1px dashed #ddd;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px dashed #e5e7eb;
+}
+.score-item:last-child{ border-bottom:none }
+.score-item strong{
+  font-size:18px;
+}
+
+/* ================================
+   TABLES
+================================ */
+.table-wrap{
+  overflow-x:auto;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  padding:10px;
+  text-align:left;
+  font-size:14px;
+}
+thead{
+  background:#eef2ff;
+}
+tr:nth-child(even){
+  background:#f8faff;
+}
+
+/* ================================
+   ATTENDANCE BOXES
+================================ */
+.small-box{
+  width:56px;
+  height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  background:#e5e7eb;
+  font-weight:700;
+  cursor:pointer;
+}
+.small-box.present{
+  background:var(--secondary);
+  color:#fff;
+}
+.small-box.absent{
+  background:var(--danger);
+  color:#fff;
+}
+
+/* ================================
+   MODALS
+================================ */
+.modal-content{
+  border-radius:20px;
+}
+.modal-header{
+  border-bottom:none;
+}
+.modal-footer{
+  border-top:none;
+}
+
+/* ================================
+   UTILITIES
+================================ */
+.text-muted{ color:var(--muted) }
+.text-center{ text-align:center }
+.mt-2{ margin-top:8px }
+.mt-3{ margin-top:16px }
+.mb-2{ margin-bottom:8px }
+.mb-3{ margin-bottom:16px }
+
+/* ================================
+   MOBILE RESPONSIVE
+================================ */
+@media(max-width:768px){
+  .top-nav-inner{
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .brand{
+    font-size:18px;
+  }
+
+  .btn-main,
+  .btn-outline{
+    width:100%;
+    padding:14px;
+  }
+
+  .card-ui{
+    padding:16px;
+  }
+
+  th,td{
+    font-size:13px;
+    padding:8px;
+  }
+
+  .small-box{
+    width:44px;
+    height:34px;
+    font-size:12px;
+  }
+}
+
+/* ================================
+   ANIMATIONS
+================================ */
+.fade-in{
+  animation:fade .5s ease;
+}
+@keyframes fade{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
 }
 </style>
 </head>
