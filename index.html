@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Art Fest | Login</title>
 
-<!-- Bootstrap -->
+<!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <!-- Icons -->
@@ -96,19 +96,12 @@ body{
   border-bottom:1px dashed #e5e7eb;
 }
 .score-item:last-child{border-bottom:none}
-.fade-in{
-  animation:fade .5s ease;
-}
-@keyframes fade{
-  from{opacity:0;transform:translateY(6px)}
-  to{opacity:1;transform:none}
-}
 </style>
 </head>
 
 <body>
 <div class="app">
-  <div class="card-ui fade-in">
+  <div class="card-ui">
 
     <!-- LOGO -->
     <div class="logo mb-4">
@@ -119,15 +112,15 @@ body{
 
     <!-- LOGIN BUTTONS -->
     <div class="d-grid gap-3">
-      <button class="btn btn-main btn-primary" onclick="openLogin('admin')">
+      <button class="btn btn-main btn-primary" id="btnAdmin">
         <i class="bi bi-shield-lock me-2"></i> Admin Login
       </button>
 
-      <button class="btn btn-main btn-success" onclick="openLogin('leader')">
+      <button class="btn btn-main btn-success" id="btnLeader">
         <i class="bi bi-people me-2"></i> Leader Login
       </button>
 
-      <button class="btn btn-outline" onclick="openLogin('participant')">
+      <button class="btn btn-outline" id="btnParticipant">
         <i class="bi bi-person me-2"></i> Participant Login
       </button>
     </div>
@@ -166,8 +159,8 @@ body{
           <h5 class="modal-title" id="loginTitle"></h5>
           <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
 
+        <div class="modal-body">
           <input type="hidden" id="loginType">
 
           <div id="teamBox" class="mb-3 d-none">
@@ -186,17 +179,20 @@ body{
           </div>
 
           <div id="loginError" class="text-danger small d-none"></div>
-
         </div>
+
         <div class="modal-footer">
-          <button class="btn btn-primary w-100">Login</button>
+          <button class="btn btn-primary w-100" type="submit">Login</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- Bootstrap JS (MUST COME BEFORE CUSTOM JS) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Firebase + Logic -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -210,19 +206,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// STATS
-onValue(ref(db,"students"),s=>statStudents.innerText=Object.keys(s.val()||{}).length);
-onValue(ref(db,"events"),s=>statEvents.innerText=Object.keys(s.val()||{}).length);
+// DOM refs
+const statStudents = document.getElementById("statStudents");
+const statEvents   = document.getElementById("statEvents");
+const statTeams    = document.getElementById("statTeams");
+const scoreList    = document.getElementById("scoreList");
+const teamSelect   = document.getElementById("teamSelect");
+
+// Stats
+onValue(ref(db,"students"),s=>statStudents.textContent=Object.keys(s.val()||{}).length);
+onValue(ref(db,"events"),s=>statEvents.textContent=Object.keys(s.val()||{}).length);
 onValue(ref(db,"teams"),s=>{
   const teams=s.val()||{};
-  statTeams.innerText=Object.keys(teams).length;
+  statTeams.textContent=Object.keys(teams).length;
   teamSelect.innerHTML='<option value="">Select Team</option>';
   Object.values(teams).forEach(t=>{
     teamSelect.innerHTML+=`<option value="${t.id}">${t.name}</option>`;
   });
 });
 
-// LIVE SCORE
+// Live Score
 onValue(ref(db,"teams"),snap=>{
   scoreList.innerHTML='';
   Object.values(snap.val()||{})
@@ -237,28 +240,35 @@ onValue(ref(db,"teams"),snap=>{
 });
 </script>
 
-<!-- UI SCRIPT -->
+<!-- UI LOGIC -->
 <script>
-const modal=new bootstrap.Modal(document.getElementById("loginModal"));
+const modal = new bootstrap.Modal(document.getElementById("loginModal"));
+
+const loginType = document.getElementById("loginType");
+const loginTitle = document.getElementById("loginTitle");
+const teamBox = document.getElementById("teamBox");
+const chessBox = document.getElementById("chessBox");
+
+document.getElementById("btnAdmin").onclick = ()=>openLogin("admin");
+document.getElementById("btnLeader").onclick = ()=>openLogin("leader");
+document.getElementById("btnParticipant").onclick = ()=>openLogin("participant");
 
 function openLogin(type){
-  loginType.value=type;
-  loginError.classList.add("d-none");
-  teamBox.classList.toggle("d-none",type!=="leader");
-  chessBox.classList.toggle("d-none",type!=="participant");
-  loginTitle.innerText=type.charAt(0).toUpperCase()+type.slice(1)+" Login";
+  loginType.value = type;
+  teamBox.classList.toggle("d-none", type !== "leader");
+  chessBox.classList.toggle("d-none", type !== "participant");
+  loginTitle.textContent = type.charAt(0).toUpperCase()+type.slice(1)+" Login";
   modal.show();
 }
 
-loginForm.onsubmit=e=>{
+document.getElementById("loginForm").onsubmit = e=>{
   e.preventDefault();
-  const t=loginType.value;
+  const t = loginType.value;
   if(t==="admin") location.href="admin.html";
   if(t==="leader") location.href="leader.html";
   if(t==="participant") location.href="participant.html";
 };
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
