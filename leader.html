@@ -1,269 +1,227 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Leader Dashboard | Art Fest</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leader Panel — Art Fest</title>
 
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<!-- PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-:root{
-  --bg:#0b1d33;
-  --card:#ffffff;
-  --accent:#fbbf24;
-  --soft:#f1f5f9;
-}
-body{
-  margin:0;
-  background:#f8fafc;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
-}
-.topbar{
-  background:var(--bg);
-  color:white;
-  padding:16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.topbar h4{margin:0}
-.container{padding:18px}
-.card-ui{
-  background:var(--card);
-  border-radius:18px;
-  padding:16px;
-  box-shadow:0 12px 30px rgba(0,0,0,.06);
-}
-.stats{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:14px;
-}
-.stat{
-  background:linear-gradient(135deg,#fde68a,#f59e0b);
-  color:#111;
-  border-radius:16px;
-  padding:16px;
-}
-.stat h3{margin:0;font-weight:800}
-.stat span{font-size:13px}
-
-.nav-pills .nav-link{
-  border-radius:14px;
-  font-weight:600;
-}
-.event-card{
-  border:2px solid #fde68a;
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:14px;
-}
-.badge-soft{
-  background:#e5e7eb;
-  color:#111;
-}
-.winner{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin:8px 0;
-}
-.winner span{
-  font-size:14px;
-}
-.pdf-btn{
-  border:0;
-  background:#111827;
-  color:white;
-  border-radius:10px;
-  padding:8px 12px;
-}
+body{background:#f5f8ff;font-family:system-ui}
+.card{border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.stat{padding:14px;border-radius:12px;background:#fff}
+.stat .v{font-size:22px;font-weight:800}
+.small-box{width:64px;height:48px;border-radius:10px;background:#eef2ff;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+cursor:pointer;margin:4px;font-weight:700}
+.small-box.selected{background:#2563eb;color:#fff}
 </style>
 </head>
 
 <body>
 
-<!-- 🔒 SECURITY CHECK -->
+<!-- 🔐 SECURITY CHECK -->
 <script>
-const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-if(user.role !== "Leader" || !user.teamId){
+const SESSION = JSON.parse(sessionStorage.getItem("user")||"{}");
+if(SESSION.role!=="Leader" || !SESSION.teamId){
+  alert("Unauthorized access");
   location.href="index.html";
 }
 </script>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <h4>Leader Dashboard</h4>
-  <button class="btn btn-sm btn-outline-light" onclick="logout()">Logout</button>
-</div>
-
-<div class="container">
-
-  <!-- DASHBOARD -->
-  <div class="stats mb-4">
-    <div class="stat">
-      <h3 id="teamScore">0</h3>
-      <span>Team Score</span>
-    </div>
-    <div class="stat">
-      <h3 id="memberCount">0</h3>
-      <span>Members</span>
-    </div>
-    <div class="stat">
-      <h3 id="attendancePct">0%</h3>
-      <span>Attendance</span>
-    </div>
-    <div class="stat">
-      <h3 id="eventCount">0</h3>
-      <span>Events</span>
+<nav class="navbar bg-white border-bottom">
+  <div class="container">
+    <strong class="text-primary">🎨 Art Fest</strong>
+    <div class="d-flex gap-2 align-items-center">
+      <span id="teamName" class="text-muted"></span>
+      <button id="logout" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
     </div>
   </div>
+</nav>
 
-  <!-- NAV -->
-  <ul class="nav nav-pills mb-3">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#events">Events</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#results">Results</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#approved">Approved</button></li>
-  </ul>
+<main class="container my-4">
 
-  <div class="tab-content">
-
-    <!-- EVENTS -->
-    <div class="tab-pane fade show active" id="events">
-      <div id="eventList"></div>
+<!-- DASHBOARD -->
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="stat">
+      <div class="text-muted">Team Score</div>
+      <div id="teamScore" class="v">0</div>
     </div>
-
-    <!-- RESULTS -->
-    <div class="tab-pane fade" id="results">
-      <div id="resultList"></div>
-    </div>
-
-    <!-- APPROVED -->
-    <div class="tab-pane fade" id="approved">
-      <div id="approvedList"></div>
-    </div>
-
   </div>
-
+  <div class="col-md-4">
+    <div class="stat">
+      <div class="text-muted">Attendance</div>
+      <div id="teamAttendance" class="v">0%</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat">
+      <div class="text-muted">Members</div>
+      <div id="memberCount" class="v">0</div>
+    </div>
+  </div>
 </div>
 
-<!-- Firebase -->
+<hr>
+
+<!-- EVENTS -->
+<div class="card p-3 mb-4">
+  <h5>Events</h5>
+  <div class="row">
+    <div class="col-md-5">
+      <input id="searchEvent" class="form-control mb-2" placeholder="Search event">
+      <table class="table table-sm">
+        <thead>
+          <tr><th>Event</th><th></th></tr>
+        </thead>
+        <tbody id="eventsTable"></tbody>
+      </table>
+    </div>
+
+    <div class="col-md-7">
+      <h6 id="selectedEvent">Select event</h6>
+      <div id="memberSelect" class="d-flex flex-wrap"></div>
+      <div class="mt-2">
+        <button id="submitEvent" class="btn btn-primary">Submit</button>
+        <span id="selCount" class="ms-2 text-muted">0 selected</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="card p-3">
+  <h5>Published Results</h5>
+  <table class="table table-sm">
+    <thead>
+      <tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th></tr>
+    </thead>
+    <tbody id="resultsTable"></tbody>
+  </table>
+</div>
+
+</main>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
   databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
   projectId: "gen7-3e139"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const TEAM_ID = user.teamId;
+const TEAM_ID = SESSION.teamId;
 
-let STUDENTS=[], EVENTS=[], RESULTS=[], ATTENDANCE={};
+const $ = id=>document.getElementById(id);
 
-onValue(ref(db,"students"),s=>{
-  STUDENTS=Object.values(s.val()||{}).filter(x=>x.teamId===TEAM_ID);
-  memberCount.innerText=STUDENTS.length;
+let STUDENTS=[], EVENTS=[], RESULTS=[], TEAM={};
+
+onValue(ref(db,"teams"),s=>{
+  TEAM=Object.values(s.val()||{}).find(t=>String(t.id)===String(TEAM_ID));
+  $("teamName").textContent=TEAM?.name||"";
+  $("teamScore").textContent=TEAM?.score||0;
 });
 
-onValue(ref(db,"attendance"),s=>{
-  ATTENDANCE=s.val()||{};
-  let present=STUDENTS.filter(s=>ATTENDANCE[s.id]).length;
-  attendancePct.innerText=STUDENTS.length?Math.round(present/STUDENTS.length*100)+"%":"0%";
+onValue(ref(db,"students"),s=>{
+  STUDENTS=Object.values(s.val()||{}).filter(x=>String(x.teamId)===String(TEAM_ID));
+  $("memberCount").textContent=STUDENTS.length;
 });
 
 onValue(ref(db,"events"),s=>{
   EVENTS=Object.values(s.val()||{});
-  eventCount.innerText=EVENTS.length;
   renderEvents();
 });
 
 onValue(ref(db,"results"),s=>{
-  RESULTS=Object.values(s.val()||{}).filter(r=>r.published);
+  RESULTS=Object.values(s.val()||{});
   renderResults();
-  renderApproved();
-  calculateScore();
 });
 
-function calculateScore(){
-  let score=0;
-  RESULTS.forEach(r=>{
-    ["first","second","third"].forEach(p=>{
-      if(r[p]?.teamId===TEAM_ID) score+=r[p].points||0;
-    });
-  });
-  teamScore.innerText=score;
-}
+let ACTIVE_EVENT=null;
+let SELECTED=[];
 
 function renderEvents(){
-  eventList.innerHTML="";
+  $("eventsTable").innerHTML="";
   EVENTS.forEach(e=>{
-    eventList.innerHTML+=`
-      <div class="event-card">
-        <strong>${e.name}</strong><br>
-        <span class="badge badge-soft">${e.type}</span>
-        <span class="badge badge-soft">${e.level}</span>
-      </div>`;
+    $("eventsTable").innerHTML+=`
+      <tr>
+        <td>${e.name}</td>
+        <td><button class="btn btn-sm btn-outline-primary" onclick="selectEvent('${e.id}')">Select</button></td>
+      </tr>`;
   });
 }
+
+window.selectEvent=id=>{
+  ACTIVE_EVENT=EVENTS.find(e=>e.id==id);
+  SELECTED=[];
+  $("selectedEvent").textContent=ACTIVE_EVENT.name;
+  renderMembers();
+};
+
+function renderMembers(){
+  $("memberSelect").innerHTML="";
+  STUDENTS.forEach(s=>{
+    const d=document.createElement("div");
+    d.className="small-box";
+    d.innerHTML=`<div>${s.id}</div><small>${s.name}</small>`;
+    d.onclick=()=>toggle(s.id,d);
+    $("memberSelect").appendChild(d);
+  });
+}
+
+function toggle(id,el){
+  if(SELECTED.includes(id)){
+    SELECTED=SELECTED.filter(x=>x!==id);
+    el.classList.remove("selected");
+  }else{
+    if(SELECTED.length>=2) return alert("Only 2 allowed");
+    SELECTED.push(id);
+    el.classList.add("selected");
+  }
+  $("selCount").textContent=SELECTED.length+" selected";
+}
+
+$("submitEvent").onclick=async()=>{
+  if(!ACTIVE_EVENT||!SELECTED.length) return;
+  for(const sid of SELECTED){
+    const r=push(ref(db,"participations"));
+    await set(r,{eventId:ACTIVE_EVENT.id,studentId:sid,teamId:TEAM_ID,status:"pending"});
+  }
+  alert("Submitted");
+  SELECTED=[];
+  renderMembers();
+};
 
 function renderResults(){
-  resultList.innerHTML="";
+  $("resultsTable").innerHTML="";
   RESULTS.forEach(r=>{
-    resultList.innerHTML+=`
-      <div class="event-card">
-        <strong>${r.eventName}</strong>
-        ${renderWinners(r)}
-      </div>`;
+    const e=EVENTS.find(x=>x.id==r.eventId)||{};
+    $("resultsTable").innerHTML+=`
+      <tr>
+        <td>${e.name||""}</td>
+        <td>${r.position==1?r.studentId:""}</td>
+        <td>${r.position==2?r.studentId:""}</td>
+        <td>${r.position==3?r.studentId:""}</td>
+      </tr>`;
   });
 }
 
-function renderApproved(){
-  approvedList.innerHTML="";
-  RESULTS.forEach(r=>{
-    approvedList.innerHTML+=`
-      <div class="event-card">
-        <strong>${r.eventName}</strong>
-        <button class="pdf-btn mt-2" onclick='downloadPDF(${JSON.stringify(r)})'>Download PDF</button>
-      </div>`;
-  });
-}
-
-function renderWinners(r){
-  return ["first","second","third"].map((p,i)=>{
-    if(!r[p]) return "";
-    return `
-      <div class="winner">
-        🏅 ${i+1}.
-        <span>${r[p].name} (${r[p].chess})</span>
-      </div>`;
-  }).join("");
-}
-
-window.downloadPDF=function(r){
-  let html=`<h3>${r.eventName}</h3><ol>`;
-  ["first","second","third"].forEach(p=>{
-    if(r[p]) html+=`<li>${r[p].chess} - ${r[p].name} (${r[p].teamName})</li>`;
-  });
-  html+="</ol>";
-  html2pdf().from(html).set({filename:r.eventName+".pdf"}).save();
-}
-</script>
-
-<script>
-function logout(){
+$("logout").onclick=()=>{
   sessionStorage.clear();
   location.href="index.html";
-}
+};
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
