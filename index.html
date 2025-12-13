@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Art Fest | Login</title>
+<title>Art Fest | Live Score</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
 <style>
 :root{
-  --accent:#ffcc33;
-  --bg:#0b0b0f;
+  --accent:#facc15;
+  --dark:#0b0b0f;
   --glass:rgba(255,255,255,.08);
 }
 body{
@@ -20,175 +19,103 @@ body{
   color:#fff;
   font-family:system-ui,-apple-system,Segoe UI,Roboto;
 }
-header{
-  padding:24px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-header img{
-  height:44px;
-}
 .hero{
   text-align:center;
-  padding:60px 15px 30px;
+  padding:70px 20px;
 }
 .hero h1{
-  font-size:clamp(32px,6vw,52px);
+  font-size:54px;
   font-weight:900;
 }
-.hero span{
-  color:var(--accent);
-}
-.stats{
-  max-width:800px;
-  margin:40px auto;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:20px;
+.hero h1 span{color:var(--accent)}
+.glass{
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:24px;
 }
 .stat{
-  background:var(--glass);
-  border-radius:18px;
-  padding:22px;
-  border:1px solid rgba(255,255,255,.12);
-}
-.stat h2{
   font-size:42px;
   font-weight:900;
   color:var(--accent);
 }
-.stat p{
-  margin:0;
-  letter-spacing:2px;
-  color:#cbd5f5;
-}
-.login-grid{
-  max-width:900px;
-  margin:50px auto;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:24px;
-}
-.login-card{
+.team-card{
   background:var(--glass);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:20px;
-  padding:28px;
+  border-radius:16px;
+  padding:18px;
   text-align:center;
-  transition:.3s;
+  transition:.25s;
 }
-.login-card:hover{
-  transform:translateY(-6px);
-}
-.login-card i{
-  font-size:46px;
+.team-card:hover{transform:translateY(-6px)}
+.score{
+  font-size:38px;
+  font-weight:900;
   color:var(--accent);
 }
-.login-card h4{
-  margin-top:12px;
-}
-.btn-main{
-  background:var(--accent);
-  color:#111;
-  font-weight:700;
-  border-radius:999px;
-}
-footer{
-  text-align:center;
-  padding:20px;
-  color:#9ca3af;
-}
-.modal-content{
-  background:#12121a;
-  color:#fff;
-  border-radius:16px;
+button{
+  border-radius:14px!important;
 }
 </style>
 </head>
+
 <body>
 
-<header>
-  <img src="logo.png" alt="Logo">
-</header>
-
-<section class="hero">
+<!-- HERO -->
+<div class="hero">
   <h1>Art <span>Fest</span></h1>
-  <p class="text-muted">Management & Live System</p>
-</section>
+  <p class="text-muted">Live Scoreboard & Login Portal</p>
+</div>
 
-<section class="stats">
-  <div class="stat">
-    <h2 id="cStudents">0</h2>
-    <p>STUDENTS</p>
-  </div>
-  <div class="stat">
-    <h2 id="cEvents">0</h2>
-    <p>PROGRAMS</p>
-  </div>
-  <div class="stat">
-    <h2 id="cTeams">0</h2>
-    <p>TEAMS</p>
-  </div>
-</section>
-
-<section class="login-grid">
-  <div class="login-card">
-    <i class="bi bi-shield-lock"></i>
-    <h4>Admin</h4>
-    <button class="btn btn-main w-100 mt-3" onclick="openLogin('admin')">Login</button>
-  </div>
-
-  <div class="login-card">
-    <i class="bi bi-people-fill"></i>
-    <h4>Leader</h4>
-    <button class="btn btn-main w-100 mt-3" onclick="openLogin('leader')">Login</button>
-  </div>
-
-  <div class="login-card">
-    <i class="bi bi-person-fill"></i>
-    <h4>Participant</h4>
-    <button class="btn btn-main w-100 mt-3" onclick="openLogin('participant')">Login</button>
-  </div>
-</section>
-
-<footer>
-  © <span id="year"></span> Art Fest
-</footer>
-
-<!-- LOGIN MODAL -->
-<div class="modal fade" id="loginModal">
-  <div class="modal-dialog modal-dialog-centered">
-    <form class="modal-content p-3" onsubmit="return loginSubmit()">
-      <h5 id="loginTitle" class="mb-3"></h5>
-
-      <div id="teamBox" class="mb-3 d-none">
-        <label class="form-label">Team</label>
-        <select id="teamSelect" class="form-select"></select>
-      </div>
-
-      <div id="passwordBox" class="mb-3 d-none">
-        <label class="form-label">Password</label>
-        <input id="password" type="password" class="form-control">
-      </div>
-
-      <div id="chessBox" class="mb-3 d-none">
-        <label class="form-label">Chess Number</label>
-        <input id="chess" class="form-control">
-      </div>
-
-      <div id="loginError" class="text-danger small mb-2"></div>
-
-      <button class="btn btn-main w-100">Login</button>
-    </form>
+<!-- LOGIN -->
+<div class="container mb-5">
+  <div class="row g-3 justify-content-center">
+    <div class="col-md-3">
+      <button class="btn btn-warning w-100" onclick="loginAdmin()">Admin Login</button>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-outline-light w-100" onclick="loginLeader()">Leader Login</button>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-outline-info w-100" onclick="loginParticipant()">Participant Login</button>
+    </div>
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- STATS -->
+<div class="container mb-5">
+  <div class="row g-4 text-center">
+    <div class="col-md-4">
+      <div class="glass">
+        <div id="statStudents" class="stat">0</div>
+        Students
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="glass">
+        <div id="statEvents" class="stat">0</div>
+        Programs
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="glass">
+        <div id="statTeams" class="stat">0</div>
+        Teams
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIVE SCORE -->
+<div class="container pb-5">
+  <h3 class="mb-4 text-center">🏆 Live Team Scores</h3>
+  <div id="scoreGrid" class="row g-4"></div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+/* Firebase */
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
   authDomain: "gen7-3e139.firebaseapp.com",
@@ -202,36 +129,65 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-onValue(ref(db,'students'), s=> cStudents.textContent=Object.keys(s.val()||{}).length);
-onValue(ref(db,'events'), s=> cEvents.textContent=Object.keys(s.val()||{}).length);
-onValue(ref(db,'teams'), s=>{
-  const v=s.val()||{};
-  cTeams.textContent=Object.keys(v).length;
-  teamSelect.innerHTML='<option value="">Select team</option>';
-  Object.values(v).forEach(t=>{
-    teamSelect.innerHTML+=`<option value="${t.id}">${t.name}</option>`;
+/* Stats */
+onValue(ref(db,'students'),s=>statStudents.textContent=Object.keys(s.val()||{}).length);
+onValue(ref(db,'events'),s=>statEvents.textContent=Object.keys(s.val()||{}).length);
+onValue(ref(db,'teams'),s=>statTeams.textContent=Object.keys(s.val()||{}).length);
+
+/* Live Scores */
+const grid=document.getElementById('scoreGrid');
+let PREV={};
+
+onValue(ref(db,'teams'),snap=>{
+  const teams=Object.values(snap.val()||{});
+  teams.sort((a,b)=>(b.score||0)-(a.score||0));
+  grid.innerHTML='';
+  teams.forEach(t=>{
+    const card=document.createElement('div');
+    card.className='col-md-3';
+    card.innerHTML=`
+      <div class="team-card">
+        <h5>${t.name||t.id}</h5>
+        <div class="score" id="s-${t.id}">0</div>
+      </div>`;
+    grid.appendChild(card);
+    animate(`s-${t.id}`,PREV[t.id]||0,t.score||0);
+    PREV[t.id]=t.score||0;
   });
 });
 
-window.openLogin=(type)=>{
-  loginType=type;
-  loginTitle.textContent=type.toUpperCase()+" LOGIN";
-  teamBox.classList.toggle('d-none',type!=='leader');
-  passwordBox.classList.toggle('d-none',type==='participant');
-  chessBox.classList.toggle('d-none',type!=='participant');
-  new bootstrap.Modal(loginModal).show();
-};
+function animate(id,from,to){
+  const el=document.getElementById(id);
+  let start=null;
+  function step(ts){
+    if(!start)start=ts;
+    const p=Math.min((ts-start)/600,1);
+    el.textContent=Math.floor(from+(to-from)*p);
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
 
-window.loginSubmit=()=>{
-  if(loginType==='admin') location.href='admin.html';
-  if(loginType==='leader') location.href='leader.html';
-  if(loginType==='participant') location.href='participant.html';
-  return false;
-};
+/* Login */
+function loginAdmin(){
+  const p=prompt("Admin Password");
+  if(p==="1234") location.href="admin.html";
+  else alert("Wrong password");
+}
+function loginLeader(){
+  const team=prompt("Team ID");
+  const p=prompt("Team Password");
+  if(team&&p) location.href=`leader.html?team=${team}`;
+}
+function loginParticipant(){
+  const c=prompt("Chess Number");
+  if(c) location.href=`participant.html?chess=${c}`;
+}
 
-year.textContent=new Date().getFullYear();
+window.loginAdmin=loginAdmin;
+window.loginLeader=loginLeader;
+window.loginParticipant=loginParticipant;
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
