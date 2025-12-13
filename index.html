@@ -5,128 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Art Fest | Portal</title>
 
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
 <style>
 :root{
   --primary:#4f46e5;
-  --bg:#f8fafc;
-  --card:#ffffff;
 }
 body{
-  margin:0;
   min-height:100vh;
   background:linear-gradient(160deg,#eef2ff,#ffffff);
   font-family:system-ui,-apple-system,Segoe UI,Roboto;
 }
-.container-main{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
 .card-ui{
-  width:100%;
   max-width:430px;
-  background:var(--card);
+  background:#fff;
   border-radius:26px;
   padding:28px;
   box-shadow:0 30px 80px rgba(0,0,0,.12);
-}
-.logo{
-  text-align:center;
-}
-.logo img{
-  width:80px;
-}
-.logo h2{
-  margin:10px 0 0;
-  font-weight:800;
-}
-.btn-main{
-  padding:14px;
-  border-radius:14px;
-  font-weight:600;
 }
 .stats{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:12px;
-  margin-top:22px;
+  margin-top:20px;
 }
 .stat{
   background:#f1f5f9;
   border-radius:14px;
-  padding:14px;
+  padding:12px;
   text-align:center;
-}
-.stat h3{margin:0;font-weight:800}
-.scoreboard{
-  margin-top:20px;
 }
 .score-item{
   display:flex;
   justify-content:space-between;
-  padding:8px 0;
-  border-bottom:1px dashed #e5e7eb;
-}
-.score-item:last-child{border-bottom:none}
-.fade{animation:fade .4s ease}
-@keyframes fade{
-  from{opacity:0;transform:translateY(6px)}
-  to{opacity:1}
+  padding:6px 0;
+  border-bottom:1px dashed #ddd;
 }
 </style>
 </head>
 
 <body>
-<div class="container-main">
-  <div class="card-ui fade">
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card-ui w-100">
 
-    <!-- LOGO -->
-    <div class="logo mb-4">
-      <img src="logo.png" alt="Logo">
-      <h2>Art Fest</h2>
-      <small class="text-muted">Management Portal</small>
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">🎨 Art Fest</h2>
+      <div class="text-muted">Management Portal</div>
     </div>
 
-    <!-- LOGIN BUTTONS -->
     <div class="d-grid gap-3">
-      <button class="btn btn-primary btn-main" onclick="openLogin('admin')">
-        <i class="bi bi-shield-lock me-2"></i> Admin Login
+      <button class="btn btn-primary" id="btnAdmin">
+        <i class="bi bi-shield-lock"></i> Admin Login
       </button>
-
-      <button class="btn btn-success btn-main" onclick="openLogin('leader')">
-        <i class="bi bi-people me-2"></i> Leader Login
+      <button class="btn btn-success" id="btnLeader">
+        <i class="bi bi-people"></i> Leader Login
       </button>
-
-      <button class="btn btn-outline-primary btn-main" onclick="openLogin('participant')">
-        <i class="bi bi-person me-2"></i> Participant Login
+      <button class="btn btn-outline-primary" id="btnParticipant">
+        <i class="bi bi-person"></i> Participant Login
       </button>
     </div>
 
-    <!-- STATS -->
     <div class="stats">
       <div class="stat">
-        <h3 id="statStudents">0</h3>
-        <span>Students</span>
+        <h4 id="statStudents">0</h4>
+        <small>Students</small>
       </div>
       <div class="stat">
-        <h3 id="statEvents">0</h3>
-        <span>Programs</span>
+        <h4 id="statEvents">0</h4>
+        <small>Programs</small>
       </div>
       <div class="stat">
-        <h3 id="statTeams">0</h3>
-        <span>Teams</span>
+        <h4 id="statTeams">0</h4>
+        <small>Teams</small>
       </div>
     </div>
 
-    <!-- LIVE SCORE -->
-    <div class="scoreboard">
-      <h6 class="fw-bold mb-2">Live Team Score</h6>
-      <div id="scoreList"></div>
+    <div class="mt-4">
+      <h6 class="fw-bold">Live Team Scores</h6>
+      <div id="scoreList" class="small text-muted">Loading…</div>
     </div>
 
   </div>
@@ -135,24 +92,19 @@ body{
 <!-- LOGIN MODAL -->
 <div class="modal fade" id="loginModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4">
+    <div class="modal-content">
       <form id="loginForm">
         <div class="modal-header">
-          <h5 class="modal-title" id="loginTitle"></h5>
+          <h5 class="modal-title" id="loginTitle">Login</h5>
           <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
           <input type="hidden" id="loginType">
 
-          <div id="teamBox" class="mb-3 d-none">
+          <div class="mb-3 d-none" id="teamBox">
             <label class="form-label">Team</label>
             <select id="teamSelect" class="form-select"></select>
-          </div>
-
-          <div id="chessBox" class="mb-3 d-none">
-            <label class="form-label">Chess Number</label>
-            <input id="chessInput" class="form-control">
           </div>
 
           <div class="mb-3">
@@ -179,93 +131,103 @@ body{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
-  databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
-  projectId: "gen7-3e139"
-};
+document.addEventListener("DOMContentLoaded", () => {
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
+    databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
+    projectId: "gen7-3e139"
+  };
 
-window.TEAMS = {};
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-// STATS
-onValue(ref(db,"students"),s=>{
-  statStudents.innerText = Object.keys(s.val()||{}).length;
-});
-onValue(ref(db,"events"),s=>{
-  statEvents.innerText = Object.keys(s.val()||{}).length;
-});
-onValue(ref(db,"teams"),s=>{
-  const teams = s.val()||{};
-  window.TEAMS = teams;
-  statTeams.innerText = Object.keys(teams).length;
+  const statStudents = document.getElementById("statStudents");
+  const statEvents = document.getElementById("statEvents");
+  const statTeams = document.getElementById("statTeams");
+  const scoreList = document.getElementById("scoreList");
+  const teamSelect = document.getElementById("teamSelect");
 
-  teamSelect.innerHTML='<option value="">Select Team</option>';
-  Object.values(teams).forEach(t=>{
-    teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+  window.TEAMS = {};
+
+  onValue(ref(db,"students"), s => {
+    statStudents.textContent = Object.keys(s.val()||{}).length;
   });
 
-  scoreList.innerHTML='';
-  Object.values(teams)
-    .sort((a,b)=>(b.score||0)-(a.score||0))
-    .forEach(t=>{
-      scoreList.innerHTML+=`
-        <div class="score-item">
-          <strong>${t.name}</strong>
-          <span>${t.score||0}</span>
-        </div>`;
-    });
+  onValue(ref(db,"events"), s => {
+    statEvents.textContent = Object.keys(s.val()||{}).length;
+  });
+
+  onValue(ref(db,"teams"), s => {
+    const teams = s.val()||{};
+    window.TEAMS = teams;
+    statTeams.textContent = Object.keys(teams).length;
+
+    teamSelect.innerHTML = `<option value="">Select Team</option>`;
+    scoreList.innerHTML = "";
+
+    Object.values(teams)
+      .sort((a,b)=>(b.score||0)-(a.score||0))
+      .forEach(t=>{
+        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+        scoreList.innerHTML += `
+          <div class="score-item">
+            <span>${t.name}</span>
+            <strong>${t.score||0}</strong>
+          </div>`;
+      });
+  });
 });
 </script>
 
-<!-- UI LOGIC -->
 <script>
-const modal = new bootstrap.Modal(document.getElementById("loginModal"));
+document.addEventListener("DOMContentLoaded", ()=>{
+  const modal = new bootstrap.Modal(document.getElementById("loginModal"));
+  const loginForm = document.getElementById("loginForm");
+  const loginType = document.getElementById("loginType");
+  const teamBox = document.getElementById("teamBox");
+  const loginTitle = document.getElementById("loginTitle");
+  const passwordInput = document.getElementById("passwordInput");
+  const teamSelect = document.getElementById("teamSelect");
+  const loginError = document.getElementById("loginError");
 
-function openLogin(type){
-  loginType.value = type;
-  loginError.classList.add("d-none");
-  teamBox.classList.toggle("d-none", type!=="leader");
-  chessBox.classList.toggle("d-none", type!=="participant");
-  loginTitle.innerText = type.charAt(0).toUpperCase()+type.slice(1)+" Login";
-  modal.show();
-}
+  btnAdmin.onclick = ()=> open("admin");
+  btnLeader.onclick = ()=> open("leader");
+  btnParticipant.onclick = ()=> location.href="participant.html";
 
-loginForm.onsubmit = e => {
-  e.preventDefault();
-  const type = loginType.value;
-  const pass = passwordInput.value.trim();
-  const teamId = teamSelect.value;
-
-  if(type === "admin"){
-    if(pass !== "1234"){ showError("Invalid admin password"); return; }
-    location.href="admin.html";
+  function open(type){
+    loginType.value = type;
+    teamBox.classList.toggle("d-none", type!=="leader");
+    loginTitle.textContent = type.toUpperCase()+" LOGIN";
+    loginError.classList.add("d-none");
+    modal.show();
   }
 
-  if(type === "leader"){
-    const team = Object.values(window.TEAMS).find(t=>String(t.id)===String(teamId));
-    if(!team){ showError("Select team"); return; }
-    if(String(team.password||"") !== pass){
-      showError("Wrong team password"); return;
+  loginForm.onsubmit = e => {
+    e.preventDefault();
+    const type = loginType.value;
+    const pwd = passwordInput.value;
+
+    if(type==="admin"){
+      if(pwd!=="1234"){ error("Wrong admin password"); return; }
+      location.href="admin.html";
     }
-    sessionStorage.setItem("leaderAuth", JSON.stringify({
-      teamId: team.id,
-      leaderId: team.leaderId
-    }));
-    location.href = `leader.html?leader=${encodeURIComponent(team.leaderId)}`;
-  }
 
-  if(type === "participant"){
-    location.href="participant.html";
-  }
-};
+    if(type==="leader"){
+      const team = Object.values(window.TEAMS).find(t=>String(t.id)===teamSelect.value);
+      if(!team || team.password!==pwd){
+        error("Invalid team or password"); return;
+      }
+      sessionStorage.setItem("leaderAuth", JSON.stringify(team));
+      location.href=`leader.html?leader=${team.leaderId}`;
+    }
+  };
 
-function showError(msg){
-  loginError.innerText = msg;
-  loginError.classList.remove("d-none");
-}
+  function error(msg){
+    loginError.textContent = msg;
+    loginError.classList.remove("d-none");
+  }
+});
 </script>
 
 </body>
