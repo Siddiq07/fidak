@@ -3,108 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Art Fest — Login</title>
+<title>Art Fest — Home</title>
 
 <!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
 <style>
+:root{
+  --gold:#facc15;
+  --dark:#0b1220;
+}
 body{
-  background: linear-gradient(135deg,#eef2ff,#f8fafc);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto;
+  margin:0;
+  font-family: system-ui,-apple-system,"Segoe UI",Roboto;
+  background:#000;
+  color:#fff;
+}
+.hero{
+  min-height:100vh;
+  background:
+    linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.9)),
+    radial-gradient(circle at top,#1e293b,#020617);
+  display:flex;
+  align-items:center;
 }
 .brand{
-  font-weight:800;
-  color:#1d4ed8;
+  font-size:42px;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.tagline{
+  color:var(--gold);
+  letter-spacing:3px;
+  font-size:13px;
+}
+.cta{
+  background:var(--gold);
+  color:#000;
+  font-weight:700;
+  border-radius:999px;
+  padding:14px 28px;
+}
+.cta-outline{
+  border:1px solid #fff;
+  border-radius:999px;
+  padding:12px 26px;
+  color:#fff;
+}
+.stat-card{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:20px;
+  backdrop-filter: blur(6px);
+}
+.stat-number{
+  font-size:34px;
+  font-weight:900;
+  color:var(--gold);
 }
 .login-card{
-  border-radius:14px;
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:18px;
+  padding:22px;
   transition:.25s;
 }
 .login-card:hover{
-  transform: translateY(-6px);
-  box-shadow:0 18px 40px rgba(15,23,42,.08);
+  transform:translateY(-6px);
+  box-shadow:0 20px 50px rgba(0,0,0,.6);
 }
 .score-card{
-  background:#fff;
-  border-radius:14px;
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:16px;
   padding:14px;
-  box-shadow:0 10px 30px rgba(15,23,42,.05);
-  animation:fadeIn .6s ease;
 }
 .score{
-  font-size:34px;
+  font-size:32px;
   font-weight:900;
-}
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:none}
+  color:var(--gold);
 }
 footer{
-  color:#64748b;
   font-size:13px;
+  color:#94a3b8;
 }
 </style>
 </head>
+
 <body>
 
-<nav class="navbar bg-white shadow-sm">
-  <div class="container">
-    <span class="navbar-brand brand">
-      🎨 Art Fest Management
-    </span>
-    <span class="text-muted small">Live System</span>
+<section class="hero">
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="mb-5 text-center">
+    <div class="tagline mb-2">RECTIFYING THE VIRTUOUS</div>
+    <div class="brand">Art Fest</div>
+    <div class="text-muted mt-2">Management & Live Score System</div>
   </div>
-</nav>
 
-<main class="container py-4">
-
-<!-- LOGIN CARDS -->
-<div class="row g-4 justify-content-center">
-
-  <!-- ADMIN -->
-  <div class="col-md-4">
-    <div class="card login-card p-4 text-center">
-      <i class="bi bi-shield-lock fs-1 text-primary"></i>
-      <h5 class="mt-2">Admin</h5>
-      <button class="btn btn-primary mt-3" onclick="loginAdmin()">Login</button>
+  <!-- STATS -->
+  <div class="row g-3 mb-5 text-center">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-number" id="statStudents">0</div>
+        <div class="small">Students</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-number" id="statPrograms">0</div>
+        <div class="small">Programs</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-number" id="statTeams">0</div>
+        <div class="small">Teams</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-number">Live</div>
+        <div class="small">Scoring</div>
+      </div>
     </div>
   </div>
 
-  <!-- LEADER -->
-  <div class="col-md-4">
-    <div class="card login-card p-4 text-center">
-      <i class="bi bi-people-fill fs-1 text-success"></i>
-      <h5 class="mt-2">Team Leader</h5>
-      <button class="btn btn-success mt-3" onclick="loginLeader()">Login</button>
+  <!-- LOGIN -->
+  <div class="row g-4 justify-content-center mb-5">
+    <div class="col-md-4">
+      <div class="login-card text-center">
+        <i class="bi bi-shield-lock fs-1 text-warning"></i>
+        <h5 class="mt-2">Admin</h5>
+        <button class="btn cta mt-3" onclick="loginAdmin()">Login</button>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="login-card text-center">
+        <i class="bi bi-people-fill fs-1 text-success"></i>
+        <h5 class="mt-2">Team Leader</h5>
+        <button class="btn cta mt-3" onclick="loginLeader()">Login</button>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="login-card text-center">
+        <i class="bi bi-person-fill fs-1 text-info"></i>
+        <h5 class="mt-2">Participant</h5>
+        <button class="btn cta mt-3" onclick="loginParticipant()">Login</button>
+      </div>
     </div>
   </div>
 
-  <!-- PARTICIPANT -->
-  <div class="col-md-4">
-    <div class="card login-card p-4 text-center">
-      <i class="bi bi-person-fill fs-1 text-info"></i>
-      <h5 class="mt-2">Participant</h5>
-      <button class="btn btn-info mt-3" onclick="loginParticipant()">Login</button>
-    </div>
-  </div>
+  <!-- LIVE SCORE -->
+  <h4 class="text-center mb-3">🏆 Live Team Score</h4>
+  <div id="scoreGrid" class="row g-3"></div>
+
+  <footer class="text-center mt-5">
+    © <span id="year"></span> Art Fest
+  </footer>
 
 </div>
-
-<!-- LIVE SCORE -->
-<section class="mt-5">
-  <h4 class="text-center mb-3">🏆 Live Team Scores</h4>
-  <div id="scoreGrid" class="row g-3"></div>
 </section>
-
-<footer class="text-center mt-5">
-  © <span id="year"></span> Art Fest
-</footer>
-
-</main>
 
 <!-- Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -114,7 +178,6 @@ footer{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-/* Firebase config */
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
   authDomain: "gen7-3e139.firebaseapp.com",
@@ -127,69 +190,62 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
-/* helpers */
 const $ = id => document.getElementById(id);
 
-/* ---------------- LIVE SCORE ---------------- */
-onValue(ref(db,'teams'), snap=>{
-  const grid = $('scoreGrid');
-  grid.innerHTML='';
-  const teams = Object.values(snap.val()||{});
-  teams
+/* COUNTS */
+onValue(ref(db,'students'),s=>$('statStudents').textContent=Object.keys(s.val()||{}).length);
+onValue(ref(db,'events'),s=>$('statPrograms').textContent=Object.keys(s.val()||{}).length);
+onValue(ref(db,'teams'),s=>$('statTeams').textContent=Object.keys(s.val()||{}).length);
+
+/* LIVE SCORE */
+onValue(ref(db,'teams'),snap=>{
+  const grid=$('scoreGrid'); grid.innerHTML='';
+  Object.values(snap.val()||{})
     .sort((a,b)=>(b.score||0)-(a.score||0))
     .forEach(t=>{
-      const div=document.createElement('div');
-      div.className='col-md-3';
-      div.innerHTML=`
+      const d=document.createElement('div');
+      d.className='col-md-3';
+      d.innerHTML=`
         <div class="score-card text-center">
           <div class="fw-bold">${t.name||'Team'}</div>
           <div class="score">${t.score||0}</div>
         </div>`;
-      grid.appendChild(div);
+      grid.appendChild(d);
     });
 });
 
-/* ---------------- LOGIN ---------------- */
-
-window.loginAdmin = async ()=>{
-  const pwd = prompt("Admin Password");
-  if(!pwd) return;
-
-  const snap = await get(ref(db,'settings/adminPassword'));
-  if(snap.exists() && snap.val()===pwd){
+/* LOGIN */
+window.loginAdmin=async()=>{
+  const p=prompt("Admin password");
+  if(!p)return;
+  const s=await get(ref(db,'settings/adminPassword'));
+  if(s.exists()&&s.val()===p){
     sessionStorage.setItem('USER',JSON.stringify({role:'admin'}));
     location.href='admin.html';
   } else alert("Wrong password");
 };
 
-window.loginLeader = async ()=>{
-  const teamId = prompt("Team ID");
-  const pwd = prompt("Team Password");
-  if(!teamId || !pwd) return;
-
-  const snap = await get(ref(db,`teams/${teamId}`));
-  if(!snap.exists()) return alert("Team not found");
-
-  const t=snap.val();
-  if(t.password===pwd){
-    sessionStorage.setItem('USER',JSON.stringify({role:'leader',teamId}));
+window.loginLeader=async()=>{
+  const id=prompt("Team ID");
+  const p=prompt("Team password");
+  if(!id||!p)return;
+  const s=await get(ref(db,`teams/${id}`));
+  if(s.exists()&&s.val().password===p){
+    sessionStorage.setItem('USER',JSON.stringify({role:'leader',teamId:id}));
     location.href='leader.html';
-  } else alert("Wrong password");
+  } else alert("Invalid login");
 };
 
-window.loginParticipant = async ()=>{
-  const chess = prompt("Chess Number");
-  if(!chess) return;
-
-  const snap = await get(ref(db,`students/${chess}`));
-  if(snap.exists()){
-    sessionStorage.setItem('USER',JSON.stringify({role:'participant',chess}));
+window.loginParticipant=async()=>{
+  const c=prompt("Chess number");
+  if(!c)return;
+  const s=await get(ref(db,`students/${c}`));
+  if(s.exists()){
+    sessionStorage.setItem('USER',JSON.stringify({role:'participant',chess:c}));
     location.href='participant.html';
-  } else alert("Student not found");
+  } else alert("Not found");
 };
 
-/* misc */
 $('year').textContent=new Date().getFullYear();
 </script>
 
