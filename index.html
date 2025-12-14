@@ -10,23 +10,23 @@
 
 <style>
 /* -------------------------------------- */
-/* UI OVERHAUL & THEME VARIABLES (More Colorful) */
+/* UI OVERHAUL & THEME VARIABLES */
 /* -------------------------------------- */
 
 :root {
     /* --- DARK MODE (Default/Fallback) --- */
-    --bg: #0c0e18; /* Deep Blue/Purple */
-    --card: #181c2e; /* Slightly lighter card */
+    --bg: #0c0e18; 
+    --card: #181c2e; 
     --text: #e2e8f0; 
     --muted: #94a3b8; 
     --shadow: rgba(0, 0, 0, 0.4);
     --border: #334155;
     
     /* Accents (More Vibrant) */
-    --accent-main: #ff7f50; /* Coral/Orange */
-    --accent-secondary: #00bcd4; /* Cyan/Blue */
-    --success: #69f0ae; /* Light Green */
-    --danger: #ff5252; /* Bright Red */
+    --accent-main: #ff7f50; /* Coral/Orange for stats numbers */
+    --accent-secondary: #00bcd4; /* Cyan/Blue for borders/buttons */
+    --success: #69f0ae; 
+    --danger: #ff5252; 
 
     /* Logo Filter (Invert colors for dark mode) */
     --logo-filter: invert(1) brightness(1.8) contrast(1.5);
@@ -57,7 +57,7 @@ body{
 }
 
 /* -------------------------------------- */
-/* INTRO ANIMATION STYLES (Bigger Logo, Pulse) */
+/* INTRO ANIMATION STYLES */
 /* -------------------------------------- */
 #intro-overlay {
     position: fixed;
@@ -80,11 +80,11 @@ body{
 }
 
 .intro-logo {
-    width: 200px; /* Bigger Logo */
+    width: 200px;
     height: auto;
     filter: var(--logo-filter);
     animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, 
-               logoPulse 1s infinite alternate 2.5s; /* Pulse after initial animation */
+               logoPulse 1s infinite alternate 2.5s;
 }
 
 @keyframes logoEntrance {
@@ -100,7 +100,7 @@ body{
 
 /* Layout */
 .container-portal{
-  max-width:550px; /* Slightly wider for desktop */
+  max-width:550px; 
   margin:auto;
   padding:20px;
   opacity: 0;
@@ -114,7 +114,7 @@ body{
 
 .card-ui{
   background:var(--card);
-  border-radius:18px; /* Larger radius */
+  border-radius:18px; 
   padding:25px;
   box-shadow:0 15px 40px var(--shadow);
   margin-bottom:20px;
@@ -133,7 +133,7 @@ body{
 
 /* Logo Styling */
 .navbar-logo {
-    height: 60px; /* Bigger Logo in Navbar */
+    height: 60px;
     width: auto;
     filter: var(--logo-filter);
     transition: filter 0.4s ease;
@@ -155,27 +155,33 @@ body{
 .btn-outline-primary:hover{ background:var(--accent-main); color:#fff; box-shadow: 0 4px 10px rgba(255, 127, 80, 0.5); }
 
 
-/* Stats Grid (Responsive) */
+/* Stats Grid (FORCED THREE IN A ROW) */
 .stats{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); /* Auto-fit columns */
+  grid-template-columns:repeat(3, 1fr); /* Force 3 columns */
   gap:15px;
   margin-top: 20px;
 }
+/* Ensure stat boxes look good on mobile too (optional wrap) */
+@media (max-width: 500px) {
+    .stats {
+        grid-template-columns: 1fr; /* Stack vertically on very small screens */
+    }
+}
 .stat{
-  background:var(--border);
+  background:var(--card); /* Changed to card background for clearer box look */
   border-radius:12px;
   padding:18px;
   text-align:center;
-  border-left: none; /* Removed for cleaner look */
-  box-shadow: inset 0 0 0 2px var(--accent-secondary);
+  /* Updated box shadow to match image example feel */
+  box-shadow: 0 0 0 2px var(--accent-secondary), 0 5px 15px var(--shadow);
   transition: background-color 0.4s, box-shadow 0.4s;
 }
 .stat h4{
-  margin:0;
+  margin:0 0 5px 0;
   font-size:2.5rem;
   font-weight:900;
-  color: var(--accent-main); /* Colorful stat numbers */
+  color: var(--accent-main);
   transition: color 0.4s;
 }
 .stat small{
@@ -184,66 +190,51 @@ body{
 }
 
 /* -------------------------------------- */
-/* GRAPH VISUALIZATION STYLES (Line/Area Graph) */
+/* GRAPH VISUALIZATION STYLES (Dynamic Line Graph) */
 /* -------------------------------------- */
 .chart-container {
     height: 200px;
     padding: 10px;
-    background: var(--card); /* Match card background */
+    background: var(--card);
     border-radius: 10px;
     margin-top: 15px;
     position: relative;
     overflow: hidden;
 }
 
-.graph-area {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    /* Pseudo-Graph Effect */
-    background: linear-gradient(to top, rgba(255, 127, 80, 0.3), rgba(0, 188, 212, 0.8));
-    clip-path: polygon(
-        0% 100%, 
-        10% 80%, 
-        20% 60%, 
-        30% 90%, 
-        40% 70%, 
-        50% 40%, 
-        60% 50%, 
-        70% 30%, 
-        80% 60%, 
-        90% 20%, 
-        100% 0%, 
-        100% 100%
-    );
-    transition: clip-path 2s ease-in-out;
-}
-
 .graph-line {
     position: absolute;
+    bottom: 10px; /* Space for X-axis label */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 20px);
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+#dynamicGraph {
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    clip-path: polygon(
-        0% 100%, 
-        10% 80%, 
-        20% 60%, 
-        30% 90%, 
-        40% 70%, 
-        50% 40%, 
-        60% 50%, 
-        70% 30%, 
-        80% 60%, 
-        90% 20%, 
-        100% 0%
-    );
-    border-bottom: 3px solid var(--accent-secondary);
-    transition: clip-path 2s ease-in-out;
+    /* Default smooth area for visualization */
+    clip-path: polygon(0% 100%, 10% 90%, 20% 70%, 30% 85%, 40% 60%, 50% 75%, 60% 50%, 70% 65%, 80% 40%, 90% 55%, 100% 30%, 100% 100%);
+    background: linear-gradient(to top, rgba(0, 188, 212, 0.3), rgba(255, 127, 80, 0.1));
+    transition: clip-path 1.5s ease-out;
 }
+
+/* Score List (For visualization reference) */
+.score-item{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  color:var(--text);
+  border-bottom:1px dashed var(--border);
+  font-weight: 500;
+  transition: border-color 0.4s;
+}
+.score-item:last-child{border-bottom:none}
 
 /* Forms and Modals */
 .modal-content{ background: var(--card); color: var(--text); }
@@ -349,9 +340,9 @@ body{
 
 
     <div class="card-ui">
-      <h5 class="fw-bold mb-3" style="color:var(--text)">📈 Team Score Trend (Graph View)</h5>
-      <div class="chart-container" id="chartContainer">
-        <div class="graph-area"></div>
+      <h5 class="fw-bold mb-3" style="color:var(--text)">📈 Live Score Trend (Line Graph)</h5>
+      <div class="chart-container">
+        <div id="dynamicGraph"></div>
         <div class="graph-line"></div>
       </div>
       <div id="scoreList" class="small text-muted mt-3">Loading Top Teams...</div>
@@ -379,7 +370,7 @@ body{
           
           <div class="mb-3 d-none" id="participantBox">
             <label class="form-label">Chess Number</label>
-            <input id="chessInput" type="number" class="form-control" placeholder="Enter your Chess ID">
+            <input id="chessInput" type="text" class="form-control" placeholder="Enter your Alphanumeric Chess ID">
           </div>
 
           <div class="mb-3" id="passwordBox">
@@ -475,6 +466,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const statEvents = document.getElementById("statEvents");
   const statTeams = document.getElementById("statTeams");
   const scoreList = document.getElementById("scoreList");
+  const dynamicGraph = document.getElementById("dynamicGraph");
+
+  // --- Graph Utility: Generates a random, dynamic clip-path based on scores ---
+  function updateGraph(maxScore) {
+      const points = 10;
+      let clipPath = 'polygon(0% 100%'; 
+
+      for (let i = 0; i <= points; i++) {
+          const x = (i / points) * 100;
+          // Calculate y using a random score percentage (simulating team growth)
+          let yPercentage = (Math.random() * 0.7 + 0.2) * 100; // Keep points between 20% and 90%
+          
+          if (i === 0) yPercentage = 100; // Start at the bottom left
+          if (i === points) yPercentage = 30; // End at a final arbitrary point
+
+          clipPath += `, ${x}% ${yPercentage.toFixed(0)}%`;
+      }
+      clipPath += `, 100% 100%)`; // Close the polygon at the bottom right
+
+      dynamicGraph.style.clipPath = clipPath;
+  }
 
   // --- Realtime Listeners ---
   onValue(ref(db,"students"), s => {
@@ -497,6 +509,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const sortedTeams = Object.values(teams)
       .sort((a,b)=>(b.score||0)-(a.score||0));
       
+    // Update Graph based on max score (or just trigger the animation)
+    const maxScore = sortedTeams.length > 0 ? Math.max(...sortedTeams.map(t => t.score || 0)) : 100;
+    updateGraph(maxScore);
+
     // Display top scores
     sortedTeams
       .slice(0, 5) // Show top 5 teams
@@ -557,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loginTitle.textContent = "PARTICIPANT LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.remove("d-none");
-        passwordBox.classList.add("d-none"); // Hide Password for Participants
+        passwordBox.classList.add("d-none"); 
     }
     modal.show();
   }
@@ -596,16 +612,20 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
-        // Find the student by looking up their ID.
-        // It checks if the entered chessID matches the object's key OR the 'id' field, 'chestNo' field, or 'chessNo' field.
-        let student = allStudents[chessID];
-        
-        if (!student) {
-            student = Object.values(allStudents).find(s => 
-                String(s.id).trim() === chessID || 
-                String(s.chestNo || '').trim() === chessID || 
-                String(s.chessNo || '').trim() === chessID
-            );
+        let student;
+        // Search by the object key directly (most common for firebase IDs)
+        if (allStudents[chessID]) {
+            student = allStudents[chessID];
+        } else {
+            // Search by fields (case-insensitive and trim spaces)
+            const lowerCaseID = chessID.toLowerCase();
+            student = Object.values(allStudents).find(s => {
+                const sId = String(s.id || '').trim().toLowerCase();
+                const sChestNo = String(s.chestNo || '').trim().toLowerCase();
+                const sChessNo = String(s.chessNo || '').trim().toLowerCase();
+                
+                return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
+            });
         }
 
         if (!student) {
@@ -613,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
-        // Final check to ensure we use the ID stored in the student object if the key was different
+        // Use the most reliable ID for session storage
         const studentID = student.id || student.chestNo || chessID;
         
         sessionStorage.setItem("participantId", studentID);
