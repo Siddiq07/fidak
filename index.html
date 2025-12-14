@@ -10,26 +10,26 @@
 
 <style>
 /* -------------------------------------- */
-/* UI OVERHAUL & THEME VARIABLES */
+/* UI OVERHAUL & THEME VARIABLES (More Colorful) */
 /* -------------------------------------- */
 
 :root {
     /* --- DARK MODE (Default/Fallback) --- */
-    --bg: #0d121c; 
-    --card: #1c2738; 
+    --bg: #0c0e18; /* Deep Blue/Purple */
+    --card: #181c2e; /* Slightly lighter card */
     --text: #e2e8f0; 
     --muted: #94a3b8; 
-    --shadow: rgba(0, 0, 0, 0.25);
+    --shadow: rgba(0, 0, 0, 0.4);
     --border: #334155;
     
-    /* Accents */
-    --accent-main: #f97316; 
-    --accent-secondary: #3b82f6; 
-    --success: #10b981;
-    --danger: #ef4444;
+    /* Accents (More Vibrant) */
+    --accent-main: #ff7f50; /* Coral/Orange */
+    --accent-secondary: #00bcd4; /* Cyan/Blue */
+    --success: #69f0ae; /* Light Green */
+    --danger: #ff5252; /* Bright Red */
 
     /* Logo Filter (Invert colors for dark mode) */
-    --logo-filter: invert(1) brightness(2);
+    --logo-filter: invert(1) brightness(1.8) contrast(1.5);
 }
 
 /* --- LIGHT MODE Variables --- */
@@ -38,7 +38,7 @@
     --card: #ffffff; 
     --text: #0f172a; 
     --muted: #64748b; 
-    --shadow: rgba(0, 0, 0, 0.08);
+    --shadow: rgba(0, 0, 0, 0.1);
     --border: #e5e7eb;
     
     /* Logo Filter (Keep original black/dark colors) */
@@ -52,12 +52,12 @@ body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto;
   background:var(--bg);
   color:var(--text);
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.4s, color 0.4s;
   overflow-x: hidden;
 }
 
 /* -------------------------------------- */
-/* INTRO ANIMATION STYLES */
+/* INTRO ANIMATION STYLES (Bigger Logo, Pulse) */
 /* -------------------------------------- */
 #intro-overlay {
     position: fixed;
@@ -80,35 +80,32 @@ body{
 }
 
 .intro-logo {
-    width: 120px;
+    width: 200px; /* Bigger Logo */
     height: auto;
     filter: var(--logo-filter);
-    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, 
+               logoPulse 1s infinite alternate 2.5s; /* Pulse after initial animation */
 }
 
 @keyframes logoEntrance {
-    0% {
-        opacity: 0;
-        transform: scale(0.5) translateY(20px);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.2);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+    0% { opacity: 0; transform: scale(0.3) translateY(50px); }
+    50% { opacity: 1; transform: scale(1.3); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes logoPulse {
+    0% { box-shadow: 0 0 10px 5px var(--accent-main); }
+    100% { box-shadow: 0 0 20px 10px var(--accent-secondary); }
 }
 
 /* Layout */
 .container-portal{
-  max-width:450px;
+  max-width:550px; /* Slightly wider for desktop */
   margin:auto;
-  padding:16px;
-  opacity: 0; 
+  padding:20px;
+  opacity: 0;
   animation: contentFadeIn 1s ease-out forwards;
-  animation-delay: 2.2s; 
+  animation-delay: 2.2s;
 }
 
 @keyframes contentFadeIn {
@@ -117,160 +114,135 @@ body{
 
 .card-ui{
   background:var(--card);
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 10px 30px var(--shadow);
-  margin-bottom:16px;
+  border-radius:18px; /* Larger radius */
+  padding:25px;
+  box-shadow:0 15px 40px var(--shadow);
+  margin-bottom:20px;
   border: 1px solid var(--border);
-  transition: background-color 0.3s, border-color 0.3s;
+  transition: background-color 0.4s, border-color 0.4s;
 }
 
 /* Navbar */
 .navbar{
   background:var(--bg);
-  padding:12px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  transition: background-color 0.3s;
+  padding:15px 25px;
+  transition: background-color 0.4s;
   position: relative;
   z-index: 100;
 }
 
 /* Logo Styling */
 .navbar-logo {
-    height: 50px; 
+    height: 60px; /* Bigger Logo in Navbar */
     width: auto;
     filter: var(--logo-filter);
-    transition: filter 0.3s ease;
-}
-
-/* Compact Theme Switcher */
-.btn-theme {
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 1.3rem;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn-theme:hover, .btn-theme:focus {
-    background: var(--border);
-    color: var(--accent-secondary);
-}
-.dropdown-menu-theme {
-    background: var(--card); 
-    border-color: var(--border);
-    padding: 8px;
-    min-width: 150px;
-    box-shadow: 0 10px 25px var(--shadow);
-    border-radius: 12px;
-}
-.dropdown-item {
-    color: var(--text);
-    border-radius: 8px;
-    padding: 8px 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.dropdown-item:hover {
-    background: var(--border);
-    color: var(--text);
-}
-.dropdown-item.active {
-    background: transparent;
-    color: var(--accent-secondary);
-    font-weight: 600;
-}
-.dropdown-item .check-icon {
-    display: none;
-}
-.dropdown-item.active .check-icon {
-    display: block;
+    transition: filter 0.4s ease;
 }
 
 /* Buttons */
 .btn{
-  padding:12px 14px;
-  border-radius:10px;
-  border:none;
+  padding:14px 18px;
+  border-radius:12px;
   font-weight:700;
-  cursor:pointer;
-  transition: background 0.2s;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
 }
 .btn-primary{ background:var(--accent-secondary); color:#fff; }
-.btn-primary:hover{ background:#2563eb; color:#fff; }
-.btn-success{ background:var(--success); color:#fff; }
-.btn-success:hover{ background:#059669; color:#fff; }
+.btn-primary:hover{ background:#0097a7; box-shadow: 0 4px 10px rgba(0, 188, 212, 0.5); }
+.btn-success{ background:var(--success); color:#000; }
+.btn-success:hover{ background:#4caf50; color:#fff; box-shadow: 0 4px 10px rgba(105, 240, 174, 0.5); }
 .btn-outline-primary{ border:2px solid var(--accent-main); color:var(--accent-main); background:transparent;}
-.btn-outline-primary:hover{ background:var(--accent-main); color:#fff; }
+.btn-outline-primary:hover{ background:var(--accent-main); color:#fff; box-shadow: 0 4px 10px rgba(255, 127, 80, 0.5); }
 
-/* Stats Grid */
+
+/* Stats Grid (Responsive) */
 .stats{
   display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
+  grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); /* Auto-fit columns */
+  gap:15px;
   margin-top: 20px;
 }
 .stat{
   background:var(--border);
-  border-radius:10px;
-  padding:16px;
-  text-align:left;
-  border-left: 5px solid var(--accent-secondary);
-  transition: background-color 0.3s;
+  border-radius:12px;
+  padding:18px;
+  text-align:center;
+  border-left: none; /* Removed for cleaner look */
+  box-shadow: inset 0 0 0 2px var(--accent-secondary);
+  transition: background-color 0.4s, box-shadow 0.4s;
 }
 .stat h4{
   margin:0;
-  font-size:2rem;
+  font-size:2.5rem;
   font-weight:900;
-  color: var(--text);
+  color: var(--accent-main); /* Colorful stat numbers */
+  transition: color 0.4s;
 }
 .stat small{
-  font-size:13px;
+  font-size:14px;
   color:var(--muted);
 }
-@media(min-width:768px){
-  .stats{
-    grid-template-columns:repeat(3,1fr);
-  }
-}
 
-/* Score List */
-.score-item{
-  display:flex;
-  justify-content:space-between;
-  padding:8px 0;
-  color:var(--text);
-  border-bottom:1px dashed var(--border);
-  font-weight: 500;
-  transition: border-color 0.3s;
-}
-.score-item:last-child{border-bottom:none}
-
-/* Animated Chart Placeholder */
+/* -------------------------------------- */
+/* GRAPH VISUALIZATION STYLES (Line/Area Graph) */
+/* -------------------------------------- */
 .chart-container {
-    height: 150px;
-    padding-top: 15px;
-    background: var(--border);
+    height: 200px;
+    padding: 10px;
+    background: var(--card); /* Match card background */
     border-radius: 10px;
     margin-top: 15px;
-    transition: background-color 0.3s;
+    position: relative;
+    overflow: hidden;
 }
-.bar {
-    background: linear-gradient(to top, var(--accent-main), var(--accent-secondary));
-    border-radius: 4px 4px 0 0;
-    width: 20px;
-    margin: 0 4px;
-    transition: height 1.5s ease-out;
-    height: 0;
-    display: inline-block;
-    vertical-align: bottom;
+
+.graph-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Pseudo-Graph Effect */
+    background: linear-gradient(to top, rgba(255, 127, 80, 0.3), rgba(0, 188, 212, 0.8));
+    clip-path: polygon(
+        0% 100%, 
+        10% 80%, 
+        20% 60%, 
+        30% 90%, 
+        40% 70%, 
+        50% 40%, 
+        60% 50%, 
+        70% 30%, 
+        80% 60%, 
+        90% 20%, 
+        100% 0%, 
+        100% 100%
+    );
+    transition: clip-path 2s ease-in-out;
+}
+
+.graph-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(
+        0% 100%, 
+        10% 80%, 
+        20% 60%, 
+        30% 90%, 
+        40% 70%, 
+        50% 40%, 
+        60% 50%, 
+        70% 30%, 
+        80% 60%, 
+        90% 20%, 
+        100% 0%
+    );
+    border-bottom: 3px solid var(--accent-secondary);
+    transition: clip-path 2s ease-in-out;
 }
 
 /* Forms and Modals */
@@ -278,8 +250,16 @@ body{
 .modal-header{ border-bottom: 1px solid var(--border); }
 .modal-footer{ border-top: 1px solid var(--border); }
 .form-label { color: var(--text); }
-.form-control, .form-select { background: var(--border); border-color: var(--border); color: var(--text); }
-.form-control:focus, .form-select:focus { background: var(--border); border-color: var(--accent-secondary); box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25); }
+.form-control, .form-select { 
+    background: var(--border); 
+    border-color: var(--border); 
+    color: var(--text); 
+}
+.form-control:focus, .form-select:focus { 
+    background: var(--border); 
+    border-color: var(--accent-secondary); 
+    box-shadow: 0 0 0 0.25rem rgba(0, 188, 212, 0.25); 
+}
 .btn-close { 
     filter: invert(var(--theme-filter, 1)) grayscale(100%) brightness(200%); 
 }
@@ -329,13 +309,13 @@ body{
 <div class="container-portal d-flex align-items-center justify-content-center min-vh-100">
   <div class="w-100">
 
-    <div class="text-center mb-4">
-      <h2 class="fw-bold" style="color:var(--accent-main)">Management Portal</h2>
-      <div class="muted">Select your access level</div>
+    <div class="text-center mb-5">
+      <h2 class="fw-bold fs-1" style="color:var(--accent-main)">Fidak Fest Portal</h2>
+      <div class="muted">Access Management and Live Data</div>
     </div>
 
     <div class="card-ui">
-        <h6 class="fw-bold mb-3" style="color:var(--text)">Login Options</h6>
+        <h5 class="fw-bold mb-3" style="color:var(--text)">🚀 Access Options</h5>
         <div class="d-grid gap-3">
           <button class="btn btn-primary" id="btnAdmin">
             <i class="bi bi-shield-lock"></i> Admin Login
@@ -350,28 +330,31 @@ body{
     </div>
     
     <div class="card-ui">
+        <h5 class="fw-bold mb-3" style="color:var(--text)">📊 Festival Statistics</h5>
         <div class="stats">
           <div class="stat">
             <h4 id="statStudents">0</h4>
-            <small>Students</small>
+            <small>Total Students</small>
           </div>
           <div class="stat">
             <h4 id="statEvents">0</h4>
-            <small>Programs</small>
+            <small>Programs Active</small>
           </div>
           <div class="stat">
             <h4 id="statTeams">0</h4>
-            <small>Teams</small>
+            <small>Teams Competing</small>
           </div>
         </div>
     </div>
 
 
     <div class="card-ui">
-      <h6 class="fw-bold" style="color:var(--text)">Live Team Scores (Animated)</h6>
-      <div class="chart-container d-flex justify-content-around align-items-end" id="chartContainer">
-        </div>
-      <div id="scoreList" class="small text-muted mt-3">Loading…</div>
+      <h5 class="fw-bold mb-3" style="color:var(--text)">📈 Team Score Trend (Graph View)</h5>
+      <div class="chart-container" id="chartContainer">
+        <div class="graph-area"></div>
+        <div class="graph-line"></div>
+      </div>
+      <div id="scoreList" class="small text-muted mt-3">Loading Top Teams...</div>
     </div>
 
   </div>
@@ -492,14 +475,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const statEvents = document.getElementById("statEvents");
   const statTeams = document.getElementById("statTeams");
   const scoreList = document.getElementById("scoreList");
-  const teamSelect = document.getElementById("teamSelect");
-  const chartContainer = document.getElementById("chartContainer");
 
   // --- Realtime Listeners ---
   onValue(ref(db,"students"), s => {
     allStudents = s.val() || {};
     statStudents.textContent = Object.keys(allStudents).length;
-    console.log("Students loaded:", Object.keys(allStudents).length); // Debug
   });
 
   onValue(ref(db,"events"), s => {
@@ -511,29 +491,32 @@ document.addEventListener("DOMContentLoaded", () => {
     allTeams = teams;
     statTeams.textContent = Object.keys(teams).length;
 
-    teamSelect.innerHTML = `<option value="">Select Team</option>`;
     scoreList.innerHTML = "";
-    chartContainer.innerHTML = "";
     
-    const sortedTeams = Object.values(teams).sort((a,b)=>(b.score||0)-(a.score||0));
-    const maxScore = sortedTeams.length > 0 ? Math.max(...sortedTeams.map(t => t.score || 0)) : 100;
-    
-    sortedTeams.forEach(t=>{
-        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-        scoreList.innerHTML += `<div class="score-item"><span>${t.name}</span><strong>${t.score||0}</strong></div>`;
-          
-        if (chartContainer.childElementCount < 10) {
-            const score = t.score || 0;
-            const heightPercent = (score / maxScore) * 85; 
-            const bar = document.createElement('div');
-            bar.className = 'bar';
-            bar.title = `${t.name}: ${score}`;
-            bar.style.height = '0';
-            bar.style.width = '20px';
-            setTimeout(() => { bar.style.height = `${Math.max(5, heightPercent)}%`; }, 100);
-            chartContainer.appendChild(bar);
-        }
-    });
+    // Sort teams by score (descending)
+    const sortedTeams = Object.values(teams)
+      .sort((a,b)=>(b.score||0)-(a.score||0));
+      
+    // Display top scores
+    sortedTeams
+      .slice(0, 5) // Show top 5 teams
+      .forEach(t=>{
+        scoreList.innerHTML += `
+          <div class="score-item">
+            <span class="d-flex align-items-center"><i class="bi bi-trophy-fill me-2" style="color:var(--accent-main)"></i> ${t.name}</span>
+            <strong>${t.score||0} pts</strong>
+          </div>`;
+      });
+      if (sortedTeams.length === 0) {
+        scoreList.innerHTML = "<div class='text-muted mt-2'>No team scores available.</div>";
+      }
+      
+      // Update Team Select in Modal
+      const teamSelect = document.getElementById("teamSelect");
+      teamSelect.innerHTML = `<option value="">Select Team</option>`;
+      Object.values(teams).forEach(t=>{
+          teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+      });
   });
 
   // --- Login Logic ---
@@ -574,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loginTitle.textContent = "PARTICIPANT LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.remove("d-none");
-        passwordBox.classList.add("d-none");
+        passwordBox.classList.add("d-none"); // Hide Password for Participants
     }
     modal.show();
   }
@@ -597,7 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if(type==="leader"){
-      const teamId = teamSelect.value;
+      const teamId = document.getElementById("teamSelect").value;
       const team = Object.values(allTeams).find(t => String(t.id) === teamId);
       if(!team || team.password !== pwd){ error("Invalid team or password"); return; }
       if (!team.leaderId) { error("Team leader ID not set."); return; }
@@ -608,33 +591,33 @@ document.addEventListener("DOMContentLoaded", () => {
     if (type === "participant") {
         if (!chessID) { error("Please enter your Chess Number."); return; }
         
-        // Wait Check
         if (Object.keys(allStudents).length === 0) {
             error("Data loading... please wait 2 seconds and try again.");
             return;
         }
-
-        // --- NEW: ROBUST SEARCH LOGIC ---
-        // 1. Try to find if the Key itself is the Chess Number
+        
+        // Find the student by looking up their ID.
+        // It checks if the entered chessID matches the object's key OR the 'id' field, 'chestNo' field, or 'chessNo' field.
         let student = allStudents[chessID];
-
-        // 2. If not, look INSIDE the objects for 'id' or 'chestNo'
-        if (!student) {
-            student = Object.values(allStudents).find(s => 
-                String(s.id) === chessID || 
-                String(s.chestNo) === chessID || 
-                String(s.chessNo) === chessID
-            );
-        }
         
         if (!student) {
-            console.log("Debug: Searched for", chessID, "in", allStudents); // Debug in Console
-            error("Invalid Chess Number. ID not found.");
-            return;
+            student = Object.values(allStudents).find(s => 
+                String(s.id).trim() === chessID || 
+                String(s.chestNo || '').trim() === chessID || 
+                String(s.chessNo || '').trim() === chessID
+            );
         }
 
-        sessionStorage.setItem("participantId", chessID);
-        sessionStorage.setItem("participantName", student.name || "Student");
+        if (!student) {
+            error("Invalid Chess Number. ID not found in system records.");
+            return;
+        }
+        
+        // Final check to ensure we use the ID stored in the student object if the key was different
+        const studentID = student.id || student.chestNo || chessID;
+        
+        sessionStorage.setItem("participantId", studentID);
+        sessionStorage.setItem("participantName", student.name || "Participant");
         location.href="participant.html"; 
     }
   };
