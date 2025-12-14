@@ -53,6 +53,52 @@ body{
   background:var(--bg);
   color:var(--text);
   transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden; /* Prevent scroll during intro */
+}
+
+/* -------------------------------------- */
+/* INTRO ANIMATION STYLES */
+/* -------------------------------------- */
+#intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s ease-out, visibility 0.8s;
+}
+
+#intro-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.intro-logo {
+    width: 120px;
+    height: auto;
+    filter: var(--logo-filter);
+    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes logoEntrance {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(20px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Layout */
@@ -60,7 +106,15 @@ body{
   max-width:450px;
   margin:auto;
   padding:16px;
+  opacity: 0; /* Hidden initially, revealed after intro */
+  animation: contentFadeIn 1s ease-out forwards;
+  animation-delay: 2.2s; /* Wait for intro to finish */
 }
+
+@keyframes contentFadeIn {
+    to { opacity: 1; }
+}
+
 .card-ui{
   background:var(--card);
   border-radius:14px;
@@ -78,16 +132,16 @@ body{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  /* Removed border for cleaner look, optional */
-  /* border-bottom:1px solid var(--border); */
   transition: background-color 0.3s;
+  position: relative;
+  z-index: 100;
 }
 
 /* Logo Styling */
 .navbar-logo {
-    height: 50px; /* Adjust size here */
+    height: 50px; 
     width: auto;
-    filter: var(--logo-filter); /* Auto-color based on theme */
+    filter: var(--logo-filter);
     transition: filter 0.3s ease;
 }
 
@@ -121,7 +175,7 @@ body{
     border-radius: 8px;
     padding: 8px 12px;
     display: flex;
-    justify-content: space-between; /* To push checkmark to right */
+    justify-content: space-between;
     align-items: center;
 }
 .dropdown-item:hover {
@@ -234,6 +288,11 @@ body{
 </head>
 
 <body>
+
+<div id="intro-overlay">
+    <img src="IMG_2247.png" alt="Fidak Fest" class="intro-logo">
+</div>
+
 <nav class="navbar">
     <a href="#" class="text-decoration-none">
         <img src="IMG_2247.png" alt="Fidak Fest" class="navbar-logo">
@@ -337,10 +396,10 @@ body{
           
           <div class="mb-3 d-none" id="participantBox">
             <label class="form-label">Chess Number</label>
-            <input id="chessInput" type="text" class="form-control" placeholder="Your Chess ID">
+            <input id="chessInput" type="number" class="form-control" placeholder="Enter your Chess ID">
           </div>
 
-          <div class="mb-3">
+          <div class="mb-3" id="passwordBox">
             <label class="form-label">Password</label>
             <input id="passwordInput" type="password" class="form-control" placeholder="Required for Admin/Leader">
           </div>
@@ -363,6 +422,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebas
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  // --- INTRO LOGIC ---
+  const introOverlay = document.getElementById('intro-overlay');
+  
+  // Wait 2.2 seconds then fade out
+  setTimeout(() => {
+    introOverlay.classList.add('fade-out');
+  }, 2200);
+
+  // Remove from DOM completely after fade out animation (3s total)
+  setTimeout(() => {
+    introOverlay.remove();
+  }, 3000);
     
   // --- Theme Management ---
   const body = document.body;
@@ -370,7 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeIconDisplay = document.getElementById('themeIconDisplay');
 
   function updateThemeUI(mode) {
-      // Update Body Attribute
       if (mode === 'system') {
           const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           body.removeAttribute('data-theme');
@@ -380,7 +451,6 @@ document.addEventListener("DOMContentLoaded", () => {
           body.setAttribute('data-theme', mode);
       }
 
-      // Update Active Checkmark in Dropdown
       themeToggles.forEach(btn => {
           btn.classList.remove('active');
           if(btn.getAttribute('data-theme-mode') === mode) {
@@ -388,8 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
       });
 
-      // Update Main Icon
-      themeIconDisplay.className = ""; // Reset classes
+      themeIconDisplay.className = "";
       if (mode === 'light') {
           themeIconDisplay.className = "bi bi-sun-fill";
       } else if (mode === 'dark') {
@@ -404,29 +473,25 @@ document.addEventListener("DOMContentLoaded", () => {
       updateThemeUI(mode);
   }
 
-  // Initial Load
   const savedTheme = localStorage.getItem('theme') || 'system';
   updateThemeUI(savedTheme);
 
-  // Listener for system preference changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
       if (localStorage.getItem('theme') === 'system') {
           updateThemeUI('system');
       }
   });
 
-  // Click Listeners
   themeToggles.forEach(toggle => {
       toggle.addEventListener('click', (e) => {
           e.preventDefault();
-          // Find closest link in case icon was clicked
           const target = e.target.closest('a');
           const mode = target.getAttribute('data-theme-mode');
           setTheme(mode);
       });
   });
 
-  // --- Firebase Initialization (Kept same as before) ---
+  // --- Firebase Initialization ---
   let app;
   let db;
   let allStudents = {};
@@ -473,7 +538,6 @@ document.addEventListener("DOMContentLoaded", () => {
     scoreList.innerHTML = "";
     chartContainer.innerHTML = "";
     
-    // Sort teams by score (descending)
     const sortedTeams = Object.values(teams)
       .sort((a,b)=>(b.score||0)-(a.score||0));
       
@@ -514,6 +578,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginType = document.getElementById("loginType");
   const teamBox = document.getElementById("teamBox");
   const participantBox = document.getElementById("participantBox");
+  const passwordBox = document.getElementById("passwordBox"); // New Reference
   const loginTitle = document.getElementById("loginTitle");
   const passwordInput = document.getElementById("passwordInput");
   const chessInput = document.getElementById("chessInput");
@@ -537,17 +602,19 @@ document.addEventListener("DOMContentLoaded", () => {
         loginTitle.textContent = "ADMIN LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.add("d-none");
+        passwordBox.classList.remove("d-none"); // Show Pass
         passwordInput.placeholder = "Admin Password";
     } else if (type === "leader"){
         loginTitle.textContent = "LEADER LOGIN";
         teamBox.classList.remove("d-none");
         participantBox.classList.add("d-none");
+        passwordBox.classList.remove("d-none"); // Show Pass
         passwordInput.placeholder = "Leader Password";
     } else if (type === "participant"){
         loginTitle.textContent = "PARTICIPANT LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.remove("d-none");
-        passwordInput.placeholder = "Optional Password (if required)";
+        passwordBox.classList.add("d-none"); // Hide Pass for Students
     }
     
     modal.show();
@@ -582,12 +649,24 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (type === "participant") {
         if (!chessID) { error("Please enter your Chess Number."); return; }
-        const student = Object.values(allStudents).find(s => String(s.id) === chessID);
-        if (!student) {
-            error("Invalid Chess Number.");
+        
+        // Wait Check: Ensure data is actually loaded
+        if (Object.keys(allStudents).length === 0) {
+            error("System loading data... please wait 2 seconds and try again.");
             return;
         }
+
+        // Search for student
+        const student = Object.values(allStudents).find(s => String(s.id) === chessID);
+        
+        if (!student) {
+            error("Invalid Chess Number. ID not found.");
+            return;
+        }
+
+        // Login Success
         sessionStorage.setItem("participantId", chessID);
+        sessionStorage.setItem("participantName", student.name); // Store name too for welcome msg
         location.href="participant.html"; 
     }
   };
