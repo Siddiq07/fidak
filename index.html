@@ -650,19 +650,37 @@ document.addEventListener("DOMContentLoaded", () => {
     if (type === "participant") {
         if (!chessID) { error("Please enter your Chess Number."); return; }
         
-        // Wait Check: Ensure data is actually loaded
         if (Object.keys(allStudents).length === 0) {
-            error("System loading data... please wait 2 seconds and try again.");
+            error("Data loading... please wait 2 seconds and try again.");
             return;
         }
-
-        // Search for student
-        const student = Object.values(allStudents).find(s => String(s.id) === chessID);
         
+        let student;
+        const lowerCaseID = chessID.toLowerCase();
+        
+        student = Object.values(allStudents).find(s => {
+            const firebaseKey = Object.keys(allStudents).find(key => allStudents[key] === s);
+            if (firebaseKey && String(firebaseKey).trim().toLowerCase() === lowerCaseID) return true;
+            
+            const sId = String(s.id || '').trim().toLowerCase();
+            const sChestNo = String(s.chestNo || '').trim().toLowerCase();
+            const sChessNo = String(s.chessNo || '').trim().toLowerCase();
+            
+            return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
+        });
+
         if (!student) {
-            error("Invalid Chess Number. ID not found.");
+            error("Invalid Chess Number or ID. Record not found.");
             return;
         }
+        
+        const studentID = student.id || student.chestNo || chessID;
+        
+        sessionStorage.setItem("participantId", studentID);
+        sessionStorage.setItem("participantName", student.name || "Participant");
+        location.href="participant.html"; 
+    }
+  };
 
         // Login Success
         sessionStorage.setItem("participantId", chessID);
@@ -680,3 +698,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
+
