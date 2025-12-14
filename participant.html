@@ -5,11 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Participant Panel | Art Fest</title>
 
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<!-- PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -18,87 +16,109 @@
   --accent:#ffb703;
   --card:#ffffff;
   --muted:#64748b;
+  --bg: #f4f7fb;
 }
 
 body{
   margin:0;
-  background:#f4f7fb;
+  background:var(--bg);
   font-family:system-ui,-apple-system,Segoe UI,Roboto;
 }
-
-.hidden{display:none}
 
 /* HEADER */
 .topbar{
   background:var(--primary);
   color:#fff;
-  padding:14px 18px;
+  padding:15px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .brand{
-  font-size:20px;
+  font-size:22px;
   font-weight:800;
+  letter-spacing: 0.5px;
 }
 .brand span{color:var(--accent)}
 .logout-btn{
   background:#ef4444;
   border:0;
   color:#fff;
-  padding:6px 12px;
+  padding:8px 16px;
   border-radius:8px;
+  font-weight: 600;
+  transition: 0.2s;
 }
+.logout-btn:hover { background: #dc2626; }
 
 /* PROFILE */
 .profile{
   background:#fff;
-  margin:16px;
+  margin:20px;
   border-radius:16px;
-  padding:16px;
+  padding:20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  border-left: 5px solid var(--accent);
 }
-.profile h4{margin:0;font-weight:800}
-.profile small{color:var(--muted)}
+.profile h4{margin:0 0 5px 0;font-weight:800; font-size: 1.5rem; color: var(--primary);}
+.profile small{
+    color:var(--muted); 
+    font-size: 0.95rem; 
+    display: block; 
+    margin-top: 5px;
+}
 
 /* STATS */
 .stats{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:12px;
-  margin:16px;
+  gap:15px;
+  margin:20px;
 }
 .stat-card{
   background:linear-gradient(135deg,#2563eb,#1e40af);
   color:#fff;
-  padding:14px;
-  border-radius:14px;
+  padding:20px;
+  border-radius:16px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  text-align: center;
 }
-.stat-card.orange{background:linear-gradient(135deg,#fb923c,#f97316)}
-.stat-card.green{background:linear-gradient(135deg,#22c55e,#16a34a)}
-.stat-card h2{margin:0;font-weight:800}
+.stat-card.orange{background:linear-gradient(135deg,#fb923c,#f97316); box-shadow: 0 4px 12px rgba(251, 146, 60, 0.2);}
+.stat-card.green{background:linear-gradient(135deg,#22c55e,#16a34a); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);}
+.stat-card h2{margin:5px 0 0 0;font-weight:900; font-size: 2.5rem;}
+.stat-card span{ font-size: 0.9rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;}
 
 /* SECTIONS */
 .section{
-  margin:16px;
+  margin:20px;
 }
 .section-title{
   font-size:18px;
   font-weight:800;
-  margin-bottom:10px;
+  margin-bottom:15px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+.section-title i { color: var(--accent); }
 
 /* EVENT CARD */
 .event-card{
   background:#fff;
-  border-radius:16px;
-  padding:14px;
+  border-radius:12px;
+  padding:16px;
   margin-bottom:12px;
-  border-left:6px solid var(--accent);
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s;
 }
-.event-card h5{margin:0;font-weight:800}
+.event-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+.event-card h5{margin:0;font-weight:700; color: var(--primary);}
 .event-meta{
   font-size:13px;
   color:var(--muted);
+  margin-top: 4px;
 }
 
 /* RESULT */
@@ -106,75 +126,88 @@ body{
   display:flex;
   align-items:center;
   gap:12px;
-  margin-top:6px;
+  margin-top:10px;
+  padding-top: 10px;
+  border-top: 1px dashed #e2e8f0;
 }
 .rank{
-  width:34px;
-  height:34px;
+  width:32px;
+  height:32px;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:800;
+  font-size: 14px;
+  color: #000;
 }
-.rank.gold{background:#fde68a}
-.rank.silver{background:#e5e7eb}
-.rank.bronze{background:#fbcfe8}
+.rank.gold{background:#fbbf24; color: #78350f;}
+.rank.silver{background:#e5e7eb; color: #374151;}
+.rank.bronze{background:#fbcfe8; color: #831843;}
+
+/* PDF TEMPLATE (Hidden) */
+#pdf-template {
+    display: none;
+    padding: 40px;
+    border: 10px solid var(--primary);
+    text-align: center;
+}
 
 /* MOBILE */
 @media(max-width:768px){
-  .topbar{flex-direction:column;gap:8px}
+  .topbar{flex-direction:row;} 
+  .stat-card h2 { font-size: 2rem; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <div class="topbar">
-  <div class="brand">Art<span>Fest</span> Participant</div>
-  <button class="logout-btn" id="logoutBtn">Logout</button>
+  <div class="brand">Art<span>Fest</span></div>
+  <button class="logout-btn" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
 </div>
 
-<!-- ================= PROFILE ================= -->
 <div class="profile">
-  <h4 id="studentName">Student</h4>
+  <h4 id="studentName">Loading Profile...</h4>
   <small>
-    Chess No: <b id="studentId"></b> |
-    Team: <b id="teamName"></b> |
-    Level: <b id="studentLevel"></b>
+    <i class="bi bi-person-badge"></i> ID: <b id="studentId">...</b> &nbsp;|&nbsp; 
+    <i class="bi bi-people"></i> Team: <b id="teamName">...</b> &nbsp;|&nbsp; 
+    <i class="bi bi-stars"></i> Level: <b id="studentLevel">...</b>
   </small>
 </div>
 
-<!-- ================= STATS ================= -->
 <div class="stats">
   <div class="stat-card">
     <span>Events</span>
     <h2 id="statEvents">0</h2>
   </div>
   <div class="stat-card orange">
-    <span>Participations</span>
+    <span>Active</span>
     <h2 id="statParts">0</h2>
   </div>
   <div class="stat-card green">
-    <span>Prizes</span>
+    <span>Wins</span>
     <h2 id="statPrizes">0</h2>
   </div>
 </div>
 
-<!-- ================= EVENTS ================= -->
 <div class="section">
-  <div class="section-title">My Events</div>
-  <div id="eventList"></div>
+  <div class="section-title"><i class="bi bi-calendar-check"></i> My Registrations</div>
+  <div id="eventList">
+      <div class="text-center text-muted mt-3">Loading registrations...</div>
+  </div>
 </div>
 
-<!-- ================= RESULTS ================= -->
 <div class="section">
-  <div class="section-title">My Results</div>
-  <div id="resultList"></div>
+  <div class="section-title"><i class="bi bi-trophy"></i> My Achievements</div>
+  <div id="resultList">
+      <div class="text-muted small ms-2">No results declared yet.</div>
+  </div>
 </div>
 
-<!-- ================= FIREBASE ================= -->
+<div id="pdf-container" style="display:none;"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -188,95 +221,170 @@ const firebaseConfig={
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
-const studentId=sessionStorage.getItem("studentId");
-if(!studentId){
- alert("Unauthorized access");
- location.href="index.html";
+// 1. FIXED: Use the correct session key "participantId" (was "studentId")
+const participantId = sessionStorage.getItem("participantId");
+
+if(!participantId){
+ location.href="index.html"; // Redirect if not logged in
 }
 
-/* PROFILE */
-let studentData=null;
-let teamMap={};
+/* DATA CONTAINERS */
+let studentData = null;
+let teamMap = {};
+let eventMap = {}; // To store Event ID -> Event Name mapping
 
+// Load Teams
 onValue(ref(db,"teams"),snap=>{
  Object.values(snap.val()||{}).forEach(t=>teamMap[t.id]=t.name);
 });
 
+// Load Events (Important to show Event Names correctly)
+onValue(ref(db,"events"),snap=>{
+ Object.values(snap.val()||{}).forEach(e=>{
+     // Map both by ID (if numeric) and safe key
+     eventMap[e.id] = e.name;
+ });
+});
+
+/* 2. LOAD PROFILE */
 onValue(ref(db,"students"),snap=>{
- Object.values(snap.val()||{}).forEach(s=>{
-  if(String(s.id)===String(studentId)){
-   studentData=s;
-   document.getElementById("studentName").innerText=s.name;
-   document.getElementById("studentId").innerText=s.id;
-   document.getElementById("studentLevel").innerText=s.level||"-";
-   document.getElementById("teamName").innerText=teamMap[s.teamId]||"-";
-  }
- });
+ const allStudents = snap.val() || {};
+ 
+ // Try direct lookup or find by ID
+ let s = allStudents[participantId];
+ 
+ if(!s) {
+    s = Object.values(allStudents).find(st => 
+        String(st.id) === String(participantId) || 
+        String(st.chestNo) === String(participantId)
+    );
+ }
+
+ if(s){
+   studentData = s;
+   document.getElementById("studentName").innerText = s.name;
+   document.getElementById("studentId").innerText = s.id || s.chestNo;
+   document.getElementById("studentLevel").innerText = s.category || s.level || "General";
+   
+   // Wait slightly for teamMap to load or check immediately
+   setTimeout(() => {
+       document.getElementById("teamName").innerText = teamMap[s.teamId] || "Unknown Team";
+   }, 500);
+ } else {
+     // If ID is in session but not in DB anymore
+     alert("Student profile not found.");
+     sessionStorage.clear();
+     location.href="index.html";
+ }
 });
 
-/* EVENTS */
-onValue(ref(db,"participations"),snap=>{
- let count=0;
- let parts=0;
- const list=document.getElementById("eventList");
- list.innerHTML="";
- Object.values(snap.val()||{}).forEach(p=>{
-  if(String(p.studentId)===String(studentId)){
+/* 3. LOAD PARTICIPATIONS & RESULTS */
+// We watch 'participations' to see what they registered for
+onValue(ref(db,"participations"), snap=>{
+ let count = 0;
+ const list = document.getElementById("eventList");
+ list.innerHTML = "";
+ 
+ const myParts = Object.values(snap.val()||{}).filter(p => String(p.studentId) === String(participantId));
+
+ if(myParts.length === 0){
+     list.innerHTML = "<div class='text-muted p-2'>You haven't registered for any events yet.</div>";
+ }
+
+ myParts.forEach(p => {
    count++;
-   parts++;
-   list.innerHTML+=`
+   // Resolve Event Name safely
+   const eName = p.eventName || eventMap[p.eventId] || "Event #" + p.eventId;
+   
+   list.innerHTML += `
    <div class="event-card">
-    <h5>${p.eventName||"Event"}</h5>
-    <div class="event-meta">Status: ${p.status}</div>
-    <button class="btn btn-sm btn-outline-primary mt-2" onclick="downloadParticipationPdf('${p.eventName}')">
-      Download PDF
-    </button>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h5>${eName}</h5>
+            <div class="event-meta">
+                <i class="bi bi-info-circle"></i> Status: <span class="badge bg-secondary">${p.status || "Registered"}</span>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-outline-primary" onclick="generatePDF('${eName}', '${studentData?.name}')">
+          <i class="bi bi-download"></i> PDF
+        </button>
+    </div>
    </div>`;
-  }
  });
- document.getElementById("statEvents").innerText=count;
- document.getElementById("statParts").innerText=parts;
+
+ document.getElementById("statEvents").innerText = count;
+ document.getElementById("statParts").innerText = count; // 'Active' is same as Total for now
 });
 
-/* RESULTS */
-onValue(ref(db,"results"),snap=>{
- let prizes=0;
- const list=document.getElementById("resultList");
- list.innerHTML="";
- Object.values(snap.val()||{}).forEach(r=>{
-  let rank=null;
-  if(r.firstId==studentId) rank=1;
-  if(r.secondId==studentId) rank=2;
-  if(r.thirdId==studentId) rank=3;
+/* LOAD RESULTS */
+onValue(ref(db,"results"), snap=>{
+ let wins = 0;
+ const list = document.getElementById("resultList");
+ list.innerHTML = "";
+ 
+ Object.values(snap.val()||{}).forEach(r => {
+  let rank = 0;
+  // Check if student ID matches any winner slot
+  if(String(r.firstId) === String(participantId)) rank = 1;
+  else if(String(r.secondId) === String(participantId)) rank = 2;
+  else if(String(r.thirdId) === String(participantId)) rank = 3;
 
-  if(rank){
-   prizes++;
-   list.innerHTML+=`
-   <div class="event-card">
-    <h5>${r.eventName}</h5>
+  if(rank > 0){
+   wins++;
+   const eName = r.eventName || eventMap[r.eventId] || "Event";
+   const rankClass = rank === 1 ? "gold" : (rank === 2 ? "silver" : "bronze");
+   const rankText = rank === 1 ? "1st" : (rank === 2 ? "2nd" : "3rd");
+   
+   list.innerHTML += `
+   <div class="event-card" style="border-left: 5px solid var(--accent)">
+    <h5>${eName}</h5>
     <div class="result-row">
-     <div class="rank ${rank==1?"gold":rank==2?"silver":"bronze"}">${rank}</div>
-     <div>You secured ${rank}${rank==1?"st":rank==2?"nd":"rd"} position</div>
+     <div class="rank ${rankClass}">${rank}</div>
+     <div class="fw-bold">Secured ${rankText} Place!</div>
     </div>
    </div>`;
   }
  });
- document.getElementById("statPrizes").innerText=prizes;
+
+ if(wins === 0) {
+     list.innerHTML = "<div class='text-muted p-2'>No prize results found yet. Keep trying!</div>";
+ }
+ document.getElementById("statPrizes").innerText = wins;
 });
 
-/* PDF */
-window.downloadParticipationPdf=(event)=>{
- const html=`
- <h3>Participation Certificate</h3>
- <p>Name: ${studentData.name}</p>
- <p>Chess No: ${studentData.id}</p>
- <p>Event: ${event}</p>
+/* PDF GENERATOR */
+window.generatePDF = (eventName, studentName) => {
+ const element = document.getElementById('pdf-container');
+ element.style.display = 'block';
+ element.innerHTML = `
+    <div style="padding: 40px; border: 10px double #0b2440; text-align: center; font-family: sans-serif;">
+        <h1 style="color: #0b2440; margin-bottom: 5px;">PARTICIPATION CERTIFICATE</h1>
+        <p style="color: #666; margin-top: 0;">Fidak Fest 2024</p>
+        <br><br>
+        <p>This is to certify that</p>
+        <h2 style="color: #ffb703; font-size: 28px; text-transform: uppercase;">${studentName}</h2>
+        <p>has successfully participated in the event</p>
+        <h3 style="color: #0b2440;">${eventName}</h3>
+        <br><br>
+        <p style="font-size: 12px; color: #999;">Generated via Fidak Fest Portal</p>
+    </div>
  `;
- html2pdf().from(html).set({filename:`${event}_participation.pdf`}).save();
+ 
+ const opt = {
+   margin: 10,
+   filename: `${studentName}_${eventName}.pdf`,
+   image: { type: 'jpeg', quality: 0.98 },
+   html2canvas: { scale: 2 },
+   jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+ };
+
+ html2pdf().set(opt).from(element).save().then(() => {
+     element.style.display = 'none';
+ });
 };
 
 /* LOGOUT */
-document.getElementById("logoutBtn").onclick=()=>{
+document.getElementById("logoutBtn").onclick = () => {
  sessionStorage.clear();
  location.href="index.html";
 };
