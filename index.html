@@ -53,7 +53,7 @@ body{
   background:var(--bg);
   color:var(--text);
   transition: background-color 0.3s, color 0.3s;
-  overflow-x: hidden; /* Prevent scroll during intro */
+  overflow-x: hidden;
 }
 
 /* -------------------------------------- */
@@ -80,7 +80,7 @@ body{
 }
 
 .intro-logo {
-    width: 250px;
+    width: 120px;
     height: auto;
     filter: var(--logo-filter);
     animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -106,9 +106,9 @@ body{
   max-width:450px;
   margin:auto;
   padding:16px;
-  opacity: 0; /* Hidden initially, revealed after intro */
+  opacity: 0; 
   animation: contentFadeIn 1s ease-out forwards;
-  animation-delay: 2.2s; /* Wait for intro to finish */
+  animation-delay: 2.2s; 
 }
 
 @keyframes contentFadeIn {
@@ -425,16 +425,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- INTRO LOGIC ---
   const introOverlay = document.getElementById('intro-overlay');
-  
-  // Wait 2.2 seconds then fade out
-  setTimeout(() => {
-    introOverlay.classList.add('fade-out');
-  }, 2200);
-
-  // Remove from DOM completely after fade out animation (3s total)
-  setTimeout(() => {
-    introOverlay.remove();
-  }, 3000);
+  setTimeout(() => { introOverlay.classList.add('fade-out'); }, 2200);
+  setTimeout(() => { introOverlay.remove(); }, 3000);
     
   // --- Theme Management ---
   const body = document.body;
@@ -450,22 +442,11 @@ document.addEventListener("DOMContentLoaded", () => {
           body.removeAttribute('data-theme');
           body.setAttribute('data-theme', mode);
       }
-
       themeToggles.forEach(btn => {
           btn.classList.remove('active');
-          if(btn.getAttribute('data-theme-mode') === mode) {
-              btn.classList.add('active');
-          }
+          if(btn.getAttribute('data-theme-mode') === mode) btn.classList.add('active');
       });
-
-      themeIconDisplay.className = "";
-      if (mode === 'light') {
-          themeIconDisplay.className = "bi bi-sun-fill";
-      } else if (mode === 'dark') {
-          themeIconDisplay.className = "bi bi-moon-stars-fill";
-      } else {
-          themeIconDisplay.className = "bi bi-circle-half";
-      }
+      themeIconDisplay.className = mode === 'light' ? "bi bi-sun-fill" : (mode === 'dark' ? "bi bi-moon-stars-fill" : "bi bi-circle-half");
   }
 
   function setTheme(mode) {
@@ -477,17 +458,14 @@ document.addEventListener("DOMContentLoaded", () => {
   updateThemeUI(savedTheme);
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (localStorage.getItem('theme') === 'system') {
-          updateThemeUI('system');
-      }
+      if (localStorage.getItem('theme') === 'system') updateThemeUI('system');
   });
 
   themeToggles.forEach(toggle => {
       toggle.addEventListener('click', (e) => {
           e.preventDefault();
           const target = e.target.closest('a');
-          const mode = target.getAttribute('data-theme-mode');
-          setTheme(mode);
+          setTheme(target.getAttribute('data-theme-mode'));
       });
   });
 
@@ -506,9 +484,8 @@ document.addEventListener("DOMContentLoaded", () => {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
   } catch (e) {
-    console.error("Firebase initialization failed:", e);
+    console.error("Firebase init failed:", e);
     document.getElementById("scoreList").innerHTML = "<div class='text-danger'>Error connecting to database.</div>";
-    return;
   }
   
   const statStudents = document.getElementById("statStudents");
@@ -519,10 +496,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const chartContainer = document.getElementById("chartContainer");
 
   // --- Realtime Listeners ---
-
   onValue(ref(db,"students"), s => {
     allStudents = s.val() || {};
     statStudents.textContent = Object.keys(allStudents).length;
+    console.log("Students loaded:", Object.keys(allStudents).length); // Debug
   });
 
   onValue(ref(db,"events"), s => {
@@ -538,38 +515,25 @@ document.addEventListener("DOMContentLoaded", () => {
     scoreList.innerHTML = "";
     chartContainer.innerHTML = "";
     
-    const sortedTeams = Object.values(teams)
-      .sort((a,b)=>(b.score||0)-(a.score||0));
-      
+    const sortedTeams = Object.values(teams).sort((a,b)=>(b.score||0)-(a.score||0));
     const maxScore = sortedTeams.length > 0 ? Math.max(...sortedTeams.map(t => t.score || 0)) : 100;
     
-    sortedTeams
-      .forEach(t=>{
+    sortedTeams.forEach(t=>{
         teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-        
-        scoreList.innerHTML += `
-          <div class="score-item">
-            <span>${t.name}</span>
-            <strong>${t.score||0}</strong>
-          </div>`;
+        scoreList.innerHTML += `<div class="score-item"><span>${t.name}</span><strong>${t.score||0}</strong></div>`;
           
         if (chartContainer.childElementCount < 10) {
             const score = t.score || 0;
             const heightPercent = (score / maxScore) * 85; 
-            
             const bar = document.createElement('div');
             bar.className = 'bar';
             bar.title = `${t.name}: ${score}`;
             bar.style.height = '0';
             bar.style.width = '20px';
-            
-            setTimeout(() => {
-                bar.style.height = `${Math.max(5, heightPercent)}%`; 
-            }, 100);
-            
+            setTimeout(() => { bar.style.height = `${Math.max(5, heightPercent)}%`; }, 100);
             chartContainer.appendChild(bar);
         }
-      });
+    });
   });
 
   // --- Login Logic ---
@@ -578,7 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginType = document.getElementById("loginType");
   const teamBox = document.getElementById("teamBox");
   const participantBox = document.getElementById("participantBox");
-  const passwordBox = document.getElementById("passwordBox"); // New Reference
+  const passwordBox = document.getElementById("passwordBox");
   const loginTitle = document.getElementById("loginTitle");
   const passwordInput = document.getElementById("passwordInput");
   const chessInput = document.getElementById("chessInput");
@@ -587,10 +551,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAdmin = document.getElementById("btnAdmin");
   const btnLeader = document.getElementById("btnLeader");
   const btnParticipant = document.getElementById("btnParticipant");
-
-  btnAdmin.onclick = () => openLogin("admin");
-  btnLeader.onclick = () => openLogin("leader");
-  btnParticipant.onclick = () => openLogin("participant");
 
   function openLogin(type){
     loginType.value = type;
@@ -602,23 +562,26 @@ document.addEventListener("DOMContentLoaded", () => {
         loginTitle.textContent = "ADMIN LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none"); // Show Pass
+        passwordBox.classList.remove("d-none");
         passwordInput.placeholder = "Admin Password";
     } else if (type === "leader"){
         loginTitle.textContent = "LEADER LOGIN";
         teamBox.classList.remove("d-none");
         participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none"); // Show Pass
+        passwordBox.classList.remove("d-none");
         passwordInput.placeholder = "Leader Password";
     } else if (type === "participant"){
         loginTitle.textContent = "PARTICIPANT LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.remove("d-none");
-        passwordBox.classList.add("d-none"); // Hide Pass for Students
+        passwordBox.classList.add("d-none");
     }
-    
     modal.show();
   }
+
+  btnAdmin.onclick = () => openLogin("admin");
+  btnLeader.onclick = () => openLogin("leader");
+  btnParticipant.onclick = () => openLogin("participant");
 
   loginForm.onsubmit = async e => {
     e.preventDefault();
@@ -636,13 +599,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if(type==="leader"){
       const teamId = teamSelect.value;
       const team = Object.values(allTeams).find(t => String(t.id) === teamId);
-      
-      if(!team || team.password !== pwd){
-        error("Invalid team or password"); return;
-      }
-      if (!team.leaderId) {
-          error("Team leader ID not set."); return;
-      }
+      if(!team || team.password !== pwd){ error("Invalid team or password"); return; }
+      if (!team.leaderId) { error("Team leader ID not set."); return; }
       sessionStorage.setItem("leaderAuth", JSON.stringify(team));
       location.href=`leader.html?leader=${team.leaderId}`;
     }
@@ -650,23 +608,33 @@ document.addEventListener("DOMContentLoaded", () => {
     if (type === "participant") {
         if (!chessID) { error("Please enter your Chess Number."); return; }
         
-        // Wait Check: Ensure data is actually loaded
+        // Wait Check
         if (Object.keys(allStudents).length === 0) {
-            error("System loading data... please wait 2 seconds and try again.");
+            error("Data loading... please wait 2 seconds and try again.");
             return;
         }
 
-        // Search for student
-        const student = Object.values(allStudents).find(s => String(s.id) === chessID);
+        // --- NEW: ROBUST SEARCH LOGIC ---
+        // 1. Try to find if the Key itself is the Chess Number
+        let student = allStudents[chessID];
+
+        // 2. If not, look INSIDE the objects for 'id' or 'chestNo'
+        if (!student) {
+            student = Object.values(allStudents).find(s => 
+                String(s.id) === chessID || 
+                String(s.chestNo) === chessID || 
+                String(s.chessNo) === chessID
+            );
+        }
         
         if (!student) {
+            console.log("Debug: Searched for", chessID, "in", allStudents); // Debug in Console
             error("Invalid Chess Number. ID not found.");
             return;
         }
 
-        // Login Success
         sessionStorage.setItem("participantId", chessID);
-        sessionStorage.setItem("participantName", student.name); // Store name too for welcome msg
+        sessionStorage.setItem("participantName", student.name || "Student");
         location.href="participant.html"; 
     }
   };
