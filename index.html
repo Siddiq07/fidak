@@ -10,42 +10,38 @@
 
 <style>
 /* -------------------------------------- */
-/* UI OVERHAUL & THEME VARIABLES (UPGRADED) */
+/* UI OVERHAUL & THEME VARIABLES */
 /* -------------------------------------- */
 
 :root {
     /* --- DARK MODE (Default/Fallback) --- */
-    --bg: #0d111d; /* Deeper space blue */
-    --card: #161b2e; /* Darker card base */
-    --text: #c9d1d9; /* Lighter text */
-    --muted: #8b949e; 
-    --shadow: rgba(0, 0, 0, 0.6); /* Richer shadow */
-    --border: #30363d; /* Subtle dark border */
+    --bg: #0d121c; 
+    --card: #1c2738; 
+    --text: #e2e8f0; 
+    --muted: #94a3b8; 
+    --shadow: rgba(0, 0, 0, 0.25);
+    --border: #334155;
     
-    /* Accents (More Vibrant) */
-    --accent-main: #66ffc2; /* Neon Green/Mint for primary focus */
-    --accent-secondary: #0087ff; /* Electric Blue for buttons */
-    --success: #3fb950; 
-    --danger: #f85149; 
+    /* Accents */
+    --accent-main: #f97316; 
+    --accent-secondary: #3b82f6; 
+    --success: #10b981;
+    --danger: #ef4444;
 
-    /* Glass effect */
-    --card-hover-border: 1px solid rgba(102, 255, 194, 0.4);
-    --logo-filter: invert(1) brightness(1.8) contrast(1.5);
+    /* Logo Filter (Invert colors for dark mode) */
+    --logo-filter: invert(1) brightness(2);
 }
 
-/* --- LIGHT MODE Variables (UPGRADED) --- */
+/* --- LIGHT MODE Variables --- */
 [data-theme="light"] {
-    --bg: #f0f4f8; /* Very light cool grey */
+    --bg: #f5f7ff; 
     --card: #ffffff; 
-    --text: #24292f; 
-    --muted: #6a737d;
-    --shadow: rgba(40, 44, 52, 0.1);
-    --border: #eaeaea;
+    --text: #0f172a; 
+    --muted: #64748b; 
+    --shadow: rgba(0, 0, 0, 0.08);
+    --border: #e5e7eb;
     
-    --accent-main: #3d5afe; /* Deep Blue for primary focus */
-    --accent-secondary: #00bcd4; 
-    
-    --card-hover-border: 1px solid rgba(61, 90, 254, 0.4);
+    /* Logo Filter (Keep original black/dark colors) */
     --logo-filter: none;
 }
 
@@ -53,15 +49,15 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
   background:var(--bg);
   color:var(--text);
-  transition: background-color 0.4s, color 0.4s;
-  overflow-x: hidden;
+  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden; /* Prevent scroll during intro */
 }
 
 /* -------------------------------------- */
-/* INTRO ANIMATION STYLES (TIMING FIX) */
+/* INTRO ANIMATION STYLES */
 /* -------------------------------------- */
 #intro-overlay {
     position: fixed;
@@ -84,207 +80,210 @@ body{
 }
 
 .intro-logo {
-    width: 200px;
+    width: 120px;
     height: auto;
     filter: var(--logo-filter);
-    animation: logoFlyIn 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards, 
-               logoGlow 1.5s infinite alternate 2s;
+    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-@keyframes logoFlyIn {
-    0% { opacity: 0; transform: translateY(-100vh) scale(0.5); }
-    70% { opacity: 1; transform: translateY(0) scale(1.1); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes logoGlow {
-    0% { filter: var(--logo-filter) drop-shadow(0 0 5px var(--accent-secondary)); }
-    100% { filter: var(--logo-filter) drop-shadow(0 0 15px var(--accent-main)); }
+@keyframes logoEntrance {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(20px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Layout */
 .container-portal{
-  max-width:550px; 
+  max-width:450px;
   margin:auto;
-  padding:20px;
-  opacity: 0;
+  padding:16px;
+  opacity: 0; /* Hidden initially, revealed after intro */
   animation: contentFadeIn 1s ease-out forwards;
-  animation-delay: 2.5s; /* REVISED DELAY */
+  animation-delay: 2.2s; /* Wait for intro to finish */
 }
 
 @keyframes contentFadeIn {
     to { opacity: 1; }
 }
 
-/* CARD UPGRADE: Smoother edges, better shadows */
 .card-ui{
   background:var(--card);
-  border-radius:20px; /* Slightly larger radius */
-  padding:30px; /* More padding */
-  box-shadow:0 8px 30px var(--shadow); /* Modern shadow */
-  margin-bottom:25px;
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 10px 30px var(--shadow);
+  margin-bottom:16px;
   border: 1px solid var(--border);
-  transition: all 0.3s ease-in-out;
-}
-.card-ui:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px var(--shadow), 0 0 0 1px var(--accent-main);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 /* Navbar */
 .navbar{
   background:var(--bg);
-  padding:15px 25px;
-  transition: background-color 0.4s;
-  position: sticky; /* Make it sticky */
-  top: 0;
+  padding:12px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  transition: background-color 0.3s;
+  position: relative;
   z-index: 100;
-  /* Add subtle separation line */
-  box-shadow: 0 1px 0 rgba(102, 255, 194, 0.1); 
 }
 
-/* Buttons (UPGRADED) */
+/* Logo Styling */
+.navbar-logo {
+    height: 50px; 
+    width: auto;
+    filter: var(--logo-filter);
+    transition: filter 0.3s ease;
+}
+
+/* Compact Theme Switcher */
+.btn-theme {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 1.3rem;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-theme:hover, .btn-theme:focus {
+    background: var(--border);
+    color: var(--accent-secondary);
+}
+.dropdown-menu-theme {
+    background: var(--card); 
+    border-color: var(--border);
+    padding: 8px;
+    min-width: 150px;
+    box-shadow: 0 10px 25px var(--shadow);
+    border-radius: 12px;
+}
+.dropdown-item {
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.dropdown-item:hover {
+    background: var(--border);
+    color: var(--text);
+}
+.dropdown-item.active {
+    background: transparent;
+    color: var(--accent-secondary);
+    font-weight: 600;
+}
+.dropdown-item .check-icon {
+    display: none;
+}
+.dropdown-item.active .check-icon {
+    display: block;
+}
+
+/* Buttons */
 .btn{
-  padding:16px 20px; /* Taller buttons */
-  border-radius:14px; /* Smoother edges */
+  padding:12px 14px;
+  border-radius:10px;
+  border:none;
   font-weight:700;
-  letter-spacing: 0.5px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: none; /* Let background handle color */
+  cursor:pointer;
+  transition: background 0.2s;
 }
 .btn-primary{ background:var(--accent-secondary); color:#fff; }
-.btn-primary:hover{ 
-    background:#0077c9; 
-    box-shadow: 0 8px 20px rgba(0, 135, 255, 0.5); 
-    transform: translateY(-2px);
-}
-.btn-success{ background:var(--success); color:var(--bg); }
-.btn-success:hover{ 
-    background:#2fa83f; 
-    color:#fff; 
-    box-shadow: 0 8px 20px rgba(63, 185, 80, 0.5); 
-    transform: translateY(-2px);
-}
+.btn-primary:hover{ background:#2563eb; color:#fff; }
+.btn-success{ background:var(--success); color:#fff; }
+.btn-success:hover{ background:#059669; color:#fff; }
 .btn-outline-primary{ border:2px solid var(--accent-main); color:var(--accent-main); background:transparent;}
-.btn-outline-primary:hover{ 
-    background:var(--accent-main); 
-    color:var(--bg); 
-    box-shadow: 0 8px 20px rgba(102, 255, 194, 0.5); 
-    transform: translateY(-2px);
-}
-
+.btn-outline-primary:hover{ background:var(--accent-main); color:#fff; }
 
 /* Stats Grid */
 .stats{
   display:grid;
-  grid-template-columns:repeat(3, 1fr); 
-  gap:15px;
+  grid-template-columns:1fr;
+  gap:12px;
   margin-top: 20px;
 }
 .stat{
-  background:var(--card); 
-  border-radius:14px;
-  padding:18px;
-  text-align:center;
-  /* UPGRADED STAT BOX: Cleaner focus ring/border */
-  box-shadow: 0 0 0 1px var(--border), 0 5px 15px var(--shadow);
-  transition: all 0.3s ease-in-out;
-}
-.stat:hover {
-    box-shadow: 0 0 0 2px var(--accent-main), 0 8px 25px var(--shadow);
-    transform: translateY(-3px);
+  background:var(--border);
+  border-radius:10px;
+  padding:16px;
+  text-align:left;
+  border-left: 5px solid var(--accent-secondary);
+  transition: background-color 0.3s;
 }
 .stat h4{
-  margin:0 0 5px 0;
-  font-size:2.8rem; /* Larger numbers */
+  margin:0;
+  font-size:2rem;
   font-weight:900;
-  color: var(--accent-main);
-  transition: color 0.4s;
+  color: var(--text);
 }
 .stat small{
-  font-size:14px;
+  font-size:13px;
   color:var(--muted);
 }
-
-/* -------------------------------------- */
-/* GRAPH VISUALIZATION STYLES (REVERTED & DECENT) */
-/* -------------------------------------- */
-.chart-container {
-    height: 220px;
-    padding: 10px;
-    background: var(--card);
-    border-radius: 14px;
-    margin-top: 15px;
-    position: relative;
-    overflow: hidden;
-    /* UPGRADED CONTAINER SHADOW */
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 5px 20px var(--shadow);
-}
-
-.graph-line {
-    position: absolute;
-    bottom: 10px; 
-    left: 0;
-    width: 100%;
-    height: calc(100% - 20px);
-    border-left: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-}
-
-/* Reverted back to the original dynamicGraph single div */
-#dynamicGraph {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    /* UPGRADED: Use the main accent color with soft gradient */
-    background: linear-gradient(to top, rgba(102, 255, 194, 0.4), rgba(0, 135, 255, 0.1));
-    transition: clip-path 1.8s ease-out; /* Slower, smoother animation */
-    
-    /* Set an initial clip-path for the animation to start from */
-    clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%); 
+@media(min-width:768px){
+  .stats{
+    grid-template-columns:repeat(3,1fr);
+  }
 }
 
 /* Score List */
 .score-item{
   display:flex;
   justify-content:space-between;
-  padding:10px 0;
+  padding:8px 0;
   color:var(--text);
   border-bottom:1px dashed var(--border);
   font-weight: 500;
-  transition: border-color 0.4s;
+  transition: border-color 0.3s;
 }
 .score-item:last-child{border-bottom:none}
 
-/* Forms and Modals */
-.modal-content{ 
-    background: var(--card); 
-    color: var(--text); 
-    border-radius: 18px; /* Decent modal radius */
+/* Animated Chart Placeholder */
+.chart-container {
+    height: 150px;
+    padding-top: 15px;
+    background: var(--border);
+    border-radius: 10px;
+    margin-top: 15px;
+    transition: background-color 0.3s;
 }
+.bar {
+    background: linear-gradient(to top, var(--accent-main), var(--accent-secondary));
+    border-radius: 4px 4px 0 0;
+    width: 20px;
+    margin: 0 4px;
+    transition: height 1.5s ease-out;
+    height: 0;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+/* Forms and Modals */
+.modal-content{ background: var(--card); color: var(--text); }
 .modal-header{ border-bottom: 1px solid var(--border); }
 .modal-footer{ border-top: 1px solid var(--border); }
-.form-label { color: var(--muted); }
-.form-control, .form-select { 
-    background: var(--bg); /* Use BG for input fields */
-    border: 1px solid var(--border); 
-    color: var(--text); 
-    padding: 12px;
-    border-radius: 10px;
-}
-.form-control:focus, .form-select:focus { 
-    background: var(--bg); 
-    border-color: var(--accent-main); 
-    box-shadow: 0 0 0 0.25rem rgba(102, 255, 194, 0.2); 
-}
+.form-label { color: var(--text); }
+.form-control, .form-select { background: var(--border); border-color: var(--border); color: var(--text); }
+.form-control:focus, .form-select:focus { background: var(--border); border-color: var(--accent-secondary); box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25); }
 .btn-close { 
-    /* Adjust filter to show up correctly against dark/light background */
     filter: invert(var(--theme-filter, 1)) grayscale(100%) brightness(200%); 
 }
-[data-theme="light"] .btn-close { filter: none; }
+[data-theme="light"] .btn-close { filter: none; } 
 </style>
 </head>
 
@@ -298,6 +297,7 @@ body{
     <a href="#" class="text-decoration-none">
         <img src="IMG_2247.png" alt="Fidak Fest" class="navbar-logo">
     </a>
+
     <div class="dropdown">
         <button class="btn btn-theme dropdown-toggle no-arrow" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-sun" id="themeIconDisplay"></i>
@@ -329,13 +329,13 @@ body{
 <div class="container-portal d-flex align-items-center justify-content-center min-vh-100">
   <div class="w-100">
 
-    <div class="text-center mb-5">
-      <h2 class="fw-bold fs-1" style="color:var(--accent-main)">Fidak Fest Portal</h2>
-      <div class="muted">Access Management and Live Data</div>
+    <div class="text-center mb-4">
+      <h2 class="fw-bold" style="color:var(--accent-main)">Management Portal</h2>
+      <div class="muted">Select your access level</div>
     </div>
 
     <div class="card-ui">
-        <h5 class="fw-bold mb-3" style="color:var(--text)">🚀 Access Options</h5>
+        <h6 class="fw-bold mb-3" style="color:var(--text)">Login Options</h6>
         <div class="d-grid gap-3">
           <button class="btn btn-primary" id="btnAdmin">
             <i class="bi bi-shield-lock"></i> Admin Login
@@ -350,31 +350,28 @@ body{
     </div>
     
     <div class="card-ui">
-        <h5 class="fw-bold mb-3" style="color:var(--text)">📊 Festival Statistics</h5>
         <div class="stats">
           <div class="stat">
             <h4 id="statStudents">0</h4>
-            <small>Total Students</small>
+            <small>Students</small>
           </div>
           <div class="stat">
             <h4 id="statEvents">0</h4>
-            <small>Programs Active</small>
+            <small>Programs</small>
           </div>
           <div class="stat">
             <h4 id="statTeams">0</h4>
-            <small>Teams Competing</small>
+            <small>Teams</small>
           </div>
         </div>
     </div>
 
 
     <div class="card-ui">
-      <h5 class="fw-bold mb-3" style="color:var(--text)">📈 Live Score Trend (Line Graph)</h5>
-      <div class="chart-container">
-        <div id="dynamicGraph"></div>
-        <div class="graph-line"></div>
-      </div>
-      <div id="scoreList" class="small text-muted mt-3">Loading Top Teams...</div>
+      <h6 class="fw-bold" style="color:var(--text)">Live Team Scores (Animated)</h6>
+      <div class="chart-container d-flex justify-content-around align-items-end" id="chartContainer">
+        </div>
+      <div id="scoreList" class="small text-muted mt-3">Loading…</div>
     </div>
 
   </div>
@@ -399,7 +396,7 @@ body{
           
           <div class="mb-3 d-none" id="participantBox">
             <label class="form-label">Chess Number</label>
-            <input id="chessInput" type="text" class="form-control" placeholder="Enter your Alphanumeric Chess ID">
+            <input id="chessInput" type="number" class="form-control" placeholder="Enter your Chess ID">
           </div>
 
           <div class="mb-3" id="passwordBox">
@@ -426,10 +423,18 @@ import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // --- INTRO LOGIC (REVISED TIMING) ---
+  // --- INTRO LOGIC ---
   const introOverlay = document.getElementById('intro-overlay');
-  setTimeout(() => { introOverlay.classList.add('fade-out'); }, 2500); 
-  setTimeout(() => { introOverlay.remove(); }, 3300); 
+  
+  // Wait 2.2 seconds then fade out
+  setTimeout(() => {
+    introOverlay.classList.add('fade-out');
+  }, 2200);
+
+  // Remove from DOM completely after fade out animation (3s total)
+  setTimeout(() => {
+    introOverlay.remove();
+  }, 3000);
     
   // --- Theme Management ---
   const body = document.body;
@@ -445,11 +450,22 @@ document.addEventListener("DOMContentLoaded", () => {
           body.removeAttribute('data-theme');
           body.setAttribute('data-theme', mode);
       }
+
       themeToggles.forEach(btn => {
           btn.classList.remove('active');
-          if(btn.getAttribute('data-theme-mode') === mode) btn.classList.add('active');
+          if(btn.getAttribute('data-theme-mode') === mode) {
+              btn.classList.add('active');
+          }
       });
-      themeIconDisplay.className = mode === 'light' ? "bi bi-sun-fill" : (mode === 'dark' ? "bi bi-moon-stars-fill" : "bi bi-circle-half");
+
+      themeIconDisplay.className = "";
+      if (mode === 'light') {
+          themeIconDisplay.className = "bi bi-sun-fill";
+      } else if (mode === 'dark') {
+          themeIconDisplay.className = "bi bi-moon-stars-fill";
+      } else {
+          themeIconDisplay.className = "bi bi-circle-half";
+      }
   }
 
   function setTheme(mode) {
@@ -461,14 +477,17 @@ document.addEventListener("DOMContentLoaded", () => {
   updateThemeUI(savedTheme);
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (localStorage.getItem('theme') === 'system') updateThemeUI('system');
+      if (localStorage.getItem('theme') === 'system') {
+          updateThemeUI('system');
+      }
   });
 
   themeToggles.forEach(toggle => {
       toggle.addEventListener('click', (e) => {
           e.preventDefault();
           const target = e.target.closest('a');
-          setTheme(target.getAttribute('data-theme-mode'));
+          const mode = target.getAttribute('data-theme-mode');
+          setTheme(mode);
       });
   });
 
@@ -487,56 +506,20 @@ document.addEventListener("DOMContentLoaded", () => {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
   } catch (e) {
-    console.error("Firebase init failed:", e);
+    console.error("Firebase initialization failed:", e);
     document.getElementById("scoreList").innerHTML = "<div class='text-danger'>Error connecting to database.</div>";
+    return;
   }
   
   const statStudents = document.getElementById("statStudents");
   const statEvents = document.getElementById("statEvents");
   const statTeams = document.getElementById("statTeams");
   const scoreList = document.getElementById("scoreList");
-  const dynamicGraph = document.getElementById("dynamicGraph");
-
-  // --- Graph Utility: Generates a Decent, single-area clip-path based on scores ---
-  function updateGraph(maxScore) {
-      const points = 10;
-      let clipPath = 'polygon(0% 100%'; 
-      const currentHighestScore = maxScore;
-      
-      for (let i = 0; i <= points; i++) {
-          const x = (i / points) * 100;
-          let yPercentage;
-          
-          if (i === 0) {
-              yPercentage = 95; // Start near the bottom (100% is the baseline)
-          } else if (i === points) {
-              // End point is relative to the current max score against a conceptual max of 2000
-              const conceptualMax = 2000; 
-              // Convert final score to a height (0% is top, 100% is bottom)
-              let height = (currentHighestScore / conceptualMax) * 80; // Max 80% height fill
-              yPercentage = Math.max(15, 95 - height); // Keep between 15% (high) and 95% (low)
-          } else {
-              // Simulate score growth over time with some random fluctuation
-              const timeProgress = i / points;
-              // A simple curve mimicking growth (e.g., cubic)
-              let scoreRatio = Math.pow(timeProgress, 3) * 0.9;
-              // Add randomness
-              scoreRatio += (Math.random() - 0.5) * 0.1;
-              scoreRatio = Math.min(1, Math.max(0, scoreRatio)); // Clamp 0 to 1
-              
-              // Map score ratio to inverted Y-coordinate
-              let height = scoreRatio * 80;
-              yPercentage = Math.max(15, 95 - height); 
-          }
-
-          clipPath += `, ${x}% ${yPercentage.toFixed(0)}%`;
-      }
-      clipPath += `, 100% 100%)`; // Close the polygon at the bottom right
-
-      dynamicGraph.style.clipPath = clipPath;
-  }
+  const teamSelect = document.getElementById("teamSelect");
+  const chartContainer = document.getElementById("chartContainer");
 
   // --- Realtime Listeners ---
+
   onValue(ref(db,"students"), s => {
     allStudents = s.val() || {};
     statStudents.textContent = Object.keys(allStudents).length;
@@ -551,47 +534,51 @@ document.addEventListener("DOMContentLoaded", () => {
     allTeams = teams;
     statTeams.textContent = Object.keys(teams).length;
 
+    teamSelect.innerHTML = `<option value="">Select Team</option>`;
     scoreList.innerHTML = "";
+    chartContainer.innerHTML = "";
     
-    // Sort teams by score (descending)
     const sortedTeams = Object.values(teams)
       .sort((a,b)=>(b.score||0)-(a.score||0));
       
-    // Update Graph based on max score
-    const maxScore = sortedTeams.length > 0 ? Math.max(...sortedTeams.map(t => t.score || 0)) : 0;
-    updateGraph(maxScore);
-
-    // Display top scores
+    const maxScore = sortedTeams.length > 0 ? Math.max(...sortedTeams.map(t => t.score || 0)) : 100;
+    
     sortedTeams
-      .slice(0, 5) // Show top 5 teams
-      .forEach((t, index)=>{
-        // Use accent main for the top team only, or use a neutral color
-        const color = index === 0 ? 'var(--accent-main)' : 'var(--text)';
+      .forEach(t=>{
+        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+        
         scoreList.innerHTML += `
           <div class="score-item">
-            <span class="d-flex align-items-center"><i class="bi bi-trophy-fill me-2" style="color:${color}"></i> ${t.name}</span>
-            <strong>${t.score||0} pts</strong>
+            <span>${t.name}</span>
+            <strong>${t.score||0}</strong>
           </div>`;
-      });
-      if (sortedTeams.length === 0) {
-        scoreList.innerHTML = "<div class='text-muted mt-2'>No team scores available.</div>";
-      }
-      
-      // Update Team Select in Modal
-      const teamSelect = document.getElementById("teamSelect");
-      teamSelect.innerHTML = `<option value="">Select Team</option>`;
-      Object.values(teams).forEach(t=>{
-          teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+          
+        if (chartContainer.childElementCount < 10) {
+            const score = t.score || 0;
+            const heightPercent = (score / maxScore) * 85; 
+            
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.title = `${t.name}: ${score}`;
+            bar.style.height = '0';
+            bar.style.width = '20px';
+            
+            setTimeout(() => {
+                bar.style.height = `${Math.max(5, heightPercent)}%`; 
+            }, 100);
+            
+            chartContainer.appendChild(bar);
+        }
       });
   });
 
-  // --- Login Logic (Unchanged from previous fix) ---
+  // --- Login Logic ---
   const modal = new bootstrap.Modal(document.getElementById("loginModal"));
   const loginForm = document.getElementById("loginForm");
   const loginType = document.getElementById("loginType");
   const teamBox = document.getElementById("teamBox");
   const participantBox = document.getElementById("participantBox");
-  const passwordBox = document.getElementById("passwordBox");
+  const passwordBox = document.getElementById("passwordBox"); // New Reference
   const loginTitle = document.getElementById("loginTitle");
   const passwordInput = document.getElementById("passwordInput");
   const chessInput = document.getElementById("chessInput");
@@ -600,6 +587,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAdmin = document.getElementById("btnAdmin");
   const btnLeader = document.getElementById("btnLeader");
   const btnParticipant = document.getElementById("btnParticipant");
+
+  btnAdmin.onclick = () => openLogin("admin");
+  btnLeader.onclick = () => openLogin("leader");
+  btnParticipant.onclick = () => openLogin("participant");
 
   function openLogin(type){
     loginType.value = type;
@@ -611,26 +602,23 @@ document.addEventListener("DOMContentLoaded", () => {
         loginTitle.textContent = "ADMIN LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none");
+        passwordBox.classList.remove("d-none"); // Show Pass
         passwordInput.placeholder = "Admin Password";
     } else if (type === "leader"){
         loginTitle.textContent = "LEADER LOGIN";
         teamBox.classList.remove("d-none");
         participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none");
+        passwordBox.classList.remove("d-none"); // Show Pass
         passwordInput.placeholder = "Leader Password";
     } else if (type === "participant"){
         loginTitle.textContent = "PARTICIPANT LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.remove("d-none");
-        passwordBox.classList.add("d-none"); 
+        passwordBox.classList.add("d-none"); // Hide Pass for Students
     }
+    
     modal.show();
   }
-
-  btnAdmin.onclick = () => openLogin("admin");
-  btnLeader.onclick = () => openLogin("leader");
-  btnParticipant.onclick = () => openLogin("participant");
 
   loginForm.onsubmit = async e => {
     e.preventDefault();
@@ -646,10 +634,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if(type==="leader"){
-      const teamId = document.getElementById("teamSelect").value;
+      const teamId = teamSelect.value;
       const team = Object.values(allTeams).find(t => String(t.id) === teamId);
-      if(!team || team.password !== pwd){ error("Invalid team or password"); return; }
-      if (!team.leaderId) { error("Team leader ID not set."); return; }
+      
+      if(!team || team.password !== pwd){
+        error("Invalid team or password"); return;
+      }
+      if (!team.leaderId) {
+          error("Team leader ID not set."); return;
+      }
       sessionStorage.setItem("leaderAuth", JSON.stringify(team));
       location.href=`leader.html?leader=${team.leaderId}`;
     }
@@ -657,34 +650,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (type === "participant") {
         if (!chessID) { error("Please enter your Chess Number."); return; }
         
+        // Wait Check: Ensure data is actually loaded
         if (Object.keys(allStudents).length === 0) {
-            error("Data loading... please wait 2 seconds and try again.");
+            error("System loading data... please wait 2 seconds and try again.");
             return;
         }
-        
-        let student;
-        const lowerCaseID = chessID.toLowerCase();
-        
-        student = Object.values(allStudents).find(s => {
-            const firebaseKey = Object.keys(allStudents).find(key => allStudents[key] === s);
-            if (firebaseKey && String(firebaseKey).trim().toLowerCase() === lowerCaseID) return true;
-            
-            const sId = String(s.id || '').trim().toLowerCase();
-            const sChestNo = String(s.chestNo || '').trim().toLowerCase();
-            const sChessNo = String(s.chessNo || '').trim().toLowerCase();
-            
-            return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
-        });
 
+        // Search for student
+        const student = Object.values(allStudents).find(s => String(s.id) === chessID);
+        
         if (!student) {
-            error("Invalid Chess Number or ID. Record not found.");
+            error("Invalid Chess Number. ID not found.");
             return;
         }
-        
-        const studentID = student.id || student.chestNo || chessID;
-        
-        sessionStorage.setItem("participantId", studentID);
-        sessionStorage.setItem("participantName", student.name || "Participant");
+
+        // Login Success
+        sessionStorage.setItem("participantId", chessID);
+        sessionStorage.setItem("participantName", student.name); // Store name too for welcome msg
         location.href="participant.html"; 
     }
   };
