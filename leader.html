@@ -12,56 +12,63 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* New UI/UX based on screenshots and modern dark theme */
+    /* -------------------------------------- */
+    /* Optimized & Refined CSS */
+    /* -------------------------------------- */
     :root{
-      --bg: #0f172a; /* Darker background */
-      --card: #1e293b; /* Dark card background */
-      --text: #f8fafc; /* Light text */
-      --muted: #94a3b8; /* Muted text */
-      --accent-orange: #f97316; /* Orange button/highlight */
-      --accent-blue: #3b82f6; /* Blue button/highlight */
+      /* Main Palette */
+      --bg: #0d121c; /* Deep Dark Blue */
+      --card: #1c2738; /* Slightly Lighter Card BG */
+      --text: #e2e8f0; /* Off-White Text */
+      --muted: #94a3b8; /* Slate Grey Muted */
+      
+      /* Accents */
+      --accent-main: #f97316; /* Vibrant Orange */
+      --accent-secondary: #3b82f6; /* Bright Blue */
+      
+      /* Status/Stats Colors */
+      --stat-red: #dc2626; 
+      --stat-orange: #f97316;
+      --stat-pink: #d946ef; 
+      --stat-dark: #1d4ed8; 
       --success: #10b981;
       --danger: #ef4444;
-      --stat-red: #ef4444;
-      --stat-orange: #f97316;
-      --stat-pink: #db2777;
-      --stat-dark: #1e3a8a;
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:var(--text);background:var(--bg)}
     .container-wide{max-width:1100px;margin:14px auto;padding:0 12px}
-    .card-neo{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,0.2);margin-bottom:14px}
+    .card-neo{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,0.3);margin-bottom:14px;border:1px solid #334155;}
     .section-title{font-weight:700;margin-bottom:12px;color:var(--text);font-size:1.2rem;}
     .muted{color:var(--muted)}
     .muted-small{color:var(--muted);font-size:13px}
-    .btn-accent{background:var(--accent-orange);color:#fff;border:0}
+    
+    /* Buttons */
+    .btn-accent{background:var(--accent-main);color:#fff;border:0}
     .btn-accent:hover{background:#ea580c;color:#fff}
-
-    /* Top Nav Redesign */
-    .top-nav{background:#0f172a;border-bottom:1px solid #1e293b;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-    .brand{font-weight:800;color:var(--accent-orange);font-size:1.5rem}
-    .nav-btn{color:var(--muted);border:1px solid #334155;background:#1e293b;}
-    .nav-btn.active{background:var(--accent-blue);color:#fff;border-color:var(--accent-blue);box-shadow:none}
+    
+    /* Forms in Dark Mode */
+    .form-control, .form-select{
+        background:#334155;
+        color:var(--text);
+        border:1px solid #475569;
+    }
+    .form-control::placeholder{color:var(--muted);}
+    
+    /* Top Nav */
+    .top-nav{background:var(--bg);border-bottom:1px solid #334155;}
+    .brand{font-weight:800;color:var(--accent-main);font-size:1.5rem}
+    .nav-btn{color:var(--muted);border:1px solid #334155;background:var(--card);}
+    .nav-btn.active{background:var(--accent-secondary);color:#fff;border-color:var(--accent-secondary);box-shadow:none}
 
     /* Leader Info & Stats */
-    .leader-info{display:flex;gap:12px;align-items:center;margin-bottom:16px}
-    .leader-avatar{width:56px;height:56px;border-radius:10px;background:var(--accent-blue);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.5rem}
+    .leader-avatar{width:56px;height:56px;border-radius:10px;background:var(--accent-secondary);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.5rem}
     .stats-grid{
       display:grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap:12px;
       margin-top:10px;
     }
-    .stat{
-      padding:20px;
-      border-radius:10px;
-      color:#fff;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      height: 100px;
-      position: relative;
-    }
+    .stat{padding:20px;border-radius:10px;color:#fff;height: 100px;position: relative;}
     .stat .title{font-size:13px;font-weight:500;margin-bottom:4px}
     .stat .big{font-weight:800;font-size:2rem;line-height:1}
     .stat-bg-red{background-color:var(--stat-red);}
@@ -69,84 +76,54 @@
     .stat-bg-pink{background-color:var(--stat-pink);}
     .stat-bg-dark{background-color:var(--stat-dark);}
 
-    /* Events Panel */
+    /* Events Panel Table */
+    .table{--bs-table-bg: var(--card);--bs-table-color: var(--text);border:1px solid #334155;}
     .table-light, .table-light th{background-color:#334155 !important;color:var(--text);}
-    .table{--bs-table-bg: var(--card);--bs-table-color: var(--text);}
     .participated-row{background:rgba(30, 41, 59, 0.5) !important;}
 
     /* Results Panel - Card/List style */
     .result-list-item {
-        background: #1e293b;
+        background: var(--card);
         border-radius: 8px;
         padding: 12px;
         margin-bottom: 10px;
-        border-left: 5px solid var(--accent-orange);
+        border-left: 5px solid var(--muted);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .result-list-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    .result-event-name {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: var(--accent-orange);
-    }
-    .result-status-badge {
-        font-size: 0.8rem;
-    }
-    .result-position-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .result-position-list li {
-        padding: 4px 0;
-        border-bottom: 1px dashed #334155;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .result-position-list li:last-child {
-        border-bottom: none;
-    }
-    .result-medal {
-      font-size: 1.1rem;
-      margin-right: 8px;
-    }
+    .result-event-name {font-weight: 700;font-size: 1.1rem;color: var(--accent-main);}
+    .result-position-list {list-style: none;padding: 0;margin: 0;}
+    .result-position-list li {padding: 4px 0;border-bottom: 1px dashed #334155;display: flex;justify-content: space-between;align-items: center;}
+    .result-medal {font-size: 1.1rem;margin-right: 8px;}
     .participated-row .result-list-item { border-left-color: var(--success); }
     .participated-row .result-event-name { color: var(--success); }
 
     /* Small box for member selection */
     .small-box{
-      width:70px;height:70px;
-      border-radius:8px;
-      background:#334155;
-      display:inline-flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      margin:6px;cursor:pointer;font-weight:700;
-      transition: background 0.2s;
+      width:70px;height:70px;border-radius:8px;
+      background:#334155;display:inline-flex;flex-direction:column;
+      align-items:center;justify-content:center;margin:6px;
+      cursor:pointer;font-weight:700;transition: background 0.2s;
     }
     .small-box .chess{font-weight:800;font-size:1.2rem;color:var(--text)}
     .small-box .name{font-size:11px;margin-top:2px;color:var(--muted);text-align:center;}
-    .small-box.selected{background:var(--accent-blue);color:#fff}
+    .small-box.selected{background:var(--accent-secondary);color:#fff}
     .small-box:hover{background:#475569}
 
     /* Modal Styling */
     .modal-content{background:var(--card);color:var(--text);}
     .modal-header{border-bottom-color: #334155;}
     .modal-footer{border-top-color: #334155;}
-    .btn-close{filter: invert(1) grayscale(100%) brightness(200%);} /* Make close button white */
-
+    .btn-close{filter: invert(1) grayscale(100%) brightness(200%);}
+    
+    /* Mobile Responsiveness */
     @media (max-width:768px){
       .stats-grid{grid-template-columns: repeat(2, 1fr);}
     }
     @media (max-width:500px){
       .stats-grid{grid-template-columns: 1fr;}
+      .top-nav .container-wide { flex-direction: column; align-items: flex-start; }
+      .top-nav .d-flex.gap-2.py-2 { width: 100%; justify-content: space-between; }
+      .top-nav .btn.ms-2 { margin-left: 0 !important; }
     }
   </style>
 </head>
@@ -159,7 +136,7 @@
 
       <div class="d-flex gap-2 align-items-center">
         <div class="muted-small d-none d-md-block">Year <span id="current-year"></span></div>
-        <button id="btnLogout" class="btn btn-outline-light ms-2"><i class="bi bi-box-arrow-right"></i> Logout</button>
+        <button id="btnLogout" class="btn btn-outline-danger ms-2"><i class="bi bi-box-arrow-right"></i> Logout</button>
       </div>
     </div>
 
@@ -212,7 +189,7 @@
           <div class="col-6 col-md-4"><div class="muted-small">Total Events Nominated: <span id="quickAdded" style="font-weight:700">0</span></div></div>
           <div class="col-6 col-md-4"><div class="muted-small">Pending Submissions: <span id="quickPending" style="font-weight:700">0</span></div></div>
           <div class="col-12 col-md-4 text-md-end">
-            <button id="btnDownloadTeamPdf" class="btn btn-outline-light btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export Member List</button>
+            <button id="btnDownloadTeamPdf" class="btn btn-outline-info btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export Member List</button>
           </div>
         </div>
       </div>
@@ -225,9 +202,9 @@
           <div class="card-neo">
             <label class="form-label muted-small">Filter / Search</label>
             <div class="d-flex gap-2 mb-2">
-              <input id="eventSearch" class="form-control form-control-dark" placeholder="Search by name / type / level" style="background:#334155;color:var(--text);border:1px solid #475569">
-              <select id="filterType" class="form-select form-select-dark" style="background:#334155;color:var(--text);border:1px solid #475569"><option value="">All Types</option><option>Stage</option><option>Non-Stage</option><option>Off-Stage</option></select>
-              <select id="filterLevel" class="form-select form-select-dark" style="background:#334155;color:var(--text);border:1px solid #475569"><option value="">All Levels</option><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
+              <input id="eventSearch" class="form-control" placeholder="Search by name / type / level">
+              <select id="filterType" class="form-select"><option value="">All Types</option><option>Stage</option><option>Non-Stage</option><option>Off-Stage</option></select>
+              <select id="filterLevel" class="form-select"><option value="">All Levels</option><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
             </div>
             <div class="section-title mt-3">Available Events</div>
             <div class="table-responsive" style="max-height:400px;overflow:auto">
@@ -297,7 +274,7 @@
         <div class="modal-content">
           <div class="modal-header"><h5 class="modal-title">Your Team Submissions</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
           <div class="modal-body">
-            <div class="alert alert-info muted-small">Showing **All** nominations. Only **Approved** ones will be included in the PDF export below.</div>
+            <div class="alert alert-info muted-small" style="background: #1d4ed830; color: #93c5fd; border-color: #3b82f6;">Showing **All** nominations. Only **Approved** ones will be included in the PDF export below.</div>
             <div id="yourSubmissionsList" style="max-height:420px;overflow:auto; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
               </div>
           </div>
@@ -319,7 +296,7 @@
     </div>
   </main>
 <script type="module">
-// ... existing firebase imports and helpers ...
+// Firebase logic must be preserved exactly as before
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
@@ -346,7 +323,7 @@ function decodeKey(k){ return decodeURIComponent(String(k)); }
 
 /* caches & keymaps */
 let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
-let KEYMAP = { students: {}, teams: {}, events: {}, participations: [], results: {} };
+let KEYMAP = { students: {}, teams: {}, events: {}, participations: {}, results: {} };
 
 /* db refs */
 const studentsRef = ref(db, 'students');
@@ -440,7 +417,6 @@ function renderAll(){
   renderLeaderDashboard();
   renderResultsList(); // Use new function for list rendering
   populateTeamLists();
-  // renderAllStudentsBox(); // Removed from dashboard
   computeQuickStats();
   // attempt detect leader again at data arrival
   if(!LEADER.active) detectLeaderFromUrlOrSession();
@@ -521,8 +497,8 @@ function selectEvent(evId){
         div.classList.add('selected');
     }
 
-    // show chess# prominent and name below small
-    div.innerHTML = `<div class="chess">${escapeHtml(s.id)}</div><div class="name">${escapeHtml(s.name.split(' ')[0])}</div>`; // show only first name
+    // show chess# prominent and name below small (first name only)
+    div.innerHTML = `<div class="chess">${escapeHtml(s.id)}</div><div class="name">${escapeHtml(s.name.split(' ')[0])}</div>`; 
     
     div.addEventListener('click', (evClick)=>{
       const clickedText = evClick.target;
@@ -552,13 +528,10 @@ function toggleMemberSelectForEvent(el, ev){
   const evId = $('membersSelection').dataset.evId;
   if(!evId) return toast('Select event first','danger');
 
-  // Get current state from the DOM (selected or not)
   const isSelected = el.classList.contains('selected');
-
-  // Total selected currently in the UI
   const selectedBoxes = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
 
-  // 1. If currently selected => unselect (no limits check needed)
+  // 1. If currently selected => unselect 
   if(isSelected) { 
     el.classList.remove('selected'); 
     updateSelectionInfo(); 
@@ -580,13 +553,7 @@ function toggleMemberSelectForEvent(el, ev){
   const caps = { Senior: { Stage:3, 'Non-Stage':4 }, Junior: { Stage:2, 'Non-Stage':3 } };
   const allowed = (caps[memberLevel] && caps[memberLevel][evTypeNormalized]) ? caps[memberLevel][evTypeNormalized] : (evTypeNormalized==='Stage'?3:4);
 
-  // Count current *existing* (not just what's selected in the UI) nominations for this member by this team for events of same evTypeNormalized
-  const teamId = LEADER.teamId;
-  const existingNominations = memberNominationsCountForType(teamId, memberId, evTypeNormalized);
-
-  // The count needs to *exclude* the current event if the member is already nominated in it,
-  // but since we clear selection on submit, a simpler way is to count existing submissions *excluding* this event.
-  // A safer check is: total submissions *plus one* (the current selection)
+  const existingNominations = memberNominationsCountForType(LEADER.teamId, memberId, evTypeNormalized);
   
   if(existingNominations + 1 > allowed) {
     return toast(`This member (${memberObj ? memberObj.name : memberId}) already has ${existingNominations} ${evTypeNormalized} nomination(s). Allowed: ${allowed}.`,'danger');
@@ -616,7 +583,6 @@ $('btnSubmitParticipation').addEventListener('click', async ()=>{
   if(!evId) return toast('Select an event first','danger');
   const sel = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
 
-  // Get existing nominations for this event and team
   const existingParts = CACHE.participations.filter(p => 
     String(p.eventId) === String(evId) && String(p.teamId) === String(LEADER.teamId)
   );
@@ -629,9 +595,7 @@ $('btnSubmitParticipation').addEventListener('click', async ()=>{
   // 1. Create new participations (selected, but not existing)
   for(const studId of selectedIds){
     if(!existingIds.has(studId)){
-      // Double-check per-event team limit at server side by current DB state before pushing new ones
       if(existingParts.length + created >= 2){
-          // This should ideally be caught by the UI check, but as a final safeguard
           toast('Cannot submit: adding this member would exceed per-event limit (2).','danger');
           continue; 
       }
@@ -663,7 +627,6 @@ $('btnSubmitParticipation').addEventListener('click', async ()=>{
   if(created || removed) toast(`Submissions: ${created} created, ${removed} removed.`);
   if(skipped) toast(`${skipped} already submitted/irremovable (skipped)`, 'warning');
 
-  // clear selection (will be re-rendered on data update from onValue)
   $('btnClearSelection').click();
   computeQuickStats();
 }
@@ -676,7 +639,6 @@ $('btnViewSubmissions').addEventListener('click', ()=> {
 
 /* ---------- Dashboard & Team ---------- */
 function populateTeamLists(){
-  // The 'teamMembersList' is removed from the dashboard, only populating 'teamMembersSmall'
   const smallWrap = $('teamMembersSmall');
   const teamInfo = $('teamInfoWrap');
   smallWrap.innerHTML = ''; teamInfo.innerHTML = '';
@@ -716,7 +678,6 @@ function computeTeamAttendancePercent(){
   Object.values(att).forEach(sess => {
     if(!sess || !sess.students) return;
     members.forEach(mid => {
-      // Only count attendance if the session has a record for the student
       if(sess.students[mid] !== undefined){
         possible++;
         if(String(sess.students[mid]).toLowerCase() === 'present') presentCount++;
@@ -759,7 +720,7 @@ function computeQuickStats(){
   const approved = parts.filter(p => String(p.status||'').toLowerCase() === 'approved').length;
   $('quickAdded').textContent = addedEvents.size;
   $('quickPending').textContent = pending;
-  $('quickApproved').textContent = approved; // Used in the Dashboard stats grid
+  $('quickApproved').textContent = approved;
 }
 
 /* ---------- Results view for leaders (Published List View) ---------- */
@@ -781,7 +742,6 @@ function renderResultsList(){
     const anyResult = !!pos[1] || !!pos[2] || !!pos[3];
     const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
     
-    // Skip if no results and not the current leader's event
     if (!anyResult) return; 
 
     const statusBadge = pub 
@@ -880,11 +840,10 @@ $('btnDownloadTeamPdf').addEventListener('click', ()=>{
   html2pdf().from(html).set({margin:10,filename:`team_members_${new Date().toISOString().slice(0,10)}.pdf`}).save();
 });
 
-/* ---------- NEW Export Approved Events PDF ---------- */
+/* ---------- Export Approved Events PDF ---------- */
 $('btnDownloadSubmissionsPdf').addEventListener('click', ()=>{
   if(!LEADER.active || !LEADER.teamId) return toast('Act as leader to export submissions','danger');
 
-  // 1. Filter for Approved Submissions
   const approvedSubs = CACHE.participations.filter(p => 
     String(p.teamId) === String(LEADER.teamId) && 
     String(p.status||'').toLowerCase() === 'approved'
@@ -892,15 +851,13 @@ $('btnDownloadSubmissionsPdf').addEventListener('click', ()=>{
 
   if (approvedSubs.length === 0) return toast('No approved submissions to export.','warning');
 
-  // 2. Group by Event
-  const eventsMap = new Map(); // Map<eventId, Array<studentId>>
+  const eventsMap = new Map(); 
   approvedSubs.forEach(p => {
     const eventId = String(p.eventId);
     if (!eventsMap.has(eventId)) eventsMap.set(eventId, []);
     eventsMap.get(eventId).push(String(p.studentId));
   });
 
-  // 3. Build HTML for PDF in the requested format
   let html = `<h2>Approved Event Participation List</h2>
     <p>Team ID: ${escapeHtml(LEADER.teamId)} | Export Date: ${new Date().toLocaleDateString()}</p>
     <div style="margin-top: 20px;">`;
