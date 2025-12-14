@@ -298,11 +298,11 @@
   </main>
 <script type="module">
 // The main JavaScript logic is now wrapped in a DOMContentLoaded listener
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
-  // Load essential firebase libraries
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  // Dynamically import Firebase modules
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
+  const { getDatabase, ref, push, set, update, onValue, get, remove } = await import("https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js");
 
   /* Firebase config - use your project's config */
   const firebaseConfig = {
@@ -435,8 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btnDownloadSubmissionsPdf').addEventListener('click', downloadApprovedSubmissionsPdf);
   
   // 7. Initial Boot Logic
+  try{ $('current-year').textContent = new Date().getFullYear(); }catch(e){}
+  
+  // Delay the initial leader detection slightly to allow first data batch to arrive
   setTimeout(()=> {
-    try{ $('current-year').textContent = new Date().getFullYear(); }catch(e){}
     detectLeaderFromUrlOrSession();
     document.querySelector('[data-target="#panel-dashboard"]').click();
   }, 400);
