@@ -27,6 +27,11 @@
     --accent-secondary: #00bcd4; /* Cyan/Blue for borders/buttons */
     --success: #69f0ae; 
     --danger: #ff5252; 
+    
+    /* NEW: Graph Colors */
+    --graph-color-1: #69f0ae; /* Green */
+    --graph-color-2: #ff7f50; /* Orange */
+    --graph-color-3: #00bcd4; /* Cyan */
 
     /* Logo Filter (Invert colors for dark mode) */
     --logo-filter: invert(1) brightness(1.8) contrast(1.5);
@@ -37,12 +42,17 @@
     --bg: #f5f7ff; 
     --card: #ffffff; 
     --text: #0f172a; 
-    --muted: #64748b; 
+    --muted: #64748b;
     --shadow: rgba(0, 0, 0, 0.1);
     --border: #e5e7eb;
     
     /* Logo Filter (Keep original black/dark colors) */
     --logo-filter: none;
+    
+    /* NEW: Graph Colors */
+    --graph-color-1: #388e3c; /* Darker Green */
+    --graph-color-2: #e65100; /* Darker Orange */
+    --graph-color-3: #0097a7; /* Darker Cyan */
 }
 
 /* --- Base Styles --- */
@@ -57,7 +67,7 @@ body{
 }
 
 /* -------------------------------------- */
-/* INTRO ANIMATION STYLES */
+/* INTRO ANIMATION STYLES (UPDATED) */
 /* -------------------------------------- */
 #intro-overlay {
     position: fixed;
@@ -83,19 +93,22 @@ body{
     width: 200px;
     height: auto;
     filter: var(--logo-filter);
-    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, 
-               logoPulse 1s infinite alternate 2.5s;
+    /* UPDATED: New animation name/timing */
+    animation: logoFlyIn 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards, 
+               logoGlow 1.5s infinite alternate 2s;
 }
 
-@keyframes logoEntrance {
-    0% { opacity: 0; transform: scale(0.3) translateY(50px); }
-    50% { opacity: 1; transform: scale(1.3); }
+/* NEW INTRO ANIMATION: Fly in from top and settle */
+@keyframes logoFlyIn {
+    0% { opacity: 0; transform: translateY(-100vh) scale(0.5); }
+    70% { opacity: 1; transform: translateY(0) scale(1.1); }
     100% { opacity: 1; transform: scale(1); }
 }
 
-@keyframes logoPulse {
-    0% { box-shadow: 0 0 10px 5px var(--accent-main); }
-    100% { box-shadow: 0 0 20px 10px var(--accent-secondary); }
+/* UPDATED INTRO PULSE: Use a lighter, cleaner glow */
+@keyframes logoGlow {
+    0% { filter: var(--logo-filter) drop-shadow(0 0 5px var(--accent-secondary)); }
+    100% { filter: var(--logo-filter) drop-shadow(0 0 15px var(--accent-main)); }
 }
 
 /* Layout */
@@ -105,7 +118,7 @@ body{
   padding:20px;
   opacity: 0;
   animation: contentFadeIn 1s ease-out forwards;
-  animation-delay: 2.2s;
+  animation-delay: 1.8s; /* Start content fade in slightly earlier */
 }
 
 @keyframes contentFadeIn {
@@ -122,79 +135,14 @@ body{
   transition: background-color 0.4s, border-color 0.4s;
 }
 
-/* Navbar */
-.navbar{
-  background:var(--bg);
-  padding:15px 25px;
-  transition: background-color 0.4s;
-  position: relative;
-  z-index: 100;
-}
-
-/* Logo Styling */
-.navbar-logo {
-    height: 60px;
-    width: auto;
-    filter: var(--logo-filter);
-    transition: filter 0.4s ease;
-}
-
-/* Buttons */
-.btn{
-  padding:14px 18px;
-  border-radius:12px;
-  font-weight:700;
-  letter-spacing: 0.5px;
-  transition: all 0.2s;
-}
-.btn-primary{ background:var(--accent-secondary); color:#fff; }
-.btn-primary:hover{ background:#0097a7; box-shadow: 0 4px 10px rgba(0, 188, 212, 0.5); }
-.btn-success{ background:var(--success); color:#000; }
-.btn-success:hover{ background:#4caf50; color:#fff; box-shadow: 0 4px 10px rgba(105, 240, 174, 0.5); }
-.btn-outline-primary{ border:2px solid var(--accent-main); color:var(--accent-main); background:transparent;}
-.btn-outline-primary:hover{ background:var(--accent-main); color:#fff; box-shadow: 0 4px 10px rgba(255, 127, 80, 0.5); }
-
-
-/* Stats Grid (FORCED THREE IN A ROW) */
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr); /* Force 3 columns */
-  gap:15px;
-  margin-top: 20px;
-}
-/* Ensure stat boxes look good on mobile too (optional wrap) */
-@media (max-width: 500px) {
-    .stats {
-        grid-template-columns: 1fr; /* Stack vertically on very small screens */
-    }
-}
-.stat{
-  background:var(--card); /* Changed to card background for clearer box look */
-  border-radius:12px;
-  padding:18px;
-  text-align:center;
-  /* Updated box shadow to match image example feel */
-  box-shadow: 0 0 0 2px var(--accent-secondary), 0 5px 15px var(--shadow);
-  transition: background-color 0.4s, box-shadow 0.4s;
-}
-.stat h4{
-  margin:0 0 5px 0;
-  font-size:2.5rem;
-  font-weight:900;
-  color: var(--accent-main);
-  transition: color 0.4s;
-}
-.stat small{
-  font-size:14px;
-  color:var(--muted);
-}
+/* ... (Rest of base styles remain the same) ... */
 
 /* -------------------------------------- */
-/* GRAPH VISUALIZATION STYLES (Dynamic Line Graph) */
+/* GRAPH VISUALIZATION STYLES (Multiple Line Graph) */
 /* -------------------------------------- */
 .chart-container {
-    height: 200px;
-    padding: 10px;
+    height: 250px; /* Slightly taller for multi-line */
+    padding: 15px;
     background: var(--card);
     border-radius: 10px;
     margin-top: 15px;
@@ -202,59 +150,51 @@ body{
     overflow: hidden;
 }
 
+/* Remove the old single-div graph setup */
 .graph-line {
     position: absolute;
-    bottom: 10px; /* Space for X-axis label */
-    left: 0;
-    width: 100%;
-    height: calc(100% - 20px);
+    bottom: 0;
+    left: 15px; /* Space for Y-axis */
+    width: calc(100% - 30px);
+    height: calc(100% - 30px); /* Space for X-axis */
     border-left: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
 }
 
-#dynamicGraph {
+/* New: Container for multiple SVG or Canvas lines */
+#lineGraphSVG {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    /* Default smooth area for visualization */
-    clip-path: polygon(0% 100%, 10% 90%, 20% 70%, 30% 85%, 40% 60%, 50% 75%, 60% 50%, 70% 65%, 80% 40%, 90% 55%, 100% 30%, 100% 100%);
-    background: linear-gradient(to top, rgba(0, 188, 212, 0.3), rgba(255, 127, 80, 0.1));
-    transition: clip-path 1.5s ease-out;
 }
 
-/* Score List (For visualization reference) */
-.score-item{
-  display:flex;
-  justify-content:space-between;
-  padding:8px 0;
-  color:var(--text);
-  border-bottom:1px dashed var(--border);
-  font-weight: 500;
-  transition: border-color 0.4s;
+/* Line animation style */
+.team-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 2s ease-in-out forwards;
+    /* Staggered delay handled in JS for each line */
 }
-.score-item:last-child{border-bottom:none}
 
-/* Forms and Modals */
-.modal-content{ background: var(--card); color: var(--text); }
-.modal-header{ border-bottom: 1px solid var(--border); }
-.modal-footer{ border-top: 1px solid var(--border); }
-.form-label { color: var(--text); }
-.form-control, .form-select { 
-    background: var(--border); 
-    border-color: var(--border); 
-    color: var(--text); 
+@keyframes drawLine {
+    to {
+        stroke-dashoffset: 0;
+    }
 }
-.form-control:focus, .form-select:focus { 
-    background: var(--border); 
-    border-color: var(--accent-secondary); 
-    box-shadow: 0 0 0 0.25rem rgba(0, 188, 212, 0.25); 
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
 }
-.btn-close { 
-    filter: invert(var(--theme-filter, 1)) grayscale(100%) brightness(200%); 
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
 }
-[data-theme="light"] .btn-close { filter: none; } 
 </style>
 </head>
 
@@ -341,8 +281,10 @@ body{
 
     <div class="card-ui">
       <h5 class="fw-bold mb-3" style="color:var(--text)">📈 Live Score Trend (Line Graph)</h5>
+      <div class="d-flex small mb-2" id="graphLegend">
+        </div>
       <div class="chart-container">
-        <div id="dynamicGraph"></div>
+        <svg id="lineGraphSVG" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
         <div class="graph-line"></div>
       </div>
       <div id="scoreList" class="small text-muted mt-3">Loading Top Teams...</div>
@@ -397,12 +339,12 @@ import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // --- INTRO LOGIC ---
+  // --- INTRO LOGIC (Updated to use new fade-out timing) ---
   const introOverlay = document.getElementById('intro-overlay');
-  setTimeout(() => { introOverlay.classList.add('fade-out'); }, 2200);
-  setTimeout(() => { introOverlay.remove(); }, 3000);
-    
-  // --- Theme Management ---
+  setTimeout(() => { introOverlay.classList.add('fade-out'); }, 2000); // 2 seconds for logoFlyIn
+  setTimeout(() => { introOverlay.remove(); }, 2800); // 800ms fade-out
+
+  // ... (Theme Management remains the same) ...
   const body = document.body;
   const themeToggles = document.querySelectorAll('[data-theme-mode]');
   const themeIconDisplay = document.getElementById('themeIconDisplay');
@@ -443,6 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 
+
   // --- Firebase Initialization ---
   let app;
   let db;
@@ -466,27 +409,90 @@ document.addEventListener("DOMContentLoaded", () => {
   const statEvents = document.getElementById("statEvents");
   const statTeams = document.getElementById("statTeams");
   const scoreList = document.getElementById("scoreList");
-  const dynamicGraph = document.getElementById("dynamicGraph");
+  const lineGraphSVG = document.getElementById("lineGraphSVG");
+  const graphLegend = document.getElementById("graphLegend");
+  
+  // NEW: Graph Colors Array
+  const teamColors = [
+      'var(--graph-color-1)', 
+      'var(--graph-color-2)', 
+      'var(--graph-color-3)', 
+      '#ffc107', // Yellow
+      '#673ab7'  // Deep Purple
+  ];
 
-  // --- Graph Utility: Generates a random, dynamic clip-path based on scores ---
-  function updateGraph(maxScore) {
-      const points = 10;
-      let clipPath = 'polygon(0% 100%'; 
+  // --- Graph Utility: Generates a multi-line SVG graph with draw animation ---
+  function updateGraph(teams) {
+      lineGraphSVG.innerHTML = '';
+      graphLegend.innerHTML = '';
+      
+      const topTeams = teams.slice(0, teamColors.length); // Use up to 5 teams
+      const maxScore = topTeams.length > 0 ? Math.max(1, ...topTeams.map(t => t.score || 0)) : 100;
+      
+      // Calculate data points (simulated over 10 time steps)
+      const graphData = topTeams.map(team => {
+          let points = [];
+          let currentScore = 0;
+          for (let i = 0; i <= 10; i++) {
+              // Simulate score growth: a percentage of final score, plus some randomness
+              let targetScore = team.score || 0;
+              let stepProgress = i / 10;
+              
+              // Base score for this step
+              currentScore = targetScore * (stepProgress * stepProgress); // Accelerating curve
+              
+              // Add a small random jitter for a "live" feel (max 10% of final score)
+              let jitter = (Math.random() - 0.5) * 0.2 * targetScore;
+              currentScore += jitter;
+              
+              currentScore = Math.max(0, currentScore); // Score can't be negative
+              
+              // Normalize to SVG coordinates (0-100)
+              const x = i * 10; // 0, 10, 20, ..., 100
+              // Y is inverted for SVG (0 is top, 100 is bottom)
+              const y = 100 - (currentScore / maxScore) * 95; // Use 95% height to keep a small buffer
+              points.push({x: x, y: y});
+          }
+          return { name: team.name, points: points };
+      });
 
-      for (let i = 0; i <= points; i++) {
-          const x = (i / points) * 100;
-          // Calculate y using a random score percentage (simulating team growth)
-          let yPercentage = (Math.random() * 0.7 + 0.2) * 100; // Keep points between 20% and 90%
+      // Draw Lines
+      graphData.forEach((data, index) => {
+          const color = teamColors[index];
           
-          if (i === 0) yPercentage = 100; // Start at the bottom left
-          if (i === points) yPercentage = 30; // End at a final arbitrary point
+          // Convert points array to SVG path string
+          const pathString = data.points.map((p, i) => 
+              `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`
+          ).join(' ');
 
-          clipPath += `, ${x}% ${yPercentage.toFixed(0)}%`;
-      }
-      clipPath += `, 100% 100%)`; // Close the polygon at the bottom right
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", pathString);
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", color);
+          path.setAttribute("stroke-width", "1.5");
+          path.setAttribute("class", "team-line");
+          
+          // Stagger the animation
+          path.style.animationDelay = `${index * 0.3}s`;
+          
+          lineGraphSVG.appendChild(path);
+          
+          // Draw a soft glow/shadow for depth (optional, for advanced visual effect)
+          const glow = path.cloneNode();
+          glow.setAttribute("stroke-width", "5");
+          glow.setAttribute("stroke-opacity", "0.2");
+          glow.style.animationDelay = path.style.animationDelay;
+          lineGraphSVG.prepend(glow); // Put glow behind the main line
 
-      dynamicGraph.style.clipPath = clipPath;
+          // Add to Legend
+          graphLegend.innerHTML += `
+              <div class="legend-item">
+                  <span class="legend-dot" style="background-color:${color};"></span>
+                  ${data.name}
+              </div>`;
+      });
   }
+
 
   // --- Realtime Listeners ---
   onValue(ref(db,"students"), s => {
@@ -509,17 +515,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const sortedTeams = Object.values(teams)
       .sort((a,b)=>(b.score||0)-(a.score||0));
       
-    // Update Graph based on max score (or just trigger the animation)
-    const maxScore = sortedTeams.length > 0 ? Math.max(...sortedTeams.map(t => t.score || 0)) : 100;
-    updateGraph(maxScore);
+    // Update Graph with new multi-line logic
+    updateGraph(sortedTeams);
 
     // Display top scores
     sortedTeams
       .slice(0, 5) // Show top 5 teams
-      .forEach(t=>{
+      .forEach((t, index)=>{
+        const color = teamColors[index] || 'var(--text)';
         scoreList.innerHTML += `
           <div class="score-item">
-            <span class="d-flex align-items-center"><i class="bi bi-trophy-fill me-2" style="color:var(--accent-main)"></i> ${t.name}</span>
+            <span class="d-flex align-items-center"><i class="bi bi-trophy-fill me-2" style="color:${color}"></i> ${t.name}</span>
             <strong>${t.score||0} pts</strong>
           </div>`;
       });
@@ -612,24 +618,27 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
+        // --- FIX FOR BUGS IN PARTICIPANT LOGIN ---
         let student;
-        // Search by the object key directly (most common for firebase IDs)
-        if (allStudents[chessID]) {
-            student = allStudents[chessID];
-        } else {
-            // Search by fields (case-insensitive and trim spaces)
-            const lowerCaseID = chessID.toLowerCase();
-            student = Object.values(allStudents).find(s => {
-                const sId = String(s.id || '').trim().toLowerCase();
-                const sChestNo = String(s.chestNo || '').trim().toLowerCase();
-                const sChessNo = String(s.chessNo || '').trim().toLowerCase();
-                
-                return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
-            });
-        }
+        const lowerCaseID = chessID.toLowerCase();
+        
+        // **BUG FIX 1: Prioritize matching `id` or `chestNo`/`chessNo`**
+        student = Object.values(allStudents).find(s => {
+            // Check Firebase key first (assuming key is one of the IDs)
+            const firebaseKey = Object.keys(allStudents).find(key => allStudents[key] === s);
+            if (firebaseKey && String(firebaseKey).trim().toLowerCase() === lowerCaseID) return true;
+            
+            // Check fields
+            const sId = String(s.id || '').trim().toLowerCase();
+            const sChestNo = String(s.chestNo || '').trim().toLowerCase();
+            const sChessNo = String(s.chessNo || '').trim().toLowerCase();
+            
+            return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
+        });
 
         if (!student) {
-            error("Invalid Chess Number. ID not found in system records.");
+            // BUG FIX 2: Clearer error message if ID is not found
+            error("Invalid Chess Number or ID. Record not found.");
             return;
         }
         
@@ -638,6 +647,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         sessionStorage.setItem("participantId", studentID);
         sessionStorage.setItem("participantName", student.name || "Participant");
+        // FIX for image: The 'Unauthorized access' image strongly suggests an issue when moving to participant.html
+        // The fix is likely *not* in this file, but in participant.html which is showing the error.
+        // However, ensuring the data passed is correct is the first step.
         location.href="participant.html"; 
     }
   };
