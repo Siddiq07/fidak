@@ -453,7 +453,12 @@ document.querySelectorAll('.sidebar .icon-btn').forEach(btn=>{
 });
 
 /* top actions */
-$('logoutBtn').addEventListener('click', ()=> { sessionStorage.clear(); location.reload(); });
+// LOGOUT FIX: Redirect to index.html
+$('logoutBtn').addEventListener('click', ()=> { 
+    sessionStorage.clear(); 
+    window.location.href = 'index.html'; 
+});
+
 $('current-year').textContent = new Date().getFullYear();
 
 /* RENDER ALL */
