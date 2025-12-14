@@ -1,302 +1,287 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Participant Dashboard — Art Fest</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Participant Panel | Art Fest</title>
 
+<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 :root{
-  --bg:#f1f5ff;
+  --primary:#0b2440;
+  --accent:#ffb703;
   --card:#ffffff;
-  --muted:#6b7280;
-  --accent:#2563eb;
-  --accent-2:#7c3aed;
+  --muted:#64748b;
 }
+
 body{
-  background:linear-gradient(180deg,#eaf2ff,#f7faff);
-  font-family:Inter,system-ui,-apple-system;
-}
-.container-wide{max-width:1100px;margin:20px auto;padding:0 16px;}
-
-.navbar{
-  background:#fff;border-bottom:1px solid #e5e9f5;
-  box-shadow:0 4px 18px rgba(0,0,0,0.05);
+  margin:0;
+  background:#f4f7fb;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
 }
 
-.card-neo{
-  background:var(--card);
-  border-radius:12px;
-  padding:16px;
-  margin-bottom:18px;
-  box-shadow:0 8px 22px rgba(0,0,0,0.06);
-}
+.hidden{display:none}
 
-.section-title{
+/* HEADER */
+.topbar{
+  background:var(--primary);
+  color:#fff;
+  padding:14px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.brand{
+  font-size:20px;
   font-weight:800;
-  margin-bottom:6px;
+}
+.brand span{color:var(--accent)}
+.logout-btn{
+  background:#ef4444;
+  border:0;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:8px;
 }
 
-.info-box{
-  padding:10px;border-radius:10px;
-  background:#f0f4ff;
+/* PROFILE */
+.profile{
+  background:#fff;
+  margin:16px;
+  border-radius:16px;
+  padding:16px;
+}
+.profile h4{margin:0;font-weight:800}
+.profile small{color:var(--muted)}
+
+/* STATS */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  margin:16px;
+}
+.stat-card{
+  background:linear-gradient(135deg,#2563eb,#1e40af);
+  color:#fff;
+  padding:14px;
+  border-radius:14px;
+}
+.stat-card.orange{background:linear-gradient(135deg,#fb923c,#f97316)}
+.stat-card.green{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.stat-card h2{margin:0;font-weight:800}
+
+/* SECTIONS */
+.section{
+  margin:16px;
+}
+.section-title{
+  font-size:18px;
+  font-weight:800;
   margin-bottom:10px;
 }
 
-.big-number{
-  font-size:32px;font-weight:900;color:var(--accent);
+/* EVENT CARD */
+.event-card{
+  background:#fff;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
+  border-left:6px solid var(--accent);
+}
+.event-card h5{margin:0;font-weight:800}
+.event-meta{
+  font-size:13px;
+  color:var(--muted);
 }
 
-.event-row{
-  padding:10px;border-bottom:1px solid #eef2ff;
+/* RESULT */
+.result-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:6px;
 }
-.result-badge{
-  padding:4px 8px;border-radius:6px;font-size:12px;font-weight:700;
+.rank{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+}
+.rank.gold{background:#fde68a}
+.rank.silver{background:#e5e7eb}
+.rank.bronze{background:#fbcfe8}
+
+/* MOBILE */
+@media(max-width:768px){
+  .topbar{flex-direction:column;gap:8px}
 }
 </style>
 </head>
 
-
 <body>
-<nav class="navbar px-3">
-  <div class="container-fluid">
-    <div class="navbar-brand fw-bold text-primary"><i class="bi bi-palette-fill"></i> Art Fest — Participant</div>
-    <button onclick="logout()" class="btn btn-outline-danger btn-sm">Logout</button>
+
+<!-- ================= HEADER ================= -->
+<div class="topbar">
+  <div class="brand">Art<span>Fest</span> Participant</div>
+  <button class="logout-btn" id="logoutBtn">Logout</button>
+</div>
+
+<!-- ================= PROFILE ================= -->
+<div class="profile">
+  <h4 id="studentName">Student</h4>
+  <small>
+    Chess No: <b id="studentId"></b> |
+    Team: <b id="teamName"></b> |
+    Level: <b id="studentLevel"></b>
+  </small>
+</div>
+
+<!-- ================= STATS ================= -->
+<div class="stats">
+  <div class="stat-card">
+    <span>Events</span>
+    <h2 id="statEvents">0</h2>
   </div>
-</nav>
-
-<main class="container-wide">
-
-  <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:10000"></div>
-
-  <!-- PARTICIPANT HEADER -->
-  <div class="card-neo">
-    <div class="d-flex justify-content-between">
-      <div>
-        <div class="section-title">Welcome, <span id="pName">Participant</span></div>
-        <div class="text-muted">Chess #: <span id="pChess"></span></div>
-        <div class="text-muted">Team: <span id="pTeam"></span></div>
-        <div class="text-muted">Level: <span id="pLevel"></span></div>
-      </div>
-
-      <div class="text-end">
-        <div class="text-muted">Team Score:</div>
-        <div id="teamScore" class="big-number">0</div>
-      </div>
-    </div>
+  <div class="stat-card orange">
+    <span>Participations</span>
+    <h2 id="statParts">0</h2>
   </div>
-
-  <!-- ATTENDANCE -->
-  <div class="card-neo">
-    <div class="section-title">Attendance</div>
-    <div class="info-box">
-      <div class="d-flex justify-content-between">
-        <div class="fw-bold">Attendance %</div>
-        <div id="attPercent" class="big-number">0%</div>
-      </div>
-    </div>
-    <canvas id="attChart" height="120"></canvas>
+  <div class="stat-card green">
+    <span>Prizes</span>
+    <h2 id="statPrizes">0</h2>
   </div>
+</div>
 
-  <!-- PARTICIPATION -->
-  <div class="card-neo">
-    <div class="section-title">Your Events</div>
-    <div id="eventList"></div>
-  </div>
+<!-- ================= EVENTS ================= -->
+<div class="section">
+  <div class="section-title">My Events</div>
+  <div id="eventList"></div>
+</div>
 
-  <!-- RESULTS -->
-  <div class="card-neo">
-    <div class="section-title">Results</div>
-    <div id="resultsList"></div>
-  </div>
+<!-- ================= RESULTS ================= -->
+<div class="section">
+  <div class="section-title">My Results</div>
+  <div id="resultList"></div>
+</div>
 
-</main>
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+<!-- ================= FIREBASE ================= -->
 <script type="module">
-
-/* ----------------------- FIREBASE INIT ------------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
-  authDomain: "gen7-3e139.firebaseapp.com",
-  databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
-  projectId: "gen7-3e139",
-  storageBucket: "gen7-3e139.firebasestorage.app",
-  messagingSenderId: "578412378966",
-  appId: "1:578412378966:web:f76c1e69a01a4bbfbd74f7"
+const firebaseConfig={
+ apiKey:"AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
+ databaseURL:"https://gen7-3e139-default-rtdb.firebaseio.com",
+ projectId:"gen7-3e139"
 };
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
 
-const $ = id => document.getElementById(id);
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
 
-/* ------------------- AUTO-DETECT PARTICIPANT ------------------ */
-function getChess() {
-  const q = new URL(location.href).searchParams.get("chess");
-  if (q) return q;
-  try {
-    const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-    if (user.role === "Participant") return user.studentId;
-  } catch {}
-  return null;
+const studentId=sessionStorage.getItem("studentId");
+if(!studentId){
+ alert("Unauthorized access");
+ location.href="index.html";
 }
 
-let CHESS = getChess();
-if (!CHESS) {
-  alert("Login required!");
-  location.href = "index.html";
-}
+/* PROFILE */
+let studentData=null;
+let teamMap={};
 
-$("pChess").textContent = CHESS;
-
-/* ------------------- LOAD ALL NECESSARY DATA ------------------ */
-let STUDENT = null;
-let TEAM = null;
-let EVENTS = [];
-let PARTS = [];
-let RESULTS = [];
-let ATT = {};
-
-onValue(ref(db, "students"), snap=>{
-  const obj = snap.val() || {};
-  STUDENT = Object.values(obj).find(s => String(s.id) === String(CHESS));
-  if (!STUDENT) {
-    alert("Participant not found"); location.href="index.html";
-  }
-
-  $("pName").textContent = STUDENT.name || CHESS;
-  $("pLevel").textContent = STUDENT.level || "-";
-
-  loadTeam();
-  renderParticipation();
-  renderResults();
-  computeAttendance();
+onValue(ref(db,"teams"),snap=>{
+ Object.values(snap.val()||{}).forEach(t=>teamMap[t.id]=t.name);
 });
 
-function loadTeam(){
-  onValue(ref(db,"teams"), snap=>{
-    const obj = snap.val() || {};
-    TEAM = Object.values(obj).find(t => String(t.id) === String(STUDENT.teamId));
-    $("pTeam").textContent = TEAM ? TEAM.name : "-";
-    $("teamScore").textContent = TEAM ? (TEAM.score || 0) : 0;
-  });
-}
-
-onValue(ref(db,"events"), snap=>{ EVENTS = Object.values(snap.val() || {}); renderParticipation(); renderResults(); });
-onValue(ref(db,"participations"), snap=>{ PARTS = Object.values(snap.val() || {}); renderParticipation(); });
-onValue(ref(db,"results"), snap=>{ RESULTS = Object.values(snap.val() || {}); renderResults(); });
-onValue(ref(db,"attendance"), snap=>{ ATT = snap.val() || {}; computeAttendance(); });
-
-/* ----------------------- PARTICIPATION ------------------------ */
-function renderParticipation(){
-  const wrap = $("eventList");
-  wrap.innerHTML = "";
-
-  const myParts = PARTS.filter(p => String(p.studentId) === String(CHESS));
-
-  if (!myParts.length) {
-    wrap.innerHTML = '<div class="text-muted">No events registered.</div>';
-    return;
+onValue(ref(db,"students"),snap=>{
+ Object.values(snap.val()||{}).forEach(s=>{
+  if(String(s.id)===String(studentId)){
+   studentData=s;
+   document.getElementById("studentName").innerText=s.name;
+   document.getElementById("studentId").innerText=s.id;
+   document.getElementById("studentLevel").innerText=s.level||"-";
+   document.getElementById("teamName").innerText=teamMap[s.teamId]||"-";
   }
+ });
+});
 
-  myParts.forEach(p=>{
-    const ev = EVENTS.find(e=> String(e.id)===String(p.eventId)) || {};
-    wrap.innerHTML += `
-      <div class="event-row">
-        <div class="fw-bold">${ev.name || p.eventId}</div>
-        <div class="text-muted">${ev.type || ''} • ${ev.level || ''}</div>
-        <div>Status: <span class="badge ${p.status==='approved'?'bg-success':'bg-warning'}">${p.status}</span></div>
-      </div>`;
-  });
-}
-
-/* --------------------------- RESULTS -------------------------- */
-function renderResults(){
-  const wrap = $("resultsList");
-  wrap.innerHTML = "";
-
-  const myRes = RESULTS.filter(r => String(r.studentId) === String(CHESS));
-
-  if (!myRes.length){
-    wrap.innerHTML = '<div class="text-muted">No results yet.</div>';
-    return;
+/* EVENTS */
+onValue(ref(db,"participations"),snap=>{
+ let count=0;
+ let parts=0;
+ const list=document.getElementById("eventList");
+ list.innerHTML="";
+ Object.values(snap.val()||{}).forEach(p=>{
+  if(String(p.studentId)===String(studentId)){
+   count++;
+   parts++;
+   list.innerHTML+=`
+   <div class="event-card">
+    <h5>${p.eventName||"Event"}</h5>
+    <div class="event-meta">Status: ${p.status}</div>
+    <button class="btn btn-sm btn-outline-primary mt-2" onclick="downloadParticipationPdf('${p.eventName}')">
+      Download PDF
+    </button>
+   </div>`;
   }
+ });
+ document.getElementById("statEvents").innerText=count;
+ document.getElementById("statParts").innerText=parts;
+});
 
-  myRes.forEach(r=>{
-    const ev = EVENTS.find(e=>String(e.id)===String(r.eventId)) || {};
-    wrap.innerHTML += `
-      <div class="event-row">
-        <div class="fw-bold">${ev.name || r.eventId}</div>
-        <div class="result-badge bg-primary text-white">Position: ${r.position}</div>
-      </div>`;
-  });
-}
+/* RESULTS */
+onValue(ref(db,"results"),snap=>{
+ let prizes=0;
+ const list=document.getElementById("resultList");
+ list.innerHTML="";
+ Object.values(snap.val()||{}).forEach(r=>{
+  let rank=null;
+  if(r.firstId==studentId) rank=1;
+  if(r.secondId==studentId) rank=2;
+  if(r.thirdId==studentId) rank=3;
 
-/* ------------------------ ATTENDANCE % ------------------------ */
-function computeAttendance(){
-  if (!STUDENT) return;
-  let total = 0, present = 0;
+  if(rank){
+   prizes++;
+   list.innerHTML+=`
+   <div class="event-card">
+    <h5>${r.eventName}</h5>
+    <div class="result-row">
+     <div class="rank ${rank==1?"gold":rank==2?"silver":"bronze"}">${rank}</div>
+     <div>You secured ${rank}${rank==1?"st":rank==2?"nd":"rd"} position</div>
+    </div>
+   </div>`;
+  }
+ });
+ document.getElementById("statPrizes").innerText=prizes;
+});
 
-  Object.values(ATT).forEach(sess=>{
-    if (sess.students && sess.students[CHESS] !== undefined) {
-      total++;
-      if (String(sess.students[CHESS]).toLowerCase()==="present") present++;
-    }
-  });
+/* PDF */
+window.downloadParticipationPdf=(event)=>{
+ const html=`
+ <h3>Participation Certificate</h3>
+ <p>Name: ${studentData.name}</p>
+ <p>Chess No: ${studentData.id}</p>
+ <p>Event: ${event}</p>
+ `;
+ html2pdf().from(html).set({filename:`${event}_participation.pdf`}).save();
+};
 
-  const pct = total === 0 ? 0 : Math.round((present/total)*100);
-  $("attPercent").textContent = pct+"%";
-
-  drawAttendanceChart(pct);
-}
-
-/* --------------------- CHART FOR ATTENDANCE ------------------- */
-let attChart;
-function drawAttendanceChart(pct){
-  if (attChart) attChart.destroy();
-  attChart = new Chart($("attChart"), {
-    type:"doughnut",
-    data:{
-      labels:["Present","Absent"],
-      datasets:[{
-        data:[pct, 100-pct],
-        backgroundColor:["#2563eb","#cbd5e1"],
-        borderWidth:0
-      }]
-    },
-    options:{
-      plugins:{legend:{display:false}},
-      cutout:"70%"
-    }
-  });
-}
-
-/* ----------------------------- LOGOUT -------------------------- */
-window.logout = function(){
-  sessionStorage.removeItem("user");
-  location.href="index.html";
-}
-
-/* ---------------------------- TOAST ---------------------------- */
-function toast(msg){
-  const box = document.createElement("div");
-  box.className="toast align-items-center text-bg-primary border-0";
-  box.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div>
-  <button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-  $("toastRoot").appendChild(box);
-  const bs = new bootstrap.Toast(box, {delay:3000}); bs.show();
-}
-
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick=()=>{
+ sessionStorage.clear();
+ location.href="index.html";
+};
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
