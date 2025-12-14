@@ -682,13 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-        // Login Success
-        sessionStorage.setItem("participantId", chessID);
-        sessionStorage.setItem("participantName", student.name); // Store name too for welcome msg
-        location.href="participant.html"; 
-    }
-  };
-
+    
   function error(msg){
     loginError.textContent = msg;
     loginError.classList.remove("d-none");
