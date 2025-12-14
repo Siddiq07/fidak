@@ -83,48 +83,82 @@
     .participated-row{background:rgba(30, 41, 59, 0.5) !important;}
 
     /* Results Panel - Card/List style */
-    .result-list-item {
-        background: var(--card);
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 10px;
-        border-left: 5px solid var(--muted);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .result-event-name {font-weight: 700;font-size: 1.1rem;color: var(--accent-main);}
-    .result-position-list {list-style: none;padding: 0;margin: 0;}
-    .result-position-list li {padding: 4px 0;border-bottom: 1px dashed #334155;display: flex;justify-content: space-between;align-items: center;}
-    .result-medal {font-size: 1.1rem;margin-right: 8px;}
-    .participated-row .result-list-item { border-left-color: var(--success); }
-    .participated-row .result-event-name { color: var(--success); }
-    
+    .results-container { padding: 0; }
+
     /* UI Override: White Card for Published Results (Matches Image) */
-    .published-result-card {
+    .result-list-item {
         background: #fff; /* White card background */
         color: #0d121c; /* Dark text for contrast */
-        border-left: 5px solid var(--accent-main);
+        border-radius: 8px;
+        padding: 0; /* Remove default padding for accordion structure */
+        margin-bottom: 12px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        overflow: hidden;
     }
-    .published-result-card .result-event-name {
-        color: #0d121c; /* Dark text for Program Name */
-        font-weight: 900;
+    .result-header {
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.15s;
     }
-    .published-result-card .muted-small,
-    .published-result-card .result-position-list li {
-        color: #475569; /* Muted text */
+    .result-header:hover {
+        background-color: #f7f7f7;
     }
-    .published-result-card .result-position-list li {
+    .result-header-left {
+        flex-grow: 1;
+    }
+    .result-zone {
+        font-weight: 600;
+        font-size: 13px;
+        color: #6b7280;
+    }
+    .result-event-name {
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: #0d121c;
+    }
+    .result-header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #6b7280;
+    }
+    .result-header-right i {
+        color: #94a3b8;
+        transition: transform 0.2s;
+    }
+    .result-header[aria-expanded="true"] i {
+        transform: rotate(180deg);
+    }
+    
+    /* Collapsed Body */
+    .result-body {
+        padding: 0 16px 16px;
+        border-top: 1px solid #f1f1f1;
+    }
+    .result-position-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 12px;
+    }
+    .result-position-list li {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        font-weight: 500;
         border-bottom: 1px dashed #e2e8f0;
     }
-    .published-result-card .result-position-list li:last-child {
+    .result-position-list li:last-child {
         border-bottom: none;
     }
-    .published-result-card .result-medal {
-        /* Default colors are fine, but ensure contrast on white */
-        filter: none;
+    .result-medal {
+        font-size: 1.5rem;
+        margin-right: 12px;
     }
-    /* End of UI Override */
-
+    
     /* Small box for member selection */
     .small-box{
       width:70px;height:70px;border-radius:8px;
@@ -267,7 +301,7 @@
 
     <section id="panel-results" class="card-neo d-none">
       <div class="section-title">Results (Published)</div>
-      <div class="muted-small mb-3">Results below are officially published and final.</div>
+      <div class="muted-small mb-3">Results below are officially published and final. Click on an event to view the winners.</div>
       <div id="leaderResultsList" class="results-container">
         </div>
     </section>
@@ -600,13 +634,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(!LEADER.active || !LEADER.teamId) return toast('You must be acting as leader (home login) to submit','danger');
     const evId = $('membersSelection').dataset.evId;
     if(!evId) return toast('Select an event first','danger');
-    const sel = Array.from(document.querySelectorAll('#membersSelection .small-box.selected'));
+    const sel = Array.querySelectorAll('#membersSelection .small-box.selected');
 
     const existingParts = CACHE.participations.filter(p => 
       String(p.eventId) === String(evId) && String(p.teamId) === String(LEADER.teamId)
     );
     
-    const selectedIds = new Set(sel.map(b => b.dataset.id));
+    const selectedIds = new Set(Array.from(sel).map(b => b.dataset.id));
     const existingIds = new Set(existingParts.map(p => String(p.studentId)));
 
     let created = 0, skipped = 0, removed = 0;
@@ -732,6 +766,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderResultsList(){
     const wrap = $('leaderResultsList');
+    wrap.innerHTML = '';
     if(!CACHE.events.length){ wrap.innerHTML = '<div class="muted-small card-neo">No events available.</div>'; return; }
     
     const evMap = {};
@@ -743,29 +778,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     let html = '';
     CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
     
-    CACHE.events.forEach(ev => {
+    CACHE.events.forEach((ev, index) => {
       const pos = evMap[ev.id] || {};
-      // Check if ANY result for this event has been explicitly published
       const isPublished = CACHE.results.some(r => String(r.eventId) === String(ev.id) && r.published);
       
       // ONLY DISPLAY IF PUBLISHED
       if (!isPublished) return; 
       
-      const statusBadge = '<span class="badge bg-success result-status-badge">Published</span>';
-      const rowClass = 'published-result-card'; // Use the custom white/high-contrast card class
-      
+      const targetId = `collapseResult${index}`;
+      const statusBadge = `<span class="badge bg-secondary me-2">${ev.id}</span>`;
+      const eventCategory = ev.zone ? ev.zone : (ev.level || 'GENERAL').toUpperCase();
+
       const getPlacement = (position) => {
         const r = pos[position];
-        // Ensure only published placements are shown (this should be redundant if isPublished check passed, but safer)
-        if (!r || !r.published) return { icon: '', text: 'No placement' }; 
+        if (!r || !r.published) return null; 
         
-        const stud = CACHE.students.find(s=>String(s.id)===String(r.studentId)) || {name:r.studentId, id:r.studentId};
-        const icon = position === 1 ? '<i class="bi bi-trophy-fill text-warning result-medal"></i>' : 
-                     position === 2 ? '<i class="bi bi-trophy-fill" style="color:#A9A9A9;"></i>' : 
-                     position === 3 ? '<i class="bi bi-trophy-fill" style="color:#CD7F32;"></i>' : '';
+        const stud = CACHE.students.find(s=>String(s.id)===String(r.studentId)) || {name:'(Unknown)', id:r.studentId};
+        const icon = position === 1 ? '<i class="bi bi-award-fill text-warning result-medal"></i>' : 
+                     position === 2 ? '<i class="bi bi-award-fill" style="color:#A9A9A9;"></i>' : 
+                     position === 3 ? '<i class="bi bi-award-fill" style="color:#CD7F32;"></i>' : '';
         return { 
           icon, 
-          text: `${escapeHtml(stud.name)}` // Show only name for cleaner UI
+          text: `${escapeHtml(stud.name)}`,
+          alias: r.alias || ''
         };
       };
 
@@ -774,32 +809,34 @@ document.addEventListener('DOMContentLoaded', async () => {
       const p3 = getPlacement(3);
 
       html += `
-        <div class="result-list-item ${rowClass}">
-          <div class="result-list-header">
-            <div class="muted-small" style="font-weight:600;">GENERAL</div>
-            ${statusBadge}
+        <div class="result-list-item">
+          <div class="result-header" data-bs-toggle="collapse" data-bs-target="#${targetId}" aria-expanded="false" aria-controls="${targetId}">
+            <div class="result-header-left">
+              <div class="result-zone">${eventCategory}</div>
+              <div class="result-event-name">${escapeHtml(ev.name)}</div>
+              <div class="muted-small">INDIVIDUAL</div>
+            </div>
+            <div class="result-header-right">
+              ${statusBadge}
+              <i class="bi bi-chevron-down"></i>
+            </div>
           </div>
-          <div class="result-event-name mt-1">${escapeHtml(ev.name)}</div>
-          <div class="muted-small mb-2">INDIVIDUAL</div>
           
-          <ul class="result-position-list">
-            <li class="${p1.text === 'No placement' ? 'd-none' : ''}">
-              ${p1.icon} ${p1.text}
-            </li>
-            <li class="${p2.text === 'No placement' ? 'd-none' : ''}">
-              ${p2.icon} ${p2.text}
-            </li>
-            <li class="${p3.text === 'No placement' ? 'd-none' : ''}">
-              ${p3.icon} ${p3.text}
-            </li>
-          </ul>
+          <div class="collapse" id="${targetId}">
+            <div class="result-body">
+              <ul class="result-position-list">
+                ${p1 ? `<li>${p1.icon} ${p1.text} <span class="muted-small ms-auto">${p1.alias}</span></li>` : ''}
+                ${p2 ? `<li>${p2.icon} ${p2.text} <span class="muted-small ms-auto">${p2.alias}</span></li>` : ''}
+                ${p3 ? `<li>${p3.icon} ${p3.text} <span class="muted-small ms-auto">${p3.alias}</span></li>` : ''}
+              </ul>
+            </div>
+          </div>
         </div>
       `;
     });
     
     wrap.innerHTML = html || '<div class="muted-small card-neo">No results published yet.</div>';
   }
-  // ... (rest of the functions remain the same)
 
   function renderYourSubmissions(){
     const wrap = $('yourSubmissionsList');
