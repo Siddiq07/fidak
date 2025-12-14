@@ -98,7 +98,7 @@
     .participated-row .result-list-item { border-left-color: var(--success); }
     .participated-row .result-event-name { color: var(--success); }
     
-    /* Override for Published look (White Card as per image) */
+    /* UI Override: White Card for Published Results (Matches Image) */
     .published-result-card {
         background: #fff; /* White card background */
         color: #0d121c; /* Dark text for contrast */
@@ -106,7 +106,8 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     .published-result-card .result-event-name {
-        color: var(--accent-main); /* Orange Program Name */
+        color: #0d121c; /* Dark text for Program Name */
+        font-weight: 900;
     }
     .published-result-card .muted-small,
     .published-result-card .result-position-list li {
@@ -115,11 +116,14 @@
     .published-result-card .result-position-list li {
         border-bottom: 1px dashed #e2e8f0;
     }
+    .published-result-card .result-position-list li:last-child {
+        border-bottom: none;
+    }
     .published-result-card .result-medal {
         /* Default colors are fine, but ensure contrast on white */
         filter: none;
     }
-    /* End of Override */
+    /* End of UI Override */
 
     /* Small box for member selection */
     .small-box{
@@ -263,7 +267,7 @@
 
     <section id="panel-results" class="card-neo d-none">
       <div class="section-title">Results (Published)</div>
-      <div class="muted-small mb-3">Green bar indicates event has published results. Grey indicates draft or no results.</div>
+      <div class="muted-small mb-3">Results below are officially published and final.</div>
       <div id="leaderResultsList" class="results-container">
         </div>
     </section>
@@ -416,16 +420,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 2. Logout Button
+  // 2. Logout Button (MODIFIED: Redirects to index.html)
   $('btnLogout').addEventListener('click', ()=> {
     sessionStorage.removeItem('leaderId');
     LEADER = { active:false, leaderId:null, teamId:null, teamDbKey:null };
-    $('leaderName').textContent = 'Guest';
-    $('leaderAvatar').textContent = 'G';
-    $('leaderTeamName').textContent = 'Team: -';
-    $('leaderTeamDbKey').value = '';
-    document.querySelector('[data-target="#panel-dashboard"]').click();
-    renderAll();
+    // Explicitly navigate to index.html
+    window.location.href = 'index.html'; 
   });
 
   // 3. Event Filters
@@ -748,22 +748,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Check if ANY result for this event has been explicitly published
       const isPublished = CACHE.results.some(r => String(r.eventId) === String(ev.id) && r.published);
       
-      // *** MODIFIED LOGIC: ONLY DISPLAY IF PUBLISHED ***
+      // ONLY DISPLAY IF PUBLISHED
       if (!isPublished) return; 
       
-      const statusBadge = '<span class="badge bg-success result-status-badge"><i class="bi bi-check-circle-fill"></i> Published</span>';
+      const statusBadge = '<span class="badge bg-success result-status-badge">Published</span>';
       const rowClass = 'published-result-card'; // Use the custom white/high-contrast card class
       
       const getPlacement = (position) => {
         const r = pos[position];
-        if (!r || !r.published) return { icon: '', text: 'No placement' }; // Ensure only published placements are shown
+        // Ensure only published placements are shown (this should be redundant if isPublished check passed, but safer)
+        if (!r || !r.published) return { icon: '', text: 'No placement' }; 
+        
         const stud = CACHE.students.find(s=>String(s.id)===String(r.studentId)) || {name:r.studentId, id:r.studentId};
         const icon = position === 1 ? '<i class="bi bi-trophy-fill text-warning result-medal"></i>' : 
                      position === 2 ? '<i class="bi bi-trophy-fill" style="color:#A9A9A9;"></i>' : 
                      position === 3 ? '<i class="bi bi-trophy-fill" style="color:#CD7F32;"></i>' : '';
         return { 
           icon, 
-          text: `${escapeHtml(stud.name)} ${stud.id ? `(${escapeHtml(stud.id)})` : ''}` 
+          text: `${escapeHtml(stud.name)}` // Show only name for cleaner UI
         };
       };
 
@@ -774,15 +776,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       html += `
         <div class="result-list-item ${rowClass}">
           <div class="result-list-header">
-            <div class="result-event-name">${escapeHtml(ev.name)}</div>
+            <div class="muted-small" style="font-weight:600;">GENERAL</div>
             ${statusBadge}
           </div>
+          <div class="result-event-name mt-1">${escapeHtml(ev.name)}</div>
+          <div class="muted-small mb-2">INDIVIDUAL</div>
+          
           <ul class="result-position-list">
-            <li>${p1.icon} **1st Place:** ${p1.text}</li>
-            <li>${p2.icon} **2nd Place:** ${p2.text}</li>
-            <li>${p3.icon} **3rd Place:** ${p3.text}</li>
+            <li class="${p1.text === 'No placement' ? 'd-none' : ''}">
+              ${p1.icon} ${p1.text}
+            </li>
+            <li class="${p2.text === 'No placement' ? 'd-none' : ''}">
+              ${p2.icon} ${p2.text}
+            </li>
+            <li class="${p3.text === 'No placement' ? 'd-none' : ''}">
+              ${p3.icon} ${p3.text}
+            </li>
           </ul>
-          <div class="muted-small text-end mt-2">${escapeHtml(ev.level || 'General')} | ${escapeHtml(ev.type)}</div>
         </div>
       `;
     });
