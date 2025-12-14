@@ -15,21 +15,21 @@
 
 :root {
     /* --- DARK MODE (Default/Fallback) --- */
-    --bg: #0d121c; 
-    --card: #1c2738; 
+    --bg: #0c0e18; 
+    --card: #181c2e; 
     --text: #e2e8f0; 
     --muted: #94a3b8; 
-    --shadow: rgba(0, 0, 0, 0.25);
+    --shadow: rgba(0, 0, 0, 0.4);
     --border: #334155;
     
-    /* Accents */
-    --accent-main: #f97316; 
-    --accent-secondary: #3b82f6; 
-    --success: #10b981;
-    --danger: #ef4444;
+    /* Accents (More Vibrant) */
+    --accent-main: #ff7f50; /* Coral */
+    --accent-secondary: #00bcd4; /* Cyan */
+    --success: #69f0ae; 
+    --danger: #ff5252; 
 
     /* Logo Filter (Invert colors for dark mode) */
-    --logo-filter: invert(1) brightness(2);
+    --logo-filter: invert(1) brightness(1.8) contrast(1.5);
 }
 
 /* --- LIGHT MODE Variables --- */
@@ -38,10 +38,8 @@
     --card: #ffffff; 
     --text: #0f172a; 
     --muted: #64748b; 
-    --shadow: rgba(0, 0, 0, 0.08);
+    --shadow: rgba(0, 0, 0, 0.1);
     --border: #e5e7eb;
-    
-    /* Logo Filter (Keep original black/dark colors) */
     --logo-filter: none;
 }
 
@@ -52,8 +50,8 @@ body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto;
   background:var(--bg);
   color:var(--text);
-  transition: background-color 0.3s, color 0.3s;
-  overflow-x: hidden; /* Prevent scroll during intro */
+  transition: background-color 0.4s, color 0.4s;
+  overflow-x: hidden;
 }
 
 /* -------------------------------------- */
@@ -80,35 +78,32 @@ body{
 }
 
 .intro-logo {
-    width: 120px;
+    width: 200px;
     height: auto;
     filter: var(--logo-filter);
-    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, 
+               logoPulse 1s infinite alternate 2.5s;
 }
 
 @keyframes logoEntrance {
-    0% {
-        opacity: 0;
-        transform: scale(0.5) translateY(20px);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.2);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+    0% { opacity: 0; transform: scale(0.3) translateY(50px); }
+    50% { opacity: 1; transform: scale(1.3); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes logoPulse {
+    0% { box-shadow: 0 0 10px 5px var(--accent-main); }
+    100% { box-shadow: 0 0 20px 10px var(--accent-secondary); }
 }
 
 /* Layout */
 .container-portal{
-  max-width:450px;
+  max-width:550px; 
   margin:auto;
-  padding:16px;
-  opacity: 0; /* Hidden initially, revealed after intro */
+  padding:20px;
+  opacity: 0;
   animation: contentFadeIn 1s ease-out forwards;
-  animation-delay: 2.2s; /* Wait for intro to finish */
+  animation-delay: 2.2s;
 }
 
 @keyframes contentFadeIn {
@@ -117,128 +112,139 @@ body{
 
 .card-ui{
   background:var(--card);
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 10px 30px var(--shadow);
-  margin-bottom:16px;
+  border-radius:18px; 
+  padding:25px;
+  box-shadow:0 15px 40px var(--shadow);
+  margin-bottom:20px;
   border: 1px solid var(--border);
-  transition: background-color 0.3s, border-color 0.3s;
+  transition: background-color 0.4s, border-color 0.4s;
 }
 
 /* Navbar */
 .navbar{
   background:var(--bg);
-  padding:12px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  transition: background-color 0.3s;
+  padding:15px 25px;
+  transition: background-color 0.4s;
   position: relative;
   z-index: 100;
 }
 
 /* Logo Styling */
 .navbar-logo {
-    height: 50px; 
+    height: 60px;
     width: auto;
     filter: var(--logo-filter);
-    transition: filter 0.3s ease;
-}
-
-/* Compact Theme Switcher */
-.btn-theme {
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 1.3rem;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn-theme:hover, .btn-theme:focus {
-    background: var(--border);
-    color: var(--accent-secondary);
-}
-.dropdown-menu-theme {
-    background: var(--card); 
-    border-color: var(--border);
-    padding: 8px;
-    min-width: 150px;
-    box-shadow: 0 10px 25px var(--shadow);
-    border-radius: 12px;
-}
-.dropdown-item {
-    color: var(--text);
-    border-radius: 8px;
-    padding: 8px 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.dropdown-item:hover {
-    background: var(--border);
-    color: var(--text);
-}
-.dropdown-item.active {
-    background: transparent;
-    color: var(--accent-secondary);
-    font-weight: 600;
-}
-.dropdown-item .check-icon {
-    display: none;
-}
-.dropdown-item.active .check-icon {
-    display: block;
+    transition: filter 0.4s ease;
 }
 
 /* Buttons */
 .btn{
-  padding:12px 14px;
-  border-radius:10px;
-  border:none;
+  padding:14px 18px;
+  border-radius:12px;
   font-weight:700;
-  cursor:pointer;
-  transition: background 0.2s;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
 }
 .btn-primary{ background:var(--accent-secondary); color:#fff; }
-.btn-primary:hover{ background:#2563eb; color:#fff; }
-.btn-success{ background:var(--success); color:#fff; }
-.btn-success:hover{ background:#059669; color:#fff; }
+.btn-primary:hover{ background:#0097a7; box-shadow: 0 4px 10px rgba(0, 188, 212, 0.5); }
+.btn-success{ background:var(--success); color:#000; }
+.btn-success:hover{ background:#4caf50; color:#fff; box-shadow: 0 4px 10px rgba(105, 240, 174, 0.5); }
 .btn-outline-primary{ border:2px solid var(--accent-main); color:var(--accent-main); background:transparent;}
-.btn-outline-primary:hover{ background:var(--accent-main); color:#fff; }
+.btn-outline-primary:hover{ background:var(--accent-main); color:#fff; box-shadow: 0 4px 10px rgba(255, 127, 80, 0.5); }
 
-/* Stats Grid */
+
+/* Stats Grid (Three in a row) */
 .stats{
   display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
+  grid-template-columns:repeat(3, 1fr); 
+  gap:15px;
   margin-top: 20px;
 }
+@media (max-width: 500px) {
+    .stats { grid-template-columns: 1fr; }
+}
 .stat{
-  background:var(--border);
-  border-radius:10px;
-  padding:16px;
-  text-align:left;
-  border-left: 5px solid var(--accent-secondary);
-  transition: background-color 0.3s;
+  background:var(--card); 
+  border-radius:12px;
+  padding:18px;
+  text-align:center;
+  box-shadow: 0 0 0 2px var(--accent-secondary), 0 5px 15px var(--shadow);
+  transition: background-color 0.4s, box-shadow 0.4s;
 }
 .stat h4{
-  margin:0;
-  font-size:2rem;
+  margin:0 0 5px 0;
+  font-size:2.5rem;
   font-weight:900;
-  color: var(--text);
+  color: var(--accent-main);
+  transition: color 0.4s;
 }
 .stat small{
-  font-size:13px;
+  font-size:14px;
   color:var(--muted);
 }
-@media(min-width:768px){
-  .stats{
-    grid-template-columns:repeat(3,1fr);
-  }
+
+/* -------------------------------------- */
+/* SVG GRAPH STYLES */
+/* -------------------------------------- */
+.chart-container {
+    height: 250px; /* Slightly taller for legend */
+    padding: 10px;
+    background: var(--card);
+    border-radius: 10px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#graphSvg {
+    flex-grow: 1;
+    width: 100%;
+    /* Invert Y axis visuals for graph logic if needed, but we handle in JS */
+}
+
+.graph-path {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    /* Animation setup */
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 2.5s ease-out forwards;
+}
+
+@keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+}
+
+/* Grid lines in SVG */
+.grid-line {
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 5,5;
+}
+
+/* Legend Styles */
+.graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    color: var(--text);
+}
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
 }
 
 /* Score List */
@@ -249,40 +255,17 @@ body{
   color:var(--text);
   border-bottom:1px dashed var(--border);
   font-weight: 500;
-  transition: border-color 0.3s;
+  transition: border-color 0.4s;
 }
 .score-item:last-child{border-bottom:none}
 
-/* Animated Chart Placeholder */
-.chart-container {
-    height: 150px;
-    padding-top: 15px;
-    background: var(--border);
-    border-radius: 10px;
-    margin-top: 15px;
-    transition: background-color 0.3s;
-}
-.bar {
-    background: linear-gradient(to top, var(--accent-main), var(--accent-secondary));
-    border-radius: 4px 4px 0 0;
-    width: 20px;
-    margin: 0 4px;
-    transition: height 1.5s ease-out;
-    height: 0;
-    display: inline-block;
-    vertical-align: bottom;
-}
-
-/* Forms and Modals */
+/* Forms/Modals */
 .modal-content{ background: var(--card); color: var(--text); }
 .modal-header{ border-bottom: 1px solid var(--border); }
 .modal-footer{ border-top: 1px solid var(--border); }
 .form-label { color: var(--text); }
 .form-control, .form-select { background: var(--border); border-color: var(--border); color: var(--text); }
-.form-control:focus, .form-select:focus { background: var(--border); border-color: var(--accent-secondary); box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25); }
-.btn-close { 
-    filter: invert(var(--theme-filter, 1)) grayscale(100%) brightness(200%); 
-}
+.btn-close { filter: invert(var(--theme-filter, 1)) grayscale(100%) brightness(200%); }
 [data-theme="light"] .btn-close { filter: none; } 
 </style>
 </head>
@@ -303,25 +286,10 @@ body{
             <i class="bi bi-sun" id="themeIconDisplay"></i>
         </button>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-theme" aria-labelledby="themeDropdown">
-            <li>
-                <a class="dropdown-item" href="#" data-theme-mode="light">
-                    <span><i class="bi bi-sun me-2"></i> Light</span>
-                    <i class="bi bi-check2 check-icon"></i>
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item" href="#" data-theme-mode="dark">
-                    <span><i class="bi bi-moon me-2"></i> Dark</span>
-                    <i class="bi bi-check2 check-icon"></i>
-                </a>
-            </li>
+            <li><a class="dropdown-item" href="#" data-theme-mode="light"><span><i class="bi bi-sun me-2"></i> Light</span><i class="bi bi-check2 check-icon"></i></a></li>
+            <li><a class="dropdown-item" href="#" data-theme-mode="dark"><span><i class="bi bi-moon me-2"></i> Dark</span><i class="bi bi-check2 check-icon"></i></a></li>
             <li><hr class="dropdown-divider" style="border-color:var(--border)"></li>
-            <li>
-                <a class="dropdown-item" href="#" data-theme-mode="system">
-                    <span><i class="bi bi-circle-half me-2"></i> System</span>
-                    <i class="bi bi-check2 check-icon"></i>
-                </a>
-            </li>
+            <li><a class="dropdown-item" href="#" data-theme-mode="system"><span><i class="bi bi-circle-half me-2"></i> System</span><i class="bi bi-check2 check-icon"></i></a></li>
         </ul>
     </div>
 </nav>
@@ -329,49 +297,40 @@ body{
 <div class="container-portal d-flex align-items-center justify-content-center min-vh-100">
   <div class="w-100">
 
-    <div class="text-center mb-4">
-      <h2 class="fw-bold" style="color:var(--accent-main)">Management Portal</h2>
-      <div class="muted">Select your access level</div>
+    <div class="text-center mb-5">
+      <h2 class="fw-bold fs-1" style="color:var(--accent-main)">Fidak Fest Portal</h2>
+      <div class="muted">Access Management and Live Data</div>
     </div>
 
     <div class="card-ui">
-        <h6 class="fw-bold mb-3" style="color:var(--text)">Login Options</h6>
+        <h5 class="fw-bold mb-3" style="color:var(--text)">🚀 Access Options</h5>
         <div class="d-grid gap-3">
-          <button class="btn btn-primary" id="btnAdmin">
-            <i class="bi bi-shield-lock"></i> Admin Login
-          </button>
-          <button class="btn btn-success" id="btnLeader">
-            <i class="bi bi-people"></i> Leader Login
-          </button>
-          <button class="btn btn-outline-primary" id="btnParticipant">
-            <i class="bi bi-person"></i> Participant Login
-          </button>
+          <button class="btn btn-primary" id="btnAdmin"><i class="bi bi-shield-lock"></i> Admin Login</button>
+          <button class="btn btn-success" id="btnLeader"><i class="bi bi-people"></i> Leader Login</button>
+          <button class="btn btn-outline-primary" id="btnParticipant"><i class="bi bi-person"></i> Participant Login</button>
         </div>
     </div>
     
     <div class="card-ui">
+        <h5 class="fw-bold mb-3" style="color:var(--text)">📊 Festival Statistics</h5>
         <div class="stats">
-          <div class="stat">
-            <h4 id="statStudents">0</h4>
-            <small>Students</small>
-          </div>
-          <div class="stat">
-            <h4 id="statEvents">0</h4>
-            <small>Programs</small>
-          </div>
-          <div class="stat">
-            <h4 id="statTeams">0</h4>
-            <small>Teams</small>
-          </div>
+          <div class="stat"><h4 id="statStudents">0</h4><small>Total Students</small></div>
+          <div class="stat"><h4 id="statEvents">0</h4><small>Programs Active</small></div>
+          <div class="stat"><h4 id="statTeams">0</h4><small>Teams Competing</small></div>
         </div>
     </div>
 
-
     <div class="card-ui">
-      <h6 class="fw-bold" style="color:var(--text)">Live Team Scores (Animated)</h6>
-      <div class="chart-container d-flex justify-content-around align-items-end" id="chartContainer">
-        </div>
-      <div id="scoreList" class="small text-muted mt-3">Loading…</div>
+      <h5 class="fw-bold mb-3" style="color:var(--text)">📈 Live Score Race</h5>
+      <div class="chart-container">
+        <svg id="graphSvg" viewBox="0 0 300 150" preserveAspectRatio="none">
+            <line x1="0" y1="37.5" x2="300" y2="37.5" class="grid-line" />
+            <line x1="0" y1="75" x2="300" y2="75" class="grid-line" />
+            <line x1="0" y1="112.5" x2="300" y2="112.5" class="grid-line" />
+        </svg>
+        <div id="graphLegend" class="graph-legend"></div>
+      </div>
+      <div id="scoreList" class="small text-muted mt-3">Loading Top Teams...</div>
     </div>
 
   </div>
@@ -385,28 +344,22 @@ body{
           <h5 class="modal-title" id="loginTitle">Login</h5>
           <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-
         <div class="modal-body">
           <input type="hidden" id="loginType">
-
           <div class="mb-3 d-none" id="teamBox">
             <label class="form-label">Team</label>
             <select id="teamSelect" class="form-select"></select>
           </div>
-          
           <div class="mb-3 d-none" id="participantBox">
             <label class="form-label">Chess Number</label>
-            <input id="chessInput" type="number" class="form-control" placeholder="Enter your Chess ID">
+            <input id="chessInput" type="text" class="form-control" placeholder="Enter Alphanumeric Chess ID">
           </div>
-
           <div class="mb-3" id="passwordBox">
             <label class="form-label">Password</label>
             <input id="passwordInput" type="password" class="form-control" placeholder="Required for Admin/Leader">
           </div>
-
           <div id="loginError" class="text-danger small d-none"></div>
         </div>
-
         <div class="modal-footer">
           <button class="btn btn-primary w-100">Login</button>
         </div>
@@ -423,20 +376,12 @@ import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // --- INTRO LOGIC ---
+  // --- INTRO ---
   const introOverlay = document.getElementById('intro-overlay');
-  
-  // Wait 2.2 seconds then fade out
-  setTimeout(() => {
-    introOverlay.classList.add('fade-out');
-  }, 2200);
-
-  // Remove from DOM completely after fade out animation (3s total)
-  setTimeout(() => {
-    introOverlay.remove();
-  }, 3000);
+  setTimeout(() => { introOverlay.classList.add('fade-out'); }, 2200);
+  setTimeout(() => { introOverlay.remove(); }, 3000);
     
-  // --- Theme Management ---
+  // --- Theme ---
   const body = document.body;
   const themeToggles = document.querySelectorAll('[data-theme-mode]');
   const themeIconDisplay = document.getElementById('themeIconDisplay');
@@ -450,22 +395,11 @@ document.addEventListener("DOMContentLoaded", () => {
           body.removeAttribute('data-theme');
           body.setAttribute('data-theme', mode);
       }
-
       themeToggles.forEach(btn => {
           btn.classList.remove('active');
-          if(btn.getAttribute('data-theme-mode') === mode) {
-              btn.classList.add('active');
-          }
+          if(btn.getAttribute('data-theme-mode') === mode) btn.classList.add('active');
       });
-
-      themeIconDisplay.className = "";
-      if (mode === 'light') {
-          themeIconDisplay.className = "bi bi-sun-fill";
-      } else if (mode === 'dark') {
-          themeIconDisplay.className = "bi bi-moon-stars-fill";
-      } else {
-          themeIconDisplay.className = "bi bi-circle-half";
-      }
+      themeIconDisplay.className = mode === 'light' ? "bi bi-sun-fill" : (mode === 'dark' ? "bi bi-moon-stars-fill" : "bi bi-circle-half");
   }
 
   function setTheme(mode) {
@@ -477,21 +411,18 @@ document.addEventListener("DOMContentLoaded", () => {
   updateThemeUI(savedTheme);
 
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (localStorage.getItem('theme') === 'system') {
-          updateThemeUI('system');
-      }
+      if (localStorage.getItem('theme') === 'system') updateThemeUI('system');
   });
 
   themeToggles.forEach(toggle => {
       toggle.addEventListener('click', (e) => {
           e.preventDefault();
           const target = e.target.closest('a');
-          const mode = target.getAttribute('data-theme-mode');
-          setTheme(mode);
+          setTheme(target.getAttribute('data-theme-mode'));
       });
   });
 
-  // --- Firebase Initialization ---
+  // --- Firebase ---
   let app;
   let db;
   let allStudents = {};
@@ -506,20 +437,80 @@ document.addEventListener("DOMContentLoaded", () => {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
   } catch (e) {
-    console.error("Firebase initialization failed:", e);
+    console.error("Firebase init failed:", e);
     document.getElementById("scoreList").innerHTML = "<div class='text-danger'>Error connecting to database.</div>";
-    return;
   }
   
   const statStudents = document.getElementById("statStudents");
   const statEvents = document.getElementById("statEvents");
   const statTeams = document.getElementById("statTeams");
   const scoreList = document.getElementById("scoreList");
-  const teamSelect = document.getElementById("teamSelect");
-  const chartContainer = document.getElementById("chartContainer");
+  
+  // Graph Elements
+  const graphSvg = document.getElementById("graphSvg");
+  const graphLegend = document.getElementById("graphLegend");
+  
+  // Define vibrant colors for the top teams
+  const teamColors = [
+      '#FF4081', // Pink
+      '#00E676', // Green
+      '#2979FF', // Blue
+      '#FF9100', // Orange
+      '#E040FB', // Purple
+      '#FFD740'  // Yellow
+  ];
+
+  function drawGraph(teams) {
+      // 1. Clear existing paths (keep grid lines)
+      const existingPaths = graphSvg.querySelectorAll('path');
+      existingPaths.forEach(p => p.remove());
+      graphLegend.innerHTML = '';
+
+      if(teams.length === 0) return;
+
+      // 2. Determine Scale
+      const maxScore = Math.max(...teams.map(t => t.score || 0)) || 100;
+      const svgHeight = 150;
+      const svgWidth = 300;
+
+      // 3. Draw Lines for Top 5 Teams
+      teams.slice(0, 5).forEach((t, index) => {
+          const score = t.score || 0;
+          const color = teamColors[index % teamColors.length];
+          
+          // Calculate Y position (SVG Y is inverted: 0 is top, 150 is bottom)
+          // We want 0 score at 150 (bottom) and maxScore at ~10 (top)
+          const normalizedScore = (score / (maxScore * 1.1)) * svgHeight; // *1.1 adds some headroom
+          const yPos = svgHeight - normalizedScore;
+
+          // Create a curved path: Start at bottom-left (0, 150) -> Curve to Right (300, yPos)
+          // Using Quadratic Bezier Curve (Q) for smoothness
+          const pathData = `M 0,150 Q ${svgWidth / 2},${yPos} ${svgWidth},${yPos}`;
+
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", pathData);
+          path.setAttribute("stroke", color);
+          path.setAttribute("class", "graph-path");
+          
+          // Add tooltip
+          const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          title.textContent = `${t.name}: ${score}`;
+          path.appendChild(title);
+
+          graphSvg.appendChild(path);
+
+          // 4. Add to Legend
+          const legendItem = document.createElement("div");
+          legendItem.className = "legend-item";
+          legendItem.innerHTML = `
+            <div class="legend-dot" style="background:${color}"></div>
+            <span>${t.name}</span>
+          `;
+          graphLegend.appendChild(legendItem);
+      });
+  }
 
   // --- Realtime Listeners ---
-
   onValue(ref(db,"students"), s => {
     allStudents = s.val() || {};
     statStudents.textContent = Object.keys(allStudents).length;
@@ -534,42 +525,31 @@ document.addEventListener("DOMContentLoaded", () => {
     allTeams = teams;
     statTeams.textContent = Object.keys(teams).length;
 
-    teamSelect.innerHTML = `<option value="">Select Team</option>`;
     scoreList.innerHTML = "";
-    chartContainer.innerHTML = "";
     
+    // Sort teams by score (descending)
     const sortedTeams = Object.values(teams)
       .sort((a,b)=>(b.score||0)-(a.score||0));
-      
-    const maxScore = sortedTeams.length > 0 ? Math.max(...sortedTeams.map(t => t.score || 0)) : 100;
-    
-    sortedTeams
-      .forEach(t=>{
-        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-        
+
+    // Update Graph
+    drawGraph(sortedTeams);
+
+    // List Text View
+    sortedTeams.slice(0, 5).forEach((t, i)=>{
+        const color = teamColors[i % teamColors.length];
         scoreList.innerHTML += `
-          <div class="score-item">
+          <div class="score-item" style="border-left: 3px solid ${color}; padding-left:10px;">
             <span>${t.name}</span>
             <strong>${t.score||0}</strong>
           </div>`;
-          
-        if (chartContainer.childElementCount < 10) {
-            const score = t.score || 0;
-            const heightPercent = (score / maxScore) * 85; 
-            
-            const bar = document.createElement('div');
-            bar.className = 'bar';
-            bar.title = `${t.name}: ${score}`;
-            bar.style.height = '0';
-            bar.style.width = '20px';
-            
-            setTimeout(() => {
-                bar.style.height = `${Math.max(5, heightPercent)}%`; 
-            }, 100);
-            
-            chartContainer.appendChild(bar);
-        }
-      });
+    });
+      
+    // Update Select
+    const teamSelect = document.getElementById("teamSelect");
+    teamSelect.innerHTML = `<option value="">Select Team</option>`;
+    Object.values(teams).forEach(t=>{
+        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+    });
   });
 
   // --- Login Logic ---
@@ -578,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginType = document.getElementById("loginType");
   const teamBox = document.getElementById("teamBox");
   const participantBox = document.getElementById("participantBox");
-  const passwordBox = document.getElementById("passwordBox"); // New Reference
+  const passwordBox = document.getElementById("passwordBox");
   const loginTitle = document.getElementById("loginTitle");
   const passwordInput = document.getElementById("passwordInput");
   const chessInput = document.getElementById("chessInput");
@@ -587,10 +567,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAdmin = document.getElementById("btnAdmin");
   const btnLeader = document.getElementById("btnLeader");
   const btnParticipant = document.getElementById("btnParticipant");
-
-  btnAdmin.onclick = () => openLogin("admin");
-  btnLeader.onclick = () => openLogin("leader");
-  btnParticipant.onclick = () => openLogin("participant");
 
   function openLogin(type){
     loginType.value = type;
@@ -602,23 +578,26 @@ document.addEventListener("DOMContentLoaded", () => {
         loginTitle.textContent = "ADMIN LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none"); // Show Pass
+        passwordBox.classList.remove("d-none");
         passwordInput.placeholder = "Admin Password";
     } else if (type === "leader"){
         loginTitle.textContent = "LEADER LOGIN";
         teamBox.classList.remove("d-none");
         participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none"); // Show Pass
+        passwordBox.classList.remove("d-none");
         passwordInput.placeholder = "Leader Password";
     } else if (type === "participant"){
         loginTitle.textContent = "PARTICIPANT LOGIN";
         teamBox.classList.add("d-none");
         participantBox.classList.remove("d-none");
-        passwordBox.classList.add("d-none"); // Hide Pass for Students
+        passwordBox.classList.add("d-none");
     }
-    
     modal.show();
   }
+
+  btnAdmin.onclick = () => openLogin("admin");
+  btnLeader.onclick = () => openLogin("leader");
+  btnParticipant.onclick = () => openLogin("participant");
 
   loginForm.onsubmit = async e => {
     e.preventDefault();
@@ -634,15 +613,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if(type==="leader"){
-      const teamId = teamSelect.value;
+      const teamId = document.getElementById("teamSelect").value;
       const team = Object.values(allTeams).find(t => String(t.id) === teamId);
-      
-      if(!team || team.password !== pwd){
-        error("Invalid team or password"); return;
-      }
-      if (!team.leaderId) {
-          error("Team leader ID not set."); return;
-      }
+      if(!team || team.password !== pwd){ error("Invalid team or password"); return; }
+      if (!team.leaderId) { error("Team leader ID not set."); return; }
       sessionStorage.setItem("leaderAuth", JSON.stringify(team));
       location.href=`leader.html?leader=${team.leaderId}`;
     }
@@ -656,33 +630,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         let student;
-        const lowerCaseID = chessID.toLowerCase();
-        
-        student = Object.values(allStudents).find(s => {
-            const firebaseKey = Object.keys(allStudents).find(key => allStudents[key] === s);
-            if (firebaseKey && String(firebaseKey).trim().toLowerCase() === lowerCaseID) return true;
-            
-            const sId = String(s.id || '').trim().toLowerCase();
-            const sChestNo = String(s.chestNo || '').trim().toLowerCase();
-            const sChessNo = String(s.chessNo || '').trim().toLowerCase();
-            
-            return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
-        });
+        if (allStudents[chessID]) {
+            student = allStudents[chessID];
+        } else {
+            const lowerCaseID = chessID.toLowerCase();
+            student = Object.values(allStudents).find(s => {
+                const sId = String(s.id || '').trim().toLowerCase();
+                const sChestNo = String(s.chestNo || '').trim().toLowerCase();
+                const sChessNo = String(s.chessNo || '').trim().toLowerCase();
+                return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
+            });
+        }
 
         if (!student) {
-            error("Invalid Chess Number or ID. Record not found.");
+            error("Invalid Chess Number. ID not found.");
             return;
         }
         
         const studentID = student.id || student.chestNo || chessID;
-        
         sessionStorage.setItem("participantId", studentID);
         sessionStorage.setItem("participantName", student.name || "Participant");
         location.href="participant.html"; 
     }
   };
 
-    
   function error(msg){
     loginError.textContent = msg;
     loginError.classList.remove("d-none");
@@ -692,5 +663,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
-
