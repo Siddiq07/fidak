@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin — Fidak Fest (Final v4)</title>
+  <title>Admin — Fidak Fest (Ultimate v5)</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -16,8 +16,8 @@
     /* -------------------------------------- */
     :root{
       --bg: #0d121c; --card: #1c2738; --text: #e2e8f0; --muted: #94a3b8;
-      --border: #334155; /* New: Define border color */
-      --input-bg: #334155; /* New: Define input background */
+      --border: #334155; 
+      --input-bg: #334155;
       --accent-main: #f97316; --accent-secondary: #3b82f6;
       --success: #10b981; --danger: #ef4444; --warning: #facc15;
     }
@@ -348,7 +348,7 @@
           <div class="section-title">All Events & Results</div>
           <div class="table-responsive">
             <table class="table align-middle">
-              <thead class="table-light"><tr><th>Event</th><th>Type</th><th>1st (Pts)</th><th>2nd (Pts)</th><th>3rd (Pts)</th><th>Total Pts</th><th>Status</th></tr></thead>
+              <thead class="table-light"><tr><th>Event</th><th>Type</th><th>1st (Pts)</th><th>2nd (Pts)</th><th>3rd (Pts)</th><th>Total Pts</th><th>Status</th><th>Act</th></tr></thead>
               <tbody id="resultsTable"></tbody>
             </table>
           </div>
@@ -365,12 +365,45 @@
 
 <div class="modal fade" id="approvalsDetailModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 id="approvalModalTitle">Participants</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><h6 class="text-warning">Pending</h6><table class="table table-sm"><tbody id="pendingParticipantsTable"></tbody></table><h6 class="text-success mt-3">Approved</h6><table class="table table-sm"><tbody id="approvedParticipantsTable"></tbody></table></div></div></div></div>
 
+<div class="modal fade" id="resultManageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="resultManageForm" class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="resultManageTitle">Manage Results</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="manageEventId">
+                <div class="alert alert-info py-2 small">
+                    This form allows you to edit the saved results for <strong id="resultEventNameDisplay"></strong>.
+                </div>
+                
+                <h6 class="mt-3">1st Place</h6>
+                <select id="manageResultSelectFirst" class="form-select mb-2"></select>
+                <input id="manageResultPointsFirst" type="number" class="form-control form-control-sm mb-3" placeholder="Points">
+                
+                <h6>2nd Place</h6>
+                <select id="manageResultSelectSecond" class="form-select mb-2"></select>
+                <input id="manageResultPointsSecond" type="number" class="form-control form-control-sm mb-3" placeholder="Points">
+                
+                <h6>3rd Place</h6>
+                <select id="manageResultSelectThird" class="form-select mb-2"></select>
+                <input id="manageResultPointsThird" type="number" class="form-control form-control-sm mb-3" placeholder="Points">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="deleteEventResultsBtn" class="btn btn-danger me-auto">Delete All Results</button>
+                <button type="button" id="managePublishBtn" class="btn btn-success">Publish & Update Scores</button>
+                <button type="submit" class="btn btn-warning">Save Draft</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <div class="modal fade" id="programDetailModal" tabindex="-1">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header"><h5 class="modal-title" id="programModalTitle">Manage Program</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
-        <div class="alert alert-info py-2" style="background:#1c2738; border:1px solid #3b82f6; color:#e2e8f0; font-size:0.9rem;">
+        <div class="alert alert-info py-2 small">
           <i class="bi bi-info-circle"></i> <strong>Scratch Card Codes:</strong> Use the "Assign Codes" button to generate a unique code letter for each participant (for use with scratch cards). Click a box to toggle attendance.
         </div>
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -441,14 +474,13 @@ document.querySelectorAll('.sidebar .icon-btn').forEach(btn=>{
 
 function renderAll(){
   populateDropdowns();
-  renderOverview(); // NEW
+  renderOverview();
   renderStudents();
   renderTeams();
   renderEvents();
   renderAttendanceHistory();
   renderApprovals();
   renderResults();
-  // renderPrograms(); REMOVED
 }
 
 function populateDropdowns(){
@@ -470,13 +502,12 @@ function populateDropdowns(){
   if(document.activeElement !== lSelect) lSelect.innerHTML = lHtml;
 }
 
-/* ---------------- OVERVIEW (NEW) ---------------- */
+/* ---------------- OVERVIEW ---------------- */
 function renderOverview() {
     const totalTeams = CACHE.teams.length;
     const totalStudents = CACHE.students.length;
     const pendingApprovals = CACHE.participations.filter(p => p.status === 'pending').length;
     
-    // Calculate Draft Results count (Event has results but is not fully published)
     let draftResultsCount = 0;
     const evMap = {};
     CACHE.results.forEach(r => { 
@@ -510,7 +541,7 @@ function renderOverview() {
     tbody.innerHTML = html;
 }
 
-/* ---------------- STUDENT DETAILS LOOKUP (NEW PAGE) ---------------- */
+/* ---------------- STUDENT DETAILS LOOKUP ---------------- */
 $('studentLookupSearch').addEventListener('input', () => {
     const q = $('studentLookupSearch').value.trim().toLowerCase();
     if (q.length < 3) return;
@@ -541,6 +572,7 @@ $('studentLookupSearch').addEventListener('input', () => {
 
 function renderStudentParticipation(studentId) {
     const eventsMap = {}; CACHE.events.forEach(e => eventsMap[e.id] = e);
+    const resultsMap = {}; CACHE.results.filter(r => r.studentId === studentId && r.published).forEach(r => resultsMap[r.eventId] = r);
     
     let html = '';
     CACHE.participations.filter(p => p.studentId === studentId)
@@ -548,18 +580,22 @@ function renderStudentParticipation(studentId) {
         .forEach(p => {
         const event = eventsMap[p.eventId];
         const status = p.status;
+        const result = resultsMap[p.eventId];
+        
         let statusBadge = '';
-        if (status === 'approved') statusBadge = '<span class="badge bg-success">Approved</span>';
-        else if (status === 'pending') statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
-        else statusBadge = '<span class="badge bg-danger">Rejected</span>';
+        if (status === 'approved') {
+             statusBadge = `<span class="badge bg-success">Approved</span>`;
+             if (result) statusBadge += ` <span class="badge bg-info text-dark">Rank ${result.position} (${result.points} pts)</span>`;
+        } else if (status === 'pending') {
+             statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+        } else {
+             statusBadge = '<span class="badge bg-danger">Rejected</span>';
+        }
 
         html += `<tr><td>${event ? event.name : 'Unknown Event'}</td><td>${statusBadge}</td></tr>`;
     });
     
-    if (html === '') {
-        return '<tr><td colspan="2" class="muted">No participation history found.</td></tr>';
-    }
-    return html;
+    return html || '<tr><td colspan="2" class="muted">No participation history found.</td></tr>';
 }
 
 /* --- EXCEL IMPORT HELPERS --- */
@@ -648,7 +684,7 @@ $('editStudentForm').addEventListener('submit', async e => {
   bootstrap.Modal.getInstance($('editStudentModal')).hide(); toast('Updated');
 });
 $('deleteStudentBtn').addEventListener('click', async ()=>{
-  if(confirm('Delete student?')) { await remove(ref(db, `students/${$('editStudentDbKey').value}`)); bootstrap.Modal.getInstance($('editStudentModal')).hide(); toast('Deleted'); }
+  if(confirm('Delete student? This action cannot be undone.')) { await remove(ref(db, `students/${$('editStudentDbKey').value}`)); bootstrap.Modal.getInstance($('editStudentModal')).hide(); toast('Deleted'); }
 });
 
 /* ---------------- TEAMS ---------------- */
@@ -670,7 +706,7 @@ function renderTeams(){
   tbody.innerHTML = html;
 }
 $('teamsTable').addEventListener('click', async e=>{
-  if(e.target.classList.contains('btn-del-team')){ if(confirm('Delete team?')) await remove(ref(db, `teams/${e.target.dataset.key}`)); }
+  if(e.target.classList.contains('btn-del-team')){ if(confirm('Delete team? This action cannot be undone.')) await remove(ref(db, `teams/${e.target.dataset.key}`)); }
 });
 
 /* ---------------- EVENTS ---------------- */
@@ -720,7 +756,7 @@ function renderEvents(){
   $('eventsTable').innerHTML = html;
 }
 $('eventsTable').addEventListener('click', async e=>{
-  if(e.target.classList.contains('btn-del-ev')){ if(confirm('Delete event?')) await remove(ref(db, `events/${e.target.dataset.key}`)); }
+  if(e.target.classList.contains('btn-del-ev')){ if(confirm('Delete event? This action cannot be undone.')) await remove(ref(db, `events/${e.target.dataset.key}`)); }
 });
 
 /* ---------------- ATTENDANCE ---------------- */
@@ -801,7 +837,15 @@ $('approvalsTable').addEventListener('click', e => {
   }
 });
 
+window.setStatus = async (id, st) => {
+  const k = KEYMAP.participations[id];
+  if(k) await update(ref(db, `participations/${k}`), { status:st });
+  bootstrap.Modal.getInstance($('approvalsDetailModal')).hide();
+};
+
+
 // PROGRAM MANAGEMENT (LOAD)
+let currentProgramEventId = null;
 function loadProgramDetails(eid) {
     const approvedParts = CACHE.participations.filter(p => p.eventId == eid && p.status == 'approved');
     const progData = CACHE.programData && CACHE.programData[eid] ? CACHE.programData[eid] : {};
@@ -835,7 +879,7 @@ $('assignRandomLetters').addEventListener('click', () => {
   if(!currentProgramEventId) return;
   const boxes = Array.from(document.querySelectorAll('#programParticipantsGrid .small-box'));
   if(!boxes.length) return toast('No participants','warning');
-  if(!confirm('This will reshuffle and overwrite existing codes/scratch card letters. Continue?')) return;
+  if(!confirm('This will reshuffle and overwrite existing scratch card codes. Continue?')) return;
   
   const generateCodes = (n) => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -866,7 +910,67 @@ $('saveProgramData').addEventListener('click', async () => {
   toast('Program data saved successfully'); bootstrap.Modal.getInstance($('programDetailModal')).hide();
 });
 
-/* ---------------- RESULTS (FIXED LOGIC) ---------------- */
+
+/* ROBUST PDF WATERMARK LOGIC (APPROVED ROSTER) */
+$('downloadApprovalsPdf').addEventListener('click', () => {
+    const approvedParts = CACHE.participations.filter(p => String(p.status||'').toLowerCase()==='approved');
+    if(!approvedParts.length) return toast('No approved data','warning');
+
+    const eventsMap = {}; CACHE.events.forEach(e => eventsMap[e.id] = {...e, list:[]});
+    const tm = {}; CACHE.teams.forEach(t=>tm[t.id]=t.name);
+    const st = {}; CACHE.students.forEach(s=>st[s.id]=s);
+
+    approvedParts.forEach(p => {
+        if(eventsMap[p.eventId]){
+            const s = st[p.studentId] || {name:p.studentId, id:p.studentId, teamId:null};
+            eventsMap[p.eventId].list.push({ ...s, teamName: tm[s.teamId]||'-' });
+        }
+    });
+
+    let htmlContent = `<div style="padding:20px; font-family:Arial, sans-serif;">
+       <h1 style="text-align:center; margin-bottom:10px; color:#212529;">Fidak Fest Approved Participation Roster</h1>
+       <p style="text-align:center; color:#6c757d; font-size:12px;">Generated: ${new Date().toLocaleDateString()}</p>`;
+
+    Object.values(eventsMap).sort((a,b)=>a.name.localeCompare(b.name)).forEach(ev => {
+        if(ev.list.length){
+            htmlContent += `<div style="margin-bottom:25px; border:1px solid #dee2e6; padding:15px; border-radius: 4px;">
+              <h3 style="margin:0 0 5px 0; font-size:16px; color:#f97316;">${escapeHtml(ev.name)}</h3>
+              <p style="margin:0 0 10px 0; font-size:11px; color:#6c757d;">Category: ${ev.type} / ${ev.level}</p>
+              <table style="width:100%; border-collapse:collapse; font-size:11px; color:#212529;">
+                <tr style="background:#f8f9fa; text-align:left;">
+                  <th style="padding:6px; border-bottom:1px solid #dee2e6; width:25%;">Chess ID</th>
+                  <th style="padding:6px; border-bottom:1px solid #dee2e6; width:45%;">Student Name</th>
+                  <th style="padding:6px; border-bottom:1px solid #dee2e6; width:30%;">Team Name</th>
+                </tr>`;
+            ev.list.sort((a,b)=>a.name.localeCompare(b.name)).forEach(m => {
+                htmlContent += `<tr>
+                    <td style="padding:6px; border-bottom:1px solid #f1f1f1;">${m.id}</td>
+                    <td style="padding:6px; border-bottom:1px solid #f1f1f1;">${escapeHtml(m.name)}</td>
+                    <td style="padding:6px; border-bottom:1px solid #f1f1f1;">${escapeHtml(m.teamName)}</td>
+                </tr>`;
+            });
+            htmlContent += `</table></div>`;
+        }
+    });
+    htmlContent += `</div>`;
+
+    html2pdf().from(htmlContent).set({
+        margin: 10, filename: `fidak_fest_roster_${new Date().toISOString().slice(0, 10)}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4' }
+    }).toPdf().get('pdf').then(function(pdf) {
+        const totalPages = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(60);
+            pdf.setTextColor(200, 200, 200); // Light Grey
+            pdf.text('FIDAK FEST', 50, 150, { angle: 45 }); // Diagonal Watermark
+        }
+    }).save();
+});
+
+
+/* ---------------- RESULTS (FIXED LOGIC & ACTIONS) ---------------- */
 // Result Validation
 function validateResults(inputs) {
     const selectedIds = inputs.filter(i => i.sid).map(i => i.sid);
@@ -877,22 +981,23 @@ function validateResults(inputs) {
     return { valid: true };
 }
 
-$('saveResult').addEventListener('click', async () => saveRes(false));
-$('publishAllResults').addEventListener('click', async () => saveRes(true));
+$('saveResult').addEventListener('click', async () => saveRes(false, 'resultEvent', 'resultSelectFirst', 'resultPointsFirst', 'resultSelectSecond', 'resultPointsSecond', 'resultSelectThird', 'resultPointsThird'));
 
-async function saveRes(publish){
-  const eid = $('resultEvent').value; if(!eid) return toast('Select event','danger');
+$('publishAllResults').addEventListener('click', async () => saveRes(true, 'resultEvent', 'resultSelectFirst', 'resultPointsFirst', 'resultSelectSecond', 'resultPointsSecond', 'resultSelectThird', 'resultPointsThird'));
+
+async function saveRes(publish, eventIdElement, s1, p1, s2, p2, s3, p3){
+  const eid = $(eventIdElement).value; if(!eid) return toast('Select event','danger');
   
   const inputs = [
-    { pos:1, sid:$('resultSelectFirst').value, pts:Number($('resultPointsFirst').value)||0 },
-    { pos:2, sid:$('resultSelectSecond').value, pts:Number($('resultPointsSecond').value)||0 },
-    { pos:3, sid:$('resultSelectThird').value, pts:Number($('resultPointsThird').value)||0 }
+    { pos:1, sid:$(s1).value, pts:Number($(p1).value)||0 },
+    { pos:2, sid:$(s2).value, pts:Number($(p2).value)||0 },
+    { pos:3, sid:$(s3).value, pts:Number($(p3).value)||0 }
   ];
   
   const validation = validateResults(inputs);
   if (!validation.valid) return toast(validation.message, 'danger');
   
-  // 1. Unpublish and reset scores for this event first (Clean slate for publishing)
+  // 1. Clean slate/Unpublish and reset scores for this event first (Only if publishing)
   if(publish) {
       const oldResults = CACHE.results.filter(r => r.eventId === eid && r.published);
       for(const oldR of oldResults) {
@@ -902,19 +1007,27 @@ async function saveRes(publish){
              const tmKey = KEYMAP.teams[tm.id];
              await update(ref(db, `teams/${tmKey}`), { score: (tm.score||0) - oldR.points });
           }
-          await update(ref(db, `results/${KEYMAP.results[oldR.id]}`), { published: false });
+          // Set old published result to draft (published: false)
+          const oldRKey = Object.keys(KEYMAP.results).find(k => KEYMAP.results[k] === oldR.id);
+          if (oldRKey) await update(ref(db, `results/${oldRKey}`), { published: false });
       }
   }
 
   // 2. Publish/Save new results
   for(const i of inputs){
     if(i.sid){
-      const ex = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
-      const data = { eventId:eid, position:i.pos, studentId:i.sid, points:i.pts, published:publish };
+      // Find existing result entry in the database by eventId and position
+      const existingEntry = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
+      const data = { eventId:eid, position:i.pos, studentId:i.sid, points:i.pts, published:publish, id: existingEntry?.id || Date.now()+Math.random().toString() };
       
-      // Save Result
-      if(ex) await update(ref(db, `results/${KEYMAP.results[ex.id]}`), data);
-      else await set(push(ref(db, 'results')), { ...data, id:Date.now()+Math.random().toString() });
+      // Save/Update Result
+      if(existingEntry) {
+          const key = Object.keys(KEYMAP.results).find(k => KEYMAP.results[k] === existingEntry.id);
+          await update(ref(db, `results/${key}`), data);
+      }
+      else {
+          await set(push(ref(db, 'results')), data);
+      }
       
       // Update Team Score (Only if publishing)
       if(publish){
@@ -928,7 +1041,16 @@ async function saveRes(publish){
     }
   }
   toast(publish ? 'Published & Scores Updated!' : 'Draft saved');
-  $('resultEvent').value = ''; 
+  // Clear only the form fields in the main results page
+  if(eventIdElement === 'resultEvent') {
+      $(eventIdElement).value = ''; 
+      $(s1).innerHTML = '<option value="">Select Student</option>';
+      $(p1).value = '';
+      $(s2).innerHTML = '<option value="">Select Student</option>';
+      $(p2).value = '';
+      $(s3).innerHTML = '<option value="">Select Student</option>';
+      $(p3).value = '';
+  }
 }
 
 function renderResults(){
@@ -945,17 +1067,113 @@ function renderResults(){
     const isPub = res.some(r=>r.published);
     const status = isPub ? '<span class="badge bg-success">Published</span>' : (res.length ? '<span class="badge bg-warning text-dark">Draft</span>' : '<span class="badge bg-secondary">No Results</span>');
     
-    // FIX: Show points next to name
     const getName = (r) => { 
         if(!r) return '-'; 
         const s = studentMap[r.studentId]; 
         return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
     };
 
-    html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td class="fw-bold text-info">${total}</td><td>${status}</td></tr>`;
+    // FIX: Added Actions column and button
+    html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td class="fw-bold text-info">${total}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-manage-results" data-eid="${ev.id}">Manage</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
+
+// FIX: New Management Modal Logic
+$('resultsTable').addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-manage-results')) {
+        const eid = e.target.dataset.eid;
+        const ev = CACHE.events.find(x => x.id === eid);
+        if (!ev) return toast('Event not found', 'danger');
+
+        const parts = CACHE.participations.filter(p => p.eventId === eid && p.status === 'approved');
+        const eventResults = CACHE.results.filter(r => r.eventId === eid);
+
+        // Populate common student dropdown
+        let html = '<option value="">Select Student</option>';
+        parts.forEach(p => { 
+            const s = CACHE.students.find(x => x.id === p.studentId); 
+            html += `<option value="${p.studentId}">${s ? s.name : p.studentId}</option>`; 
+        });
+
+        const selects = ['manageResultSelectFirst', 'manageResultSelectSecond', 'manageResultSelectThird'];
+        const points = ['manageResultPointsFirst', 'manageResultPointsSecond', 'manageResultPointsThird'];
+
+        selects.forEach(id => $(id).innerHTML = html);
+
+        // Load existing data
+        selects.forEach((sId, index) => {
+            const pos = index + 1;
+            const res = eventResults.find(r => r.position === pos);
+            if (res) {
+                $(sId).value = res.studentId || '';
+                $(points[index]).value = res.points || 0;
+            } else {
+                $(sId).value = '';
+                $(points[index]).value = '';
+            }
+        });
+
+        $('manageEventId').value = eid;
+        $('resultEventNameDisplay').textContent = ev.name;
+        new bootstrap.Modal($('#resultManageModal')).show();
+    }
+});
+
+// FIX: Handle Management Modal Form Submission (Save Draft)
+$('#resultManageForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const eid = $('#manageEventId').value;
+    const s1 = $('#manageResultSelectFirst').id;
+    const p1 = $('#manageResultPointsFirst').id;
+    const s2 = $('#manageResultSelectSecond').id;
+    const p2 = $('#manageResultPointsSecond').id;
+    const s3 = $('#manageResultSelectThird').id;
+    const p3 = $('#manageResultPointsThird').id;
+    
+    await saveRes(false, 'manageEventId', s1, p1, s2, p2, s3, p3);
+    bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+});
+
+// FIX: Handle Management Modal Publish Button
+$('#managePublishBtn').addEventListener('click', async () => {
+    const eid = $('#manageEventId').value;
+    const s1 = $('#manageResultSelectFirst').id;
+    const p1 = $('#manageResultPointsFirst').id;
+    const s2 = $('#manageResultSelectSecond').id;
+    const p2 = $('#manageResultPointsSecond').id;
+    const s3 = $('#manageResultSelectThird').id;
+    const p3 = $('#manageResultPointsThird').id;
+    
+    await saveRes(true, 'manageEventId', s1, p1, s2, p2, s3, p3);
+    bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+});
+
+// FIX: Handle Management Modal Delete Button
+$('#deleteEventResultsBtn').addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to delete ALL results for this event? This includes scores and publication status.')) return;
+    
+    const eid = $('#manageEventId').value;
+    const resultsToDelete = CACHE.results.filter(r => r.eventId === eid);
+    
+    // 1. Unpublish and reset scores
+    for(const r of resultsToDelete) {
+        if(r.published) {
+             const stu = CACHE.students.find(s=>s.id === r.studentId);
+             if(stu && stu.teamId){
+                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
+                const tmKey = KEYMAP.teams[tm.id];
+                await update(ref(db, `teams/${tmKey}`), { score: (tm.score||0) - r.points });
+             }
+        }
+        // 2. Delete entry from Firebase
+        const key = Object.keys(KEYMAP.results).find(k => KEYMAP.results[k] === r.id);
+        if (key) await remove(ref(db, `results/${key}`));
+    }
+    
+    toast('All results deleted for this event.', 'danger');
+    bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+});
 
 /* ---------------- FINAL BOOTSTRAPPING ---------------- */
 setTimeout(()=> {
@@ -964,7 +1182,7 @@ setTimeout(()=> {
   renderAll();
 }, 600);
 
-console.log('Admin v4 Loaded');
+console.log('Admin v5 Loaded');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
