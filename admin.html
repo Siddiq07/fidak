@@ -234,6 +234,7 @@
               <hr style="border-top: 1px solid var(--border);">
               <div class="section-title">Add Student Manually</div>
               <input id="manualChess" class="form-control mb-2" placeholder="Chess ID (alphanumeric)">
+              <input id="manualName" class="form-control mb-2" placeholder="Full Name">
               <select id="manualLevel" class="form-select mb-2"><option>Senior</option><option>Junior</option></select>
               <select id="manualTeam" class="form-select mb-2"><option value="">Unassigned</option></select>
               <button id="addManualStudent" class="btn btn-success w-100">Add Student</button>
@@ -545,13 +546,14 @@
 </div>
 
 <script type="module">
-/* Final admin.js embedded - FULL CODE (Corrected) */
+/* Final admin.js embedded - FULL CODE (Verified Stable) */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 /* Firebase config - ***************************************************************************/
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 /* !! IMPORTANT: REPLACE THESE PLACEHOLDER KEYS WITH YOUR ACTUAL FIREBASE PROJECT CREDENTIALS !! */
+/* !! If you do not replace these, the application WILL NOT connect to Firebase.              !! */
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 const firebaseConfig = {
   apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM", 
@@ -1008,7 +1010,7 @@ $('attendanceSessions').addEventListener('click', async (e)=> {
     CACHE.students.forEach(st => { const tid = st.teamId || '__unassigned'; if(!byTeam[tid]) byTeam[tid] = []; byTeam[tid].push(st); });
     Object.keys(byTeam).forEach(tid => {
       const groupTitle = document.createElement('div'); groupTitle.innerHTML = `<div style="font-weight:700;margin:8px 0">${escapeHtml(teamsMap[tid]||'Unassigned')}</div>`; wrap.appendChild(groupTitle);
-      const groupBox = document.createElement('div'); groupBox.style.display='flex'; groupBoxBox.style.flexWrap='wrap';
+      const groupBox = document.createElement('div'); groupBox.style.display='flex'; groupBox.style.flexWrap='wrap';
       byTeam[tid].forEach(st => {
         const status = (s.students && s.students[st.id]) ? s.students[st.id] : 'Absent';
         const div = document.createElement('div'); div.className = 'small-box ' + (status==='Present' ? 'present' : 'absent'); div.dataset.key = encodeKey(st.id); div.dataset.name = st.name || ''; div.textContent = st.id;
@@ -1295,8 +1297,6 @@ $('downloadStudentsPdf').addEventListener('click', ()=> {
         margin: [10, 10, 10, 10], filename: `students_${date}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     }).save();
 });
-
-/* Event List PDF (Updated format) */
 $('downloadEventsPdf').addEventListener('click', ()=> {
     const date = new Date().toISOString().slice(0,10);
     let tableRows = '';
@@ -1396,12 +1396,34 @@ function renderResults(){
 
 // Result actions were already correct, but ensuring listener consistency:
 document.addEventListener('click', async (e)=>{
-  // ... (handle btn-toggle-publish-event, btn-edit-event-results, btn-delete-event-results logic) ...
+  // Event listener for EDIT button on Results Table
+  if(e.target.classList.contains('btn-edit-event-results')){
+    const evId = e.target.dataset.ev;
+    $('resultEvent').value = evId;
+    $('resultEvent').dispatchEvent(new Event('change'));
+    
+    const positions = [1,2,3];
+    positions.forEach(pn=>{
+      const rr = (CACHE.results || []).find(r => String(r.eventId) === String(evId) && Number(r.position) === pn);
+      if(rr){
+        if(pn===1){ $('resultSelectFirst').value = rr.studentId; $('resultPointsFirst').value = rr.points||0; }
+        if(pn===2){ $('resultSelectSecond').value = rr.studentId; $('resultPointsSecond').value = rr.points||0; }
+        if(pn===3){ $('resultSelectThird').value = rr.studentId; $('resultPointsThird').value = rr.points||0; }
+      } else {
+        if(pn===1){ $('resultSelectFirst').value = ''; $('resultPointsFirst').value = ''; }
+        if(pn===2){ $('resultSelectSecond').value = ''; $('resultPointsSecond').value = ''; }
+        if(pn===3){ $('resultSelectThird').value = ''; $('resultPointsThird').value = ''; }
+      }
+    });
+    toast('Loaded results into the editor (save to update).');
+    return;
+  }
   
+  // Event listener for PUBLISH/UNPUBLISH button on Results Table
   if(e.target.classList.contains('btn-toggle-publish-event')){
     const ev = e.target.dataset.ev;
-    const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
-    if(!eventResults.length) return toast('No results for this event','danger');
+    const eventResults = (CACHE.results || []).filter(r => String(r.eventId) === String(ev));
+    if(!eventResults.length) return toast('No results to publish','danger');
     
     const anyPublished = eventResults.some(r=> r.published);
     
@@ -1429,10 +1451,14 @@ document.addEventListener('click', async (e)=>{
     }
     toast(anyPublished ? 'Unpublished event results' : 'Published event results');
     renderAll();
-  } else if(e.target.classList.contains('btn-delete-event-results')){
+    return;
+  } 
+  
+  // Event listener for DELETE button on Results Table
+  if(e.target.classList.contains('btn-delete-event-results')){
     if(!confirm('Delete all results for this event? This will also remove associated team scores.')) return;
     const evId = e.target.dataset.ev;
-    const toDelete = CACHE.results.filter(r=> String(r.eventId)===String(evId));
+    const toDelete = (CACHE.results || []).filter(r=> String(r.eventId)===String(evId));
     for(const r of toDelete){
         const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
         if(r.published && stud && stud.teamId){
@@ -1448,6 +1474,7 @@ document.addEventListener('click', async (e)=>{
     }
     toast('Deleted results for event');
     renderAll();
+    return;
   }
 });
 
@@ -1769,12 +1796,34 @@ function renderResults(){
 
 // Result actions were already correct, but ensuring listener consistency:
 document.addEventListener('click', async (e)=>{
-  // ... (handle btn-toggle-publish-event, btn-edit-event-results, btn-delete-event-results logic) ...
+  // Event listener for EDIT button on Results Table
+  if(e.target.classList.contains('btn-edit-event-results')){
+    const evId = e.target.dataset.ev;
+    $('resultEvent').value = evId;
+    $('resultEvent').dispatchEvent(new Event('change'));
+    
+    const positions = [1,2,3];
+    positions.forEach(pn=>{
+      const rr = (CACHE.results || []).find(r => String(r.eventId) === String(evId) && Number(r.position) === pn);
+      if(rr){
+        if(pn===1){ $('resultSelectFirst').value = rr.studentId; $('resultPointsFirst').value = rr.points||0; }
+        if(pn===2){ $('resultSelectSecond').value = rr.studentId; $('resultPointsSecond').value = rr.points||0; }
+        if(pn===3){ $('resultSelectThird').value = rr.studentId; $('resultPointsThird').value = rr.points||0; }
+      } else {
+        if(pn===1){ $('resultSelectFirst').value = ''; $('resultPointsFirst').value = ''; }
+        if(pn===2){ $('resultSelectSecond').value = ''; $('resultPointsSecond').value = ''; }
+        if(pn===3){ $('resultSelectThird').value = ''; $('resultPointsThird').value = ''; }
+      }
+    });
+    toast('Loaded results into the editor (save to update).');
+    return;
+  }
   
+  // Event listener for PUBLISH/UNPUBLISH button on Results Table
   if(e.target.classList.contains('btn-toggle-publish-event')){
     const ev = e.target.dataset.ev;
-    const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
-    if(!eventResults.length) return toast('No results for this event','danger');
+    const eventResults = (CACHE.results || []).filter(r => String(r.eventId) === String(ev));
+    if(!eventResults.length) return toast('No results to publish','danger');
     
     const anyPublished = eventResults.some(r=> r.published);
     
@@ -1802,10 +1851,14 @@ document.addEventListener('click', async (e)=>{
     }
     toast(anyPublished ? 'Unpublished event results' : 'Published event results');
     renderAll();
-  } else if(e.target.classList.contains('btn-delete-event-results')){
+    return;
+  } 
+  
+  // Event listener for DELETE button on Results Table
+  if(e.target.classList.contains('btn-delete-event-results')){
     if(!confirm('Delete all results for this event? This will also remove associated team scores.')) return;
     const evId = e.target.dataset.ev;
-    const toDelete = CACHE.results.filter(r=> String(r.eventId)===String(evId));
+    const toDelete = (CACHE.results || []).filter(r=> String(r.eventId)===String(evId));
     for(const r of toDelete){
         const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
         if(r.published && stud && stud.teamId){
@@ -1821,6 +1874,7 @@ document.addEventListener('click', async (e)=>{
     }
     toast('Deleted results for event');
     renderAll();
+    return;
   }
 });
 
@@ -2142,12 +2196,34 @@ function renderResults(){
 
 // Result actions were already correct, but ensuring listener consistency:
 document.addEventListener('click', async (e)=>{
-  // ... (handle btn-toggle-publish-event, btn-edit-event-results, btn-delete-event-results logic) ...
+  // Event listener for EDIT button on Results Table
+  if(e.target.classList.contains('btn-edit-event-results')){
+    const evId = e.target.dataset.ev;
+    $('resultEvent').value = evId;
+    $('resultEvent').dispatchEvent(new Event('change'));
+    
+    const positions = [1,2,3];
+    positions.forEach(pn=>{
+      const rr = (CACHE.results || []).find(r => String(r.eventId) === String(evId) && Number(r.position) === pn);
+      if(rr){
+        if(pn===1){ $('resultSelectFirst').value = rr.studentId; $('resultPointsFirst').value = rr.points||0; }
+        if(pn===2){ $('resultSelectSecond').value = rr.studentId; $('resultPointsSecond').value = rr.points||0; }
+        if(pn===3){ $('resultSelectThird').value = rr.studentId; $('resultPointsThird').value = rr.points||0; }
+      } else {
+        if(pn===1){ $('resultSelectFirst').value = ''; $('resultPointsFirst').value = ''; }
+        if(pn===2){ $('resultSelectSecond').value = ''; $('resultPointsSecond').value = ''; }
+        if(pn===3){ $('resultSelectThird').value = ''; $('resultPointsThird').value = ''; }
+      }
+    });
+    toast('Loaded results into the editor (save to update).');
+    return;
+  }
   
+  // Event listener for PUBLISH/UNPUBLISH button on Results Table
   if(e.target.classList.contains('btn-toggle-publish-event')){
     const ev = e.target.dataset.ev;
-    const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
-    if(!eventResults.length) return toast('No results for this event','danger');
+    const eventResults = (CACHE.results || []).filter(r => String(r.eventId) === String(ev));
+    if(!eventResults.length) return toast('No results to publish','danger');
     
     const anyPublished = eventResults.some(r=> r.published);
     
@@ -2175,10 +2251,14 @@ document.addEventListener('click', async (e)=>{
     }
     toast(anyPublished ? 'Unpublished event results' : 'Published event results');
     renderAll();
-  } else if(e.target.classList.contains('btn-delete-event-results')){
+    return;
+  } 
+  
+  // Event listener for DELETE button on Results Table
+  if(e.target.classList.contains('btn-delete-event-results')){
     if(!confirm('Delete all results for this event? This will also remove associated team scores.')) return;
     const evId = e.target.dataset.ev;
-    const toDelete = CACHE.results.filter(r=> String(r.eventId)===String(evId));
+    const toDelete = (CACHE.results || []).filter(r=> String(r.eventId)===String(evId));
     for(const r of toDelete){
         const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
         if(r.published && stud && stud.teamId){
@@ -2194,6 +2274,7 @@ document.addEventListener('click', async (e)=>{
     }
     toast('Deleted results for event');
     renderAll();
+    return;
   }
 });
 
@@ -2457,6 +2538,414 @@ $('downloadEventsPdf').addEventListener('click', ()=> {
         margin: [10, 10, 10, 10], filename: `events_${date}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     }).save();
 });
+
+
+/* ---------- RESULTS (RERENDER HOOK & STABILITY FIX) ---------- */
+$('searchResults')?.addEventListener('input', ()=> renderResults());
+function renderResults(){
+  const tbody = $('resultsTable');
+  const q = ($('searchResults')?.value||'').trim().toLowerCase(); 
+
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="7" class="text-center muted">No events</td></tr>'; return; }
+  
+  const evMap = {};
+  (CACHE.results || []).forEach(r => { 
+    if(!evMap[r.eventId]) evMap[r.eventId] = { positions: {}, pointsTotal: 0 }; 
+    evMap[r.eventId].positions[r.position] = r; 
+    evMap[r.eventId].pointsTotal += Number(r.points || 0);
+  });
+  
+  let rows = [];
+  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+  
+  CACHE.events.forEach(ev => {
+    const resultData = evMap[ev.id] || { positions: {}, pointsTotal: 0 };
+    const pos = resultData.positions;
+    const pointsTotal = resultData.pointsTotal;
+
+    const hasAnyResult = !!pos[1] || !!pos[2] || !!pos[3];
+    
+    // Filtering logic for Results search
+    if(q && !`${ev.name||''} ${ev.type||''} ${ev.level||''}`.toLowerCase().includes(q)) return;
+
+    const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
+    const pubBadge = pub ? '<span class="badge bg-success">Published</span>' : (hasAnyResult ? '<span class="badge bg-warning">Draft</span>' : '<span class="badge bg-secondary">No Results</span>');
+    const rowClass = hasAnyResult ? 'participated-row' : '';
+    
+    const first = pos[1] ? (CACHE.students.find(s=>String(s.id)===String(pos[1].studentId))||{name:pos[1].studentId,id:pos[1].studentId}) : {name:'', id:''};
+    const second = pos[2] ? (CACHE.students.find(s=>String(s.id)===String(pos[2].studentId))||{name:pos[2].studentId,id:pos[2].studentId}) : {name:'', id:''};
+    const third = pos[3] ? (CACHE.students.find(s=>String(s.id)===String(pos[3].studentId))||{name:pos[3].studentId,id:pos[3].studentId}) : {name:'', id:''};
+    
+    rows.push(`<tr class="${rowClass}">
+      <td>${escapeHtml(ev.name)}</td>
+      <td>${escapeHtml(ev.type)}/${escapeHtml(ev.level)}</td>
+      <td>${escapeHtml(first.name)} ${first.id?`(${escapeHtml(first.id)})`:''}</td>
+      <td>${escapeHtml(second.name)} ${second.id?`(${escapeHtml(second.id)})`:''}</td>
+      <td>${escapeHtml(third.name)} ${third.id?`(${escapeHtml(third.id)})`:''}</td>
+      <td><strong>${pointsTotal}</strong></td>
+      <td>${pubBadge}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-primary btn-edit-event-results" data-ev="${escapeHtml(ev.id)}">Edit</button> 
+        <button class="btn btn-sm btn-outline-secondary btn-toggle-publish-event" data-ev="${escapeHtml(ev.id)}">${pub? 'Unpublish' : 'Publish'}</button> 
+        <button class="btn btn-sm btn-outline-danger btn-delete-event-results" data-ev="${escapeHtml(ev.id)}">Delete</button>
+      </td>
+    </tr>`);
+  });
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="7" class="text-center muted">No events match search criteria.</td></tr>';
+}
+
+// Result actions were already correct, but ensuring listener consistency:
+document.addEventListener('click', async (e)=>{
+  // Event listener for EDIT button on Results Table
+  if(e.target.classList.contains('btn-edit-event-results')){
+    const evId = e.target.dataset.ev;
+    $('resultEvent').value = evId;
+    $('resultEvent').dispatchEvent(new Event('change'));
+    
+    const positions = [1,2,3];
+    positions.forEach(pn=>{
+      const rr = (CACHE.results || []).find(r => String(r.eventId) === String(evId) && Number(r.position) === pn);
+      if(rr){
+        if(pn===1){ $('resultSelectFirst').value = rr.studentId; $('resultPointsFirst').value = rr.points||0; }
+        if(pn===2){ $('resultSelectSecond').value = rr.studentId; $('resultPointsSecond').value = rr.points||0; }
+        if(pn===3){ $('resultSelectThird').value = rr.studentId; $('resultPointsThird').value = rr.points||0; }
+      } else {
+        if(pn===1){ $('resultSelectFirst').value = ''; $('resultPointsFirst').value = ''; }
+        if(pn===2){ $('resultSelectSecond').value = ''; $('resultPointsSecond').value = ''; }
+        if(pn===3){ $('resultSelectThird').value = ''; $('resultPointsThird').value = ''; }
+      }
+    });
+    toast('Loaded results into the editor (save to update).');
+    return;
+  }
+  
+  // Event listener for PUBLISH/UNPUBLISH button on Results Table
+  if(e.target.classList.contains('btn-toggle-publish-event')){
+    const ev = e.target.dataset.ev;
+    const eventResults = (CACHE.results || []).filter(r => String(r.eventId) === String(ev));
+    if(!eventResults.length) return toast('No results to publish','danger');
+    
+    const anyPublished = eventResults.some(r=> r.published);
+    
+    for(const r of eventResults){
+      const dbKey = KEYMAP.results[r.id] || r.id;
+      
+      const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+      if(stud && stud.teamId){
+        const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+        if(team){
+          const dbTeamKey = KEYMAP.teams[team.id];
+          const delta = Number(r.points)||0;
+          let newScore = Number(team.score)||0;
+
+          if(!anyPublished && !r.published){ // Publishing: Add score
+            newScore += delta;
+          } else if(anyPublished && r.published){ // Unpublishing: Subtract score
+             newScore = Math.max(0, newScore - delta);
+          }
+          await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+        }
+      }
+      
+      await update(ref(db, `results/${dbKey}`), { published: !anyPublished, publishedAt: !anyPublished?Date.now():null });
+    }
+    toast(anyPublished ? 'Unpublished event results' : 'Published event results');
+    renderAll();
+    return;
+  } 
+  
+  // Event listener for DELETE button on Results Table
+  if(e.target.classList.contains('btn-delete-event-results')){
+    if(!confirm('Delete all results for this event? This will also remove associated team scores.')) return;
+    const evId = e.target.dataset.ev;
+    const toDelete = (CACHE.results || []).filter(r=> String(r.eventId)===String(evId));
+    for(const r of toDelete){
+        const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+        if(r.published && stud && stud.teamId){
+            const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+            if(team){
+                const dbTeamKey = KEYMAP.teams[team.id];
+                const newScore = Math.max(0, (Number(team.score)||0) - (Number(r.points)||0));
+                await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+            }
+        }
+        const dbKey = KEYMAP.results[r.id] || r.id;
+        await remove(ref(db, `results/${dbKey}`));
+    }
+    toast('Deleted results for event');
+    renderAll();
+    return;
+  }
+});
+
+
+/* ---------- PROGRAMS (RERENDER HOOK & STABILITY FIX) ---------- */
+$('searchPrograms')?.addEventListener('input', ()=> renderPrograms());
+function renderPrograms(){
+  const tbody = $('programsTable');
+  const q = ($('searchPrograms')?.value||'').trim().toLowerCase(); 
+
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No events</td></tr>'; return; }
+  
+  let html='';
+  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+  
+  CACHE.events.forEach(ev => {
+    if(q && !`${ev.name||''} ${ev.type||''} ${ev.level||''}`.toLowerCase().includes(q)) return;
+    
+    const approvedCount = (CACHE.participations || []).filter(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved').length;
+    
+    html += `<tr data-event-id="${ev.id}">
+      <td>${escapeHtml(ev.name)}</td>
+      <td>${escapeHtml(ev.type)}</td>
+      <td>${escapeHtml(ev.level)}</td>
+      <td>${approvedCount} Approved</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-accent btn-program-details" data-ev="${ev.id}">Details</button>
+      </td>
+    </tr>`;
+  });
+  
+  tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No events match search criteria.</td></tr>';
+}
+
+// Handler for the "Details" button in Programs panel
+$('programsTable').addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-program-details');
+  if (!btn) return;
+
+  const evId = btn.dataset.ev;
+  const ev = CACHE.events.find(e => String(e.id) === String(evId));
+  if (!ev) return toast('Event not found', 'danger');
+
+  currentProgramEventId = evId;
+  $('programModalTitle').textContent = `Event Participants: ${ev.name}`;
+  
+  loadProgramDetails(evId);
+  new bootstrap.Modal(document.getElementById('programDetailModal')).show();
+});
+
+// Load the small boxes for a specific event
+function loadProgramDetails(evId) {
+  const participants = (CACHE.participations || []).filter(p => String(p.eventId) === String(evId) && String(p.status||'').toLowerCase()==='approved');
+  const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s);
+  const boxesWrap = $('programAttendanceBoxes');
+  boxesWrap.innerHTML = '';
+  
+  const eventData = CACHE.programAttendance[evId] || {};
+
+  participants.forEach(p => {
+    const student = studentMap[p.studentId];
+    if (!student) return;
+
+    const attStatus = eventData[p.studentId]?.status || 'Absent';
+    const code = eventData[p.studentId]?.code || '';
+
+    const div = document.createElement('div');
+    div.className = `small-box ${attStatus === 'Present' ? 'present' : 'absent'}`;
+    div.dataset.id = p.studentId;
+    div.dataset.name = student.name;
+    div.title = `${student.name} (${student.id})`;
+    
+    const codeSpan = `<span style="font-size:12px;font-weight:bold;color:var(--warning);">${escapeHtml(code || '-')}</span>`;
+    const idSpan = `<span class="small-box-id">${escapeHtml(student.id)}</span>`;
+
+    div.innerHTML = `${codeSpan}${idSpan}`;
+    
+    div.addEventListener('click', () => toggleProgramAttendanceBox(div, evId));
+    boxesWrap.appendChild(div);
+  });
+  
+  $('toggleProgramAttendance').textContent = 'Toggle All Present';
+}
+
+// Toggle logic for small boxes in Program Details
+function toggleProgramAttendanceBox(el, evId) {
+  const isPresent = el.classList.toggle('present');
+  el.classList.toggle('absent', !isPresent);
+}
+
+// Toggle all attendance
+$('toggleProgramAttendance').addEventListener('click', () => {
+  const boxes = Array.from(document.querySelectorAll('#programAttendanceBoxes .small-box'));
+  if (boxes.length === 0) return;
+  
+  const allPresent = boxes.every(b => b.classList.contains('present'));
+  const newState = allPresent ? 'absent' : 'present';
+  
+  boxes.forEach(b => {
+    b.classList.remove('present', 'absent');
+    b.classList.add(newState);
+  });
+
+  $('toggleProgramAttendance').textContent = allPresent ? 'Toggle All Present' : 'Toggle All Absent';
+});
+
+// Save Program Attendance
+$('saveProgramAttendance').addEventListener('click', async () => {
+  if (!currentProgramEventId) return toast('No event selected', 'danger');
+
+  const boxes = Array.from(document.querySelectorAll('#programAttendanceBoxes .small-box'));
+  const eventData = CACHE.programAttendance[currentProgramEventId] || {};
+  const updates = {};
+  
+  boxes.forEach(b => {
+    const studentId = b.dataset.id;
+    const status = b.classList.contains('present') ? 'Present' : 'Absent';
+    const code = b.querySelector('span:first-child')?.textContent || eventData[studentId]?.code || '';
+    
+    updates[studentId] = { status, code };
+  });
+
+  try {
+    await set(ref(db, `programAttendance/${currentProgramEventId}`), updates);
+    toast('Program attendance and codes saved!', 'success');
+    CACHE.programAttendance[currentProgramEventId] = updates;
+    loadProgramDetails(currentProgramEventId);
+  } catch (error) {
+    toast(`Error saving attendance: ${error.message}`, 'danger');
+  }
+});
+
+// Assign Random Letters
+$('assignRandomLetters').addEventListener('click', async () => {
+  if (!currentProgramEventId) return toast('No event selected', 'danger');
+  
+  const boxes = Array.from(document.querySelectorAll('#programAttendanceBoxes .small-box'));
+  if (boxes.length === 0) return toast('No participants to assign codes.', 'danger');
+
+  const eventData = CACHE.programAttendance[currentProgramEventId] || {};
+  
+  const codes = boxes.map((_, i) => String.fromCharCode(65 + i));
+  const shuffledCodes = codes.sort(() => Math.random() - 0.5);
+
+  const updates = {};
+  boxes.forEach((b, index) => {
+    const studentId = b.dataset.id;
+    const currentCodeSpan = b.querySelector('span:first-child');
+    const newCode = shuffledCodes[index];
+    
+    if (currentCodeSpan) {
+      currentCodeSpan.textContent = newCode;
+    }
+    
+    const status = b.classList.contains('present') ? 'Present' : (eventData[studentId]?.status || 'Absent');
+    updates[studentId] = { status, code: newCode };
+  });
+
+  try {
+    await set(ref(db, `programAttendance/${currentProgramEventId}`), updates);
+    toast('Random letters assigned and saved!', 'success');
+    CACHE.programAttendance[currentProgramEventId] = updates;
+    loadProgramDetails(currentProgramEventId);
+  } catch (error) {
+    toast(`Error assigning codes: ${error.message}`, 'danger');
+  }
+});
+
+
+/* ---------- DROPDOWNS & POPULATE ---------- */
+function populateDropdowns(){
+  const manualTeam = $('manualTeam'); if(manualTeam){ manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t => manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  const teamLeader = $('teamLeader'); if(teamLeader){ teamLeader.innerHTML = '<option value="">Choose leader (Chess #)</option>'; CACHE.students.forEach(s => teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
+  const attTeam = $('attTeam'); if(attTeam){ attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t=> attTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  const editTeam = $('editTeam'); if(editTeam){ editTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> editTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
+  const resEv = $('resultEvent'); if(resEv){ resEv.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e => resEv.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`); }
+}
+
+
+/* ---------- PDF exports (Old ones) ---------- */
+$('downloadStudentsPdf').addEventListener('click', ()=> {
+    const date = new Date().toISOString().slice(0,10);
+    const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
+    let tableRows = '';
+    CACHE.students.forEach(s => {
+        tableRows += `
+            <tr>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(s.name)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(s.id)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(teamMap[s.teamId]||'Unassigned')}</td>
+            </tr>
+        `;
+    });
+
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; position: relative; color: #000;">
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1; z-index: -1000; text-align: center; display: flex; justify-content: center; align-items: center; pointer-events: none;">
+                <h1 style="font-size: 100px;">FIDAK FEST</h1> 
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2>Student List</h2>
+                <p>Date Generated: ${date}</p>
+            </div>
+            <div style="margin: 10px 0; border: 1px solid #000; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ccc;">
+                            <th style="text-align: left; padding: 5px;">Name</th>
+                            <th style="text-align: left; padding: 5px;">Chess #</th>
+                            <th style="text-align: left; padding: 5px;">Team Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    html2pdf().from(htmlContent).set({
+        margin: [10, 10, 10, 10], filename: `students_${date}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).save();
+});
+$('downloadEventsPdf').addEventListener('click', ()=> {
+    const date = new Date().toISOString().slice(0,10);
+    let tableRows = '';
+    CACHE.events.forEach(e => {
+        tableRows += `
+            <tr>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(e.name)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(e.type)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(e.level||'')}</td>
+            </tr>
+        `;
+    });
+
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; position: relative; color: #000;">
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1; z-index: -1000; text-align: center; display: flex; justify-content: center; align-items: center; pointer-events: none;">
+                <h1 style="font-size: 100px;">FIDAK FEST</h1> 
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2>Event List</h2>
+                <p>Date Generated: ${date}</p>
+            </div>
+            <div style="margin: 10px 0; border: 1px solid #000; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ccc;">
+                            <th style="text-align: left; padding: 5px;">Name</th>
+                            <th style="text-align: left; padding: 5px;">Type</th>
+                            <th style="text-align: left; padding: 5px;">Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    html2pdf().from(htmlContent).set({
+        margin: [10, 10, 10, 10], filename: `events_${date}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).save();
+});
+
+
+/* ---------- RESULTS (RERENDER HOOK & STABILITY FIX) ---------- */
+$('searchResults')?.addEventListener('input', ()=> renderResults());
+
+
+/* ---------- PROGRAMS (RERENDER HOOK & STABILITY FIX) ---------- */
+$('searchPrograms')?.addEventListener('input', ()=> renderPrograms());
 
 
 /* ---------- bootstrapping ---------- */
