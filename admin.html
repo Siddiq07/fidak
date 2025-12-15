@@ -546,7 +546,7 @@
 </div>
 
 <script type="module">
-/* Final admin.js embedded - FULL CODE */
+/* Final admin.js embedded - FULL CODE (Corrected) */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
@@ -894,7 +894,7 @@ function renderEvents(){
     }
     const participated = CACHE.participations.some(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved');
     const rowClass = participated ? 'participated-row' : '';
-    html += `<tr class="${rowClass}" data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'')}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event" data-key="${ev.id}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event" data-key="${ev.id}">Delete</button></td></tr>`;
+    html += `<tr class="${rowClass}" data-key="${ev.id}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(ev.type)}</td><td>${escapeHtml(ev.level||'')}</td><td>${escapeHtml((ev.description||'').slice(0,120))}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-event">Delete</button></td></tr>`;
   });
   tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No events match</td></tr>';
 }
@@ -1134,7 +1134,7 @@ document.addEventListener('click', async (e)=>{
   }
 });
 
-/* New PDF Export for Event Participation Summary (Applies to individual event PDF from Approvals Summary) */
+/* PDF Export for Event Participation Summary */
 function exportRosterPdf(evId, allEvents = false) {
     const approvedParts = CACHE.participations.filter(p => String(p.status||'').toLowerCase()==='approved' && (allEvents || String(p.eventId) === String(evId)));
     
@@ -1170,6 +1170,13 @@ function exportRosterPdf(evId, allEvents = false) {
     let eventsHtml = '';
     Object.values(rosterData).forEach(item => {
         const ev = item.event;
+        // Sort members by Team Name then Member Name for clean roster
+        item.members.sort((a, b) => {
+            const teamCmp = a.teamName.localeCompare(b.teamName);
+            if (teamCmp !== 0) return teamCmp;
+            return a.name.localeCompare(b.name);
+        });
+        
         eventsHtml += `
             <div style="text-align: center; margin-top: 30px; page-break-before: auto;">
                 <h4 style="margin: 0;">${escapeHtml(ev.name)}</h4>
@@ -1329,177 +1336,10 @@ $('downloadEventsPdf').addEventListener('click', ()=> {
 });
 
 
-/* ---------- RESULTS ---------- */
+/* ---------- RESULTS (RERENDER HOOK) ---------- */
 $('searchResults')?.addEventListener('input', ()=> renderResults());
-
-
-/* ---------- PROGRAMS (NEW) ---------- */
-let currentProgramEventId = null;
-
+/* ---------- PROGRAMS (RERENDER HOOK) ---------- */
 $('searchPrograms')?.addEventListener('input', ()=> renderPrograms());
-function renderPrograms(){
-  const tbody = $('programsTable');
-  const q = ($('searchPrograms')?.value||'').trim().toLowerCase(); 
-
-  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No events</td></tr>'; return; }
-  
-  let html='';
-  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-  
-  CACHE.events.forEach(ev => {
-    if(q && !`${ev.name} ${ev.type} ${ev.level}`.toLowerCase().includes(q)) return;
-    
-    const approvedCount = CACHE.participations.filter(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved').length;
-    
-    html += `<tr data-event-id="${ev.id}">
-      <td>${escapeHtml(ev.name)}</td>
-      <td>${escapeHtml(ev.type)}</td>
-      <td>${escapeHtml(ev.level)}</td>
-      <td>${approvedCount} Approved</td>
-      <td class="text-end">
-        <button class="btn btn-sm btn-accent btn-program-details" data-ev="${ev.id}">Details</button>
-      </td>
-    </tr>`;
-  });
-  
-  tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No events match search criteria.</td></tr>';
-}
-
-// Handler for the "Details" button in Programs panel
-$('programsTable').addEventListener('click', (e) => {
-  const btn = e.target.closest('.btn-program-details');
-  if (!btn) return;
-
-  const evId = btn.dataset.ev;
-  const ev = CACHE.events.find(e => String(e.id) === String(evId));
-  if (!ev) return toast('Event not found', 'danger');
-
-  currentProgramEventId = evId;
-  $('programModalTitle').textContent = `Event Participants: ${ev.name}`;
-  
-  loadProgramDetails(evId);
-  new bootstrap.Modal(document.getElementById('programDetailModal')).show();
-});
-
-// Load the small boxes for a specific event
-function loadProgramDetails(evId) {
-  const participants = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status||'').toLowerCase()==='approved');
-  const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s);
-  const boxesWrap = $('programAttendanceBoxes');
-  boxesWrap.innerHTML = '';
-  
-  const eventData = CACHE.programAttendance[evId] || {};
-
-  participants.forEach(p => {
-    const student = studentMap[p.studentId];
-    if (!student) return;
-
-    const attStatus = eventData[p.studentId]?.status || 'Absent';
-    const code = eventData[p.studentId]?.code || '';
-
-    const div = document.createElement('div');
-    div.className = `small-box ${attStatus === 'Present' ? 'present' : 'absent'}`;
-    div.dataset.id = p.studentId;
-    div.dataset.name = student.name;
-    div.title = `${student.name} (${student.id})`;
-    
-    const codeSpan = `<span style="font-size:12px;font-weight:bold;color:var(--warning);">${escapeHtml(code || '-')}</span>`;
-    const idSpan = `<span class="small-box-id">${escapeHtml(student.id)}</span>`;
-
-    div.innerHTML = `${codeSpan}${idSpan}`;
-    
-    div.addEventListener('click', () => toggleProgramAttendanceBox(div, evId));
-    boxesWrap.appendChild(div);
-  });
-  
-  $('toggleProgramAttendance').textContent = 'Toggle All Present';
-}
-
-// Toggle logic for small boxes in Program Details
-function toggleProgramAttendanceBox(el, evId) {
-  const isPresent = el.classList.toggle('present');
-  el.classList.toggle('absent', !isPresent);
-}
-
-// Toggle all attendance
-$('toggleProgramAttendance').addEventListener('click', () => {
-  const boxes = Array.from(document.querySelectorAll('#programAttendanceBoxes .small-box'));
-  if (boxes.length === 0) return;
-  
-  const allPresent = boxes.every(b => b.classList.contains('present'));
-  const newState = allPresent ? 'absent' : 'present';
-  
-  boxes.forEach(b => {
-    b.classList.remove('present', 'absent');
-    b.classList.add(newState);
-  });
-
-  $('toggleProgramAttendance').textContent = allPresent ? 'Toggle All Present' : 'Toggle All Absent';
-});
-
-// Save Program Attendance
-$('saveProgramAttendance').addEventListener('click', async () => {
-  if (!currentProgramEventId) return toast('No event selected', 'danger');
-
-  const boxes = Array.from(document.querySelectorAll('#programAttendanceBoxes .small-box'));
-  const eventData = CACHE.programAttendance[currentProgramEventId] || {};
-  const updates = {};
-  
-  boxes.forEach(b => {
-    const studentId = b.dataset.id;
-    const status = b.classList.contains('present') ? 'Present' : 'Absent';
-    const code = b.querySelector('span:first-child')?.textContent || eventData[studentId]?.code || '';
-    
-    updates[studentId] = { status, code };
-  });
-
-  await set(ref(db, `programAttendance/${currentProgramEventId}`), updates);
-  toast('Program attendance and codes saved!', 'success');
-  CACHE.programAttendance[currentProgramEventId] = updates;
-  loadProgramDetails(currentProgramEventId);
-});
-
-// Assign Random Letters
-$('assignRandomLetters').addEventListener('click', async () => {
-  if (!currentProgramEventId) return toast('No event selected', 'danger');
-  
-  const boxes = Array.from(document.querySelectorAll('#programAttendanceBoxes .small-box'));
-  if (boxes.length === 0) return toast('No participants to assign codes.', 'danger');
-
-  const eventData = CACHE.programAttendance[currentProgramEventId] || {};
-  
-  const codes = boxes.map((_, i) => String.fromCharCode(65 + i));
-  const shuffledCodes = codes.sort(() => Math.random() - 0.5);
-
-  const updates = {};
-  boxes.forEach((b, index) => {
-    const studentId = b.dataset.id;
-    const currentCodeSpan = b.querySelector('span:first-child');
-    const newCode = shuffledCodes[index];
-    
-    if (currentCodeSpan) {
-      currentCodeSpan.textContent = newCode;
-    }
-    
-    const status = b.classList.contains('present') ? 'Present' : (eventData[studentId]?.status || 'Absent');
-    updates[studentId] = { status, code: newCode };
-  });
-
-  await set(ref(db, `programAttendance/${currentProgramEventId}`), updates);
-  toast('Random letters assigned and saved!', 'success');
-  CACHE.programAttendance[currentProgramEventId] = updates;
-  loadProgramDetails(currentProgramEventId);
-});
-
-
-/* ---------- DROPDOWNS & POPULATE ---------- */
-function populateDropdowns(){
-  const manualTeam = $('manualTeam'); if(manualTeam){ manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t => manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
-  const teamLeader = $('teamLeader'); if(teamLeader){ teamLeader.innerHTML = '<option value="">Choose leader (Chess #)</option>'; CACHE.students.forEach(s => teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
-  const attTeam = $('attTeam'); if(attTeam){ attTeam.innerHTML = '<option value="">Select team</option>'; CACHE.teams.forEach(t=> attTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
-  const editTeam = $('editTeam'); if(editTeam){ editTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t=> editTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
-  const resEv = $('resultEvent'); if(resEv){ resEv.innerHTML = '<option value="">Select event</option>'; CACHE.events.forEach(e => resEv.innerHTML += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.name)}</option>`); }
-}
 
 
 /* ---------- bootstrapping ---------- */
