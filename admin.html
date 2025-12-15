@@ -272,18 +272,18 @@
       <section id="panel-approvals" class="card-neo d-none">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <div>
-            <div class="section-title">Pending Participations</div>
-            <div class="muted">Approve or reject leader submissions</div>
+            <div class="section-title">Event Participation Summary</div>
+            <div class="muted">Review pending submissions and view approved members by event</div>
           </div>
           <div class="d-flex gap-2">
-            <input id="searchApprovals" class="form-control" placeholder="Search...">
+            <input id="searchApprovals" class="form-control" placeholder="Search event/team...">
             <button id="downloadApprovalsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i></button>
           </div>
         </div>
 
         <div class="table-responsive" style="max-height:420px;overflow:auto">
           <table class="table table-hover">
-            <thead><tr><th>Event</th><th>Student</th><th>Team</th><th>Submitted At</th><th class="text-end">Actions</th></tr></thead>
+            <thead><tr><th>Event</th><th>Type/Level</th><th>Pending</th><th>Approved</th><th class="text-end">Actions</th></tr></thead>
             <tbody id="approvalsTable"></tbody>
           </table>
         </div>
@@ -322,8 +322,8 @@
         </div>
 
         <div class="card-neo mt-3">
-          <div class="section-title">Results List</div>
-          <div class="muted mb-2">Light rows indicate at least one result is uploaded for that event</div>
+          <div class="section-title">Results List (Showing Drafts Only)</div>
+          <div class="muted mb-2">Events shown below have saved results but are not yet Published.</div>
           <div class="table-responsive">
             <table class="table align-middle">
               <thead class="table-light"><tr><th>Event</th><th>1st</th><th>2nd</th><th>3rd</th><th>Published</th><th class="text-end">Actions</th></tr></thead>
@@ -380,6 +380,30 @@
   </div>
 </div>
 
+<div class="modal fade" id="approvalsDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="approvalModalTitle">Event Participants</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="section-title" id="pendingSectionTitle">Pending Submissions</div>
+        <div class="table-responsive mb-4">
+          <table class="table table-sm">
+            <thead><tr><th>Student</th><th>Team</th><th class="text-end">Actions</th></tr></thead>
+            <tbody id="pendingParticipantsTable"></tbody>
+          </table>
+        </div>
+
+        <div class="section-title" id="approvedSectionTitle">Approved Participants</div>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>Student</th><th>Team</th><th>Approved At</th><th class="text-end">Actions</th></tr></thead>
+            <tbody id="approvedParticipantsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal fade" id="editResultModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form id="editResultForm" class="modal-content">
@@ -395,7 +419,7 @@
   </div>
 </div>
 <script type="module">
-/* Final admin.js embedded */
+/* Final admin.js embedded - MODIFIED */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
@@ -468,8 +492,8 @@ function renderAll(){
   renderTeams();
   renderEvents();
   renderAttendanceSessions();
-  renderApprovals();
-  renderResults();
+  renderApprovals(); // MODIFIED
+  renderResults(); // MODIFIED
   renderReports();
 }
 
@@ -811,25 +835,121 @@ $('attendanceSessions').addEventListener('click', async (e)=> {
   }
 });
 
-/* ---------- APPROVALS ---------- */
+/* ---------- APPROVALS (MODIFIED TO EVENT SUMMARY) ---------- */
 function renderApprovals(){
-  const tbody = $('approvalsTable'); const q = ($('searchApprovals')?.value||'').trim().toLowerCase(); const parts = CACHE.participations || [];
-  const rows = [];
-  parts.forEach(p => {
-    if(String(p.status).toLowerCase() !== 'pending') return;
-    const ev = CACHE.events.find(e => String(e.id) === String(p.eventId)) || {};
-    const student = CACHE.students.find(s => String(s.id) === String(p.studentId)) || { name: p.studentId };
-    const team = CACHE.teams.find(t => String(t.id) === String(p.teamId)) || {};
-    const text = `${ev.name||''} ${student.name||''} ${team.name||''}`.toLowerCase();
-    if(q && !text.includes(q)) return;
-    rows.push(`<tr data-key="${p.id}"><td>${escapeHtml(ev.name||p.eventId)}</td><td>${escapeHtml(student.name||p.studentId)}</td><td>${escapeHtml(team.name||p.teamId)}</td><td>${new Date(p.submittedAt||0).toLocaleString()}</td><td class="text-end"><button class="btn btn-sm btn-success btn-approve" data-key="${p.id}">Approve</button> <button class="btn btn-sm btn-danger btn-reject" data-key="${p.id}">Reject</button></td></tr>`);
+  const tbody = $('approvalsTable'); 
+  const q = ($('searchApprovals')?.value||'').trim().toLowerCase(); 
+  const parts = CACHE.participations || [];
+  const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
+  const partSummary = {};
+
+  CACHE.events.forEach(ev => {
+    partSummary[ev.id] = { event: ev, pending: 0, approved: 0 };
+    const text = `${ev.name||''} ${ev.type||''} ${ev.level||''}`.toLowerCase();
+    if(q && !text.includes(q)) return; // Filter by event name/type/level search
   });
-  tbody.innerHTML = rows.join('') || '<tr><td colspan="5" class="text-center muted">No pending participations</td></tr>';
+  
+  parts.forEach(p => {
+    const status = String(p.status||'').toLowerCase();
+    const evId = String(p.eventId);
+    if(partSummary[evId]){
+      if(status === 'pending') partSummary[evId].pending++;
+      else if(status === 'approved') partSummary[evId].approved++;
+    }
+  });
+
+  let rows = [];
+  Object.values(partSummary).forEach(item => {
+    if(q && !`${item.event.name||''} ${item.event.type||''} ${item.event.level||''}`.toLowerCase().includes(q)) return;
+    
+    rows.push(`<tr data-event-id="${item.event.id}">
+      <td>${escapeHtml(item.event.name)}</td>
+      <td>${escapeHtml(item.event.type)}/${escapeHtml(item.event.level)}</td>
+      <td><span class="badge bg-danger">${item.pending} Pending</span></td>
+      <td><span class="badge bg-success">${item.approved} Approved</span></td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-primary btn-view-parts" data-event-id="${item.event.id}">Details</button>
+      </td>
+    </tr>`);
+  });
+
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="5" class="text-center muted">No events found or no participations submitted.</td></tr>';
 }
-$('approvalsTable').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('button'); if(!btn) return; const key = btn.dataset.key; const dbKey = KEYMAP.participations[key] || key;
-  if(btn.classList.contains('btn-approve')){ await update(ref(db, `participations/${dbKey}`), { status:'approved', approvedAt: Date.now() }); toast('Approved'); renderApprovals(); }
-  else if(btn.classList.contains('btn-reject')){ await update(ref(db, `participations/${dbKey}`), { status:'rejected', rejectedAt: Date.now() }); toast('Rejected'); renderApprovals(); }
+
+// Handler for the new 'Details' button (View participants for an event)
+$('approvalsTable').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.btn-view-parts'); if(!btn) return;
+  const evId = btn.dataset.eventId;
+  const ev = CACHE.events.find(e => String(e.id) === String(evId));
+  if(!ev) return toast('Event not found','danger');
+
+  const pending = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status).toLowerCase() === 'pending');
+  const approved = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status).toLowerCase() === 'approved');
+  
+  const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s.name);
+  const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t.name);
+
+  // Render Pending Table
+  let pendingHtml = '';
+  pending.forEach(p => {
+    const studentName = studentMap[p.studentId] || p.studentId;
+    const teamName = teamMap[p.teamId] || 'Unassigned';
+    const dbKey = KEYMAP.participations[p.id] || p.id;
+    pendingHtml += `<tr data-key="${dbKey}">
+      <td>${escapeHtml(studentName)} (${escapeHtml(p.studentId)})</td>
+      <td>${escapeHtml(teamName)}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-success btn-approve-inline" data-key="${p.id}">Approve</button> 
+        <button class="btn btn-sm btn-danger btn-reject-inline" data-key="${p.id}">Reject</button>
+      </td>
+    </tr>`;
+  });
+  $('pendingParticipantsTable').innerHTML = pendingHtml || '<tr><td colspan="3" class="muted">No pending submissions.</td></tr>';
+  $('pendingSectionTitle').textContent = `Pending Submissions (${pending.length})`;
+
+
+  // Render Approved Table
+  let approvedHtml = '';
+  approved.forEach(p => {
+    const studentName = studentMap[p.studentId] || p.studentId;
+    const teamName = teamMap[p.teamId] || 'Unassigned';
+    approvedHtml += `<tr>
+      <td>${escapeHtml(studentName)} (${escapeHtml(p.studentId)})</td>
+      <td>${escapeHtml(teamName)}</td>
+      <td>${new Date(p.approvedAt||0).toLocaleString()}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-danger btn-unapprove-inline" data-key="${p.id}">Unapprove</button>
+      </td>
+    </tr>`;
+  });
+  $('approvedParticipantsTable').innerHTML = approvedHtml || '<tr><td colspan="4" class="muted">No approved participants.</td></tr>';
+  $('approvedSectionTitle').textContent = `Approved Participants (${approved.length})`;
+
+  $('approvalModalTitle').textContent = `Participants for: ${ev.name}`;
+  new bootstrap.Modal(document.getElementById('approvalsDetailModal')).show();
+});
+
+// Inline Action Handlers (must be outside the table click listener)
+document.addEventListener('click', async (e)=>{
+  const key = e.target.dataset.key; if(!key) return;
+  const dbKey = KEYMAP.participations[key] || key;
+
+  if(e.target.classList.contains('btn-approve-inline')){ 
+    await update(ref(db, `participations/${dbKey}`), { status:'approved', approvedAt: Date.now(), rejectedAt: null }); 
+    toast('Approved'); 
+    renderAll(); // Rerender main table and modal details
+  }
+  else if(e.target.classList.contains('btn-reject-inline')){ 
+    await update(ref(db, `participations/${dbKey}`), { status:'rejected', rejectedAt: Date.now(), approvedAt: null }); 
+    toast('Rejected'); 
+    renderAll();
+  }
+  else if(e.target.classList.contains('btn-unapprove-inline')){ 
+    // Set status to rejected or pending (pending seems safer for later re-approval)
+    await update(ref(db, `participations/${dbKey}`), { status:'pending', approvedAt: null, rejectedAt: null }); 
+    toast('Unapproved (Set back to Pending)'); 
+    renderAll();
+  }
 });
 
 /* download approved participations PDF */
@@ -849,7 +969,8 @@ $('downloadApprovalsPdf').addEventListener('click', ()=> {
   html2pdf().from(html).set({margin:10,filename:`approved_participations_${new Date().toISOString().slice(0,10)}.pdf`}).save();
 });
 
-/* ---------- RESULTS ---------- */
+
+/* ---------- RESULTS (MODIFIED TO SHOW DRAFTS ONLY) ---------- */
 /* When event selected, auto load approved participants */
 $('resultEvent').addEventListener('change', ()=> {
   const ev = $('resultEvent').value; if(!ev){ ['resultSelectFirst','resultSelectSecond','resultSelectThird'].forEach(id=> $(id).innerHTML = '<option value="">Select</option>'); return; }
@@ -870,6 +991,7 @@ $('saveResult').addEventListener('click', async ()=>{
   async function upsertPosition(position, studentId, points){
     if(!studentId) return;
     const existing = CACHE.results.find(r => String(r.eventId) === String(ev) && Number(r.position) === Number(position));
+    // If saving a new result, ensure it is saved as 'draft' (published: false)
     if(existing){
       const dbKey = KEYMAP.results[existing.id] || existing.id;
       await update(ref(db, `results/${dbKey}`), { studentId, points, published:false, updatedAt: Date.now() });
@@ -908,7 +1030,7 @@ $('publishAllResults').addEventListener('click', async ()=>{
   renderResults();
 });
 
-/* render results */
+/* render results (MODIFIED TO SHOW DRAFTS ONLY) */
 function renderResults(){
   const tbody = $('resultsTable');
   if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No events</td></tr>'; return; }
@@ -918,17 +1040,23 @@ function renderResults(){
   CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
   CACHE.events.forEach(ev => {
     const pos = evMap[ev.id] || {};
+    const hasAnyResult = !!pos[1] || !!pos[2] || !!pos[3];
+    
+    // Check for DRAFT status: Has results AND at least one result is NOT published
+    const isDraft = hasAnyResult && !((pos[1]?.published ?? true) && (pos[2]?.published ?? true) && (pos[3]?.published ?? true));
+
+    if (!isDraft) return; // Only show DRAFT results
+
     const first = pos[1] ? (CACHE.students.find(s=>String(s.id)===String(pos[1].studentId))||{name:pos[1].studentId,id:pos[1].studentId}) : {name:'', id:''};
     const second = pos[2] ? (CACHE.students.find(s=>String(s.id)===String(pos[2].studentId))||{name:pos[2].studentId,id:pos[2].studentId}) : {name:'', id:''};
     const third = pos[3] ? (CACHE.students.find(s=>String(s.id)===String(pos[3].studentId))||{name:pos[3].studentId,id:pos[3].studentId}) : {name:'', id:''};
-    const anyUploaded = !!pos[1] || !!pos[2] || !!pos[3];
     const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
     const pubBadge = pub ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
-    const rowClass = anyUploaded ? 'participated-row' : '';
-    // single edit/delete/publish actions for event (as requested)
+    const rowClass = hasAnyResult ? 'participated-row' : '';
+    
     rows.push(`<tr class="${rowClass}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(first.name)} ${first.id?`(${escapeHtml(first.id)})`:''}</td><td>${escapeHtml(second.name)} ${second.id?`(${escapeHtml(second.id)})`:''}</td><td>${escapeHtml(third.name)} ${third.id?`(${escapeHtml(third.id)})`:''}</td><td>${pubBadge}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event-results" data-ev="${escapeHtml(ev.id)}">Edit</button> <button class="btn btn-sm btn-outline-secondary btn-toggle-publish-event" data-ev="${escapeHtml(ev.id)}">${pub? 'Unpublish' : 'Publish'}</button> <button class="btn btn-sm btn-outline-danger btn-delete-event-results" data-ev="${escapeHtml(ev.id)}">Delete</button></td></tr>`);
   });
-  tbody.innerHTML = rows.join('') || '<tr><td colspan="6" class="text-center muted">No results</td></tr>';
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="6" class="text-center muted">No draft results to display.</td></tr>';
 }
 
 /* result event-level actions */
@@ -955,7 +1083,7 @@ document.addEventListener('click', async (e)=>{
       }
     }
     toast(anyPublished ? 'Unpublished event results' : 'Published event results');
-    renderResults();
+    renderAll();
   } else if(e.target.classList.contains('btn-edit-event-results')){
     const evId = e.target.dataset.ev;
     // open the resultEvent select + pre-fill positions using admin UI controls
@@ -977,12 +1105,22 @@ document.addEventListener('click', async (e)=>{
     if(!confirm('Delete all results for this event?')) return;
     const evId = e.target.dataset.ev;
     const toDelete = CACHE.results.filter(r=> String(r.eventId)===String(evId));
+    // Revert score before deleting results
     for(const r of toDelete){
-      const dbKey = KEYMAP.results[r.id] || r.id;
-      await remove(ref(db, `results/${dbKey}`));
+        const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+        if(r.published && stud && stud.teamId){
+            const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+            if(team){
+                const dbTeamKey = KEYMAP.teams[team.id];
+                const newScore = Math.max(0, (Number(team.score)||0) - (Number(r.points)||0));
+                await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+            }
+        }
+        const dbKey = KEYMAP.results[r.id] || r.id;
+        await remove(ref(db, `results/${dbKey}`));
     }
     toast('Deleted results for event');
-    renderResults();
+    renderAll();
   }
 });
 
