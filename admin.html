@@ -449,7 +449,7 @@
   </div>
 </div>
 <script type="module">
-/* Final admin.js embedded - MODIFIED for Program Panel and Results View */
+/* Final admin.js embedded - FULL CODE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
@@ -485,7 +485,6 @@ const eventsRef = ref(db, 'events');
 const partsRef = ref(db, 'participations');
 const resultsRef = ref(db, 'results');
 const attendanceRef = ref(db, 'attendance');
-// New ref for program-specific attendance/codes
 const programAttendanceRef = ref(db, 'programAttendance'); 
 
 /* realtime listeners */
@@ -495,7 +494,7 @@ onValue(eventsRef, snap => { const obj = snap.val() || {}; CACHE.events = Object
 onValue(partsRef, snap => { const obj = snap.val() || {}; CACHE.participations = Object.values(obj); KEYMAP.participations = {}; Object.entries(obj).forEach(([k,v])=> v && v.id !== undefined && (KEYMAP.participations[String(v.id)] = k)); renderAll(); });
 onValue(resultsRef, snap => { const obj = snap.val() || {}; CACHE.results = Object.values(obj); KEYMAP.results = {}; Object.entries(obj).forEach(([k,v])=> v && v.id !== undefined && (KEYMAP.results[String(v.id)] = k)); renderAll(); });
 onValue(attendanceRef, snap => { CACHE.attendance = snap.val() || {}; renderAll(); });
-onValue(programAttendanceRef, snap => { CACHE.programAttendance = snap.val() || {}; renderAll(); }); // New listener
+onValue(programAttendanceRef, snap => { CACHE.programAttendance = snap.val() || {}; renderAll(); });
 
 /* NAV wiring */
 document.querySelectorAll('.sidebar .icon-btn').forEach(btn=>{
@@ -525,14 +524,73 @@ function renderAll(){
   renderEvents();
   renderAttendanceSessions();
   renderApprovals();
-  renderResults(); // MODIFIED
-  renderPrograms(); // NEW
+  renderResults();
+  renderPrograms();
 }
 
-/* ---------- STUDENT FUNCTIONS (UNMODIFIED) ---------- */
+/* ---------- STUDENT FUNCTIONS ---------- */
 function studentIdExists(id){ return CACHE.students.some(s => String(s.id) === String(id)); }
 function studentNameExists(name){ if(!name) return false; const n = String(name).trim().toLowerCase(); return CACHE.students.some(s => String(s.name||'').trim().toLowerCase() === n); }
-// ... (rest of student functions: preview, import, manual add, renderStudents, actions, edit form) ...
+
+/* preview import */
+let studentsPreviewRows = [];
+$('previewStudents').addEventListener('click', ()=> {
+  const f = $('studentFile').files[0]; if(!f) return toast('Select Excel file','danger');
+  const r = new FileReader();
+  r.onload = e => {
+    const wb = XLSX.read(e.target.result, { type:'binary' });
+    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' });
+    studentsPreviewRows = json.slice(0,500);
+    renderStudentsPreview();
+  };
+  r.readAsBinaryString(f);
+});
+function renderStudentsPreview(){
+  const wrap = $('studentsPreview'); if(!studentsPreviewRows.length){ wrap.innerHTML = '<div class="muted">No preview</div>'; return;}
+  let html = `<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>`;
+  studentsPreviewRows.forEach(r => {
+    const chess = (r['Chess']||r['Chess Number']||r['ID']||'').toString();
+    const name = (r['Name']||r['name']||'').toString();
+    const level = (r['Level']||r['level']||'Senior').toString();
+    const team = (r['Team']||r['team']||'').toString();
+    html += `<tr><td>${escapeHtml(chess)}</td><td>${escapeHtml(name)}</td><td>${escapeHtml(level)}</td><td>${escapeHtml(team)}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+$('importStudents').addEventListener('click', async ()=>{
+  if(!studentsPreviewRows.length) return toast('No preview','danger');
+  const teamNameToId = {}; CACHE.teams.forEach(t => { if(t.name) teamNameToId[String(t.name).trim().toLowerCase()] = t.id; });
+  const updates = {}; let imported=0, skipped=0;
+  studentsPreviewRows.forEach(r => {
+    const chessRaw = (r['Chess']||r['Chess Number']||r['ID']||'').toString().trim();
+    const nameRaw = (r['Name']||r['name']||'').toString().trim();
+    const levelRaw = (r['Level']||r['level']||'Senior').toString().trim();
+    if(!chessRaw || !nameRaw){ skipped++; return; }
+    const chess = chessRaw; const name = nameRaw;
+    if(studentIdExists(chess) || studentNameExists(name)){ skipped++; return; }
+    const teamName = (r['Team']||r['team']||'').toString().trim();
+    const teamId = teamName ? (teamNameToId[teamName.toLowerCase()] || null) : null;
+    updates[`students/${encodeKey(chess)}`] = { id: chess, name, level: levelRaw||'Senior', teamId: teamId ? String(teamId) : null };
+    imported++;
+  });
+  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+  studentsPreviewRows = []; $('studentsPreview').innerHTML=''; $('studentFile').value='';
+  toast(`Imported ${imported}, skipped ${skipped}`);
+});
+
+/* manual add */
+$('addManualStudent').addEventListener('click', async ()=>{
+  const chess = $('manualChess').value.trim(); const name = $('manualName').value.trim(); const level = $('manualLevel').value||'Senior'; const teamId = $('manualTeam').value || null;
+  if(!chess || !name) return toast('Enter chess & name','danger');
+  if(studentIdExists(chess)) return toast('Chess already exists','danger');
+  if(studentNameExists(name)) return toast('Name already exists','danger');
+  await set(ref(db, `students/${encodeKey(chess)}`), { id: chess, name, level, teamId: teamId ? String(teamId) : null });
+  $('manualChess').value=''; $('manualName').value=''; $('manualTeam').value='';
+  toast('Student saved');
+});
+
+/* render students */
 $('searchStudents')?.addEventListener('input', ()=> renderStudents());
 function renderStudents(){
   const tbody = $('studentsTable'); const q = ($('searchStudents')?.value||'').trim().toLowerCase();
@@ -548,17 +606,50 @@ function renderStudents(){
   });
   tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No students</td></tr>';
 }
-// ... (student actions/edit form logic here, truncated for brevity) ...
+
+/* student actions */
+$('studentsTable').addEventListener('click', async (e)=>{
+  const tr = e.target.closest('tr'); if(!tr) return; const dbKey = tr.dataset.key;
+  if(e.target.classList.contains('btn-delete-student')){ if(!confirm('Delete student?')) return; await remove(ref(db, `students/${dbKey}`)); toast('Student deleted'); }
+  else if(e.target.classList.contains('btn-edit-student')){
+    const snap = await get(ref(db, `students/${dbKey}`)); const s = snap.val(); if(!s) return toast('Not found','danger');
+    $('editStudentDbKey').value = dbKey; $('editChess').value = s.id; $('editName').value = s.name||''; $('editLevel').value = s.level||'Senior';
+    populateDropdowns(); setTimeout(()=> $('editTeam').value = s.teamId || '', 50);
+    new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+  }
+});
+
+/* edit student save/delete */
+$('editStudentForm').addEventListener('submit', async (ev)=>{ ev.preventDefault();
+  const dbKey = $('editStudentDbKey').value; if(!dbKey) return toast('Missing key','danger');
+  const newName = $('editName').value.trim(); const newLevel = $('editLevel').value||'Senior'; const newTeam = $('editTeam').value || null;
+  if(!newName) return toast('Name required','danger');
+  const curSnap = await get(ref(db, `students/${dbKey}`)); const cur = curSnap.val(); if(!cur) return toast('Not found','danger');
+  if(String(newName).trim().toLowerCase() !== String(cur.name||'').trim().toLowerCase()){ if(studentNameExists(newName)) return toast('Name exists','danger'); }
+  await update(ref(db, `students/${dbKey}`), { name: newName, level: newLevel, teamId: newTeam ? String(newTeam) : null });
+  toast('Student updated'); bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+});
+$('deleteStudentBtn').addEventListener('click', async ()=>{ if(!confirm('Delete?')) return; const dbKey = $('editStudentDbKey').value; await remove(ref(db, `students/${dbKey}`)); toast('Deleted'); bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide(); });
 
 
-/* ---------- TEAMS (UNMODIFIED) ---------- */
-// ... (team functions: saveTeam, computeTeamAttendancePct, renderTeams, actions) ...
+/* ---------- TEAMS ---------- */
+$('saveTeam').addEventListener('click', async ()=> {
+  const name = $('teamName').value.trim(); const leader = $('teamLeader').value || null; const pwd = $('teamPassword').value.trim() || '';
+  if(!name) return toast('Team name required','danger');
+  const id = Date.now().toString(); const p = push(ref(db, 'teams'));
+  await set(p, { id, name, leaderId: leader ? String(leader) : null, password: pwd, locked:false, score:0 });
+  $('teamName').value=''; $('teamLeader').value=''; $('teamPassword').value=''; toast('Team saved');
+});
+
+/* compute attendance % */
 function computeTeamAttendancePct(teamId){
   const attend = CACHE.attendance || {}; const members = CACHE.students.filter(s => String(s.teamId) === String(teamId)).map(s=>String(s.id));
   if(!members.length) return 0; let total=0, present=0;
   for(const k in attend){ const s = attend[k]; if(!s || !s.students) continue; members.forEach(m=>{ if(s.students && s.students[m] !== undefined){ total++; if(String(s.students[m]).toLowerCase() === 'present') present++; } }); }
   return total? Math.round((present/total)*100):0;
 }
+
+/* render teams */
 function renderTeams(){
   const tbody = $('teamsTable');
   if(!CACHE.teams.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No teams</td></tr>'; return; }
@@ -572,11 +663,77 @@ function renderTeams(){
   });
   tbody.innerHTML = html;
 }
-// ... (team actions logic here, truncated for brevity) ...
 
-/* ---------- EVENTS (UNMODIFIED) ---------- */
-// ... (event functions: eventKey, saveEvent, preview/import, renderEvents, actions) ...
-$('filterEventSearch')?.addEventListener('input', ()=> renderEvents());
+/* team pdf handler (fixed) */
+document.addEventListener('click', (e)=>{
+  const b = e.target.closest('.btn-team-pdf');
+  if(!b) return;
+  const tid = b.dataset.team;
+  const members = CACHE.students.filter(s => String(s.teamId) === String(tid));
+  let html = `<h3>Team ${(CACHE.teams.find(tt=>String(tt.id)===String(tid))||{}).name || tid}</h3><table border="1" style="border-collapse:collapse;width:100%"><thead><tr><th>Chess</th><th>Name</th></tr></thead><tbody>`;
+  members.forEach(m=> html += `<tr><td>${escapeHtml(m.id)}</td><td>${escapeHtml(m.name)}</td></tr>`);
+  html += '</tbody></table>';
+  html2pdf().from(html).set({margin:10,filename:`team_${tid}.pdf`}).save();
+});
+
+/* team actions: edit/delete */
+$('teamsTable').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.key;
+  if(btn.classList.contains('btn-delete-team')){ if(!confirm('Delete team?')) return; const dbKey = KEYMAP.teams[id] || id; if(dbKey) await remove(ref(db, `teams/${dbKey}`)); const updates = {}; CACHE.students.filter(s => String(s.teamId) === String(id)).forEach(s => updates[`students/${encodeKey(s.id)}/teamId`] = null); if(Object.keys(updates).length) await update(ref(db,'/'), updates); toast('Team deleted'); }
+  else if(btn.classList.contains('btn-edit-team')){
+    const dbKey = KEYMAP.teams[id] || id; const snap = await get(ref(db, `teams/${dbKey}`)); const t = snap.val(); if(!t) return toast('Team not found','danger');
+    // open a simple prompt for edit (keeps file shorter)
+    const newName = prompt('Team Name', t.name||''); if(newName===null) return;
+    const newPwd = prompt('Password (leave empty to keep current)', t.password||'');
+    const locked = confirm('Lock team? OK for locked, Cancel for unlocked');
+    await update(ref(db, `teams/${dbKey}`), { name: newName, password: newPwd!==null? newPwd : t.password, locked });
+    toast('Team updated');
+  }
+});
+
+
+/* ---------- EVENTS ---------- */
+function eventKey(name,type,level){ return `${String(name||'').trim().toLowerCase()}||${String(type||'').trim().toLowerCase()}||${String(level||'').trim().toLowerCase()}`; }
+$('saveEvent').addEventListener('click', async ()=>{
+  const name = $('eventName').value.trim(); const type = $('eventType').value; const level = $('eventLevel').value; const desc = $('eventDescription').value.trim();
+  if(!name) return toast('Event name required','danger');
+  if(CACHE.events.some(e => eventKey(e.name,e.type,e.level) === eventKey(name,type,level))) return toast('Event (same name+type+level) already exists','danger');
+  const p = push(ref(db, 'events')); const id = Date.now().toString();
+  await set(p, { id, name, type, level, description: desc, status:'Open', createdAt: Date.now() });
+  $('eventName').value=''; $('eventDescription').value=''; toast('Event added');
+});
+
+/* preview/import events */
+let eventsPreviewRows = [];
+$('previewEvents').addEventListener('click', ()=> {
+  const f = $('eventFile').files[0]; if(!f) return toast('Choose file','danger');
+  const r = new FileReader(); r.onload = e => {
+    const wb = XLSX.read(e.target.result, { type:'binary' }); const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' }).slice(0,500);
+    eventsPreviewRows = json;
+    let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th></tr></thead><tbody>';
+    json.forEach(rw => html += `<tr><td>${escapeHtml(rw['Name']||rw['Event']||'')}</td><td>${escapeHtml(rw['Type']||'')}</td><td>${escapeHtml(rw['Level']||'')}</td><td>${escapeHtml(rw['Description']||'')}</td></tr>`);
+    html += '</tbody></table>'; $('eventsPreview').innerHTML = html;
+  }; r.readAsBinaryString(f);
+});
+$('importEvents').addEventListener('click', async ()=> {
+  if(!eventsPreviewRows.length) return toast('No preview','danger');
+  const updates = {}; let imported=0, skipped=0;
+  eventsPreviewRows.forEach(rw => {
+    const name = (rw['Name']||rw['Event']||rw['name']||'').toString().trim(); if(!name){ skipped++; return; }
+    const type = (rw['Type']||rw['type']||'Non-Stage').toString().trim(); const level = (rw['Level']||rw['level']||'General').toString().trim();
+    if(CACHE.events.some(ev => eventKey(ev.name,ev.type,ev.level) === eventKey(name,type,level))){ skipped++; return; }
+    const desc = (rw['Description']||rw['description']||'').toString();
+    const id = Date.now().toString() + Math.floor(Math.random()*9999);
+    updates[`events/${id}`] = { id, name, type, level, description: desc, status:'Open', createdAt: Date.now() };
+    imported++;
+  });
+  if(Object.keys(updates).length) await update(ref(db,'/'), updates);
+  eventsPreviewRows = []; $('eventFile').value=''; $('eventsPreview').innerHTML='';
+  toast(`Imported ${imported}, skipped ${skipped}`);
+});
+
+/* event search/filter */
+$('filterEventsBtn').addEventListener('click', ()=> renderEvents());
 function renderEvents(){
   const tbody = $('eventsTable'); const q = ($('filterEventSearch')?.value||'').trim().toLowerCase();
   if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No events</td></tr>'; return; }
@@ -593,15 +750,128 @@ function renderEvents(){
   });
   tbody.innerHTML = html || '<tr><td colspan="5" class="text-center muted">No events match</td></tr>';
 }
-// ... (event actions/edit form logic here, truncated for brevity) ...
+
+/* event actions */
+$('eventsTable').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.key;
+  if(btn.classList.contains('btn-delete-event')){ if(!confirm('Delete event?')) return; const dbKey = KEYMAP.events[id] || id; if(dbKey) await remove(ref(db, `events/${dbKey}`)); toast('Event removed'); }
+  else if(btn.classList.contains('btn-edit-event')){ const dbKey = KEYMAP.events[id] || id; const snap = await get(ref(db, `events/${dbKey}`)); const ev = snap.val(); if(!ev) return toast('Not found','danger'); $('editEventDbKey').value = dbKey; $('editEventName').value = ev.name||''; $('editEventType').value = ev.type||'Non-Stage'; $('editEventLevel').value = ev.level||'General'; $('editEventDesc').value = ev.description||''; new bootstrap.Modal(document.getElementById('editEventModal')).show(); }
+});
+$('editEventForm').addEventListener('submit', async (ev)=>{ ev.preventDefault(); const dbKey = $('editEventDbKey').value; if(!dbKey) return toast('Missing key','danger'); const name = $('editEventName').value.trim(); const type = $('editEventType').value; const level = $('editEventLevel').value; const desc = $('editEventDesc').value.trim(); if(!name) return toast('Name required','danger');
+  const other = CACHE.events.find(e => eventKey(e.name,e.type,e.level) === eventKey(name,type,level) && KEYMAP.events[e.id] !== dbKey);
+  if(other) return toast('Event with same name+type+level exists','danger');
+  await update(ref(db, `events/${dbKey}`), { name, type, level, description: desc });
+  toast('Event updated'); bootstrap.Modal.getInstance(document.getElementById('editEventModal')).hide();
+});
 
 
-/* ---------- ATTENDANCE (UNMODIFIED) ---------- */
-// ... (attendance functions: load, toggle, save, render sessions, view/edit/delete) ...
-// Truncated for brevity
+/* ---------- ATTENDANCE ---------- */
+let attendanceToggleState = 'none';
+let editingAttendanceDbKey = null;
+
+$('attMethod').addEventListener('change', ()=> $('attTeamWrap').classList.toggle('d-none', $('attMethod').value!=='team'));
+$('loadAttendance').addEventListener('click', ()=> {
+  const method = $('attMethod').value; const teamId = $('attTeam').value;
+  let list = method === 'all' ? CACHE.students.slice() : CACHE.students.filter(s => String(s.teamId) === String(teamId));
+  const wrap = $('attendanceBoxes'); wrap.innerHTML = '';
+
+  if(method === 'all'){
+    const teamsMap = {}; CACHE.teams.forEach(t => teamsMap[t.id] = t.name);
+    const byTeam = {};
+    list.forEach(s => { const tid = s.teamId || '__unassigned'; if(!byTeam[tid]) byTeam[tid] = []; byTeam[tid].push(s); });
+    Object.keys(byTeam).forEach(tid => {
+      const groupTitle = document.createElement('div'); groupTitle.innerHTML = `<div style="font-weight:700;margin:8px 0">${escapeHtml(teamsMap[tid]||'Unassigned')}</div>`; wrap.appendChild(groupTitle);
+      const groupBox = document.createElement('div'); groupBox.style.display='flex'; groupBox.style.flexWrap='wrap';
+      byTeam[tid].forEach(s => {
+        const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = encodeKey(s.id); div.dataset.name = s.name || ''; div.title = s.name || ''; div.textContent = s.id;
+        div.addEventListener('click', ()=> toggleAttendanceBox(div));
+        groupBox.appendChild(div);
+      });
+      wrap.appendChild(groupBox);
+    });
+  } else {
+    list.forEach(s => {
+      const div = document.createElement('div'); div.className = 'small-box absent'; div.dataset.key = encodeKey(s.id); div.dataset.name = s.name || ''; div.title = s.name || ''; div.textContent = s.id;
+      div.addEventListener('click', ()=> toggleAttendanceBox(div));
+      wrap.appendChild(div);
+    });
+  }
+
+  $('attendanceMarkCard').style.display = list.length ? 'block' : 'none';
+  attendanceToggleState = 'absent'; $('toggleAll').textContent = 'Set All Present';
+  editingAttendanceDbKey = null;
+});
+
+function toggleAttendanceBox(el){
+  if(el.classList.contains('present')){ el.classList.remove('present'); el.classList.add('absent'); }
+  else if(el.classList.contains('absent')){ el.classList.remove('absent'); el.classList.add('present'); }
+  else el.classList.add('present');
+}
+$('toggleAll').addEventListener('click', ()=> {
+  const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box')); if(!boxes.length) return;
+  if(attendanceToggleState === 'none' || attendanceToggleState === 'absent'){ boxes.forEach(b => { b.classList.remove('absent'); b.classList.add('present'); }); attendanceToggleState = 'present'; $('toggleAll').textContent = 'Set All Absent'; }
+  else { boxes.forEach(b => { b.classList.remove('present'); b.classList.add('absent'); }); attendanceToggleState = 'absent'; $('toggleAll').textContent = 'Set All Present'; }
+});
+
+$('saveAttendance').addEventListener('click', async ()=> {
+  const date = $('attDate').value; const time = $('attTime').value || ''; if(!date) return toast('Select date','danger');
+  const desc = $('attDesc').value || ''; const boxes = Array.from(document.querySelectorAll('#attendanceBoxes .small-box'));
+  if(!boxes.length) return toast('Load students first','danger');
+  const studentsObj = {}; boxes.forEach(b => { const id = decodeKey(b.dataset.key); studentsObj[id] = b.classList.contains('present') ? 'Present' : 'Absent'; });
+  const payload = { date, time, description: desc, students: studentsObj, savedAt: Date.now() };
+  if(editingAttendanceDbKey){ await set(ref(db, `attendance/${editingAttendanceDbKey}`), payload); toast('Attendance updated'); editingAttendanceDbKey = null; } else { const p = push(ref(db, 'attendance')); await set(p, payload); toast('Attendance saved'); }
+  $('attendanceMarkCard').style.display = 'none';
+});
+
+/* attendance sessions render + view/edit/delete */
+function renderAttendanceSessions(){
+  const tbody = $('attendanceSessions'); const att = CACHE.attendance || {}; const rows = Object.entries(att);
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-center muted">No sessions</td></tr>'; return; }
+  rows.sort((a,b)=> (b[1].savedAt||0) - (a[1].savedAt||0));
+  let html=''; rows.forEach(([k,v]) => { const count = v.students ? Object.keys(v.students).length : 0; html += `<tr data-db="${k}"><td>${escapeHtml(v.date||'')}</td><td>${escapeHtml(v.time||'')}</td><td>${escapeHtml(v.description||'')}</td><td>${count}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-view-att" data-db="${k}">View</button> <button class="btn btn-sm btn-outline-secondary btn-edit-att" data-db="${k}">Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete-att" data-db="${k}">Delete</button></td></tr>`; });
+  tbody.innerHTML = html;
+}
+$('attendanceSessions').addEventListener('click', async (e)=> {
+  const btn = e.target.closest('button'); if(!btn) return; const dbKey = btn.dataset.db;
+  const snap = await get(ref(db, `attendance/${dbKey}`)); const s = snap.val(); if(!s) return toast('Session not found','danger');
+  if(btn.classList.contains('btn-view-att')){
+    const abs = []; if(s.students) for(const id in s.students) if(String(s.students[id]).toLowerCase() !== 'present') abs.push({ id, status: s.students[id] });
+    const container = document.createElement('div');
+    container.innerHTML = `<div style="font-weight:700">Date: ${escapeHtml(s.date)} ${escapeHtml(s.time||'')}</div><div class="muted mb-2">${escapeHtml(s.description||'')}</div>`;
+    if(!abs.length) container.innerHTML += '<div class="muted">No absentees — all present</div>';
+    else {
+      container.innerHTML += '<div style="max-height:360px;overflow:auto">';
+      abs.forEach(a => {
+        const st = CACHE.students.find(st => String(st.id) === String(a.id));
+        container.innerHTML += `<div style="padding:6px 4px;border-bottom:1px solid #f1f5ff;font-size:14px">${escapeHtml(st?st.name:a.id)} <span class="muted" style="font-size:13px">(${escapeHtml(a.id)})</span></div>`;
+      });
+      container.innerHTML += '</div>';
+    }
+    html2pdf().from(container).set({margin:10,filename:`absentees_${s.date}.pdf`}).save();
+    return;
+  } else if(btn.classList.contains('btn-edit-att')){
+    editingAttendanceDbKey = dbKey; $('attDate').value = s.date||''; $('attTime').value = s.time||''; $('attDesc').value = s.description||'';
+    const wrap = $('attendanceBoxes'); wrap.innerHTML = '';
+    const teamsMap = {}; CACHE.teams.forEach(t => teamsMap[t.id] = t.name); const byTeam = {};
+    CACHE.students.forEach(st => { const tid = st.teamId || '__unassigned'; if(!byTeam[tid]) byTeam[tid] = []; byTeam[tid].push(st); });
+    Object.keys(byTeam).forEach(tid => {
+      const groupTitle = document.createElement('div'); groupTitle.innerHTML = `<div style="font-weight:700;margin:8px 0">${escapeHtml(teamsMap[tid]||'Unassigned')}</div>`; wrap.appendChild(groupTitle);
+      const groupBox = document.createElement('div'); groupBox.style.display='flex'; groupBox.style.flexWrap='wrap';
+      byTeam[tid].forEach(st => {
+        const status = (s.students && s.students[st.id]) ? s.students[st.id] : 'Absent';
+        const div = document.createElement('div'); div.className = 'small-box ' + (status==='Present' ? 'present' : 'absent'); div.dataset.key = encodeKey(st.id); div.dataset.name = st.name || ''; div.textContent = st.id;
+        div.addEventListener('click', ()=> toggleAttendanceBox(div)); groupBox.appendChild(div);
+      });
+      wrap.appendChild(groupBox);
+    });
+    $('attendanceMarkCard').style.display = 'block'; toast('Loaded session for edit');
+  } else if(btn.classList.contains('btn-delete-att')){
+    if(!confirm('Delete session?')) return; await remove(ref(db, `attendance/${dbKey}`)); toast('Deleted');
+  }
+});
 
 
-/* ---------- APPROVALS (MODIFIED TO EVENT SUMMARY) ---------- */
+/* ---------- APPROVALS ---------- */
 $('searchApprovals')?.addEventListener('input', ()=> renderApprovals());
 function renderApprovals(){
   const tbody = $('approvalsTable'); 
@@ -640,7 +910,60 @@ function renderApprovals(){
   tbody.innerHTML = rows.join('') || '<tr><td colspan="5" class="text-center muted">No events found or no participations submitted.</td></tr>';
 }
 
-// ... (approval detail modal and action handlers, truncated for brevity) ...
+// Handler for the new 'Details' button (View participants for an event)
+$('approvalsTable').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.btn-view-parts'); if(!btn) return;
+  const evId = btn.dataset.eventId;
+  const ev = CACHE.events.find(e => String(e.id) === String(evId));
+  if(!ev) return toast('Event not found','danger');
+
+  const pending = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status).toLowerCase() === 'pending');
+  const approved = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status).toLowerCase() === 'approved');
+  
+  const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s.name);
+  const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t.name);
+
+  // Render Pending Table
+  let pendingHtml = '';
+  pending.forEach(p => {
+    const studentName = studentMap[p.studentId] || p.studentId;
+    const teamName = teamMap[p.teamId] || 'Unassigned';
+    const dbKey = KEYMAP.participations[p.id] || p.id;
+    pendingHtml += `<tr data-key="${p.id}">
+      <td>${escapeHtml(studentName)} (${escapeHtml(p.studentId)})</td>
+      <td>${escapeHtml(teamName)}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-success btn-approve-inline" data-key="${p.id}">Approve</button> 
+        <button class="btn btn-sm btn-danger btn-reject-inline" data-key="${p.id}">Reject</button>
+      </td>
+    </tr>`;
+  });
+  $('pendingParticipantsTable').innerHTML = pendingHtml || '<tr><td colspan="3" class="muted">No pending submissions.</td></tr>';
+  $('pendingSectionTitle').textContent = `Pending Submissions (${pending.length})`;
+
+
+  // Render Approved Table
+  let approvedHtml = '';
+  approved.forEach(p => {
+    const studentName = studentMap[p.studentId] || p.studentId;
+    const teamName = teamMap[p.teamId] || 'Unassigned';
+    approvedHtml += `<tr>
+      <td>${escapeHtml(studentName)} (${escapeHtml(p.studentId)})</td>
+      <td>${escapeHtml(teamName)}</td>
+      <td>${new Date(p.approvedAt||0).toLocaleString()}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-danger btn-unapprove-inline" data-key="${p.id}">Unapprove</button>
+      </td>
+    </tr>`;
+  });
+  $('approvedParticipantsTable').innerHTML = approvedHtml || '<tr><td colspan="4" class="muted">No approved participants.</td></tr>';
+  $('approvedSectionTitle').textContent = `Approved Participants (${approved.length})`;
+
+  $('approvalModalTitle').textContent = `Participants for: ${ev.name}`;
+  new bootstrap.Modal(document.getElementById('approvalsDetailModal')).show();
+});
+
+// Inline Action Handlers (must be outside the table click listener)
 document.addEventListener('click', async (e)=>{
   const key = e.target.dataset.key; if(!key) return;
   const dbKey = KEYMAP.participations[key] || key;
@@ -661,10 +984,85 @@ document.addEventListener('click', async (e)=>{
     renderAll();
   }
 });
-// ... (downloadApprovalsPdf handler) ...
+
+/* download approved participations PDF */
+$('downloadApprovalsPdf').addEventListener('click', ()=> {
+  let html = `<h3>Approved Participations</h3>`;
+  CACHE.events.forEach(ev => {
+    const approved = CACHE.participations.filter(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved');
+    if(!approved.length) return;
+    html += `<h4>${escapeHtml(ev.name)}</h4><ol>`;
+    approved.forEach(p => {
+      const s = CACHE.students.find(st => String(st.id) === String(p.studentId));
+      html += `<li>${escapeHtml(s? s.name : p.studentId)} ${s? `(${escapeHtml(s.id)})` : ''}</li>`;
+    });
+    html += `</ol>`;
+  });
+  if(html === `<h3>Approved Participations</h3>`) return toast('No approved participations','warning');
+  html2pdf().from(html).set({margin:10,filename:`approved_participations_${new Date().toISOString().slice(0,10)}.pdf`}).save();
+});
 
 
 /* ---------- RESULTS (MODIFIED TO SHOW ALL EVENTS AND TOTAL POINTS) ---------- */
+/* When event selected, auto load approved participants */
+$('resultEvent').addEventListener('change', ()=> {
+  const ev = $('resultEvent').value; if(!ev){ ['resultSelectFirst','resultSelectSecond','resultSelectThird'].forEach(id=> $(id).innerHTML = '<option value="">Select</option>'); return; }
+  const participants = CACHE.participations.filter(p => String(p.eventId) === String(ev) && String(p.status||'').toLowerCase()==='approved');
+  const map = {}; CACHE.students.forEach(s => map[s.id] = s.name);
+  ['resultSelectFirst','resultSelectSecond','resultSelectThird'].forEach(id => {
+    const sel = $(id); sel.innerHTML = `<option value="">Select</option>`;
+    participants.forEach(p => sel.innerHTML += `<option value="${escapeHtml(p.studentId)}">${escapeHtml(map[p.studentId]||p.studentId)} (${escapeHtml(p.studentId)})</option>`);
+  });
+});
+
+/* save individual results (draft) */
+$('saveResult').addEventListener('click', async ()=>{
+  const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
+  const firstId = $('resultSelectFirst').value; const fPts = Number($('resultPointsFirst').value)||0;
+  const secondId = $('resultSelectSecond').value; const sPts = Number($('resultPointsSecond').value)||0;
+  const thirdId = $('resultSelectThird').value; const tPts = Number($('resultPointsThird').value)||0;
+  async function upsertPosition(position, studentId, points){
+    if(!studentId) return;
+    const existing = CACHE.results.find(r => String(r.eventId) === String(ev) && Number(r.position) === Number(position));
+    // If saving a new result, ensure it is saved as 'draft' (published: false)
+    if(existing){
+      const dbKey = KEYMAP.results[existing.id] || existing.id;
+      await update(ref(db, `results/${dbKey}`), { studentId, points, published:false, updatedAt: Date.now() });
+    } else {
+      const p = push(ref(db, 'results')); const id = Date.now().toString() + Math.floor(Math.random()*9999);
+      await set(p, { id, eventId: ev, position, studentId, points, published:false, createdAt: Date.now() });
+    }
+  }
+  await upsertPosition(1, firstId, fPts);
+  await upsertPosition(2, secondId, sPts);
+  await upsertPosition(3, thirdId, tPts);
+  toast('Results saved as draft');
+  renderAll();
+});
+
+/* publish all results for selected event */
+$('publishAllResults').addEventListener('click', async ()=>{
+  const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
+  const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
+  if(!eventResults.length) return toast('No results to publish','danger');
+  for(const r of eventResults){
+    const dbKey = KEYMAP.results[r.id] || r.id;
+    if(r.published) continue;
+    await update(ref(db, `results/${dbKey}`), { published:true, publishedAt: Date.now() });
+    const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+    if(stud && stud.teamId){
+      const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+      if(team){
+        const dbTeamKey = KEYMAP.teams[team.id];
+        const newScore = (Number(team.score)||0) + (Number(r.points)||0);
+        await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+      }
+    }
+  }
+  toast('Published results for event');
+  renderAll();
+});
+
 /* render results (MODIFIED TO SHOW ALL EVENTS AND TOTAL POINTS) */
 function renderResults(){
   const tbody = $('resultsTable');
@@ -687,7 +1085,6 @@ function renderResults(){
 
     const hasAnyResult = !!pos[1] || !!pos[2] || !!pos[3];
     
-    // Determine published status based on 1st place result, or if 1st place isn't set, check 2nd/3rd.
     const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
     const pubBadge = pub ? '<span class="badge bg-success">Published</span>' : (hasAnyResult ? '<span class="badge bg-warning">Draft</span>' : '<span class="badge bg-secondary">No Results</span>');
     const rowClass = hasAnyResult ? 'participated-row' : '';
@@ -713,7 +1110,85 @@ function renderResults(){
   });
   tbody.innerHTML = rows.join('') || '<tr><td colspan="7" class="text-center muted">No events found.</td></tr>';
 }
-// ... (rest of result actions, truncated for brevity) ...
+
+/* result event-level actions */
+document.addEventListener('click', async (e)=>{
+  if(e.target.classList.contains('btn-toggle-publish-event')){
+    const ev = e.target.dataset.ev;
+    const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
+    if(!eventResults.length) return toast('No results to publish','danger');
+    
+    // Check if score update is needed (if toggling from published to unpublished, or vice versa)
+    const anyPublished = eventResults.some(r=> r.published);
+    
+    for(const r of eventResults){
+      const dbKey = KEYMAP.results[r.id] || r.id;
+      
+      // Update score *before* toggling if publishing, or *after* toggling if unpublishing
+      const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+      if(stud && stud.teamId){
+        const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+        if(team){
+          const dbTeamKey = KEYMAP.teams[team.id];
+          const delta = Number(r.points)||0;
+          let newScore = Number(team.score)||0;
+
+          if(!anyPublished && !r.published){ // Publishing: Add score
+            newScore += delta;
+          } else if(anyPublished && r.published){ // Unpublishing: Subtract score
+             newScore = Math.max(0, newScore - delta);
+          }
+          await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+        }
+      }
+      
+      await update(ref(db, `results/${dbKey}`), { published: !anyPublished, publishedAt: !anyPublished?Date.now():null });
+    }
+    toast(anyPublished ? 'Unpublished event results' : 'Published event results');
+    renderAll();
+  } else if(e.target.classList.contains('btn-edit-event-results')){
+    const evId = e.target.dataset.ev;
+    // open the resultEvent select + pre-fill positions using admin UI controls
+    $('resultEvent').value = evId;
+    $('resultEvent').dispatchEvent(new Event('change'));
+    // prefill fields if existing
+    const positions = [1,2,3];
+    positions.forEach(pn=>{
+      const rr = CACHE.results.find(r => String(r.eventId) === String(evId) && Number(r.position) === pn);
+      if(rr){
+        if(pn===1){ $('resultSelectFirst').value = rr.studentId; $('resultPointsFirst').value = rr.points||0; }
+        if(pn===2){ $('resultSelectSecond').value = rr.studentId; $('resultPointsSecond').value = rr.points||0; }
+        if(pn===3){ $('resultSelectThird').value = rr.studentId; $('resultPointsThird').value = rr.points||0; }
+      } else {
+        // Clear fields if no result exists for that position
+        if(pn===1){ $('resultSelectFirst').value = ''; $('resultPointsFirst').value = ''; }
+        if(pn===2){ $('resultSelectSecond').value = ''; $('resultPointsSecond').value = ''; }
+        if(pn===3){ $('resultSelectThird').value = ''; $('resultPointsThird').value = ''; }
+      }
+    });
+    toast('Loaded results into the editor (save to update).');
+    document.querySelector('[data-target="#panel-results"]').click();
+  } else if(e.target.classList.contains('btn-delete-event-results')){
+    if(!confirm('Delete all results for this event? This will also remove associated team scores.')) return;
+    const evId = e.target.dataset.ev;
+    const toDelete = CACHE.results.filter(r=> String(r.eventId)===String(evId));
+    for(const r of toDelete){
+        const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+        if(r.published && stud && stud.teamId){
+            const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+            if(team){
+                const dbTeamKey = KEYMAP.teams[team.id];
+                const newScore = Math.max(0, (Number(team.score)||0) - (Number(r.points)||0));
+                await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+            }
+        }
+        const dbKey = KEYMAP.results[r.id] || r.id;
+        await remove(ref(db, `results/${dbKey}`));
+    }
+    toast('Deleted results for event');
+    renderAll();
+  }
+});
 
 
 /* ---------- PROGRAMS (NEW) ---------- */
@@ -761,17 +1236,20 @@ $('programsTable').addEventListener('click', (e) => {
 
 // Load the small boxes for a specific event
 function loadProgramDetails(evId) {
+  // Get all approved participations for this event
   const participants = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.status||'').toLowerCase()==='approved');
   const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s);
   const boxesWrap = $('programAttendanceBoxes');
   boxesWrap.innerHTML = '';
   
+  // Get saved program data (attendance/codes)
   const eventData = CACHE.programAttendance[evId] || {};
 
   participants.forEach(p => {
     const student = studentMap[p.studentId];
     if (!student) return;
 
+    // Get status and code from the database cache, defaulting to Absent
     const attStatus = eventData[p.studentId]?.status || 'Absent';
     const code = eventData[p.studentId]?.code || '';
 
@@ -779,7 +1257,7 @@ function loadProgramDetails(evId) {
     div.className = `small-box ${attStatus === 'Present' ? 'present' : 'absent'}`;
     div.dataset.id = p.studentId;
     div.dataset.name = student.name;
-    div.title = `${student.name} - ${student.id}`;
+    div.title = `${student.name} (${student.id})`;
     
     // Letter/Code (A, B, C...)
     const codeSpan = `<span style="font-size:12px;font-weight:bold;color:var(--warning);">${escapeHtml(code || '-')}</span>`;
@@ -792,19 +1270,16 @@ function loadProgramDetails(evId) {
     div.addEventListener('click', () => toggleProgramAttendanceBox(div, evId));
     boxesWrap.appendChild(div);
   });
+  
+  // Update the toggle button text based on the current state (default to Set All Present)
+  $('toggleProgramAttendance').textContent = 'Toggle All Present';
 }
 
 // Toggle logic for small boxes in Program Details
 function toggleProgramAttendanceBox(el, evId) {
   const isPresent = el.classList.toggle('present');
   el.classList.toggle('absent', !isPresent);
-  
-  const status = isPresent ? 'Present' : 'Absent';
-  const studentId = el.dataset.id;
-  
-  // OPTIONAL: Update a local cache if you don't want to rely on the main CACHE for a live view
-  // Since we have a 'Save' button, we'll collect the state on click and rely on the button to save to DB.
-  el.dataset.status = status;
+  // No immediate DB update. State is collected on 'Save Attendance' button click.
 }
 
 // Toggle all attendance
@@ -814,12 +1289,10 @@ $('toggleProgramAttendance').addEventListener('click', () => {
   
   const allPresent = boxes.every(b => b.classList.contains('present'));
   const newState = allPresent ? 'absent' : 'present';
-  const newStatus = allPresent ? 'Absent' : 'Present';
   
   boxes.forEach(b => {
     b.classList.remove('present', 'absent');
     b.classList.add(newState);
-    b.dataset.status = newStatus;
   });
 
   $('toggleProgramAttendance').textContent = allPresent ? 'Toggle All Present' : 'Toggle All Absent';
@@ -834,8 +1307,8 @@ $('saveProgramAttendance').addEventListener('click', async () => {
   
   boxes.forEach(b => {
     const studentId = b.dataset.id;
-    // Get status from live class state (or fallback to a saved state if implemented)
     const status = b.classList.contains('present') ? 'Present' : 'Absent';
+    // Get the current displayed code from the box's inner HTML
     const code = b.querySelector('span:first-child')?.textContent || '';
     
     updates[studentId] = { status, code };
@@ -843,7 +1316,7 @@ $('saveProgramAttendance').addEventListener('click', async () => {
 
   await set(ref(db, `programAttendance/${currentProgramEventId}`), updates);
   toast('Program attendance and codes saved!', 'success');
-  // Re-render the local view from the cache after saving
+  // Update cache and re-render local view
   CACHE.programAttendance[currentProgramEventId] = updates;
   loadProgramDetails(currentProgramEventId);
 });
@@ -855,6 +1328,9 @@ $('assignRandomLetters').addEventListener('click', async () => {
   const boxes = Array.from(document.querySelectorAll('#programAttendanceBoxes .small-box'));
   if (boxes.length === 0) return toast('No participants to assign codes.', 'danger');
 
+  // Get current event data from cache to preserve current status
+  const eventData = CACHE.programAttendance[currentProgramEventId] || {};
+  
   // Generate shuffled list of codes (A, B, C, ...)
   const codes = boxes.map((_, i) => String.fromCharCode(65 + i)); // A=65
   const shuffledCodes = codes.sort(() => Math.random() - 0.5);
@@ -862,16 +1338,16 @@ $('assignRandomLetters').addEventListener('click', async () => {
   const updates = {};
   boxes.forEach((b, index) => {
     const studentId = b.dataset.id;
-    const currentCode = b.querySelector('span:first-child');
+    const currentCodeSpan = b.querySelector('span:first-child');
     const newCode = shuffledCodes[index];
     
     // Update the live box display
-    if (currentCode) {
-      currentCode.textContent = newCode;
+    if (currentCodeSpan) {
+      currentCodeSpan.textContent = newCode;
     }
     
-    // Keep the current status for saving
-    const status = b.classList.contains('present') ? 'Present' : 'Absent';
+    // Preserve the current status (or default to 'Absent')
+    const status = b.classList.contains('present') ? 'Present' : (eventData[studentId]?.status || 'Absent');
     updates[studentId] = { status, code: newCode };
   });
 
@@ -879,11 +1355,11 @@ $('assignRandomLetters').addEventListener('click', async () => {
   toast('Random letters assigned and saved!', 'success');
   // Update cache and re-render the local view
   CACHE.programAttendance[currentProgramEventId] = updates;
-  loadProgramDetails(currentProgramEventId); // Re-render to confirm
+  loadProgramDetails(currentProgramEventId);
 });
 
 
-/* ---------- DROPDOWNS & POPULATE (UNMODIFIED) ---------- */
+/* ---------- DROPDOWNS & POPULATE ---------- */
 function populateDropdowns(){
   const manualTeam = $('manualTeam'); if(manualTeam){ manualTeam.innerHTML = '<option value="">Unassigned</option>'; CACHE.teams.forEach(t => manualTeam.innerHTML += `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`); }
   const teamLeader = $('teamLeader'); if(teamLeader){ teamLeader.innerHTML = '<option value="">Choose leader (Chess #)</option>'; CACHE.students.forEach(s => teamLeader.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`); }
@@ -893,8 +1369,18 @@ function populateDropdowns(){
 }
 
 
-/* ---------- PDF exports (UNMODIFIED) ---------- */
-// ... (pdf handlers, truncated for brevity) ...
+/* ---------- PDF exports ---------- */
+$('downloadStudentsPdf').addEventListener('click', ()=> {
+  let html = `<h3>Students</h3><table border="1" style="border-collapse:collapse;width:100%"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>`;
+  const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
+  CACHE.students.forEach(s => html += `<tr><td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.level||'')}</td><td>${escapeHtml(teamMap[s.teamId]||'Unassigned')}</td></tr>`);
+  html += '</tbody></table>'; html2pdf().from(html).set({margin:10,filename:`students_${new Date().toISOString().slice(0,10)}.pdf`}).save();
+});
+$('downloadEventsPdf').addEventListener('click', ()=> {
+  let html = `<h3>Events</h3><table border="1" style="border-collapse:collapse;width:100%"><thead><tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th></tr></thead><tbody>`;
+  CACHE.events.forEach(e => html += `<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.type)}</td><td>${escapeHtml(e.level||'')}</td><td>${escapeHtml(e.description||'')}</td></tr>`);
+  html += '</tbody></table>'; html2pdf().from(html).set({margin:10,filename:`events_${new Date().toISOString().slice(0,10)}.pdf`}).save();
+});
 
 
 /* ---------- bootstrapping ---------- */
