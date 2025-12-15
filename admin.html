@@ -44,6 +44,7 @@
       --input-bg: #e9ecef;
       --accent-main: #dc3545; /* Red (Example, could be anything) */
       --accent-secondary: #0d6efd; /* Bootstrap Blue */
+      --bs-table-bg: var(--card); /* Ensure table background is correct in light mode */
     }
 
     /* -------------------------------------- */
@@ -84,13 +85,17 @@
     }
     .form-control::placeholder{color:var(--muted);}
     .form-select{
-        /* Adjusted background image for both modes */
+        /* Use standard Bootstrap arrow color/styling */
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2.25rem;
     }
     .light-mode .form-select{
          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236c757d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     }
-    
+
     /* Buttons */
     .btn-accent{background:var(--accent-main);color:#fff;border:0}
     .btn-accent:hover{background:var(--accent-main);filter: brightness(0.9);}
@@ -106,7 +111,7 @@
     }
     table.table td, table.table th{vertical-align:middle; border-color: var(--border);}
     .table-light{background-color:var(--input-bg) !important;}
-    .participated-row{background:rgba(59, 130, 246, 0.1) !important;} /* Light blue row for participation/results */
+    .participated-row{background:rgba(59, 130, 246, 0.1) !important;}
 
     /* small boxes used in attendance / members */
     .small-box{width:72px;height:44px;border-radius:8px;background:var(--input-bg);color:var(--text);display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700;padding:2px;}
@@ -122,9 +127,6 @@
     .btn-close{filter: invert(1) grayscale(100%) brightness(200%);}
     .light-mode .btn-close{filter: none;}
     
-    /* responsive */
-    @media (max-width:900px){ .sidebar{width:56px} .small-box{width:56px;height:36px} .main-area{padding:12px} }
-
     /* Dashboard Overview Styles */
     .score-card {
         text-align: center;
@@ -155,7 +157,6 @@
     <div class="icon-btn" data-target="#panel-programs" title="Programs"><i class="bi bi-journal-check" style="font-size:18px"></i></div>
     <div style="flex:1"></div>
     <div class="icon-btn" id="logoutBtnSidebar" title="Logout"><i class="bi bi-box-arrow-right" style="font-size:18px"></i></div>
-    <div class="icon-btn" id="toggleDarkMode" title="Toggle Mode"><i class="bi bi-moon-stars" style="font-size:18px"></i></div>
   </aside>
 
   <main class="main-area">
@@ -166,6 +167,7 @@
       </div>
       <div class="d-flex gap-2 align-items-center">
         <div class="muted">Year <span id="current-year"></span></div>
+        <button id="toggleDarkModeTop" class="btn btn-outline-secondary" title="Toggle Mode"><i class="bi bi-moon-stars"></i></button>
         <button id="logoutBtnTop" class="btn btn-danger">Logout</button>
       </div>
     </div>
@@ -248,7 +250,7 @@
                 <div class="section-title">All Students</div>
                 <div class="d-flex gap-2">
                   <input id="searchStudents" class="form-control" placeholder="Search name or chess #">
-                  <button id="downloadStudentsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i></button>
+                  <button id="downloadStudentsPdf" class="btn btn-outline-secondary" title="Export Student List"><i class="bi bi-file-earmark-pdf"></i></button>
                 </div>
               </div>
               <div class="table-responsive" style="max-height:520px;overflow:auto">
@@ -299,7 +301,7 @@
               <select id="eventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option><option>Group</option><option>Open</option><option>Special</option></select>
               <select id="eventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option><option>Special</option></select>
               <textarea id="eventDescription" class="form-control mb-2" rows="3" placeholder="Description / rules"></textarea>
-              <div class="d-flex gap-2"><button id="saveEvent" class="btn btn-accent">Save Event</button><button id="downloadEventsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i></button></div>
+              <div class="d-flex gap-2"><button id="saveEvent" class="btn btn-accent">Save Event</button><button id="downloadEventsPdf" class="btn btn-outline-secondary" title="Export Event List"><i class="bi bi-file-earmark-pdf"></i></button></div>
             </div>
 
             <div class="card-neo">
@@ -368,7 +370,7 @@
           </div>
           <div class="d-flex gap-2">
             <input id="searchApprovals" class="form-control" placeholder="Search event name, type, or level...">
-            <button id="downloadApprovalsPdf" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-pdf"></i> Export Approved PDF</button>
+            <button id="downloadApprovalsPdf" class="btn btn-outline-secondary" title="Export Approved Roster"><i class="bi bi-file-earmark-pdf"></i> Export Roster</button>
           </div>
         </div>
 
@@ -407,7 +409,7 @@
             <div class="col-md-2"><input id="resultPointsThird" type="number" class="form-control" placeholder="Points"></div>
 
             <div class="col-md-2 d-flex gap-2">
-              <button id="saveResult" class="btn btn-success">Save (Draft)</button>
+              <button id="saveResult" class="btn btn-success">Save Draft</button>
               <button id="publishAllResults" class="btn btn-accent">Publish</button>
             </div>
           </div>
@@ -430,7 +432,7 @@
       <section id="panel-programs" class="card-neo d-none">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <div class="section-title">Event Programs Management</div>
-           <input id="searchPrograms" class="form-control w-50" placeholder="Search event name, type, or level...">
+          <input id="searchPrograms" class="form-control w-50" placeholder="Search event name, type, or level...">
         </div>
         <div class="muted mb-3">View approved participants and manage event attendance/coding.</div>
         <div class="table-responsive">
@@ -542,6 +544,7 @@
     </div>
   </div>
 </div>
+
 <script type="module">
 /* Final admin.js embedded - FULL CODE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -611,7 +614,7 @@ $('logoutBtnSidebar').addEventListener('click', handleLogout);
 $('logoutBtnTop').addEventListener('click', handleLogout); 
 
 // Dark/Light Mode Toggle
-$('toggleDarkMode').addEventListener('click', () => {
+$('toggleDarkModeTop').addEventListener('click', () => {
     document.body.classList.toggle('light-mode');
 });
 
@@ -628,7 +631,7 @@ function renderAll(){
   renderApprovals();
   renderResults();
   renderPrograms();
-  renderOverview(); // New Dashboard function
+  renderOverview(); 
 }
 
 /* ---------- NEW DASHBOARD OVERVIEW ---------- */
@@ -1049,6 +1052,7 @@ function renderApprovals(){
       <td><span class="badge bg-success">${item.approved} Approved</span></td>
       <td class="text-end">
         <button class="btn btn-sm btn-outline-primary btn-view-parts" data-event-id="${ev.id}">Details</button>
+        <button class="btn btn-sm btn-outline-secondary btn-event-pdf-summary" data-event-id="${ev.id}" title="Export Roster PDF"><i class="bi bi-file-earmark-pdf"></i></button>
       </td>
     </tr>`);
   });
@@ -1130,23 +1134,28 @@ document.addEventListener('click', async (e)=>{
   }
 });
 
-/* New PDF Export for Event Participation Summary */
-$('downloadApprovalsPdf').addEventListener('click', ()=> {
-    // Collect approved participants grouped by event, including student and team details
-    const approvedParts = CACHE.participations.filter(p => String(p.status||'').toLowerCase()==='approved');
+/* New PDF Export for Event Participation Summary (Applies to individual event PDF from Approvals Summary) */
+function exportRosterPdf(evId, allEvents = false) {
+    const approvedParts = CACHE.participations.filter(p => String(p.status||'').toLowerCase()==='approved' && (allEvents || String(p.eventId) === String(evId)));
+    
+    if (approvedParts.length === 0) return toast('No approved participations to export.','warning');
+
     const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t);
     const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s);
     const eventsMap = {}; CACHE.events.forEach(e => eventsMap[e.id] = e);
 
+    // Grouping logic
+    const rosterData = {};
     approvedParts.forEach(p => {
-        if (!eventsMap[p.eventId].approvedList) {
-            eventsMap[p.eventId].approvedList = [];
-        }
+        const ev = eventsMap[p.eventId];
         const student = studentMap[p.studentId];
         const team = student ? teamMap[student.teamId] : { name: 'N/A' };
         
+        if (!rosterData[p.eventId]) {
+            rosterData[p.eventId] = { event: ev, members: [] };
+        }
         if (student) {
-            eventsMap[p.eventId].approvedList.push({
+            rosterData[p.eventId].members.push({
                 name: student.name,
                 id: student.id,
                 teamName: team.name
@@ -1154,68 +1163,58 @@ $('downloadApprovalsPdf').addEventListener('click', ()=> {
         }
     });
 
-    let htmlContent = '';
     const date = new Date().toISOString().slice(0,10);
-    const logoUrl = 'path/to/your/logo.png'; // Placeholder for Logo URL
+    const title = allEvents ? "All Approved Participation Rosters" : `Roster for ${rosterData[evId].event.name}`;
+    const filename = allEvents ? `approved_roster_all_${date}.pdf` : `approved_roster_${rosterData[evId].event.name.replace(/[^a-z0-9]/gi, '_')}.pdf`;
 
     let eventsHtml = '';
-    
-    // Check if there are any events with approved participants
-    let hasApprovedData = false;
-    
-    CACHE.events.forEach(ev => {
-        if (ev.approvedList && ev.approvedList.length > 0) {
-            hasApprovedData = true;
+    Object.values(rosterData).forEach(item => {
+        const ev = item.event;
+        eventsHtml += `
+            <div style="text-align: center; margin-top: 30px; page-break-before: auto;">
+                <h4 style="margin: 0;">${escapeHtml(ev.name)}</h4>
+                <p style="margin: 0; font-size: 14px;">${escapeHtml(ev.level)} / ${escapeHtml(ev.type)}</p>
+            </div>
+            <div style="margin: 10px 0; border: 1px solid #000; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ccc;">
+                            <th style="text-align: left; padding: 5px;">Member Name</th>
+                            <th style="text-align: left; padding: 5px;">Chess #</th>
+                            <th style="text-align: left; padding: 5px;">Team Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        item.members.forEach(member => {
             eventsHtml += `
-                <div style="text-align: center; margin-top: 30px;">
-                    <h4 style="margin: 0;">${escapeHtml(ev.name)}</h4>
-                    <p style="margin: 0; font-size: 14px;">${escapeHtml(ev.level)} / ${escapeHtml(ev.type)}</p>
-                </div>
-                <div style="margin: 10px 0; border: 1px solid #000; padding: 10px;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid #ccc;">
-                                <th style="text-align: left; padding: 5px;">Member Name</th>
-                                <th style="text-align: left; padding: 5px;">Chess #</th>
-                                <th style="text-align: left; padding: 5px;">Team Name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <tr>
+                    <td style="padding: 5px; font-size: 13px;">${escapeHtml(member.name)}</td>
+                    <td style="padding: 5px; font-size: 13px;">${escapeHtml(member.id)}</td>
+                    <td style="padding: 5px; font-size: 13px;">${escapeHtml(member.teamName)}</td>
+                </tr>
             `;
-            ev.approvedList.forEach(member => {
-                eventsHtml += `
-                    <tr>
-                        <td style="padding: 5px; font-size: 13px;">${escapeHtml(member.name)}</td>
-                        <td style="padding: 5px; font-size: 13px;">${escapeHtml(member.id)}</td>
-                        <td style="padding: 5px; font-size: 13px;">${escapeHtml(member.teamName)}</td>
-                    </tr>
-                `;
-            });
-            eventsHtml += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
+        });
+        eventsHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
     });
 
-    if (!hasApprovedData) return toast('No approved participations to export.','warning');
-
-
-    // Construct the final HTML with watermark and styling
-    htmlContent = `
-        <div style="font-family: Arial, sans-serif; position: relative;">
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; position: relative; color: #000;">
             <div style="
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
                 opacity: 0.1; z-index: -1000; text-align: center; 
                 display: flex; justify-content: center; align-items: center;
                 pointer-events: none;
             ">
-                <h1 style="font-size: 100px; color: #000;">FIDAK FEST</h1> 
+                <h1 style="font-size: 100px;">FIDAK FEST</h1> 
             </div>
             
             <div style="text-align: center; margin-bottom: 20px;">
-                <h2>Event Participation Roster</h2>
+                <h2>${title}</h2>
                 <p>Date Generated: ${date}</p>
             </div>
             ${eventsHtml}
@@ -1224,66 +1223,114 @@ $('downloadApprovalsPdf').addEventListener('click', ()=> {
 
     html2pdf().from(htmlContent).set({
         margin: [10, 10, 10, 10],
-        filename: `approved_participants_${date}.pdf`,
+        filename: filename,
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).save();
+}
+
+// Handler for Export Roster PDF button (in Approvals Summary)
+$('downloadApprovalsPdf').addEventListener('click', () => exportRosterPdf(null, true));
+
+// Handler for individual event PDF button (in Approvals Summary table row)
+$('approvalsTable').addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-event-pdf-summary');
+    if (btn) {
+        const evId = btn.dataset.eventId;
+        exportRosterPdf(evId, false);
+    }
+});
+
+/* Student List PDF (Updated format) */
+$('downloadStudentsPdf').addEventListener('click', ()=> {
+    const date = new Date().toISOString().slice(0,10);
+    const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
+    let tableRows = '';
+    CACHE.students.forEach(s => {
+        tableRows += `
+            <tr>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(s.name)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(s.id)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(teamMap[s.teamId]||'Unassigned')}</td>
+            </tr>
+        `;
+    });
+
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; position: relative; color: #000;">
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1; z-index: -1000; text-align: center; display: flex; justify-content: center; align-items: center; pointer-events: none;">
+                <h1 style="font-size: 100px;">FIDAK FEST</h1> 
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2>Student List</h2>
+                <p>Date Generated: ${date}</p>
+            </div>
+            <div style="margin: 10px 0; border: 1px solid #000; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ccc;">
+                            <th style="text-align: left; padding: 5px;">Name</th>
+                            <th style="text-align: left; padding: 5px;">Chess #</th>
+                            <th style="text-align: left; padding: 5px;">Team Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    html2pdf().from(htmlContent).set({
+        margin: [10, 10, 10, 10], filename: `students_${date}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).save();
+});
+
+/* Event List PDF (Updated format) */
+$('downloadEventsPdf').addEventListener('click', ()=> {
+    const date = new Date().toISOString().slice(0,10);
+    let tableRows = '';
+    CACHE.events.forEach(e => {
+        tableRows += `
+            <tr>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(e.name)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(e.type)}</td>
+                <td style="padding: 5px; font-size: 13px;">${escapeHtml(e.level||'')}</td>
+            </tr>
+        `;
+    });
+
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; position: relative; color: #000;">
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1; z-index: -1000; text-align: center; display: flex; justify-content: center; align-items: center; pointer-events: none;">
+                <h1 style="font-size: 100px;">FIDAK FEST</h1> 
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2>Event List</h2>
+                <p>Date Generated: ${date}</p>
+            </div>
+            <div style="margin: 10px 0; border: 1px solid #000; padding: 10px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ccc;">
+                            <th style="text-align: left; padding: 5px;">Name</th>
+                            <th style="text-align: left; padding: 5px;">Type</th>
+                            <th style="text-align: left; padding: 5px;">Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    html2pdf().from(htmlContent).set({
+        margin: [10, 10, 10, 10], filename: `events_${date}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     }).save();
 });
 
 
 /* ---------- RESULTS ---------- */
 $('searchResults')?.addEventListener('input', ()=> renderResults());
-function renderResults(){
-  const tbody = $('resultsTable');
-  const q = ($('searchResults')?.value||'').trim().toLowerCase(); 
-
-  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="7" class="text-center muted">No events</td></tr>'; return; }
-  
-  const evMap = {};
-  CACHE.results.forEach(r => { 
-    if(!evMap[r.eventId]) evMap[r.eventId] = { positions: {}, pointsTotal: 0 }; 
-    evMap[r.eventId].positions[r.position] = r; 
-    evMap[r.eventId].pointsTotal += Number(r.points || 0);
-  });
-  
-  let rows = [];
-  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
-  
-  CACHE.events.forEach(ev => {
-    const resultData = evMap[ev.id] || { positions: {}, pointsTotal: 0 };
-    const pos = resultData.positions;
-    const pointsTotal = resultData.pointsTotal;
-
-    const hasAnyResult = !!pos[1] || !!pos[2] || !!pos[3];
-    
-    // Filtering logic for Results search
-    if(q && !`${ev.name} ${ev.type} ${ev.level}`.toLowerCase().includes(q)) return;
-
-    const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
-    const pubBadge = pub ? '<span class="badge bg-success">Published</span>' : (hasAnyResult ? '<span class="badge bg-warning">Draft</span>' : '<span class="badge bg-secondary">No Results</span>');
-    const rowClass = hasAnyResult ? 'participated-row' : '';
-    
-    const first = pos[1] ? (CACHE.students.find(s=>String(s.id)===String(pos[1].studentId))||{name:pos[1].studentId,id:pos[1].studentId}) : {name:'', id:''};
-    const second = pos[2] ? (CACHE.students.find(s=>String(s.id)===String(pos[2].studentId))||{name:pos[2].studentId,id:pos[2].studentId}) : {name:'', id:''};
-    const third = pos[3] ? (CACHE.students.find(s=>String(s.id)===String(pos[3].studentId))||{name:pos[3].studentId,id:pos[3].studentId}) : {name:'', id:''};
-    
-    rows.push(`<tr class="${rowClass}">
-      <td>${escapeHtml(ev.name)}</td>
-      <td>${escapeHtml(ev.type)}/${escapeHtml(ev.level)}</td>
-      <td>${escapeHtml(first.name)} ${first.id?`(${escapeHtml(first.id)})`:''}</td>
-      <td>${escapeHtml(second.name)} ${second.id?`(${escapeHtml(second.id)})`:''}</td>
-      <td>${escapeHtml(third.name)} ${third.id?`(${escapeHtml(third.id)})`:''}</td>
-      <td><strong>${pointsTotal}</strong></td>
-      <td>${pubBadge}</td>
-      <td class="text-end">
-        <button class="btn btn-sm btn-outline-primary btn-edit-event-results" data-ev="${escapeHtml(ev.id)}">Edit</button> 
-        <button class="btn btn-sm btn-outline-secondary btn-toggle-publish-event" data-ev="${escapeHtml(ev.id)}">${pub? 'Unpublish' : 'Publish'}</button> 
-        <button class="btn btn-sm btn-outline-danger btn-delete-event-results" data-ev="${escapeHtml(ev.id)}">Delete</button>
-      </td>
-    </tr>`);
-  });
-  tbody.innerHTML = rows.join('') || '<tr><td colspan="7" class="text-center muted">No events match search criteria.</td></tr>';
-}
 
 
 /* ---------- PROGRAMS (NEW) ---------- */
@@ -1300,7 +1347,6 @@ function renderPrograms(){
   CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
   
   CACHE.events.forEach(ev => {
-    // Filtering logic for Programs search
     if(q && !`${ev.name} ${ev.type} ${ev.level}`.toLowerCase().includes(q)) return;
     
     const approvedCount = CACHE.participations.filter(p => String(p.eventId) === String(ev.id) && String(p.status||'').toLowerCase()==='approved').length;
@@ -1456,23 +1502,8 @@ function populateDropdowns(){
 }
 
 
-/* ---------- PDF exports (Old ones) ---------- */
-$('downloadStudentsPdf').addEventListener('click', ()=> {
-  let html = `<h3>Students</h3><table border="1" style="border-collapse:collapse;width:100%"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>`;
-  const teamMap = {}; CACHE.teams.forEach(t=> teamMap[t.id]=t.name);
-  CACHE.students.forEach(s => html += `<tr><td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.level||'')}</td><td>${escapeHtml(teamMap[s.teamId]||'Unassigned')}</td></tr>`);
-  html += '</tbody></table>'; html2pdf().from(html).set({margin:10,filename:`students_${new Date().toISOString().slice(0,10)}.pdf`}).save();
-});
-$('downloadEventsPdf').addEventListener('click', ()=> {
-  let html = `<h3>Events</h3><table border="1" style="border-collapse:collapse;width:100%"><thead><tr><th>Name</th><th>Type</th><th>Level</th><th>Description</th></tr></thead><tbody>`;
-  CACHE.events.forEach(e => html += `<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.type)}</td><td>${escapeHtml(e.level||'')}</td><td>${escapeHtml(e.description||'')}</td></tr>`);
-  html += '</tbody></table>'; html2pdf().from(html).set({margin:10,filename:`events_${new Date().toISOString().slice(0,10)}.pdf`}).save();
-});
-
-
 /* ---------- bootstrapping ---------- */
 setTimeout(()=> {
-  // Start on the new Overview panel
   document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]').click();
   renderAll();
 }, 600);
