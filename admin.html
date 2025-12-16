@@ -366,7 +366,7 @@
           <div class="section-title">All Events & Results</div>
           <div class="table-responsive">
             <table class="table align-middle">
-              <thead class="table-light"><tr><th>Event</th><th>Type</th><th>1st (Pts)</th><th>2nd (Pts)</th><th>3rd (Pts)</th><th>Total Pts</th><th>Status</th><th>Act</th></tr></thead>
+              <thead class="table-light"><tr><th>Event</th><th>Type</th><th>1st (Pts)</th><th>2nd (Pts)</th><th>3rd (Pts)</th><th>Status</th><th>Act</th></tr></thead>
               <tbody id="resultsTable"></tbody>
             </table>
           </div>
@@ -1035,7 +1035,7 @@ $('loadAttendance').addEventListener('click', ()=>{
 $('toggleAll').addEventListener('click', ()=>{
   const all = document.querySelectorAll('#attendanceBoxes .small-box');
   const isAllPres = Array.from(all).every(b=>b.classList.contains('present'));
-  all.forEach(b => { b.className = isAllPres ? 'small-box absent' : 'small-box present'; });
+  all.forEach(b => { b.className = isAllBoxPres ? 'small-box absent' : 'small-box present'; });
 });
 
 // FIX: Update Save Attendance to handle Edits and Description
@@ -1451,15 +1451,15 @@ function renderResults(){
         return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
     };
     
-    // FIX: Changed button class to btn-manage-results which is handled below
-    html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td class="fw-bold text-info">${total}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-manage-results" data-eid="${ev.id}">Manage</button></td></tr>`;
+    // CHANGE: Removed Total Pts column. Changed button class to btn-edit-results for clarity.
+    html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}">Edit</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
-// FIX: New Management Modal Logic (Called by btn-manage-results)
+// FIX: New Management Modal Logic (Called by btn-edit-results)
 $('resultsTable').addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-manage-results')) {
+    if (e.target.classList.contains('btn-edit-results')) {
         const eid = e.target.dataset.eid;
         const ev = CACHE.events.find(x => x.id === eid);
         if (!ev) return toast('Event not found', 'danger');
