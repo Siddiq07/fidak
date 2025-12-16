@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin — Fidak Fest (Ultimate v5)</title>
+  <title>Admin — Fidak Fest (Ultimate v6)</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -12,17 +12,30 @@
 
   <style>
     /* -------------------------------------- */
-    /* ADMIN PANEL DARK THEME */
+    /* ROOT THEME VARIABLES */
     /* -------------------------------------- */
     :root{
+      /* Dark Mode (Default) */
       --bg: #0d121c; --card: #1c2738; --text: #e2e8f0; --muted: #94a3b8;
       --border: #334155; 
       --input-bg: #334155;
       --accent-main: #f97316; --accent-secondary: #3b82f6;
       --success: #10b981; --danger: #ef4444; --warning: #facc15;
     }
+    /* Light Mode Toggle */
+    .light-mode {
+      --bg: #f8f9fa; /* Light Grey/White */
+      --card: #ffffff; /* White Card */
+      --text: #212529; /* Dark Text */
+      --muted: #6c757d; /* Grey Muted */
+      --border: #dee2e6;
+      --input-bg: #e9ecef;
+      --accent-main: #dc3545; /* Red (Example, could be anything) */
+      --accent-secondary: #0d6efd; /* Bootstrap Blue */
+    }
+
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--text);background:var(--bg)}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--text);background:var(--bg); transition: background 0.3s, color 0.3s;}
     
     /* UI FIX: FIX SIDEBAR */
     .app-wrap{display:flex;min-height:100vh;align-items:stretch}
@@ -53,14 +66,14 @@
     .topbar h3{color:var(--accent-main);}
     
     /* Components */
-    .card-neo{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,0.3);margin-bottom:14px;border:1px solid var(--border);}
+    .card-neo{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,0.3);margin-bottom:14px;border:1px solid var(--border); transition: background 0.3s, border-color 0.3s;}
     .section-title{font-weight:700;margin-bottom:12px;color:var(--text);font-size:1.1rem;}
     .muted{color:var(--muted)}
-    .form-control, .form-select{background:var(--input-bg);color:var(--text);border:1px solid #475569;}
+    .form-control, .form-select{background:var(--input-bg);color:var(--text);border:1px solid #475569; transition: background 0.3s, border-color 0.3s, color 0.3s;}
     .form-control::placeholder{color:var(--muted);}
     
     /* Tables */
-    .table{--bs-table-bg: var(--card); --bs-table-color: var(--text);}
+    .table{--bs-table-bg: var(--card); --bs-table-color: var(--text); transition: background 0.3s, color 0.3s;}
     table.table td, table.table th{vertical-align:middle; border-color: var(--border);}
     .table-light{background-color:var(--input-bg) !important;}
     .participated-row{background:rgba(59, 130, 246, 0.1) !important;} 
@@ -70,17 +83,18 @@
     .score-value {font-size: 2.5rem; font-weight: 800; margin-top: 5px; color: var(--accent-secondary);}
 
     /* Small Boxes (Program Management) */
-    .small-box{width:80px;height:50px;border-radius:8px;background:var(--input-bg);color:var(--text);display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700;padding:2px;position:relative;border:1px solid #475569;}
+    .small-box{width:80px;height:50px;border-radius:8px;background:var(--input-bg);color:var(--text);display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700;padding:2px;position:relative;border:1px solid #475569; transition: background 0.2s, border-color 0.2s;}
     .small-box.present{background:var(--success);color:#fff;border-color:var(--success);}
     .small-box.absent{background:var(--danger);color:#fff;border-color:var(--danger);}
     .small-box-id{font-size:10px;font-weight:400;color:rgba(255,255,255,0.8);}
     .small-box-code{position:absolute;top:-8px;right:-8px;background:var(--warning);color:#000;font-size:11px;padding:2px 6px;border-radius:10px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.5);}
 
     /* Modals */
-    .modal-content{background:var(--card);color:var(--text);}
+    .modal-content{background:var(--card);color:var(--text); transition: background 0.3s, color 0.3s;}
     .modal-header{border-bottom-color: var(--border);}
     .modal-footer{border-top-color: var(--border);}
     .btn-close{filter: invert(1) grayscale(100%) brightness(200%);}
+    .light-mode .btn-close{filter: none;}
     .btn-accent{background:var(--accent-main);color:#fff;border:0}
     .btn-accent:hover{background:#ea580c;color:#fff}
   </style>
@@ -90,7 +104,7 @@
   <aside class="sidebar">
     <div class="brand"><i class="bi bi-palette-fill" style="font-size:20px"></i></div>
     <div class="icon-btn active" data-target="#panel-overview" title="Dashboard"><i class="bi bi-columns-gap" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-student-details" title="Student Search"><i class="bi bi-search" style="font-size:18px"></i></div>
+    <div class="icon-btn" data-target="#panel-student-details" title="Search Details"><i class="bi bi-search" style="font-size:18px"></i></div>
     <div class="icon-btn" data-target="#panel-students" title="Students"><i class="bi bi-people-fill" style="font-size:18px"></i></div>
     <div class="icon-btn" data-target="#panel-teams" title="Teams"><i class="bi bi-people" style="font-size:18px"></i></div>
     <div class="icon-btn" data-target="#panel-events" title="Events"><i class="bi bi-calendar-event" style="font-size:18px"></i></div>
@@ -108,7 +122,7 @@
         <div class="muted">Fidak Fest Management System</div>
       </div>
       <div>
-        <span class="badge bg-secondary">Admin</span>
+        <button id="toggleThemeBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-moon-stars"></i> Theme</button>
       </div>
     </div>
 
@@ -162,22 +176,25 @@
       </section>
       
       <section id="panel-student-details" class="card-neo d-none">
-        <div class="section-title">Student Details Lookup</div>
-        <input id="studentLookupSearch" class="form-control mb-3" placeholder="Search Student Name or Chess ID (e.g., S101 or Ali)">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="section-title">Search Details Lookup (Student/Event)</div>
+            <button id="searchPdfBtn" class="btn btn-sm btn-outline-secondary d-none"><i class="bi bi-file-earmark-pdf"></i> PDF Roster</button>
+        </div>
+        <input id="studentLookupSearch" class="form-control mb-3" placeholder="Search Student Name/ID (e.g., S101 or Ali) or Event Name (e.g., Quiz)">
         <div id="studentLookupDetails">
           <div class="card-neo">
             <div class="row">
-                <div class="col-md-6">
-                    <h5 id="studentLookupName" class="text-info">No Student Selected</h5>
-                    <p class="mb-1"><strong>ID:</strong> <span id="studentLookupID">-</span></p>
+                <div class="col-md-5">
+                    <h5 id="lookupTitle" class="text-info">Search to begin...</h5>
+                    <p class="mb-1"><strong>ID/Category:</strong> <span id="studentLookupID">-</span></p>
                     <p class="mb-1"><strong>Level:</strong> <span id="studentLookupLevel">-</span></p>
                     <p class="mb-1"><strong>Team:</strong> <span id="studentLookupTeam">-</span></p>
                 </div>
-                <div class="col-md-6">
-                    <h5 class="text-secondary">Participation History</h5>
+                <div class="col-md-7">
+                    <h5 id="listHeader" class="text-secondary">Participation/Roster List</h5>
                     <div class="table-responsive">
                         <table class="table table-sm">
-                            <thead class="table-light"><tr><th>Event</th><th>Status</th></tr></thead>
+                            <thead class="table-light"><tr id="listTableHeaders"><th>Event/Student</th><th>Status/Team</th></tr></thead>
                             <tbody id="studentParticipationTable"><tr><td colspan="2" class="muted">Search above to load details.</td></tr></tbody>
                         </table>
                     </div>
@@ -472,6 +489,11 @@ document.querySelectorAll('.sidebar .icon-btn').forEach(btn=>{
   });
 });
 
+/* UI FIX: Theme Toggle */
+$('toggleThemeBtn').addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+});
+
 function renderAll(){
   populateDropdowns();
   renderOverview();
@@ -541,62 +563,123 @@ function renderOverview() {
     tbody.innerHTML = html;
 }
 
-/* ---------------- STUDENT DETAILS LOOKUP ---------------- */
+/* ---------------- STUDENT/EVENT DETAILS LOOKUP ---------------- */
+let currentSearchType = 'none';
+let currentSearchTarget = null;
+
 $('studentLookupSearch').addEventListener('input', () => {
     const q = $('studentLookupSearch').value.trim().toLowerCase();
-    if (q.length < 3) return;
+    if (q.length < 3) return resetSearchDetails();
 
     const student = CACHE.students.find(s => 
         String(s.id).toLowerCase() === q || String(s.name).toLowerCase().includes(q)
     );
+    const event = CACHE.events.find(e => 
+        String(e.name).toLowerCase().includes(q)
+    );
 
     if (student) {
-        const team = CACHE.teams.find(t => t.id === student.teamId);
-        const teamName = team ? team.name : 'Unassigned';
-
-        $('studentLookupName').textContent = student.name;
-        $('studentLookupID').textContent = student.id;
-        $('studentLookupLevel').textContent = student.level;
-        $('studentLookupTeam').textContent = teamName;
-
-        const participationHtml = renderStudentParticipation(student.id);
-        $('studentParticipationTable').innerHTML = participationHtml;
+        displayStudentDetails(student);
+    } else if (event) {
+        displayEventRoster(event);
     } else {
-        $('studentLookupName').textContent = 'Student Not Found';
-        $('studentLookupID').textContent = '-';
-        $('studentLookupLevel').textContent = '-';
-        $('studentLookupTeam').textContent = '-';
-        $('studentParticipationTable').innerHTML = '<tr><td colspan="2" class="text-danger">No student matching your query.</td></tr>';
+        resetSearchDetails(true);
     }
 });
 
-function renderStudentParticipation(studentId) {
-    const eventsMap = {}; CACHE.events.forEach(e => eventsMap[e.id] = e);
-    const resultsMap = {}; CACHE.results.filter(r => r.studentId === studentId && r.published).forEach(r => resultsMap[r.eventId] = r);
+function resetSearchDetails(notFound = false) {
+    currentSearchType = 'none';
+    currentSearchTarget = null;
+    $('searchPdfBtn').classList.add('d-none');
     
-    let html = '';
-    CACHE.participations.filter(p => p.studentId === studentId)
-        .sort((a,b) => eventsMap[a.eventId]?.name.localeCompare(eventsMap[b.eventId]?.name))
-        .forEach(p => {
-        const event = eventsMap[p.eventId];
-        const status = p.status;
-        const result = resultsMap[p.eventId];
-        
-        let statusBadge = '';
-        if (status === 'approved') {
-             statusBadge = `<span class="badge bg-success">Approved</span>`;
-             if (result) statusBadge += ` <span class="badge bg-info text-dark">Rank ${result.position} (${result.points} pts)</span>`;
-        } else if (status === 'pending') {
-             statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
-        } else {
-             statusBadge = '<span class="badge bg-danger">Rejected</span>';
-        }
-
-        html += `<tr><td>${event ? event.name : 'Unknown Event'}</td><td>${statusBadge}</td></tr>`;
-    });
-    
-    return html || '<tr><td colspan="2" class="muted">No participation history found.</td></tr>';
+    $('lookupTitle').textContent = notFound ? 'Not Found' : 'Search to begin...';
+    $('studentLookupID').textContent = '-';
+    $('studentLookupLevel').textContent = '-';
+    $('studentLookupTeam').textContent = '-';
+    $('listHeader').textContent = 'Participation/Roster List';
+    $('listTableHeaders').innerHTML = '<th>Event/Student</th><th>Status/Team</th>';
+    $('studentParticipationTable').innerHTML = `<tr><td colspan="2" class="muted">${notFound ? 'No match found for your query.' : 'Search above to load details.'}</td></tr>`;
 }
+
+function displayStudentDetails(student) {
+    currentSearchType = 'student';
+    currentSearchTarget = student.id;
+    $('searchPdfBtn').classList.remove('d-none');
+    
+    const team = CACHE.teams.find(t => t.id === student.teamId);
+
+    $('lookupTitle').textContent = student.name;
+    $('studentLookupID').textContent = student.id;
+    $('studentLookupLevel').textContent = student.level;
+    $('studentLookupTeam').textContent = team ? team.name : 'Unassigned';
+    $('listHeader').textContent = 'Participation History';
+    $('listTableHeaders').innerHTML = '<th>Event</th><th>Status & Result</th>';
+
+    const participationHtml = renderStudentParticipation(student.id);
+    $('studentParticipationTable').innerHTML = participationHtml;
+}
+
+function displayEventRoster(event) {
+    currentSearchType = 'event';
+    currentSearchTarget = event.id;
+    $('searchPdfBtn').classList.remove('d-none');
+    
+    const teamMap = {}; CACHE.teams.forEach(t => teamMap[t.id] = t.name);
+    const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s);
+
+    $('lookupTitle').textContent = event.name;
+    $('studentLookupID').textContent = event.id;
+    $('studentLookupLevel').textContent = event.level;
+    $('studentLookupTeam').textContent = event.type;
+    $('listHeader').textContent = 'Approved Participants Roster';
+    $('listTableHeaders').innerHTML = '<th>Student Name</th><th>Chess ID & Team</th>';
+
+    const approvedParts = CACHE.participations.filter(p => p.eventId === event.id && p.status === 'approved');
+    let html = '';
+
+    if (approvedParts.length === 0) {
+        html = '<tr><td colspan="2" class="muted">No approved participants for this event.</td></tr>';
+    } else {
+        approvedParts.forEach(p => {
+            const student = studentMap[p.studentId];
+            const teamName = student ? teamMap[student.teamId] || 'Unassigned' : 'N/A';
+            const studentName = student ? student.name : p.studentId;
+
+            html += `<tr><td>${escapeHtml(studentName)}</td><td>${p.studentId} (${teamName})</td></tr>`;
+        });
+    }
+
+    $('studentParticipationTable').innerHTML = html;
+}
+
+$('searchPdfBtn').addEventListener('click', () => {
+    if (currentSearchType === 'student' && currentSearchTarget) {
+        // PDF Export for Student History
+        const s = CACHE.students.find(x => x.id === currentSearchTarget);
+        if (!s) return;
+        const historyHtml = $('studentParticipationTable').outerHTML;
+        
+        let headerHtml = `
+            <h2>Participation History: ${s.name} (${s.id})</h2>
+            <p>Level: ${s.level}, Team: ${$('studentLookupTeam').textContent}</p>
+        `;
+        
+        html2pdf().from(headerHtml + historyHtml).set({ margin: 10, filename: `history_${s.id}.pdf` }).save();
+
+    } else if (currentSearchType === 'event' && currentSearchTarget) {
+        // PDF Export for Event Roster (Similar to Approvals PDF, but without watermark for simplicity)
+        const ev = CACHE.events.find(x => x.id === currentSearchTarget);
+        if (!ev) return;
+        
+        let headerHtml = `
+            <h2>Approved Roster: ${ev.name}</h2>
+            <p>Category: ${ev.type} / ${ev.level}</p>
+        `;
+        
+        html2pdf().from(headerHtml + $('studentParticipationTable').outerHTML).set({ margin: 10, filename: `roster_${ev.id}.pdf` }).save();
+    }
+});
+
 
 /* --- EXCEL IMPORT HELPERS --- */
 let tempImportData = [];
@@ -609,6 +692,7 @@ function readExcel(file, callback){
   };
   reader.readAsBinaryString(file);
 }
+
 
 /* ---------------- STUDENTS ---------------- */
 $('addManualStudent').addEventListener('click', async ()=>{
@@ -782,16 +866,94 @@ $('saveAttendance').addEventListener('click', async ()=>{
   await push(ref(db, 'attendance'), { date:d, students:sts, timestamp:Date.now() });
   $('attendanceMarkCard').style.display='none'; toast('Attendance saved');
 });
+
 function renderAttendanceHistory(){
   let html='';
   Object.entries(CACHE.attendance).sort((a,b)=>b[1].timestamp-a[1].timestamp).forEach(([k,v])=>{
     const c = v.students ? Object.values(v.students).filter(x=>x=='Present').length : 0;
     const dateStr = v.timestamp ? new Date(v.timestamp).toLocaleTimeString() : '';
-    html += `<tr><td>${v.date}</td><td>${c}</td><td><small>${dateStr}</small></td><td><button class="btn btn-sm btn-outline-danger" onclick="delAtt('${k}')">Del</button></td></tr>`;
+    // FIX: Added View Absent and Edit buttons
+    html += `<tr data-key="${k}"><td>${v.date}</td><td>${c}</td><td><small>${dateStr}</small></td><td><button class="btn btn-sm btn-outline-info btn-view-absent me-1" data-key="${k}">View Absent</button><button class="btn btn-sm btn-outline-primary btn-edit-att-session me-1" data-key="${k}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-att" data-key="${k}">Del</button></td></tr>`;
   });
   $('attendanceSessions').innerHTML = html;
 }
+
+// FIX: View Absent Logic
+$('attendanceSessions').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const key = btn.dataset.key;
+
+    if (btn.classList.contains('btn-view-absent')) {
+        const session = CACHE.attendance[key];
+        if (!session || !session.students) return toast('Session data missing', 'danger');
+
+        const absentIds = Object.entries(session.students).filter(([id, status]) => status !== 'Present').map(([id]) => id);
+        const absentStudents = absentIds.map(id => CACHE.students.find(s => s.id === id) || {id: id, name: 'Unknown'});
+
+        let absentListHtml = `
+            <h3>Absent Students (${session.date})</h3>
+            <p>Total Absent: ${absentStudents.length}</p>
+            <table border="1" style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead><tr><th>Chess ID</th><th>Name</th></tr></thead>
+                <tbody>
+        `;
+        absentStudents.forEach(s => {
+            absentListHtml += `<tr><td style="padding:4px;">${s.id}</td><td style="padding:4px;">${escapeHtml(s.name)}</td></tr>`;
+        });
+        absentListHtml += `</tbody></table>`;
+        
+        // Open in new tab or generate PDF
+        html2pdf().from(absentListHtml).set({ margin: 10, filename: `absent_${session.date}.pdf` }).save();
+    
+    // FIX: Edit Attendance Session Logic
+    } else if (btn.classList.contains('btn-edit-att-session')) {
+        const session = CACHE.attendance[key];
+        if (!session || !session.students) return toast('Session data missing', 'danger');
+        
+        $('attDate').value = session.date || '';
+        $('attMethod').value = 'all'; // Defaulting to all for simplicity on edit load
+        $('attTeamWrap').classList.add('d-none');
+        
+        const box = $('attendanceBoxes'); box.innerHTML = '';
+        CACHE.students.sort((a,b)=>a.id.localeCompare(b.id)).forEach(s => {
+            const status = session.students[s.id] === 'Present' ? 'present' : 'absent';
+            box.innerHTML += `<div class="small-box ${status}" data-id="${s.id}" onclick="this.classList.toggle('present');this.classList.toggle('absent')"><div>${s.id}</div><div class="small-box-id">${escapeHtml(s.name.split(' ')[0])}</div></div>`;
+        });
+        $('attendanceMarkCard').style.display = 'block';
+        
+        // Temporarily store key to overwrite on save
+        $('saveAttendance').dataset.editKey = key;
+        toast('Session loaded for editing. Click Save Session to overwrite.');
+
+    } else if (btn.classList.contains('btn-del-att')) {
+        if(confirm('Delete?')) remove(ref(db, `attendance/${key}`));
+    }
+});
+
+// FIX: Update Save Attendance to handle Edits
+$('saveAttendance').addEventListener('click', async ()=>{
+    const d = $('attDate').value; if(!d) return toast('Date required','danger');
+    const sts = {};
+    document.querySelectorAll('#attendanceBoxes .small-box').forEach(b => { sts[b.dataset.id] = b.classList.contains('present')?'Present':'Absent'; });
+    
+    const editKey = $('saveAttendance').dataset.editKey;
+    const payload = { date:d, students:sts, timestamp:Date.now() };
+
+    if (editKey) {
+        await set(ref(db, `attendance/${editKey}`), payload);
+        $('saveAttendance').removeAttribute('data-edit-key');
+        toast('Attendance updated successfully!');
+    } else {
+        await push(ref(db, 'attendance'), payload);
+        toast('Attendance saved successfully!');
+    }
+    
+    $('attendanceMarkCard').style.display='none';
+});
+
 window.delAtt = async k => { if(confirm('Delete?')) await remove(ref(db, `attendance/${k}`)); };
+
 
 /* ---------------- APPROVALS & PROGRAM MANAGEMENT (COMBINED) ---------------- */
 function renderApprovals(){
@@ -845,7 +1007,6 @@ window.setStatus = async (id, st) => {
 
 
 // PROGRAM MANAGEMENT (LOAD)
-let currentProgramEventId = null;
 function loadProgramDetails(eid) {
     const approvedParts = CACHE.participations.filter(p => p.eventId == eid && p.status == 'approved');
     const progData = CACHE.programData && CACHE.programData[eid] ? CACHE.programData[eid] : {};
@@ -1007,8 +1168,7 @@ async function saveRes(publish, eventIdElement, s1, p1, s2, p2, s3, p3){
              const tmKey = KEYMAP.teams[tm.id];
              await update(ref(db, `teams/${tmKey}`), { score: (tm.score||0) - oldR.points });
           }
-          // Set old published result to draft (published: false)
-          const oldRKey = Object.keys(KEYMAP.results).find(k => KEYMAP.results[k] === oldR.id);
+          const oldRKey = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === oldR.id);
           if (oldRKey) await update(ref(db, `results/${oldRKey}`), { published: false });
       }
   }
@@ -1016,13 +1176,11 @@ async function saveRes(publish, eventIdElement, s1, p1, s2, p2, s3, p3){
   // 2. Publish/Save new results
   for(const i of inputs){
     if(i.sid){
-      // Find existing result entry in the database by eventId and position
       const existingEntry = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
       const data = { eventId:eid, position:i.pos, studentId:i.sid, points:i.pts, published:publish, id: existingEntry?.id || Date.now()+Math.random().toString() };
       
-      // Save/Update Result
       if(existingEntry) {
-          const key = Object.keys(KEYMAP.results).find(k => KEYMAP.results[k] === existingEntry.id);
+          const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
           await update(ref(db, `results/${key}`), data);
       }
       else {
@@ -1041,7 +1199,7 @@ async function saveRes(publish, eventIdElement, s1, p1, s2, p2, s3, p3){
     }
   }
   toast(publish ? 'Published & Scores Updated!' : 'Draft saved');
-  // Clear only the form fields in the main results page
+  
   if(eventIdElement === 'resultEvent') {
       $(eventIdElement).value = ''; 
       $(s1).innerHTML = '<option value="">Select Student</option>';
@@ -1073,7 +1231,6 @@ function renderResults(){
         return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
     };
 
-    // FIX: Added Actions column and button
     html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td class="fw-bold text-info">${total}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-manage-results" data-eid="${ev.id}">Manage</button></td></tr>`;
   });
   tbody.innerHTML = html;
@@ -1089,7 +1246,6 @@ $('resultsTable').addEventListener('click', (e) => {
         const parts = CACHE.participations.filter(p => p.eventId === eid && p.status === 'approved');
         const eventResults = CACHE.results.filter(r => r.eventId === eid);
 
-        // Populate common student dropdown
         let html = '<option value="">Select Student</option>';
         parts.forEach(p => { 
             const s = CACHE.students.find(x => x.id === p.studentId); 
@@ -1167,7 +1323,7 @@ $('#deleteEventResultsBtn').addEventListener('click', async () => {
              }
         }
         // 2. Delete entry from Firebase
-        const key = Object.keys(KEYMAP.results).find(k => KEYMAP.results[k] === r.id);
+        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === r.id);
         if (key) await remove(ref(db, `results/${key}`));
     }
     
@@ -1182,7 +1338,7 @@ setTimeout(()=> {
   renderAll();
 }, 600);
 
-console.log('Admin v5 Loaded');
+console.log('Admin v6 Loaded');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
