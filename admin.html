@@ -755,7 +755,7 @@ $('previewStudents').addEventListener('click', () => {
   const f = $('studentFile').files[0]; if(!f) return toast('Select File','warning');
   readExcel(f, (json) => {
     tempImportData = json;
-    let html = '<table class="table table-sm table-dark"><thead><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th></tr></thead><tbody>';
+    let html = '<table class="table table-sm table-dark"><thead><tr><th>Chess</th><th>Name</th><th><th>Level</th><th>Team</th></tr></thead><tbody>';
     json.slice(0,5).forEach(r => {
       const chess = r['Chess']||r['ID']||'';
       const name = r['Name']||r['Student']||'';
@@ -1459,8 +1459,9 @@ function renderResults(){
 
 // FIX: New Management Modal Logic (Called by btn-edit-results)
 $('resultsTable').addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-edit-results') || e.target.closest('.btn-edit-results')) {
-        const btn = e.target.closest('.btn-edit-results');
+    // Check if the clicked element OR its closest ancestor is the edit button
+    const btn = e.target.closest('.btn-edit-results');
+    if (btn) {
         const eid = btn.dataset.eid;
         const ev = CACHE.events.find(x => x.id === eid);
         if (!ev) return toast('Event not found', 'danger');
@@ -1494,8 +1495,14 @@ $('resultsTable').addEventListener('click', (e) => {
 
         $('manageEventId').value = eid;
         $('resultEventNameDisplay').textContent = ev.name;
-        // FIX: Show the modal (this was the missing piece causing "not working")
-        new bootstrap.Modal($('#resultManageModal')).show(); 
+        
+        // **CRITICAL FIX AREA:** Check if bootstrap Modal is available before showing
+        try {
+            new bootstrap.Modal($('#resultManageModal')).show(); 
+        } catch (error) {
+            console.error("Failed to show modal. Check if bootstrap.bundle.min.js is loading correctly.", error);
+            toast("Error: Bootstrap modal failed to initialize. Check console for details.", "danger");
+        }
     }
 });
 
@@ -1511,7 +1518,9 @@ $('#resultManageForm').addEventListener('submit', async (e) => {
     const p3 = $('#manageResultPointsThird').id;
     
     await saveRes(false, 'manageEventId', s1, p1, s2, p2, s3, p3);
-    bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+    try {
+        bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+    } catch (e) {}
 });
 
 // FIX: Handle Management Modal Publish Button
@@ -1525,7 +1534,9 @@ $('#managePublishBtn').addEventListener('click', async () => {
     const p3 = $('#manageResultPointsThird').id;
     
     await saveRes(true, 'manageEventId', s1, p1, s2, p2, s3, p3);
-    bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+    try {
+        bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+    } catch (e) {}
 });
 
 // FIX: Handle Management Modal Delete Button
@@ -1553,7 +1564,9 @@ $('#deleteEventResultsBtn').addEventListener('click', async () => {
     }
     
     toast('All results deleted for this event.', 'danger');
-    bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+    try {
+        bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+    } catch (e) {}
 });
 
 /* ---------------- FINAL BOOTSTRAPPING ---------------- */
