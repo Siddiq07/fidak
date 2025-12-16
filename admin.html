@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin — Fidak Fest (Ultimate v6 - Final Updated)</title>
+  <title>Admin — Fidak Fest (Ultimate v6 - Updated)</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -466,7 +466,6 @@ function encodeKey(k){ return encodeURIComponent(String(k)); }
 
 /* Cache */
 let CACHE = { students:[], teams:[], events:[], participations:[], results:[], attendance:{}, programData:{} };
-// FIX: Added KEYMAP for attendance for edit functionality
 let KEYMAP = { students:{}, teams:{}, events:{}, participations:{}, results:{}, attendance:{} };
 
 /* Listeners */
@@ -480,13 +479,12 @@ Object.entries(refs).forEach(([key, path]) => {
         CACHE[key] = val;
         if(key === 'attendance') {
              KEYMAP[key] = {};
-             Object.entries(val).forEach(([k,v]) => { KEYMAP[key][k] = k; }); // Key is the actual key
+             Object.entries(val).forEach(([k,v]) => { KEYMAP[key][v.timestamp] = k; });
         }
     }
     else {
       CACHE[key] = Object.values(val);
       KEYMAP[key] = {};
-      // Map item ID (e.g., Chess ID, Event ID) to Firebase Key (k)
       Object.entries(val).forEach(([k,v]) => { if(v && v.id) KEYMAP[key][String(v.id)] = k; });
     }
     renderAll();
@@ -522,6 +520,7 @@ function renderAll(){
 }
 
 function populateDropdowns(){
+  // FIX: Added team dropdown population for editTeamModal
   const tSelect = $('manualTeam'); const eTeam = $('editTeam'); const eTeamLeader = $('editTeamLeader'); const aTeam = $('attTeam');
   const teams = CACHE.teams.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
   let html = '<option value="">Unassigned</option>';
@@ -797,7 +796,7 @@ function renderStudents(){
   CACHE.students.sort((a,b)=> String(a.id).localeCompare(String(b.id))).forEach(s => {
     const dbKey = KEYMAP.students[s.id]; // FIX: Get the unique DB key
     if(q && !`${s.id} ${s.name}`.toLowerCase().includes(q)) return;
-    // FIX: Added Edit button
+    // FIX: Changed button to 'Edit' and added logic below
     html += `<tr data-id="${s.id}"><td>${s.id}</td><td>${escapeHtml(s.name)}</td><td>${s.level}</td><td>${escapeHtml(tm[s.teamId]||'-')}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-stu" data-dbkey="${dbKey}">Edit</button></td></tr>`;
   });
   $('studentsTable').innerHTML = html;
@@ -844,10 +843,10 @@ function renderTeams(){
   const tbody = $('teamsTable');
   let html='';
   CACHE.teams.forEach(t => {
-    const l = CACACHE.students.find(s=>s.id==t.leaderId);
+    const l = CACHE.students.find(s=>s.id==t.leaderId);
     const cnt = CACHE.students.filter(s=>s.teamId==t.id).length;
     const dbKey = KEYMAP.teams[t.id]; // FIX: Get the unique DB key
-    // FIX: Added Edit button and kept Delete
+    // FIX: Changed button to 'Edit' and added 'Delete' logic
     html += `<tr data-id="${t.id}"><td>${escapeHtml(t.name)}</td><td>${l?l.name:'-'}</td><td>${cnt}</td><td>${t.score||0}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-team me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-team" data-dbkey="${dbKey}">Del</button></td></tr>`;
   });
   tbody.innerHTML = html;
@@ -905,7 +904,7 @@ $('deleteTeamBtn').addEventListener('click', async ()=>{
   const k = $('editTeamDbKey').value;
   const t = CACHE.teams.find(x => KEYMAP.teams[x.id] === k);
   if(confirm('Delete team? This action cannot be undone. All students in this team will become "Unassigned".')) { 
-      // Unassign students first
+      // Unassign students first (copied logic from above)
       const updates = {};
       CACHE.students.filter(s => s.teamId === t.id).forEach(s => {
           const sKey = KEYMAP.students[s.id];
@@ -966,7 +965,7 @@ function renderEvents(){
   CACHE.events.forEach(e => {
     const dbKey = KEYMAP.events[e.id]; // FIX: Get the unique DB key
     if(q && !e.name.toLowerCase().includes(q)) return;
-    // FIX: Added Edit button and kept Delete
+    // FIX: Added 'Edit' button
     html += `<tr data-id="${e.id}"><td>${escapeHtml(e.name)}</td><td>${e.type}</td><td>${e.level}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-ev me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">Del</button></td></tr>`;
   });
   $('eventsTable').innerHTML = html;
@@ -1148,7 +1147,6 @@ function renderApprovals(){
 }
 
 // APPROVAL VIEW
-let currentProgramEventId = null; 
 $('approvalsTable').addEventListener('click', e => {
   if(e.target.classList.contains('btn-view-app')){
     const eid = e.target.dataset.eid;
@@ -1184,6 +1182,7 @@ window.setStatus = async (id, st) => {
 
 
 // PROGRAM MANAGEMENT (LOAD)
+let currentProgramEventId = null; // FIX: Ensure this is defined for use
 function loadProgramDetails(eid) {
     const approvedParts = CACHE.participations.filter(p => p.eventId == eid && p.status == 'approved');
     const progData = CACHE.programData && CACHE.programData[eid] ? CACHE.programData[eid] : {};
@@ -1452,13 +1451,13 @@ function renderResults(){
         return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
     };
     
-    // FIX: Ensure btn-manage-results class is used
+    // FIX: Changed button class to btn-manage-results which is handled below
     html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td class="fw-bold text-info">${total}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-manage-results" data-eid="${ev.id}">Manage</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
-// FIX: Management Modal Logic (Called by btn-manage-results)
+// FIX: New Management Modal Logic (Called by btn-manage-results)
 $('resultsTable').addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-manage-results')) {
         const eid = e.target.dataset.eid;
