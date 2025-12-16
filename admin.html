@@ -844,7 +844,7 @@ function renderTeams(){
   const tbody = $('teamsTable');
   let html='';
   CACHE.teams.forEach(t => {
-    const l = CACHE.students.find(s=>s.id==t.leaderId);
+    const l = CACACHE.students.find(s=>s.id==t.leaderId);
     const cnt = CACHE.students.filter(s=>s.teamId==t.id).length;
     const dbKey = KEYMAP.teams[t.id]; // FIX: Get the unique DB key
     // FIX: Added Edit button and kept Delete
@@ -1458,7 +1458,7 @@ function renderResults(){
   tbody.innerHTML = html;
 }
 
-// FIX: New Management Modal Logic (Called by btn-manage-results)
+// FIX: Management Modal Logic (Called by btn-manage-results)
 $('resultsTable').addEventListener('click', (e) => {
     if (e.target.classList.contains('btn-manage-results')) {
         const eid = e.target.dataset.eid;
