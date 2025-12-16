@@ -1035,7 +1035,7 @@ $('loadAttendance').addEventListener('click', ()=>{
 $('toggleAll').addEventListener('click', ()=>{
   const all = document.querySelectorAll('#attendanceBoxes .small-box');
   const isAllPres = Array.from(all).every(b=>b.classList.contains('present'));
-  all.forEach(b => { b.className = isAllBoxPres ? 'small-box absent' : 'small-box present'; });
+  all.forEach(b => { b.className = isAllPres ? 'small-box absent' : 'small-box present'; });
 });
 
 // FIX: Update Save Attendance to handle Edits and Description
@@ -1451,16 +1451,17 @@ function renderResults(){
         return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
     };
     
-    // CHANGE: Removed Total Pts column. Changed button class to btn-edit-results for clarity.
-    html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}">Edit</button></td></tr>`;
+    // CHANGE: Removed Total Pts column. Changed button class to btn-edit-results for clarity and updated text.
+    html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}"><i class="bi bi-pencil"></i> Edit</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
 // FIX: New Management Modal Logic (Called by btn-edit-results)
 $('resultsTable').addEventListener('click', (e) => {
-    if (e.target.classList.contains('btn-edit-results')) {
-        const eid = e.target.dataset.eid;
+    if (e.target.classList.contains('btn-edit-results') || e.target.closest('.btn-edit-results')) {
+        const btn = e.target.closest('.btn-edit-results');
+        const eid = btn.dataset.eid;
         const ev = CACHE.events.find(x => x.id === eid);
         if (!ev) return toast('Event not found', 'danger');
 
