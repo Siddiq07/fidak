@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin — Fidak Fest (Ultimate v6 - Updated)</title>
+  <title>Admin — Fidak Fest (Ultimate v6 - Combined)</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -442,6 +442,8 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getDatabase, ref, push, set, update, onValue, get, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -460,7 +462,20 @@ const db = getDatabase(app);
 
 /* Helpers */
 const $ = id => document.getElementById(id);
-function toast(msg,type='success'){ const el=document.createElement('div'); el.className=`toast align-items-center text-bg-${type} border-0 positioned-toast`; el.style.position='fixed'; el.style.bottom='20px'; el.style.right='20px'; el.style.zIndex='9999'; el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; document.body.appendChild(el); const t=new bootstrap.Toast(el,{delay:3000}); t.show(); el.addEventListener('hidden.bs.toast', ()=>el.remove()); }
+function toast(msg,type='success'){ 
+    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+        const el=document.createElement('div'); 
+        el.className=`toast align-items-center text-bg-${type} border-0 positioned-toast`; 
+        el.style.position='fixed'; el.style.bottom='20px'; el.style.right='20px'; el.style.zIndex='9999'; 
+        el.innerHTML=`<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; 
+        document.body.appendChild(el); 
+        const t=new bootstrap.Toast(el,{delay:3000}); 
+        t.show(); 
+        el.addEventListener('hidden.bs.toast', ()=>el.remove()); 
+    } else {
+        alert(msg);
+    }
+}
 function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 function encodeKey(k){ return encodeURIComponent(String(k)); }
 
@@ -811,6 +826,7 @@ $('studentsTable').addEventListener('click', e => {
       $('editStudentDbKey').value = dbKey;
       $('editChess').value = s.id; $('editName').value = s.name; $('editLevel').value = s.level; $('editTeam').value = s.teamId||'';
       new bootstrap.Modal($('editStudentModal')).show();
+
     }
   }
 });
@@ -818,13 +834,14 @@ $('editStudentForm').addEventListener('submit', async e => {
   e.preventDefault();
   const k = $('editStudentDbKey').value;
   await update(ref(db, `students/${k}`), { name:$('editName').value, level:$('editLevel').value, teamId:$('editTeam').value||null });
-  bootstrap.Modal.getInstance($('editStudentModal')).hide(); toast('Updated');
+  try { bootstrap.Modal.getInstance($('editStudentModal')).hide(); } catch(e){}
+  toast('Updated');
 });
 $('deleteStudentBtn').addEventListener('click', async ()=>{
   const k = $('editStudentDbKey').value;
   if(confirm('Delete student? This action cannot be undone and will not remove their participations.')) { 
       await remove(ref(db, `students/${k}`)); 
-      bootstrap.Modal.getInstance($('editStudentModal')).hide(); 
+      try { bootstrap.Modal.getInstance($('editStudentModal')).hide(); } catch(e){}
       toast('Deleted'); 
   }
 });
@@ -896,7 +913,7 @@ $('editTeamForm').addEventListener('submit', async e => {
     }
     
     await update(ref(db, `teams/${k}`), updates);
-    bootstrap.Modal.getInstance($('editTeamModal')).hide(); 
+    try { bootstrap.Modal.getInstance($('editTeamModal')).hide(); } catch(e){}
     toast('Team updated');
 });
 
@@ -913,7 +930,7 @@ $('deleteTeamBtn').addEventListener('click', async ()=>{
       await update(ref(db), updates);
       // Delete team
       await remove(ref(db, `teams/${k}`)); 
-      bootstrap.Modal.getInstance($('editTeamModal')).hide(); 
+      try { bootstrap.Modal.getInstance($('editTeamModal')).hide(); } catch(e){}
       toast('Team and student assignments deleted/updated.');
   }
 });
@@ -1003,7 +1020,7 @@ $('editEventForm').addEventListener('submit', async e => {
         type:$('editEventType').value, 
         level:$('editEventLevel').value 
     });
-    bootstrap.Modal.getInstance($('editEventModal')).hide(); 
+    try { bootstrap.Modal.getInstance($('editEventModal')).hide(); } catch(e){}
     toast('Event updated');
 });
 
@@ -1011,7 +1028,7 @@ $('deleteEventBtn').addEventListener('click', async ()=>{
   const k = $('editEventDbKey').value;
   if(confirm('Delete event? This action cannot be undone and will not remove participations/results.')) { 
       await remove(ref(db, `events/${k}`)); 
-      bootstrap.Modal.getInstance($('editEventModal')).hide(); 
+      try { bootstrap.Modal.getInstance($('editEventModal')).hide(); } catch(e){}
       toast('Event deleted'); 
   }
 });
@@ -1098,9 +1115,6 @@ $('attendanceSessions').addEventListener('click', (e) => {
         absentStudents.forEach(s => {
             absentListHtml += `<tr><td style="padding:4px;">${s.id}</td><td style="padding:4px;">${escapeHtml(s.name)}</td></tr>`;
         });
-        absentListHtml += `</tbody></table>`;
-        
-        // Open in new tab or generate PDF
         html2pdf().from(absentListHtml).set({ margin: 10, filename: `absent_${session.date}.pdf` }).save();
     
     // FIX: Edit Attendance Session Logic
@@ -1177,7 +1191,7 @@ $('approvalsTable').addEventListener('click', e => {
 window.setStatus = async (id, st) => {
   const k = KEYMAP.participations[id];
   if(k) await update(ref(db, `participations/${k}`), { status:st });
-  bootstrap.Modal.getInstance($('approvalsDetailModal')).hide();
+  try { bootstrap.Modal.getInstance($('approvalsDetailModal')).hide(); } catch(e){}
 };
 
 
@@ -1244,7 +1258,8 @@ $('saveProgramData').addEventListener('click', async () => {
     updates[box.dataset.sid] = { present: box.classList.contains('present'), code: codeEl ? codeEl.textContent : null };
   });
   await set(ref(db, `program_data/${currentProgramEventId}`), updates);
-  toast('Program data saved successfully'); bootstrap.Modal.getInstance($('programDetailModal')).hide();
+  try { bootstrap.Modal.getInstance($('programDetailModal')).hide(); } catch(e){}
+  toast('Program data saved successfully'); 
 });
 
 
@@ -1499,7 +1514,7 @@ $('resultsTable').addEventListener('click', (e) => {
         
         // **CRITICAL FIX AREA:** Display the modal. 
         try {
-            // Check for the Bootstrap Modal object before showing
+            // This relies on bootstrap.bundle.min.js being loaded BEFORE this module executes.
             if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                  new bootstrap.Modal($('#resultManageModal')).show(); 
             } else {
@@ -1578,42 +1593,18 @@ $('#deleteEventResultsBtn').addEventListener('click', async () => {
 
 /* ---------------- FINAL BOOTSTRAPPING ---------------- */
 
-// **FINAL CRITICAL FIX:** This wrapper script will load Bootstrap and then kick off your application logic.
-// Removing the type="module" from the main script and the window.onload listener, and moving all initialization here, 
-// ensures absolute sequential loading if the browser has issues with module/defer loading.
+document.addEventListener('DOMContentLoaded', () => {
+    // Manually trigger the first menu item (Dashboard/Overview) to show content
+    setTimeout(() => {
+        const initialBtn = document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]');
+        if (initialBtn) {
+            initialBtn.click();
+        }
+    }, 100); 
+    // Data loading (renderAll) is handled by Firebase onValue listeners
+});
 
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    // This will run immediately after the Bootstrap script finishes loading.
-    function initializeApp() {
-        // Run the module logic from your Firebase file after a small timeout
-        // to ensure the browser has fully registered the imported modules and global objects.
-        setTimeout(() => {
-            try {
-                // Assuming 'bootstrap' is now globally available due to the script above
-                
-                // Manually trigger the initial dashboard panel click
-                const initialBtn = document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]');
-                if (initialBtn) {
-                    initialBtn.click();
-                    console.log('Admin v6 Initialized.');
-                }
-                
-                // We rely on renderAll() being called by the Firebase listeners now
-            } catch(e) {
-                 console.error("Application initialization failed:", e);
-            }
-        }, 100); // Small delay for robustness
-    }
-
-    // Call initializeApp after a slight delay to ensure all external scripts (like Firebase) have executed.
-    if (document.readyState === 'loading') {
-        window.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-        initializeApp();
-    }
+console.log('Admin v6 Combined Loaded');
 </script>
 </body>
 </html>
