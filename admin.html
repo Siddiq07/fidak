@@ -966,7 +966,7 @@ function renderEvents(){
     const dbKey = KEYMAP.events[e.id]; // FIX: Get the unique DB key
     if(q && !e.name.toLowerCase().includes(q)) return;
     // FIX: Added 'Edit' button
-    html += `<tr data-id="${e.id}"><td>${escapeHtml(e.name)}</td><td>${e.type}</td><td>${e.level}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-ev me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">Del</button></td></tr>`;
+    html += `<tr data-id="${e.id}"><td>${e.name}</td><td>${e.type}</td><td>${e.level}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-ev me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">Del</button></td></tr>`;
   });
   $('eventsTable').innerHTML = html;
 }
@@ -1451,13 +1451,14 @@ function renderResults(){
         return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
     };
     
-    // CHANGE: Removed Total Pts column. Changed button class to btn-edit-results for clarity and updated text.
+    // CHANGE: Added 'Edit' button with icon and data-eid attribute
     html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}"><i class="bi bi-pencil"></i> Edit</button></td></tr>`;
   });
   tbody.innerHTML = html;
 }
 
 // FIX: New Management Modal Logic (Called by btn-edit-results)
+// IMPORTANT: Event delegation used to catch dynamically created buttons
 $('resultsTable').addEventListener('click', (e) => {
     // Check if the clicked element OR its closest ancestor is the edit button
     const btn = e.target.closest('.btn-edit-results');
@@ -1496,11 +1497,17 @@ $('resultsTable').addEventListener('click', (e) => {
         $('manageEventId').value = eid;
         $('resultEventNameDisplay').textContent = ev.name;
         
-        // **CRITICAL FIX AREA:** Check if bootstrap Modal is available before showing
+        // **CRITICAL FIX AREA:** Display the modal. Added robust error handling.
         try {
-            new bootstrap.Modal($('#resultManageModal')).show(); 
+            // Ensure Bootstrap's Modal class is available
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                 new bootstrap.Modal($('#resultManageModal')).show(); 
+            } else {
+                console.error("Bootstrap Modal object is undefined. Check CDN load.");
+                toast("Error: Bootstrap modal failed to initialize. Check console for details.", "danger");
+            }
         } catch (error) {
-            console.error("Failed to show modal. Check if bootstrap.bundle.min.js is loading correctly.", error);
+            console.error("Failed to show modal. Potential issue with Bootstrap loading or Modal constructor.", error);
             toast("Error: Bootstrap modal failed to initialize. Check console for details.", "danger");
         }
     }
@@ -1570,11 +1577,19 @@ $('#deleteEventResultsBtn').addEventListener('click', async () => {
 });
 
 /* ---------------- FINAL BOOTSTRAPPING ---------------- */
-setTimeout(()=> {
-  // Start on the new Overview panel
-  document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]').click();
-  renderAll();
-}, 600);
+
+// **FINAL CRITICAL FIX:** Wait for the whole window to load before running initialization
+window.onload = () => {
+    // This function will ensure all dependencies (like Bootstrap JS) have loaded
+    // before the initial render is attempted.
+    try {
+        // Start on the new Overview panel
+        document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]').click();
+        renderAll();
+    } catch(e) {
+         console.error("Initial render failed after window load.", e);
+    }
+};
 
 console.log('Admin v6 Updated Loaded');
 </script>
