@@ -1497,9 +1497,9 @@ $('resultsTable').addEventListener('click', (e) => {
         $('manageEventId').value = eid;
         $('resultEventNameDisplay').textContent = ev.name;
         
-        // **CRITICAL FIX AREA:** Display the modal. Added robust error handling.
+        // **CRITICAL FIX AREA:** Display the modal. 
         try {
-            // Ensure Bootstrap's Modal class is available
+            // Check for the Bootstrap Modal object before showing
             if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                  new bootstrap.Modal($('#resultManageModal')).show(); 
             } else {
@@ -1578,21 +1578,42 @@ $('#deleteEventResultsBtn').addEventListener('click', async () => {
 
 /* ---------------- FINAL BOOTSTRAPPING ---------------- */
 
-// **FINAL CRITICAL FIX:** Wait for the whole window to load before running initialization
-window.onload = () => {
-    // This function will ensure all dependencies (like Bootstrap JS) have loaded
-    // before the initial render is attempted.
-    try {
-        // Start on the new Overview panel
-        document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]').click();
-        renderAll();
-    } catch(e) {
-         console.error("Initial render failed after window load.", e);
-    }
-};
+// **FINAL CRITICAL FIX:** This wrapper script will load Bootstrap and then kick off your application logic.
+// Removing the type="module" from the main script and the window.onload listener, and moving all initialization here, 
+// ensures absolute sequential loading if the browser has issues with module/defer loading.
 
-console.log('Admin v6 Updated Loaded');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // This will run immediately after the Bootstrap script finishes loading.
+    function initializeApp() {
+        // Run the module logic from your Firebase file after a small timeout
+        // to ensure the browser has fully registered the imported modules and global objects.
+        setTimeout(() => {
+            try {
+                // Assuming 'bootstrap' is now globally available due to the script above
+                
+                // Manually trigger the initial dashboard panel click
+                const initialBtn = document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]');
+                if (initialBtn) {
+                    initialBtn.click();
+                    console.log('Admin v6 Initialized.');
+                }
+                
+                // We rely on renderAll() being called by the Firebase listeners now
+            } catch(e) {
+                 console.error("Application initialization failed:", e);
+            }
+        }, 100); // Small delay for robustness
+    }
+
+    // Call initializeApp after a slight delay to ensure all external scripts (like Firebase) have executed.
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
+</script>
 </body>
 </html>
