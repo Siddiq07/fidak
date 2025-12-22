@@ -1085,17 +1085,17 @@
             <div class="col-md-3">
                 <label class="form-label mb-2 text-info">1st Place</label>
                 <select id="resultSelectFirst" class="form-select mb-2"></select>
-                <input id="resultPointsFirst" type="number" class="form-control" placeholder="Points">
+                <input id="resultPointsFirst" type="number" class="form-control" placeholder="Points" value="10">
             </div>
             <div class="col-md-3">
                 <label class="form-label mb-2 text-info">2nd Place</label>
                 <select id="resultSelectSecond" class="form-select mb-2"></select>
-                <input id="resultPointsSecond" type="number" class="form-control" placeholder="Points">
+                <input id="resultPointsSecond" type="number" class="form-control" placeholder="Points" value="7">
             </div>
             <div class="col-md-3">
                 <label class="form-label mb-2 text-info">3rd Place</label>
                 <select id="resultSelectThird" class="form-select mb-2"></select>
-                <input id="resultPointsThird" type="number" class="form-control" placeholder="Points">
+                <input id="resultPointsThird" type="number" class="form-control" placeholder="Points" value="5">
             </div>
           </div>
           <div class="mt-4 d-flex gap-3 justify-content-end">
@@ -1293,17 +1293,17 @@
                     <div class="col-md-4">
                         <h6 class="mb-3">1st Place</h6>
                         <select id="manageResultSelectFirst" class="form-select mb-3"></select>
-                        <input id="manageResultPointsFirst" type="number" class="form-control" placeholder="Points">
+                        <input id="manageResultPointsFirst" type="number" class="form-control" placeholder="Points" value="10">
                     </div>
                     <div class="col-md-4">
                         <h6 class="mb-3">2nd Place</h6>
                         <select id="manageResultSelectSecond" class="form-select mb-3"></select>
-                        <input id="manageResultPointsSecond" type="number" class="form-control" placeholder="Points">
+                        <input id="manageResultPointsSecond" type="number" class="form-control" placeholder="Points" value="7">
                     </div>
                     <div class="col-md-4">
                         <h6 class="mb-3">3rd Place</h6>
                         <select id="manageResultSelectThird" class="form-select mb-3"></select>
-                        <input id="manageResultPointsThird" type="number" class="form-control" placeholder="Points">
+                        <input id="manageResultPointsThird" type="number" class="form-control" placeholder="Points" value="5">
                     </div>
                 </div>
             </div>
@@ -1733,6 +1733,49 @@ $('teamsTable')?.addEventListener('click', async e => {
     }
 });
 
+// Edit Team Modal
+$('teamsTable')?.addEventListener('click', e => {
+    const editBtn = e.target.closest('.btn-edit-team');
+    if (editBtn) {
+        const dbKey = editBtn.dataset.dbkey;
+        const team = CACHE.teams.find(t => KEYMAP.teams[t.id] === dbKey);
+        if (team) {
+            $('editTeamDbKey').value = dbKey;
+            $('editTeamId').value = team.id;
+            $('editTeamName').value = team.name;
+            $('editTeamLeader').value = team.leaderId || '';
+            
+            new bootstrap.Modal($('editTeamModal')).show();
+        }
+    }
+});
+
+$('editTeamForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const key = $('editTeamDbKey').value;
+    const updates = {
+        name: $('editTeamName').value,
+        leaderId: $('editTeamLeader').value || null
+    };
+    
+    const newPassword = $('editTeamPassword').value;
+    if (newPassword) {
+        updates.password = newPassword;
+    }
+    
+    await update(ref(db, `teams/${key}`), updates);
+    bootstrap.Modal.getInstance($('editTeamModal')).hide();
+    toast('Team updated');
+});
+
+$('deleteTeamBtn')?.addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to delete this team?')) return;
+    const key = $('editTeamDbKey').value;
+    await remove(ref(db, `teams/${key}`));
+    bootstrap.Modal.getInstance($('editTeamModal')).hide();
+    toast('Team deleted');
+});
+
 /* Events Panel */
 function renderEvents() {
     const searchTerm = ($('filterEventSearch')?.value || '').toLowerCase();
@@ -1886,9 +1929,6 @@ function renderAttendanceHistory() {
                         <button class="btn btn-sm btn-outline-info btn-view-absent" data-key="${key}">
                             <i class="bi bi-eye"></i> View
                         </button>
-                        <button class="btn btn-sm btn-outline-primary btn-edit-att-session" data-key="${key}">
-                            <i class="bi bi-pencil"></i> Edit
-                        </button>
                         <button class="btn btn-sm btn-outline-danger btn-del-att" data-key="${key}">
                             <i class="bi bi-trash"></i> Delete
                         </button>
@@ -1994,6 +2034,43 @@ $('attMethod')?.addEventListener('change', function() {
     }
 });
 
+// Delete attendance session
+$('attendanceSessions')?.addEventListener('click', async e => {
+    const delBtn = e.target.closest('.btn-del-att');
+    if (delBtn) {
+        const sessionKey = delBtn.dataset.key;
+        
+        if (!confirm('Are you sure you want to delete this attendance session?')) return;
+        
+        await remove(ref(db, `attendance/${sessionKey}`));
+        toast('Attendance session deleted');
+    }
+});
+
+// View attendance session
+$('attendanceSessions')?.addEventListener('click', async e => {
+    const viewBtn = e.target.closest('.btn-view-absent');
+    if (viewBtn) {
+        const sessionKey = viewBtn.dataset.key;
+        const session = CACHE.attendance[sessionKey];
+        
+        if (!session) return;
+        
+        const absentStudents = Object.entries(session.students || {})
+            .filter(([id, status]) => status === 'Absent')
+            .map(([id]) => {
+                const student = CACHE.students.find(s => s.id === id);
+                return student ? `${student.name} (${student.id})` : id;
+            });
+        
+        if (absentStudents.length > 0) {
+            alert(`Absent Students (${session.date}):\n\n${absentStudents.join('\n')}`);
+        } else {
+            alert('No absent students for this session.');
+        }
+    }
+});
+
 /* Approvals Panel */
 function renderApprovals() {
     const searchTerm = ($('searchApprovals')?.value || '').toLowerCase();
@@ -2032,9 +2109,6 @@ function renderApprovals() {
                     <button class="btn btn-sm btn-primary btn-view-app" data-eid="${e.event.id}">
                         <i class="bi bi-eye"></i> View
                     </button>
-                    <button class="btn btn-sm btn-outline-info btn-manage-prog" data-eid="${e.event.id}">
-                        <i class="bi bi-card-checklist"></i> Manage
-                    </button>
                 </div>
             </td>
         </tr>
@@ -2058,12 +2132,16 @@ $('approvalsTable')?.addEventListener('click', async e => {
         const pendingTable = $('pendingParticipantsTable');
         pendingTable.innerHTML = pending.map(p => {
             const student = CACHE.students.find(s => s.id === p.studentId);
+            const dbKey = KEYMAP.participations[p.id];
             return `
                 <tr>
                     <td>${student ? escapeHtml(student.name) : 'Unknown'} (${p.studentId})</td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-success btn-approve-participant" data-id="${p.id}">
+                        <button class="btn btn-sm btn-success btn-approve-participant" data-key="${dbKey}">
                             <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-reject-participant" data-key="${dbKey}">
+                            <i class="bi bi-x-lg"></i> Reject
                         </button>
                     </td>
                 </tr>
@@ -2074,12 +2152,16 @@ $('approvalsTable')?.addEventListener('click', async e => {
         const approvedTable = $('approvedParticipantsTable');
         approvedTable.innerHTML = approved.map(p => {
             const student = CACHE.students.find(s => s.id === p.studentId);
+            const dbKey = KEYMAP.participations[p.id];
             return `
                 <tr>
                     <td>${student ? escapeHtml(student.name) : 'Unknown'} (${p.studentId})</td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-danger btn-reject-participant" data-id="${p.id}">
-                            <i class="bi bi-x-lg"></i> Reject
+                        <button class="btn btn-sm btn-warning btn-unapprove-participant" data-key="${dbKey}">
+                            <i class="bi bi-arrow-counterclockwise"></i> Unapprove
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-reject-participant" data-key="${dbKey}">
+                            <i class="bi bi-x-lg"></i> Remove
                         </button>
                     </td>
                 </tr>
@@ -2091,7 +2173,38 @@ $('approvalsTable')?.addEventListener('click', async e => {
     }
 });
 
-/* Results Panel - Basic Implementation */
+// Handle approval actions
+$('pendingParticipantsTable')?.addEventListener('click', async e => {
+    const approveBtn = e.target.closest('.btn-approve-participant');
+    const rejectBtn = e.target.closest('.btn-reject-participant');
+    
+    if (approveBtn) {
+        const key = approveBtn.dataset.key;
+        await update(ref(db, `participations/${key}`), { status: 'approved' });
+        toast('Participant approved');
+    } else if (rejectBtn) {
+        const key = rejectBtn.dataset.key;
+        await remove(ref(db, `participations/${key}`));
+        toast('Participant removed');
+    }
+});
+
+$('approvedParticipantsTable')?.addEventListener('click', async e => {
+    const unapproveBtn = e.target.closest('.btn-unapprove-participant');
+    const removeBtn = e.target.closest('.btn-reject-participant');
+    
+    if (unapproveBtn) {
+        const key = unapproveBtn.dataset.key;
+        await update(ref(db, `participations/${key}`), { status: 'pending' });
+        toast('Participant unapproved');
+    } else if (removeBtn) {
+        const key = removeBtn.dataset.key;
+        await remove(ref(db, `participations/${key}`));
+        toast('Participant removed');
+    }
+});
+
+/* Results Panel */
 function renderResults() {
     const searchTerm = ($('searchResults')?.value || '').toLowerCase();
     const filter = $('filterResults')?.value || 'all';
@@ -2131,15 +2244,16 @@ function renderResults() {
         const thirdPlace = eventResults.find(r => r.position === 3);
         
         const isPublished = eventResults.length > 0 && eventResults.every(r => r.published === true);
+        const hasResults = eventResults.length > 0;
         
         return `
             <tr>
                 <td><strong>${escapeHtml(e.name)}</strong></td>
                 <td><span class="badge ${e.type === 'Stage' ? 'bg-primary' : 'bg-info'}">${e.type}</span></td>
-                <td>${firstPlace ? `${firstPlace.studentName || firstPlace.teamName || 'Unknown'} (${firstPlace.points})` : '-'}</td>
-                <td>${secondPlace ? `${secondPlace.studentName || secondPlace.teamName || 'Unknown'} (${secondPlace.points})` : '-'}</td>
-                <td>${thirdPlace ? `${thirdPlace.studentName || thirdPlace.teamName || 'Unknown'} (${thirdPlace.points})` : '-'}</td>
-                <td><span class="${isPublished ? 'status-published' : 'status-draft'}">${isPublished ? 'Published' : 'Draft'}</span></td>
+                <td>${firstPlace ? `${firstPlace.studentName || firstPlace.teamName || firstPlace.studentId || 'Unknown'} (${firstPlace.points || 0})` : '-'}</td>
+                <td>${secondPlace ? `${secondPlace.studentName || secondPlace.teamName || secondPlace.studentId || 'Unknown'} (${secondPlace.points || 0})` : '-'}</td>
+                <td>${thirdPlace ? `${thirdPlace.studentName || thirdPlace.teamName || thirdPlace.studentId || 'Unknown'} (${thirdPlace.points || 0})` : '-'}</td>
+                <td><span class="${isPublished ? 'status-published' : hasResults ? 'status-draft' : 'status-pending'}">${isPublished ? 'Published' : hasResults ? 'Draft' : 'No Results'}</span></td>
                 <td class="text-end">
                     <div class="action-buttons">
                         <button class="btn btn-sm btn-outline-primary btn-manage-result" data-eid="${e.id}">
@@ -2151,6 +2265,528 @@ function renderResults() {
         `;
     }).join('') || '<tr><td colspan="7" class="text-center muted">No events found</td></tr>';
 }
+
+// Populate result dropdowns
+function populateResultDropdowns() {
+    const firstSelect = $('resultSelectFirst');
+    const secondSelect = $('resultSelectSecond');
+    const thirdSelect = $('resultSelectThird');
+    
+    if (!firstSelect || !secondSelect || !thirdSelect) return;
+    
+    // Get all students and teams
+    const options = [];
+    
+    // Add students
+    CACHE.students.forEach(s => {
+        options.push({
+            value: `student_${s.id}`,
+            text: `${s.name} (${s.id}) - Student`,
+            type: 'student'
+        });
+    });
+    
+    // Add teams
+    CACHE.teams.forEach(t => {
+        options.push({
+            value: `team_${t.id}`,
+            text: `${t.name} - Team`,
+            type: 'team'
+        });
+    });
+    
+    // Populate all dropdowns
+    [firstSelect, secondSelect, thirdSelect].forEach(select => {
+        select.innerHTML = '<option value="">Select Winner</option>' + 
+            options.map(opt => `<option value="${opt.value}">${escapeHtml(opt.text)}</option>`).join('');
+    });
+}
+
+// Save Result
+$('saveResult')?.addEventListener('click', async () => {
+    const eventId = $('resultEvent').value;
+    if (!eventId) return toast('Please select an event', 'warning');
+    
+    const results = [];
+    const event = CACHE.events.find(e => e.id === eventId);
+    if (!event) return toast('Event not found', 'danger');
+    
+    // First place
+    const firstValue = $('resultSelectFirst').value;
+    const firstPoints = parseInt($('resultPointsFirst').value) || 0;
+    if (firstValue) {
+        const [type, id] = firstValue.split('_');
+        results.push({
+            eventId,
+            position: 1,
+            [type === 'student' ? 'studentId' : 'teamId']: id,
+            points: firstPoints,
+            published: false
+        });
+    }
+    
+    // Second place
+    const secondValue = $('resultSelectSecond').value;
+    const secondPoints = parseInt($('resultPointsSecond').value) || 0;
+    if (secondValue) {
+        const [type, id] = secondValue.split('_');
+        results.push({
+            eventId,
+            position: 2,
+            [type === 'student' ? 'studentId' : 'teamId']: id,
+            points: secondPoints,
+            published: false
+        });
+    }
+    
+    // Third place
+    const thirdValue = $('resultSelectThird').value;
+    const thirdPoints = parseInt($('resultPointsThird').value) || 0;
+    if (thirdValue) {
+        const [type, id] = thirdValue.split('_');
+        results.push({
+            eventId,
+            position: 3,
+            [type === 'student' ? 'studentId' : 'teamId']: id,
+            points: thirdPoints,
+            published: false
+        });
+    }
+    
+    if (results.length === 0) return toast('Please select at least one winner', 'warning');
+    
+    // Save each result
+    for (const result of results) {
+        await set(push(ref(db, 'results')), result);
+    }
+    
+    toast('Results saved as draft');
+    $('clearResultForm').click();
+});
+
+// Publish Results
+$('publishAllResults')?.addEventListener('click', async () => {
+    const eventId = $('resultEvent').value;
+    if (!eventId) return toast('Please select an event', 'warning');
+    
+    // Check if results already exist for this event
+    const existingResults = CACHE.results.filter(r => r.eventId === eventId);
+    
+    // Delete existing results
+    for (const result of existingResults) {
+        const key = KEYMAP.results[result.id];
+        if (key) {
+            await remove(ref(db, `results/${key}`));
+        }
+    }
+    
+    // Save new results as published
+    const results = [];
+    
+    // First place
+    const firstValue = $('resultSelectFirst').value;
+    const firstPoints = parseInt($('resultPointsFirst').value) || 0;
+    if (firstValue) {
+        const [type, id] = firstValue.split('_');
+        const result = {
+            eventId,
+            position: 1,
+            points: firstPoints,
+            published: true
+        };
+        
+        if (type === 'student') {
+            result.studentId = id;
+            const student = CACHE.students.find(s => s.id === id);
+            if (student) result.studentName = student.name;
+        } else {
+            result.teamId = id;
+            const team = CACHE.teams.find(t => t.id === id);
+            if (team) result.teamName = team.name;
+        }
+        
+        results.push(result);
+    }
+    
+    // Second place
+    const secondValue = $('resultSelectSecond').value;
+    const secondPoints = parseInt($('resultPointsSecond').value) || 0;
+    if (secondValue) {
+        const [type, id] = secondValue.split('_');
+        const result = {
+            eventId,
+            position: 2,
+            points: secondPoints,
+            published: true
+        };
+        
+        if (type === 'student') {
+            result.studentId = id;
+            const student = CACHE.students.find(s => s.id === id);
+            if (student) result.studentName = student.name;
+        } else {
+            result.teamId = id;
+            const team = CACHE.teams.find(t => t.id === id);
+            if (team) result.teamName = team.name;
+        }
+        
+        results.push(result);
+    }
+    
+    // Third place
+    const thirdValue = $('resultSelectThird').value;
+    const thirdPoints = parseInt($('resultPointsThird').value) || 0;
+    if (thirdValue) {
+        const [type, id] = thirdValue.split('_');
+        const result = {
+            eventId,
+            position: 3,
+            points: thirdPoints,
+            published: true
+        };
+        
+        if (type === 'student') {
+            result.studentId = id;
+            const student = CACHE.students.find(s => s.id === id);
+            if (student) result.studentName = student.name;
+        } else {
+            result.teamId = id;
+            const team = CACHE.teams.find(t => t.id === id);
+            if (team) result.teamName = team.name;
+        }
+        
+        results.push(result);
+    }
+    
+    if (results.length === 0) return toast('Please select at least one winner', 'warning');
+    
+    // Save results
+    for (const result of results) {
+        await set(push(ref(db, 'results')), result);
+    }
+    
+    // Update team scores
+    for (const result of results) {
+        if (result.teamId) {
+            const team = CACHE.teams.find(t => t.id === result.teamId);
+            if (team) {
+                const teamKey = KEYMAP.teams[team.id];
+                if (teamKey) {
+                    const newScore = (team.score || 0) + result.points;
+                    await update(ref(db, `teams/${teamKey}`), { score: newScore });
+                }
+            }
+        }
+    }
+    
+    toast('Results published and points added to teams');
+    $('clearResultForm').click();
+});
+
+// Clear result form
+$('clearResultForm')?.addEventListener('click', () => {
+    $('resultSelectFirst').value = '';
+    $('resultSelectSecond').value = '';
+    $('resultSelectThird').value = '';
+    $('resultPointsFirst').value = '10';
+    $('resultPointsSecond').value = '7';
+    $('resultPointsThird').value = '5';
+});
+
+// Manage results
+$('resultsTable')?.addEventListener('click', e => {
+    const manageBtn = e.target.closest('.btn-manage-result');
+    if (manageBtn) {
+        const eventId = manageBtn.dataset.eid;
+        const event = CACHE.events.find(e => e.id === eventId);
+        if (!event) return;
+        
+        $('manageEventId').value = eventId;
+        $('resultEventNameDisplay').textContent = event.name;
+        
+        // Populate manage modal dropdowns
+        populateManageResultDropdowns(eventId);
+        
+        // Load existing results
+        const eventResults = CACHE.results.filter(r => r.eventId === eventId);
+        const firstPlace = eventResults.find(r => r.position === 1);
+        const secondPlace = eventResults.find(r => r.position === 2);
+        const thirdPlace = eventResults.find(r => r.position === 3);
+        
+        if (firstPlace) {
+            const type = firstPlace.studentId ? 'student' : 'team';
+            const id = firstPlace.studentId || firstPlace.teamId;
+            $('manageResultSelectFirst').value = `${type}_${id}`;
+            $('manageResultPointsFirst').value = firstPlace.points || 10;
+        }
+        
+        if (secondPlace) {
+            const type = secondPlace.studentId ? 'student' : 'team';
+            const id = secondPlace.studentId || secondPlace.teamId;
+            $('manageResultSelectSecond').value = `${type}_${id}`;
+            $('manageResultPointsSecond').value = secondPlace.points || 7;
+        }
+        
+        if (thirdPlace) {
+            const type = thirdPlace.studentId ? 'student' : 'team';
+            const id = thirdPlace.studentId || thirdPlace.teamId;
+            $('manageResultSelectThird').value = `${type}_${id}`;
+            $('manageResultPointsThird').value = thirdPlace.points || 5;
+        }
+        
+        new bootstrap.Modal($('resultManageModal')).show();
+    }
+});
+
+function populateManageResultDropdowns(eventId) {
+    const firstSelect = $('manageResultSelectFirst');
+    const secondSelect = $('manageResultSelectSecond');
+    const thirdSelect = $('manageResultSelectThird');
+    
+    if (!firstSelect || !secondSelect || !thirdSelect) return;
+    
+    // Get all students and teams
+    const options = [];
+    
+    // Add students
+    CACHE.students.forEach(s => {
+        options.push({
+            value: `student_${s.id}`,
+            text: `${s.name} (${s.id}) - Student`,
+            type: 'student'
+        });
+    });
+    
+    // Add teams
+    CACHE.teams.forEach(t => {
+        options.push({
+            value: `team_${t.id}`,
+            text: `${t.name} - Team`,
+            type: 'team'
+        });
+    });
+    
+    // Populate all dropdowns
+    [firstSelect, secondSelect, thirdSelect].forEach(select => {
+        select.innerHTML = '<option value="">Select Winner</option>' + 
+            options.map(opt => `<option value="${opt.value}">${escapeHtml(opt.text)}</option>`).join('');
+    });
+}
+
+// Save draft in manage modal
+$('resultManageForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const eventId = $('manageEventId').value;
+    const event = CACHE.events.find(e => e.id === eventId);
+    if (!event) return toast('Event not found', 'danger');
+    
+    // Delete existing results
+    const existingResults = CACHE.results.filter(r => r.eventId === eventId);
+    for (const result of existingResults) {
+        const key = KEYMAP.results[result.id];
+        if (key) {
+            await remove(ref(db, `results/${key}`));
+        }
+    }
+    
+    // Save new results as draft
+    const results = [];
+    
+    // First place
+    const firstValue = $('manageResultSelectFirst').value;
+    const firstPoints = parseInt($('manageResultPointsFirst').value) || 0;
+    if (firstValue) {
+        const [type, id] = firstValue.split('_');
+        results.push({
+            eventId,
+            position: 1,
+            [type === 'student' ? 'studentId' : 'teamId']: id,
+            points: firstPoints,
+            published: false
+        });
+    }
+    
+    // Second place
+    const secondValue = $('manageResultSelectSecond').value;
+    const secondPoints = parseInt($('manageResultPointsSecond').value) || 0;
+    if (secondValue) {
+        const [type, id] = secondValue.split('_');
+        results.push({
+            eventId,
+            position: 2,
+            [type === 'student' ? 'studentId' : 'teamId']: id,
+            points: secondPoints,
+            published: false
+        });
+    }
+    
+    // Third place
+    const thirdValue = $('manageResultSelectThird').value;
+    const thirdPoints = parseInt($('manageResultPointsThird').value) || 0;
+    if (thirdValue) {
+        const [type, id] = thirdValue.split('_');
+        results.push({
+            eventId,
+            position: 3,
+            [type === 'student' ? 'studentId' : 'teamId']: id,
+            points: thirdPoints,
+            published: false
+        });
+    }
+    
+    if (results.length === 0) {
+        toast('No results to save', 'warning');
+        return;
+    }
+    
+    // Save each result
+    for (const result of results) {
+        await set(push(ref(db, 'results')), result);
+    }
+    
+    bootstrap.Modal.getInstance($('resultManageModal')).hide();
+    toast('Results saved as draft');
+});
+
+// Publish from manage modal
+$('managePublishBtn')?.addEventListener('click', async () => {
+    const eventId = $('manageEventId').value;
+    const event = CACHE.events.find(e => e.id === eventId);
+    if (!event) return toast('Event not found', 'danger');
+    
+    // Delete existing results
+    const existingResults = CACHE.results.filter(r => r.eventId === eventId);
+    for (const result of existingResults) {
+        const key = KEYMAP.results[result.id];
+        if (key) {
+            await remove(ref(db, `results/${key}`));
+        }
+    }
+    
+    // Save new results as published
+    const results = [];
+    
+    // First place
+    const firstValue = $('manageResultSelectFirst').value;
+    const firstPoints = parseInt($('manageResultPointsFirst').value) || 0;
+    if (firstValue) {
+        const [type, id] = firstValue.split('_');
+        const result = {
+            eventId,
+            position: 1,
+            points: firstPoints,
+            published: true
+        };
+        
+        if (type === 'student') {
+            result.studentId = id;
+            const student = CACHE.students.find(s => s.id === id);
+            if (student) result.studentName = student.name;
+        } else {
+            result.teamId = id;
+            const team = CACHE.teams.find(t => t.id === id);
+            if (team) result.teamName = team.name;
+        }
+        
+        results.push(result);
+    }
+    
+    // Second place
+    const secondValue = $('manageResultSelectSecond').value;
+    const secondPoints = parseInt($('manageResultPointsSecond').value) || 0;
+    if (secondValue) {
+        const [type, id] = secondValue.split('_');
+        const result = {
+            eventId,
+            position: 2,
+            points: secondPoints,
+            published: true
+        };
+        
+        if (type === 'student') {
+            result.studentId = id;
+            const student = CACHE.students.find(s => s.id === id);
+            if (student) result.studentName = student.name;
+        } else {
+            result.teamId = id;
+            const team = CACHE.teams.find(t => t.id === id);
+            if (team) result.teamName = team.name;
+        }
+        
+        results.push(result);
+    }
+    
+    // Third place
+    const thirdValue = $('manageResultSelectThird').value;
+    const thirdPoints = parseInt($('manageResultPointsThird').value) || 0;
+    if (thirdValue) {
+        const [type, id] = thirdValue.split('_');
+        const result = {
+            eventId,
+            position: 3,
+            points: thirdPoints,
+            published: true
+        };
+        
+        if (type === 'student') {
+            result.studentId = id;
+            const student = CACHE.students.find(s => s.id === id);
+            if (student) result.studentName = student.name;
+        } else {
+            result.teamId = id;
+            const team = CACHE.teams.find(t => t.id === id);
+            if (team) result.teamName = team.name;
+        }
+        
+        results.push(result);
+    }
+    
+    if (results.length === 0) {
+        toast('No results to publish', 'warning');
+        return;
+    }
+    
+    // Save results
+    for (const result of results) {
+        await set(push(ref(db, 'results')), result);
+    }
+    
+    // Update team scores
+    for (const result of results) {
+        if (result.teamId) {
+            const team = CACHE.teams.find(t => t.id === result.teamId);
+            if (team) {
+                const teamKey = KEYMAP.teams[team.id];
+                if (teamKey) {
+                    const newScore = (team.score || 0) + result.points;
+                    await update(ref(db, `teams/${teamKey}`), { score: newScore });
+                }
+            }
+        }
+    }
+    
+    bootstrap.Modal.getInstance($('resultManageModal')).hide();
+    toast('Results published and points added to teams');
+});
+
+// Delete event results
+$('deleteEventResultsBtn')?.addEventListener('click', async () => {
+    const eventId = $('manageEventId').value;
+    
+    if (!confirm('Are you sure you want to delete all results for this event?')) return;
+    
+    const existingResults = CACHE.results.filter(r => r.eventId === eventId);
+    for (const result of existingResults) {
+        const key = KEYMAP.results[result.id];
+        if (key) {
+            await remove(ref(db, `results/${key}`));
+        }
+    }
+    
+    bootstrap.Modal.getInstance($('resultManageModal')).hide();
+    toast('Event results deleted');
+});
 
 /* Reset All Data */
 function showResetModal() {
@@ -2193,6 +2829,11 @@ $('filterEventSearch')?.addEventListener('input', renderEvents);
 $('searchApprovals')?.addEventListener('input', renderApprovals);
 $('searchResults')?.addEventListener('input', renderResults);
 $('filterResults')?.addEventListener('change', renderResults);
+
+// When result event changes, populate dropdowns
+$('resultEvent')?.addEventListener('change', () => {
+    populateResultDropdowns();
+});
 
 /* File Import Functions */
 $('previewStudents')?.addEventListener('click', () => {
@@ -2306,11 +2947,202 @@ $('importStudents')?.addEventListener('click', async () => {
     reader.readAsArrayBuffer(file);
 });
 
+// Event import
+$('previewEvents')?.addEventListener('click', () => {
+    const fileInput = $('eventFile');
+    if (!fileInput.files.length) return toast('Please select a file', 'warning');
+    
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+            
+            const previewDiv = $('eventsPreview');
+            previewDiv.innerHTML = `
+                <h6>Preview (${jsonData.length} rows)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${jsonData.slice(0, 5).map(row => `
+                                <tr>
+                                    <td>${escapeHtml(row.Name || '')}</td>
+                                    <td>${escapeHtml(row.Type || 'Stage')}</td>
+                                    <td>${escapeHtml(row.Level || 'General')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${jsonData.length > 5 ? `<p class="text-muted small">... and ${jsonData.length - 5} more rows</p>` : ''}
+            `;
+        } catch (error) {
+            toast('Error reading file: ' + error.message, 'danger');
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+});
+
+$('importEvents')?.addEventListener('click', async () => {
+    const fileInput = $('eventFile');
+    if (!fileInput.files.length) return toast('Please select a file', 'warning');
+    
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+            
+            let imported = 0;
+            let skipped = 0;
+            
+            for (const row of jsonData) {
+                const name = String(row.Name || '').trim();
+                const type = String(row.Type || 'Stage').trim();
+                const level = String(row.Level || 'General').trim();
+                
+                if (!name) {
+                    skipped++;
+                    continue;
+                }
+                
+                // Check if event already exists
+                const exists = CACHE.events.some(e => e.name.toLowerCase() === name.toLowerCase());
+                if (exists) {
+                    skipped++;
+                    continue;
+                }
+                
+                const id = Date.now().toString() + imported;
+                await set(push(ref(db, 'events')), {
+                    id,
+                    name,
+                    type: ['Stage', 'Non-Stage', 'Group', 'Open'].includes(type) ? type : 'Stage',
+                    level: ['Junior', 'Senior', 'General'].includes(level) ? level : 'General'
+                });
+                
+                imported++;
+            }
+            
+            fileInput.value = '';
+            $('eventsPreview').innerHTML = '';
+            toast(`Imported ${imported} events, skipped ${skipped}`, 'success');
+        } catch (error) {
+            toast('Error importing: ' + error.message, 'danger');
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+});
+
+/* Student Search Lookup */
+$('studentLookupSearch')?.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    if (!searchTerm) {
+        $('lookupTitle').textContent = 'Search to begin...';
+        $('studentLookupID').textContent = '-';
+        $('studentLookupLevel').textContent = '-';
+        $('studentLookupTeam').textContent = '-';
+        $('listHeader').textContent = 'Participation/Roster List';
+        $('listTableHeaders').innerHTML = '<th>Event/Student</th><th>Status/Team</th>';
+        $('studentParticipationTable').innerHTML = '<tr><td colspan="2" class="text-center muted">Search above to load details.</td></tr>';
+        return;
+    }
+    
+    // Search for student
+    const student = CACHE.students.find(s => 
+        s.id.toLowerCase().includes(searchTerm) || 
+        s.name.toLowerCase().includes(searchTerm)
+    );
+    
+    if (student) {
+        // Display student info
+        $('lookupTitle').textContent = student.name;
+        $('studentLookupID').textContent = student.id;
+        $('studentLookupLevel').textContent = student.level;
+        
+        const team = CACHE.teams.find(t => t.id === student.teamId);
+        $('studentLookupTeam').textContent = team ? team.name : 'Unassigned';
+        
+        // Display student's participations
+        const participations = CACHE.participations.filter(p => p.studentId === student.id);
+        $('listHeader').textContent = 'Event Participations';
+        $('listTableHeaders').innerHTML = '<th>Event</th><th>Status</th>';
+        
+        if (participations.length > 0) {
+            $('studentParticipationTable').innerHTML = participations.map(p => {
+                const event = CACHE.events.find(e => e.id === p.eventId);
+                return `
+                    <tr>
+                        <td>${event ? escapeHtml(event.name) : 'Unknown Event'}</td>
+                        <td><span class="badge ${p.status === 'approved' ? 'bg-success' : 'bg-warning'}">${p.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        } else {
+            $('studentParticipationTable').innerHTML = '<tr><td colspan="2" class="text-center muted">No event participations found.</td></tr>';
+        }
+    } else {
+        // Search for event
+        const event = CACHE.events.find(e => e.name.toLowerCase().includes(searchTerm));
+        if (event) {
+            $('lookupTitle').textContent = event.name;
+            $('studentLookupID').textContent = event.type;
+            $('studentLookupLevel').textContent = event.level;
+            $('studentLookupTeam').textContent = '-';
+            
+            // Display event participants
+            const participations = CACHE.participations.filter(p => p.eventId === event.id);
+            $('listHeader').textContent = 'Event Participants';
+            $('listTableHeaders').innerHTML = '<th>Student</th><th>Status</th>';
+            
+            if (participations.length > 0) {
+                $('studentParticipationTable').innerHTML = participations.map(p => {
+                    const student = CACHE.students.find(s => s.id === p.studentId);
+                    return `
+                        <tr>
+                            <td>${student ? escapeHtml(student.name) : 'Unknown Student'} (${p.studentId})</td>
+                            <td><span class="badge ${p.status === 'approved' ? 'bg-success' : 'bg-warning'}">${p.status}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                $('studentParticipationTable').innerHTML = '<tr><td colspan="2" class="text-center muted">No participants found for this event.</td></tr>';
+            }
+        } else {
+            // No results
+            $('lookupTitle').textContent = 'No results found';
+            $('studentLookupID').textContent = '-';
+            $('studentLookupLevel').textContent = '-';
+            $('studentLookupTeam').textContent = '-';
+            $('listHeader').textContent = 'Search Results';
+            $('listTableHeaders').innerHTML = '<th>Result</th><th>Type</th>';
+            $('studentParticipationTable').innerHTML = '<tr><td colspan="2" class="text-center muted">No matching students or events found.</td></tr>';
+        }
+    }
+});
+
 /* Initialize */
 document.addEventListener('DOMContentLoaded', () => {
     // Set default date for attendance
     const today = new Date().toISOString().split('T')[0];
-    $('attDate').value = today;
+    if ($('attDate')) $('attDate').value = today;
     
     // Initialize theme button text
     if (document.body.classList.contains('dark-mode')) {
