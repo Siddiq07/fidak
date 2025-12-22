@@ -10,52 +10,97 @@
 
 <style>
 /* -------------------------------------- */
-/* UI OVERHAUL & THEME VARIABLES */
+/* MODERN UI OVERHAUL & THEME VARIABLES */
 /* -------------------------------------- */
 
 :root {
-    /* --- DARK MODE (Default/Fallback) --- */
-    --bg: #0c0e18; 
-    --card: #181c2e; 
+    /* --- DARK MODE (Default) --- */
+    --bg: #0f1529; 
+    --card: #1a2238; 
     --text: #e2e8f0; 
     --muted: #94a3b8; 
-    --shadow: rgba(0, 0, 0, 0.4);
-    --border: #334155;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --border: #2d3748;
+    --surface: #252e44;
     
-    /* Accents (More Vibrant) */
-    --accent-main: #ff7f50; /* Coral */
-    --accent-secondary: #00bcd4; /* Cyan */
-    --success: #69f0ae; 
-    --danger: #ff5252; 
-
-    /* Logo Filter (Invert colors for dark mode) */
-    --logo-filter: invert(1) brightness(1.8) contrast(1.5);
+    /* Vibrant Accents */
+    --accent-main: #ff6b6b;
+    --accent-secondary: #4ecdc4;
+    --accent-tertiary: #45b7d1;
+    --success: #69ff97;
+    --warning: #ffd166;
+    --danger: #ff6b6b;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+    --gradient-secondary: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    --gradient-card: linear-gradient(145deg, #1a2238 0%, #151b2b 100%);
+    
+    /* Glow Effects */
+    --glow-primary: 0 0 30px rgba(255, 107, 107, 0.4);
+    --glow-secondary: 0 0 30px rgba(78, 205, 196, 0.4);
+    
+    /* Logo Filter */
+    --logo-filter: invert(1) brightness(1.5) contrast(1.2);
 }
 
 /* --- LIGHT MODE Variables --- */
 [data-theme="light"] {
-    --bg: #f5f7ff; 
-    --card: #ffffff; 
-    --text: #0f172a; 
-    --muted: #64748b; 
-    --shadow: rgba(0, 0, 0, 0.1);
-    --border: #e5e7eb;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --shadow: rgba(149, 157, 165, 0.1);
+    --border: #e2e8f0;
+    --surface: #f1f5f9;
+    
+    --accent-main: #3b82f6;
+    --accent-secondary: #10b981;
+    --accent-tertiary: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    
+    --glow-primary: 0 0 20px rgba(59, 130, 246, 0.2);
+    --glow-secondary: 0 0 20px rgba(16, 185, 129, 0.2);
+    
     --logo-filter: none;
 }
 
 /* --- Base Styles --- */
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
-  background:var(--bg);
-  color:var(--text);
-  transition: background-color 0.4s, color 0.4s;
-  overflow-x: hidden;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.6;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Selection Color */
+::selection {
+    background: var(--accent-main);
+    color: white;
 }
 
 /* -------------------------------------- */
-/* INTRO ANIMATION STYLES */
+/* INTRO ANIMATION */
 /* -------------------------------------- */
 #intro-overlay {
     position: fixed;
@@ -63,11 +108,13 @@ body{
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: var(--bg);
+    background: var(--bg);
     z-index: 9999;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 30px;
     transition: opacity 0.8s ease-out, visibility 0.8s;
 }
 
@@ -78,130 +125,456 @@ body{
 }
 
 .intro-logo {
-    width: 200px;
+    width: 220px;
     height: auto;
     filter: var(--logo-filter);
-    animation: logoEntrance 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, 
-               logoPulse 1s infinite alternate 2.5s;
+    animation: logoFloat 3s ease-in-out infinite;
 }
 
-@keyframes logoEntrance {
-    0% { opacity: 0; transform: scale(0.3) translateY(50px); }
-    50% { opacity: 1; transform: scale(1.3); }
-    100% { opacity: 1; transform: scale(1); }
+.intro-title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0;
+    animation: fadeInUp 1s ease-out 0.5s forwards;
 }
 
-@keyframes logoPulse {
-    0% { box-shadow: 0 0 10px 5px var(--accent-main); }
-    100% { box-shadow: 0 0 20px 10px var(--accent-secondary); }
+.loading-bar {
+    width: 200px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeInUp 1s ease-out 0.8s forwards;
 }
 
-/* Layout */
-.container-portal{
-  max-width:550px; 
-  margin:auto;
-  padding:20px;
-  opacity: 0;
-  animation: contentFadeIn 1s ease-out forwards;
-  animation-delay: 2.2s;
+.loading-progress {
+    width: 0%;
+    height: 100%;
+    background: var(--gradient-primary);
+    animation: loading 2s ease-in-out forwards;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loading {
+    to { width: 100%; }
+}
+
+/* -------------------------------------- */
+/* NAVBAR */
+/* -------------------------------------- */
+.navbar {
+    background: transparent;
+    padding: 20px 30px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    background: rgba(15, 21, 41, 0.8);
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+[data-theme="light"] .navbar {
+    background: rgba(248, 250, 252, 0.8);
+}
+
+.navbar.scrolled {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 20px var(--shadow);
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.navbar-logo {
+    height: 50px;
+    width: auto;
+    filter: var(--logo-filter);
+    transition: all 0.3s ease;
+}
+
+.navbar-logo:hover {
+    transform: scale(1.05);
+}
+
+/* Theme Dropdown */
+.theme-dropdown {
+    position: relative;
+}
+
+.btn-theme {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-theme:hover {
+    background: var(--accent-main);
+    color: white;
+    transform: rotate(15deg);
+    box-shadow: var(--glow-primary);
+}
+
+.dropdown-menu-theme {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 160px;
+    box-shadow: 0 10px 40px var(--shadow);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-radius: 8px;
+    color: var(--text);
+    transition: all 0.2s ease;
+    margin: 2px 0;
+}
+
+.dropdown-item:hover {
+    background: var(--surface);
+}
+
+.dropdown-item.active {
+    background: var(--accent-main);
+    color: white;
+}
+
+.dropdown-item.active .check-icon {
+    opacity: 1;
+}
+
+.check-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* -------------------------------------- */
+/* MAIN CONTENT */
+/* -------------------------------------- */
+.container-portal {
+    max-width: 1200px;
+    margin: 100px auto 50px;
+    padding: 0 20px;
+    opacity: 0;
+    animation: contentFadeIn 1s ease-out forwards;
+    animation-delay: 0.5s;
 }
 
 @keyframes contentFadeIn {
     to { opacity: 1; }
 }
 
-.card-ui{
-  background:var(--card);
-  border-radius:18px; 
-  padding:25px;
-  box-shadow:0 15px 40px var(--shadow);
-  margin-bottom:20px;
-  border: 1px solid var(--border);
-  transition: background-color 0.4s, border-color 0.4s;
+.hero-section {
+    text-align: center;
+    margin-bottom: 60px;
+    padding: 40px 0;
 }
 
-/* Navbar */
-.navbar{
-  background:var(--bg);
-  padding:15px 25px;
-  transition: background-color 0.4s;
-  position: relative;
-  z-index: 100;
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 15px;
+    line-height: 1.1;
 }
 
-/* Logo Styling */
-.navbar-logo {
-    height: 60px;
-    width: auto;
-    filter: var(--logo-filter);
-    transition: filter 0.4s ease;
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto 30px;
 }
 
-/* Buttons */
-.btn{
-  padding:14px 18px;
-  border-radius:12px;
-  font-weight:700;
-  letter-spacing: 0.5px;
-  transition: all 0.2s;
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 40px;
 }
-.btn-primary{ background:var(--accent-secondary); color:#fff; }
-.btn-primary:hover{ background:#0097a7; box-shadow: 0 4px 10px rgba(0, 188, 212, 0.5); }
-.btn-success{ background:var(--success); color:#000; }
-.btn-success:hover{ background:#4caf50; color:#fff; box-shadow: 0 4px 10px rgba(105, 240, 174, 0.5); }
-.btn-outline-primary{ border:2px solid var(--accent-main); color:var(--accent-main); background:transparent;}
-.btn-outline-primary:hover{ background:var(--accent-main); color:#fff; box-shadow: 0 4px 10px rgba(255, 127, 80, 0.5); }
 
+.hero-stat {
+    text-align: center;
+}
 
-/* Stats Grid (Three in a row) */
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr); 
-  gap:15px;
-  margin-top: 20px;
+.hero-stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: block;
+    line-height: 1;
 }
-@media (max-width: 500px) {
-    .stats { grid-template-columns: 1fr; }
-}
-.stat{
-  background:var(--card); 
-  border-radius:12px;
-  padding:18px;
-  text-align:center;
-  box-shadow: 0 0 0 2px var(--accent-secondary), 0 5px 15px var(--shadow);
-  transition: background-color 0.4s, box-shadow 0.4s;
-}
-.stat h4{
-  margin:0 0 5px 0;
-  font-size:2.5rem;
-  font-weight:900;
-  color: var(--accent-main);
-  transition: color 0.4s;
-}
-.stat small{
-  font-size:14px;
-  color:var(--muted);
+
+.hero-stat-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 5px;
 }
 
 /* -------------------------------------- */
-/* SVG GRAPH STYLES */
+/* CARDS */
 /* -------------------------------------- */
-.chart-container {
-    height: 250px; /* Slightly taller for legend */
-    padding: 10px;
-    background: var(--card);
-    border-radius: 10px;
-    margin-top: 15px;
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+.card-ui {
+    background: var(--gradient-card);
+    border-radius: 24px;
+    padding: 30px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 40px var(--shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+}
+
+.card-ui::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-ui:hover::before {
+    opacity: 1;
+}
+
+.card-ui:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px var(--shadow);
+    border-color: var(--accent-main);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+/* Login Buttons */
+.login-options {
     display: flex;
     flex-direction: column;
+    gap: 15px;
+}
+
+.btn-login {
+    padding: 18px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.btn-login:hover::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+.btn-login i {
+    font-size: 1.3rem;
+}
+
+.btn-login:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+.btn-admin {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-admin:hover {
+    box-shadow: var(--glow-primary);
+}
+
+.btn-leader {
+    background: var(--gradient-secondary);
+    color: white;
+}
+
+.btn-leader:hover {
+    box-shadow: var(--glow-secondary);
+}
+
+.btn-participant {
+    background: transparent;
+    border: 2px solid var(--accent-main);
+    color: var(--accent-main);
+}
+
+.btn-participant:hover {
+    background: var(--accent-main);
+    color: white;
+}
+
+/* -------------------------------------- */
+/* STATS GRID */
+/* -------------------------------------- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 25px;
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-secondary);
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0;
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+/* -------------------------------------- */
+/* GRAPH SECTION */
+/* -------------------------------------- */
+.graph-container {
+    position: relative;
+    height: 300px;
+    margin-top: 20px;
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
 }
 
 #graphSvg {
-    flex-grow: 1;
     width: 100%;
-    /* Invert Y axis visuals for graph logic if needed, but we handle in JS */
+    height: 100%;
 }
 
 .graph-path {
@@ -209,163 +582,537 @@ body{
     stroke-width: 4;
     stroke-linecap: round;
     stroke-linejoin: round;
-    /* Animation setup */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
     stroke-dasharray: 1000;
     stroke-dashoffset: 1000;
-    animation: drawLine 2.5s ease-out forwards;
+    animation: drawLine 2s ease-out forwards;
 }
 
 @keyframes drawLine {
     to { stroke-dashoffset: 0; }
 }
 
-/* Grid lines in SVG */
 .grid-line {
     stroke: var(--border);
     stroke-width: 1;
-    stroke-dasharray: 5,5;
+    stroke-dasharray: 5, 5;
+    opacity: 0.5;
 }
 
-/* Legend Styles */
 .graph-legend {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-    font-size: 0.85rem;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
 }
+
 .legend-item {
     display: flex;
     align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.legend-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-name {
+    font-weight: 600;
     color: var(--text);
 }
-.legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 6px;
+
+.legend-score {
+    font-weight: 700;
+    color: var(--accent-main);
 }
 
-/* Score List */
-.score-item{
-  display:flex;
-  justify-content:space-between;
-  padding:8px 0;
-  color:var(--text);
-  border-bottom:1px dashed var(--border);
-  font-weight: 500;
-  transition: border-color 0.4s;
+/* -------------------------------------- */
+/* SCORE LIST */
+/* -------------------------------------- */
+.score-list {
+    margin-top: 25px;
 }
-.score-item:last-child{border-bottom:none}
 
-/* Forms/Modals */
-.modal-content{ background: var(--card); color: var(--text); }
-.modal-header{ border-bottom: 1px solid var(--border); }
-.modal-footer{ border-top: 1px solid var(--border); }
-.form-label { color: var(--text); }
-.form-control, .form-select { background: var(--border); border-color: var(--border); color: var(--text); }
-.btn-close { filter: invert(var(--theme-filter, 1)) grayscale(100%) brightness(200%); }
-[data-theme="light"] .btn-close { filter: none; } 
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--surface);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border);
+}
+
+.score-item:hover {
+    transform: translateX(5px);
+    border-color: var(--accent-main);
+    box-shadow: 0 4px 15px var(--shadow);
+}
+
+.score-rank {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--muted);
+    min-width: 30px;
+}
+
+.score-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text);
+    margin-left: 15px;
+}
+
+.score-value {
+    font-weight: 800;
+    font-size: 1.3rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* -------------------------------------- */
+/* MODAL */
+/* -------------------------------------- */
+.modal-content {
+    background: var(--gradient-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px var(--shadow);
+}
+
+.modal-header {
+    padding: 25px 30px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control, .form-select {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background: var(--card);
+    border-color: var(--accent-main);
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--muted);
+}
+
+.btn-close {
+    filter: invert(0.5);
+    opacity: 0.7;
+    transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+}
+
+[data-theme="light"] .btn-close {
+    filter: none;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.error-message.show {
+    display: flex;
+}
+
+/* -------------------------------------- */
+/* FOOTER */
+/* -------------------------------------- */
+.footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+}
+
+.footer-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.footer-logo {
+    height: 40px;
+    width: auto;
+    filter: var(--logo-filter);
+    opacity: 0.7;
+    margin-bottom: 20px;
+}
+
+/* -------------------------------------- */
+/* RESPONSIVE DESIGN */
+/* -------------------------------------- */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 15px 20px;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .card-ui {
+        padding: 25px;
+    }
+    
+    .container-portal {
+        margin-top: 80px;
+        padding: 0 15px;
+    }
+    
+    .graph-container {
+        height: 250px;
+    }
+    
+    .stats-grid {
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .card-ui {
+        padding: 20px;
+    }
+    
+    .btn-login {
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+}
+
+/* -------------------------------------- */
+/* UTILITY CLASSES */
+/* -------------------------------------- */
+.glow-text {
+    text-shadow: 0 0 20px currentColor;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+    transform: rotate(30deg);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) rotate(30deg); }
+    100% { transform: translateX(100%) rotate(30deg); }
+}
 </style>
 </head>
 
 <body>
 
+<!-- Intro Overlay -->
 <div id="intro-overlay">
     <img src="IMG_2247.png" alt="Fidak Fest" class="intro-logo">
+    <div class="intro-title">FIDAK FEST</div>
+    <div class="loading-bar">
+        <div class="loading-progress"></div>
+    </div>
 </div>
 
-<nav class="navbar">
-    <a href="#" class="text-decoration-none">
-        <img src="IMG_2247.png" alt="Fidak Fest" class="navbar-logo">
-    </a>
+<!-- Navigation -->
+<nav class="navbar" id="mainNavbar">
+    <div class="navbar-content">
+        <a href="#" class="text-decoration-none">
+            <img src="IMG_2247.png" alt="Fidak Fest" class="navbar-logo">
+        </a>
 
-    <div class="dropdown">
-        <button class="btn btn-theme dropdown-toggle no-arrow" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-sun" id="themeIconDisplay"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-theme" aria-labelledby="themeDropdown">
-            <li><a class="dropdown-item" href="#" data-theme-mode="light"><span><i class="bi bi-sun me-2"></i> Light</span><i class="bi bi-check2 check-icon"></i></a></li>
-            <li><a class="dropdown-item" href="#" data-theme-mode="dark"><span><i class="bi bi-moon me-2"></i> Dark</span><i class="bi bi-check2 check-icon"></i></a></li>
-            <li><hr class="dropdown-divider" style="border-color:var(--border)"></li>
-            <li><a class="dropdown-item" href="#" data-theme-mode="system"><span><i class="bi bi-circle-half me-2"></i> System</span><i class="bi bi-check2 check-icon"></i></a></li>
-        </ul>
+        <div class="theme-dropdown">
+            <button class="btn btn-theme dropdown-toggle no-arrow" type="button" id="themeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-sun" id="themeIconDisplay"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-theme" aria-labelledby="themeDropdown">
+                <li><a class="dropdown-item" href="#" data-theme-mode="light"><span><i class="bi bi-sun me-2"></i> Light</span><i class="bi bi-check2 check-icon"></i></a></li>
+                <li><a class="dropdown-item" href="#" data-theme-mode="dark"><span><i class="bi bi-moon me-2"></i> Dark</span><i class="bi bi-check2 check-icon"></i></a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" data-theme-mode="system"><span><i class="bi bi-circle-half me-2"></i> System</span><i class="bi bi-check2 check-icon"></i></a></li>
+            </ul>
+        </div>
     </div>
 </nav>
 
-<div class="container-portal d-flex align-items-center justify-content-center min-vh-100">
-  <div class="w-100">
+<!-- Main Content -->
+<div class="container-portal">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <h1 class="hero-title">Welcome to Fidak Fest</h1>
+        <p class="hero-subtitle">Experience the ultimate festival management system with real-time tracking, leaderboards, and seamless participation.</p>
+        
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-number" id="statStudents">0</span>
+                <span class="hero-stat-label">Total Students</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" id="statEvents">0</span>
+                <span class="hero-stat-label">Active Events</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" id="statTeams">0</span>
+                <span class="hero-stat-label">Competing Teams</span>
+            </div>
+        </div>
+    </section>
 
-    <div class="text-center mb-5">
-      <h2 class="fw-bold fs-1" style="color:var(--accent-main)">Fidak Fest Portal</h2>
-      <div class="muted">Access Management and Live Data</div>
-    </div>
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <!-- Access Card -->
+        <div class="card-ui">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="bi bi-key"></i>
+                </div>
+                <h3 class="card-title">Portal Access</h3>
+            </div>
+            <div class="login-options">
+                <button class="btn btn-login btn-admin" id="btnAdmin">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>Admin Login</span>
+                </button>
+                <button class="btn btn-login btn-leader" id="btnLeader">
+                    <i class="bi bi-people"></i>
+                    <span>Leader Login</span>
+                </button>
+                <button class="btn btn-login btn-participant" id="btnParticipant">
+                    <i class="bi bi-person"></i>
+                    <span>Participant Login</span>
+                </button>
+            </div>
+        </div>
 
-    <div class="card-ui">
-        <h5 class="fw-bold mb-3" style="color:var(--text)">🚀 Access Options</h5>
-        <div class="d-grid gap-3">
-          <button class="btn btn-primary" id="btnAdmin"><i class="bi bi-shield-lock"></i> Admin Login</button>
-          <button class="btn btn-success" id="btnLeader"><i class="bi bi-people"></i> Leader Login</button>
-          <button class="btn btn-outline-primary" id="btnParticipant"><i class="bi bi-person"></i> Participant Login</button>
+        <!-- Live Stats Card -->
+        <div class="card-ui">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <h3 class="card-title">Live Statistics</h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4 class="stat-number" id="statStudentsCard">0</h4>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <h4 class="stat-number" id="statEventsCard">0</h4>
+                    <div class="stat-label">Active Events</div>
+                </div>
+                <div class="stat-card">
+                    <h4 class="stat-number" id="statTeamsCard">0</h4>
+                    <div class="stat-label">Teams Competing</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Card -->
+        <div class="card-ui">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="bi bi-trophy"></i>
+                </div>
+                <h3 class="card-title">Live Leaderboard</h3>
+            </div>
+            
+            <div class="graph-container">
+                <svg id="graphSvg" viewBox="0 0 300 150" preserveAspectRatio="none">
+                    <line x1="0" y1="37.5" x2="300" y2="37.5" class="grid-line" />
+                    <line x1="0" y1="75" x2="300" y2="75" class="grid-line" />
+                    <line x1="0" y1="112.5" x2="300" y2="112.5" class="grid-line" />
+                </svg>
+            </div>
+            
+            <div id="graphLegend" class="graph-legend"></div>
+            
+            <div class="score-list" id="scoreList">
+                <div class="text-center text-muted py-4">Loading leaderboard data...</div>
+            </div>
         </div>
     </div>
-    
-    <div class="card-ui">
-        <h5 class="fw-bold mb-3" style="color:var(--text)">📊 Festival Statistics</h5>
-        <div class="stats">
-          <div class="stat"><h4 id="statStudents">0</h4><small>Total Students</small></div>
-          <div class="stat"><h4 id="statEvents">0</h4><small>Programs Active</small></div>
-          <div class="stat"><h4 id="statTeams">0</h4><small>Teams Competing</small></div>
-        </div>
-    </div>
-
-    <div class="card-ui">
-      <h5 class="fw-bold mb-3" style="color:var(--text)">📈 Live Score Race</h5>
-      <div class="chart-container">
-        <svg id="graphSvg" viewBox="0 0 300 150" preserveAspectRatio="none">
-            <line x1="0" y1="37.5" x2="300" y2="37.5" class="grid-line" />
-            <line x1="0" y1="75" x2="300" y2="75" class="grid-line" />
-            <line x1="0" y1="112.5" x2="300" y2="112.5" class="grid-line" />
-        </svg>
-        <div id="graphLegend" class="graph-legend"></div>
-      </div>
-      <div id="scoreList" class="small text-muted mt-3">Loading Top Teams...</div>
-    </div>
-
-  </div>
 </div>
 
-<div class="modal fade" id="loginModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <form id="loginForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="loginTitle">Login</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="loginType">
-          <div class="mb-3 d-none" id="teamBox">
-            <label class="form-label">Team</label>
-            <select id="teamSelect" class="form-select"></select>
-          </div>
-          <div class="mb-3 d-none" id="participantBox">
-            <label class="form-label">Chess Number</label>
-            <input id="chessInput" type="text" class="form-control" placeholder="Enter Alphanumeric Chess ID">
-          </div>
-          <div class="mb-3" id="passwordBox">
-            <label class="form-label">Password</label>
-            <input id="passwordInput" type="password" class="form-control" placeholder="Required for Admin/Leader">
-          </div>
-          <div id="loginError" class="text-danger small d-none"></div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary w-100">Login</button>
-        </div>
-      </form>
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-content">
+        <img src="IMG_2247.png" alt="Fidak Fest" class="footer-logo">
+        <p>© 2024 Fidak Fest Management System. All rights reserved.</p>
+        <p class="text-muted small mt-2">Real-time dashboard powered by Firebase</p>
     </div>
-  </div>
+</footer>
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="loginForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginTitle">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Login Required</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="loginType">
+                    
+                    <div class="mb-4 d-none" id="teamBox">
+                        <label class="form-label">Select Your Team</label>
+                        <select id="teamSelect" class="form-select">
+                            <option value="">Select Team</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4 d-none" id="participantBox">
+                        <label class="form-label">Chess Number</label>
+                        <input id="chessInput" type="text" class="form-control" placeholder="Enter your unique Chess ID">
+                        <small class="text-muted mt-1 d-block">Enter your assigned chess number or ID</small>
+                    </div>
+                    
+                    <div class="mb-4" id="passwordBox">
+                        <label class="form-label">Password</label>
+                        <input id="passwordInput" type="password" class="form-control" placeholder="Enter your password">
+                    </div>
+                    
+                    <div id="loginError" class="error-message">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="errorText">Invalid credentials</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -375,291 +1122,496 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebas
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  // --- INTRO ---
-  const introOverlay = document.getElementById('intro-overlay');
-  setTimeout(() => { introOverlay.classList.add('fade-out'); }, 2200);
-  setTimeout(() => { introOverlay.remove(); }, 3000);
+    // --- INTRO ANIMATION ---
+    const introOverlay = document.getElementById('intro-overlay');
+    setTimeout(() => { 
+        introOverlay.classList.add('fade-out'); 
+    }, 2800);
+    setTimeout(() => { 
+        introOverlay.remove(); 
+    }, 3600);
     
-  // --- Theme ---
-  const body = document.body;
-  const themeToggles = document.querySelectorAll('[data-theme-mode]');
-  const themeIconDisplay = document.getElementById('themeIconDisplay');
-
-  function updateThemeUI(mode) {
-      if (mode === 'system') {
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          body.removeAttribute('data-theme');
-          body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-      } else {
-          body.removeAttribute('data-theme');
-          body.setAttribute('data-theme', mode);
-      }
-      themeToggles.forEach(btn => {
-          btn.classList.remove('active');
-          if(btn.getAttribute('data-theme-mode') === mode) btn.classList.add('active');
-      });
-      themeIconDisplay.className = mode === 'light' ? "bi bi-sun-fill" : (mode === 'dark' ? "bi bi-moon-stars-fill" : "bi bi-circle-half");
-  }
-
-  function setTheme(mode) {
-      localStorage.setItem('theme', mode);
-      updateThemeUI(mode);
-  }
-
-  const savedTheme = localStorage.getItem('theme') || 'system';
-  updateThemeUI(savedTheme);
-
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (localStorage.getItem('theme') === 'system') updateThemeUI('system');
-  });
-
-  themeToggles.forEach(toggle => {
-      toggle.addEventListener('click', (e) => {
-          e.preventDefault();
-          const target = e.target.closest('a');
-          setTheme(target.getAttribute('data-theme-mode'));
-      });
-  });
-
-  // --- Firebase ---
-  let app;
-  let db;
-  let allStudents = {};
-  let allTeams = {};
-
-  try {
-    const firebaseConfig = {
-      apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
-      databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
-      projectId: "gen7-3e139"
-    };
-    app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-  } catch (e) {
-    console.error("Firebase init failed:", e);
-    document.getElementById("scoreList").innerHTML = "<div class='text-danger'>Error connecting to database.</div>";
-  }
-  
-  const statStudents = document.getElementById("statStudents");
-  const statEvents = document.getElementById("statEvents");
-  const statTeams = document.getElementById("statTeams");
-  const scoreList = document.getElementById("scoreList");
-  
-  // Graph Elements
-  const graphSvg = document.getElementById("graphSvg");
-  const graphLegend = document.getElementById("graphLegend");
-  
-  // Define vibrant colors for the top teams
-  const teamColors = [
-      '#FF4081', // Pink
-      '#00E676', // Green
-      '#2979FF', // Blue
-      '#FF9100', // Orange
-      '#E040FB', // Purple
-      '#FFD740'  // Yellow
-  ];
-
-  function drawGraph(teams) {
-      // 1. Clear existing paths (keep grid lines)
-      const existingPaths = graphSvg.querySelectorAll('path');
-      existingPaths.forEach(p => p.remove());
-      graphLegend.innerHTML = '';
-
-      if(teams.length === 0) return;
-
-      // 2. Determine Scale
-      const maxScore = Math.max(...teams.map(t => t.score || 0)) || 100;
-      const svgHeight = 150;
-      const svgWidth = 300;
-
-      // 3. Draw Lines for Top 5 Teams
-      teams.slice(0, 5).forEach((t, index) => {
-          const score = t.score || 0;
-          const color = teamColors[index % teamColors.length];
-          
-          // Calculate Y position (SVG Y is inverted: 0 is top, 150 is bottom)
-          // We want 0 score at 150 (bottom) and maxScore at ~10 (top)
-          const normalizedScore = (score / (maxScore * 1.1)) * svgHeight; // *1.1 adds some headroom
-          const yPos = svgHeight - normalizedScore;
-
-          // Create a curved path: Start at bottom-left (0, 150) -> Curve to Right (300, yPos)
-          // Using Quadratic Bezier Curve (Q) for smoothness
-          const pathData = `M 0,150 Q ${svgWidth / 2},${yPos} ${svgWidth},${yPos}`;
-
-          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          path.setAttribute("d", pathData);
-          path.setAttribute("stroke", color);
-          path.setAttribute("class", "graph-path");
-          
-          // Add tooltip
-          const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-          title.textContent = `${t.name}: ${score}`;
-          path.appendChild(title);
-
-          graphSvg.appendChild(path);
-
-          // 4. Add to Legend
-          const legendItem = document.createElement("div");
-          legendItem.className = "legend-item";
-          legendItem.innerHTML = `
-            <div class="legend-dot" style="background:${color}"></div>
-            <span>${t.name}</span>
-          `;
-          graphLegend.appendChild(legendItem);
-      });
-  }
-
-  // --- Realtime Listeners ---
-  onValue(ref(db,"students"), s => {
-    allStudents = s.val() || {};
-    statStudents.textContent = Object.keys(allStudents).length;
-  });
-
-  onValue(ref(db,"events"), s => {
-    statEvents.textContent = Object.keys(s.val()||{}).length;
-  });
-
-  onValue(ref(db,"teams"), s => {
-    const teams = s.val()||{};
-    allTeams = teams;
-    statTeams.textContent = Object.keys(teams).length;
-
-    scoreList.innerHTML = "";
-    
-    // Sort teams by score (descending)
-    const sortedTeams = Object.values(teams)
-      .sort((a,b)=>(b.score||0)-(a.score||0));
-
-    // Update Graph
-    drawGraph(sortedTeams);
-
-    // List Text View
-    sortedTeams.slice(0, 5).forEach((t, i)=>{
-        const color = teamColors[i % teamColors.length];
-        scoreList.innerHTML += `
-          <div class="score-item" style="border-left: 3px solid ${color}; padding-left:10px;">
-            <span>${t.name}</span>
-            <strong>${t.score||0}</strong>
-          </div>`;
-    });
-      
-    // Update Select
-    const teamSelect = document.getElementById("teamSelect");
-    teamSelect.innerHTML = `<option value="">Select Team</option>`;
-    Object.values(teams).forEach(t=>{
-        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-    });
-  });
-
-  // --- Login Logic ---
-  const modal = new bootstrap.Modal(document.getElementById("loginModal"));
-  const loginForm = document.getElementById("loginForm");
-  const loginType = document.getElementById("loginType");
-  const teamBox = document.getElementById("teamBox");
-  const participantBox = document.getElementById("participantBox");
-  const passwordBox = document.getElementById("passwordBox");
-  const loginTitle = document.getElementById("loginTitle");
-  const passwordInput = document.getElementById("passwordInput");
-  const chessInput = document.getElementById("chessInput");
-  const loginError = document.getElementById("loginError");
-
-  const btnAdmin = document.getElementById("btnAdmin");
-  const btnLeader = document.getElementById("btnLeader");
-  const btnParticipant = document.getElementById("btnParticipant");
-
-  function openLogin(type){
-    loginType.value = type;
-    loginError.classList.add("d-none");
-    passwordInput.value = "";
-    chessInput.value = "";
-
-    if(type === "admin"){
-        loginTitle.textContent = "ADMIN LOGIN";
-        teamBox.classList.add("d-none");
-        participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none");
-        passwordInput.placeholder = "Admin Password";
-    } else if (type === "leader"){
-        loginTitle.textContent = "LEADER LOGIN";
-        teamBox.classList.remove("d-none");
-        participantBox.classList.add("d-none");
-        passwordBox.classList.remove("d-none");
-        passwordInput.placeholder = "Leader Password";
-    } else if (type === "participant"){
-        loginTitle.textContent = "PARTICIPANT LOGIN";
-        teamBox.classList.add("d-none");
-        participantBox.classList.remove("d-none");
-        passwordBox.classList.add("d-none");
-    }
-    modal.show();
-  }
-
-  btnAdmin.onclick = () => openLogin("admin");
-  btnLeader.onclick = () => openLogin("leader");
-  btnParticipant.onclick = () => openLogin("participant");
-
-  loginForm.onsubmit = async e => {
-    e.preventDefault();
-    const type = loginType.value;
-    const pwd = passwordInput.value;
-    const chessID = chessInput.value.trim();
-
-    loginError.classList.add("d-none");
-
-    if(type==="admin"){
-      if(pwd!=="1234"){ error("Wrong admin password"); return; }
-      location.href="admin.html";
-    }
-
-    if(type==="leader"){
-      const teamId = document.getElementById("teamSelect").value;
-      const team = Object.values(allTeams).find(t => String(t.id) === teamId);
-      if(!team || team.password !== pwd){ error("Invalid team or password"); return; }
-      if (!team.leaderId) { error("Team leader ID not set."); return; }
-      sessionStorage.setItem("leaderAuth", JSON.stringify(team));
-      location.href=`leader.html?leader=${team.leaderId}`;
-    }
-    
-    if (type === "participant") {
-        if (!chessID) { error("Please enter your Chess Number."); return; }
-        
-        if (Object.keys(allStudents).length === 0) {
-            error("Data loading... please wait 2 seconds and try again.");
-            return;
-        }
-        
-        let student;
-        if (allStudents[chessID]) {
-            student = allStudents[chessID];
+    // --- NAVBAR SCROLL EFFECT ---
+    const navbar = document.getElementById('mainNavbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
         } else {
-            const lowerCaseID = chessID.toLowerCase();
-            student = Object.values(allStudents).find(s => {
-                const sId = String(s.id || '').trim().toLowerCase();
-                const sChestNo = String(s.chestNo || '').trim().toLowerCase();
-                const sChessNo = String(s.chessNo || '').trim().toLowerCase();
-                return sId === lowerCaseID || sChestNo === lowerCaseID || sChessNo === lowerCaseID;
-            });
+            navbar.classList.remove('scrolled');
+        }
+    });
+    
+    // --- THEME MANAGEMENT ---
+    const body = document.body;
+    const themeToggles = document.querySelectorAll('[data-theme-mode]');
+    const themeIconDisplay = document.getElementById('themeIconDisplay');
+
+    function updateThemeUI(mode) {
+        // Remove all active classes first
+        themeToggles.forEach(btn => {
+            btn.classList.remove('active');
+            const checkIcon = btn.querySelector('.check-icon');
+            if (checkIcon) checkIcon.style.opacity = '0';
+        });
+
+        // Set theme
+        if (mode === 'system') {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        } else {
+            body.setAttribute('data-theme', mode);
         }
 
-        if (!student) {
-            error("Invalid Chess Number. ID not found.");
+        // Update active state
+        themeToggles.forEach(btn => {
+            if (btn.getAttribute('data-theme-mode') === mode) {
+                btn.classList.add('active');
+                const checkIcon = btn.querySelector('.check-icon');
+                if (checkIcon) checkIcon.style.opacity = '1';
+            }
+        });
+
+        // Update icon
+        const iconClass = {
+            'light': 'bi-sun-fill',
+            'dark': 'bi-moon-stars-fill',
+            'system': 'bi-circle-half'
+        }[mode];
+        themeIconDisplay.className = `bi ${iconClass}`;
+    }
+
+    function setTheme(mode) {
+        localStorage.setItem('theme', mode);
+        updateThemeUI(mode);
+    }
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'system';
+    updateThemeUI(savedTheme);
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (localStorage.getItem('theme') === 'system') {
+            updateThemeUI('system');
+        }
+    });
+
+    // Theme toggle events
+    themeToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = e.currentTarget;
+            const mode = target.getAttribute('data-theme-mode');
+            setTheme(mode);
+        });
+    });
+
+    // --- FIREBASE INITIALIZATION ---
+    let app;
+    let db;
+    let allStudents = {};
+    let allTeams = {};
+    let allEvents = {};
+
+    try {
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
+            databaseURL: "https://gen7-3e139-default-rtdb.firebaseio.com",
+            projectId: "gen7-3e139"
+        };
+        app = initializeApp(firebaseConfig);
+        db = getDatabase(app);
+    } catch (e) {
+        console.error("Firebase initialization failed:", e);
+        showError("Database connection failed. Please refresh the page.");
+    }
+
+    // --- UI ELEMENTS ---
+    const statElements = {
+        students: ['statStudents', 'statStudentsCard'],
+        events: ['statEvents', 'statEventsCard'],
+        teams: ['statTeams', 'statTeamsCard']
+    };
+
+    const scoreList = document.getElementById("scoreList");
+    const graphSvg = document.getElementById("graphSvg");
+    const graphLegend = document.getElementById("graphLegend");
+    
+    // Color palette for teams
+    const teamColors = [
+        '#FF4081', '#00E676', '#2979FF', '#FF9100', '#E040FB',
+        '#FFD740', '#18FFFF', '#FF6B6B', '#4ECDC4', '#45B7D1'
+    ];
+
+    // --- GRAPH FUNCTIONS ---
+    function drawGraph(teams) {
+        // Clear existing graph elements except grid lines
+        const existingPaths = graphSvg.querySelectorAll('path');
+        existingPaths.forEach(p => p.remove());
+        
+        const existingCircles = graphSvg.querySelectorAll('circle');
+        existingCircles.forEach(c => c.remove());
+        
+        graphLegend.innerHTML = '';
+
+        if (!teams || teams.length === 0) {
+            // Draw placeholder text
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", "150");
+            text.setAttribute("y", "75");
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("fill", "var(--muted)");
+            text.setAttribute("font-size", "14");
+            text.textContent = "No team data available";
+            graphSvg.appendChild(text);
             return;
         }
-        
-        const studentID = student.id || student.chestNo || chessID;
-        sessionStorage.setItem("participantId", studentID);
-        sessionStorage.setItem("participantName", student.name || "Participant");
-        location.href="participant.html"; 
-    }
-  };
 
-  function error(msg){
-    loginError.textContent = msg;
-    loginError.classList.remove("d-none");
-  }
+        const svgWidth = 300;
+        const svgHeight = 150;
+        const maxScore = Math.max(...teams.map(t => t.score || 0), 100);
+        const topTeams = teams.slice(0, 6); // Top 6 teams
+
+        // Draw team lines
+        topTeams.forEach((team, index) => {
+            const color = teamColors[index % teamColors.length];
+            const score = team.score || 0;
+            
+            // Calculate Y position (inverted: 0 at bottom)
+            const yPos = svgHeight - (score / maxScore) * (svgHeight * 0.8) - 10;
+            
+            // Create curved path
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const pathData = `M 0,${svgHeight} Q ${svgWidth * 0.3},${yPos + 20} ${svgWidth * 0.5},${yPos} Q ${svgWidth * 0.7},${yPos - 20} ${svgWidth},${yPos}`;
+            
+            path.setAttribute("d", pathData);
+            path.setAttribute("stroke", color);
+            path.setAttribute("stroke-width", "3");
+            path.setAttribute("fill", "none");
+            path.setAttribute("class", "graph-path");
+            path.style.animationDelay = `${index * 0.2}s`;
+            
+            // Add tooltip
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+            title.textContent = `${team.name}: ${score} points`;
+            path.appendChild(title);
+            
+            graphSvg.appendChild(path);
+            
+            // Add endpoint circle
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", svgWidth);
+            circle.setAttribute("cy", yPos);
+            circle.setAttribute("r", "4");
+            circle.setAttribute("fill", color);
+            circle.setAttribute("stroke", "white");
+            circle.setAttribute("stroke-width", "2");
+            graphSvg.appendChild(circle);
+
+            // Add to legend
+            const legendItem = document.createElement("div");
+            legendItem.className = "legend-item";
+            legendItem.innerHTML = `
+                <div class="legend-dot" style="background:${color}"></div>
+                <span class="legend-name">${team.name}</span>
+                <span class="legend-score">${score}</span>
+            `;
+            graphLegend.appendChild(legendItem);
+        });
+    }
+
+    // --- STATS UPDATE FUNCTIONS ---
+    function updateStat(statName, value) {
+        statElements[statName].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                // Animate number change
+                const current = parseInt(element.textContent) || 0;
+                animateNumber(element, current, value);
+            }
+        });
+    }
+
+    function animateNumber(element, start, end) {
+        if (start === end) return;
+        
+        const duration = 1000;
+        const startTime = Date.now();
+        const step = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const current = Math.floor(start + (end - start) * easeOutCubic(progress));
+            
+            element.textContent = current;
+            
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                element.textContent = end;
+            }
+        };
+        
+        requestAnimationFrame(step);
+    }
+
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+
+    // --- FIREBASE LISTENERS ---
+    // Students listener
+    onValue(ref(db, "students"), snapshot => {
+        const students = snapshot.val() || {};
+        allStudents = students;
+        const count = Object.keys(students).length;
+        updateStat('students', count);
+    });
+
+    // Events listener
+    onValue(ref(db, "events"), snapshot => {
+        const events = snapshot.val() || {};
+        allEvents = events;
+        const count = Object.keys(events).length;
+        updateStat('events', count);
+    });
+
+    // Teams listener (main data source)
+    onValue(ref(db, "teams"), snapshot => {
+        const teams = snapshot.val() || {};
+        allTeams = teams;
+        const count = Object.keys(teams).length;
+        updateStat('teams', count);
+
+        // Sort teams by score
+        const sortedTeams = Object.values(teams)
+            .sort((a, b) => (b.score || 0) - (a.score || 0))
+            .slice(0, 10); // Top 10 teams
+
+        // Update graph
+        drawGraph(sortedTeams);
+
+        // Update score list
+        updateScoreList(sortedTeams);
+
+        // Update team dropdown
+        updateTeamDropdown(teams);
+    });
+
+    function updateScoreList(teams) {
+        if (!teams || teams.length === 0) {
+            scoreList.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-trophy-fill display-4 opacity-50 mb-3"></i>
+                    <p>No team scores yet</p>
+                </div>`;
+            return;
+        }
+
+        let html = '';
+        teams.forEach((team, index) => {
+            const color = teamColors[index % teamColors.length];
+            const medal = index < 3 ? ['🥇', '🥈', '🥉'][index] : `${index + 1}.`;
+            
+            html += `
+                <div class="score-item" style="border-left-color: ${color};">
+                    <div class="score-rank">${medal}</div>
+                    <div class="score-name">${team.name || 'Unnamed Team'}</div>
+                    <div class="score-value">${team.score || 0}</div>
+                </div>`;
+        });
+        
+        scoreList.innerHTML = html;
+    }
+
+    function updateTeamDropdown(teams) {
+        const teamSelect = document.getElementById("teamSelect");
+        if (!teamSelect) return;
+
+        let options = '<option value="">Select Team</option>';
+        Object.values(teams).forEach(team => {
+            options += `<option value="${team.id}">${team.name || 'Unnamed Team'}</option>`;
+        });
+        
+        teamSelect.innerHTML = options;
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById("loginError");
+        const errorText = document.getElementById("errorText");
+        
+        if (errorDiv && errorText) {
+            errorText.textContent = message;
+            errorDiv.classList.add("show");
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.classList.remove("show");
+            }, 5000);
+        }
+    }
+
+    // --- LOGIN MODAL ---
+    const loginModal = new bootstrap.Modal(document.getElementById("loginModal"));
+    const loginForm = document.getElementById("loginForm");
+    const loginType = document.getElementById("loginType");
+    const teamBox = document.getElementById("teamBox");
+    const participantBox = document.getElementById("participantBox");
+    const passwordBox = document.getElementById("passwordBox");
+    const loginTitle = document.getElementById("loginTitle");
+    const passwordInput = document.getElementById("passwordInput");
+    const chessInput = document.getElementById("chessInput");
+    const loginError = document.getElementById("loginError");
+
+    // Login button handlers
+    document.getElementById("btnAdmin").addEventListener("click", () => openLogin("admin"));
+    document.getElementById("btnLeader").addEventListener("click", () => openLogin("leader"));
+    document.getElementById("btnParticipant").addEventListener("click", () => openLogin("participant"));
+
+    function openLogin(type) {
+        loginType.value = type;
+        loginError.classList.remove("show");
+        passwordInput.value = "";
+        chessInput.value = "";
+
+        // Update modal based on login type
+        const config = {
+            admin: {
+                title: "Admin Login",
+                icon: "bi-shield-lock",
+                showTeam: false,
+                showParticipant: false,
+                showPassword: true,
+                passwordPlaceholder: "Enter admin password"
+            },
+            leader: {
+                title: "Leader Login",
+                icon: "bi-people",
+                showTeam: true,
+                showParticipant: false,
+                showPassword: true,
+                passwordPlaceholder: "Enter team password"
+            },
+            participant: {
+                title: "Participant Login",
+                icon: "bi-person",
+                showTeam: false,
+                showParticipant: true,
+                showPassword: false,
+                passwordPlaceholder: ""
+            }
+        }[type];
+
+        // Apply configuration
+        loginTitle.innerHTML = `<i class="bi ${config.icon}"></i> <span>${config.title}</span>`;
+        teamBox.classList.toggle("d-none", !config.showTeam);
+        participantBox.classList.toggle("d-none", !config.showParticipant);
+        passwordBox.classList.toggle("d-none", !config.showPassword);
+        passwordInput.placeholder = config.passwordPlaceholder;
+
+        // Show modal
+        loginModal.show();
+    }
+
+    // Form submission
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loginError.classList.remove("show");
+
+        const type = loginType.value;
+        const password = passwordInput.value;
+        const chessID = chessInput.value.trim();
+
+        try {
+            switch (type) {
+                case "admin":
+                    if (password !== "1234") {
+                        throw new Error("Invalid admin password");
+                    }
+                    window.location.href = "admin.html";
+                    break;
+
+                case "leader":
+                    const teamId = document.getElementById("teamSelect").value;
+                    if (!teamId) {
+                        throw new Error("Please select a team");
+                    }
+                    
+                    const team = Object.values(allTeams).find(t => String(t.id) === teamId);
+                    if (!team) {
+                        throw new Error("Team not found");
+                    }
+                    
+                    if (team.password !== password) {
+                        throw new Error("Invalid team password");
+                    }
+                    
+                    if (!team.leaderId) {
+                        throw new Error("Team leader not assigned");
+                    }
+                    
+                    sessionStorage.setItem("leaderAuth", JSON.stringify(team));
+                    window.location.href = `leader.html?leader=${team.leaderId}`;
+                    break;
+
+                case "participant":
+                    if (!chessID) {
+                        throw new Error("Please enter your Chess ID");
+                    }
+
+                    if (Object.keys(allStudents).length === 0) {
+                        throw new Error("Loading student data... Please try again in a moment");
+                    }
+
+                    let student;
+                    const lowerCaseID = chessID.toLowerCase();
+                    
+                    // Try to find student by various ID fields
+                    student = Object.values(allStudents).find(s => {
+                        const idFields = [
+                            s.id,
+                            s.chestNo,
+                            s.chessNo,
+                            s.studentId,
+                            s.registrationNo
+                        ].filter(Boolean).map(f => String(f).toLowerCase());
+                        
+                        return idFields.includes(lowerCaseID);
+                    });
+
+                    if (!student) {
+                        throw new Error("Student not found. Please check your Chess ID");
+                    }
+
+                    sessionStorage.setItem("participantId", student.id || chessID);
+                    sessionStorage.setItem("participantName", student.name || "Participant");
+                    sessionStorage.setItem("participantData", JSON.stringify(student));
+                    
+                    window.location.href = "participant.html";
+                    break;
+
+                default:
+                    throw new Error("Invalid login type");
+            }
+        } catch (error) {
+            showError(error.message);
+        }
+    });
+
+    // Initialize with some sample data if Firebase fails
+    setTimeout(() => {
+        if (Object.keys(allTeams).length === 0) {
+            const sampleTeams = [
+                { name: "Team Alpha", score: 150 },
+                { name: "Team Beta", score: 120 },
+                { name: "Team Gamma", score: 90 },
+                { name: "Team Delta", score: 75 },
+                { name: "Team Epsilon", score: 60 }
+            ];
+            drawGraph(sampleTeams);
+            updateScoreList(sampleTeams);
+        }
+    }, 3000);
 });
 </script>
-
 </body>
 </html>
