@@ -1325,7 +1325,7 @@ $('downloadApprovalsPdf').addEventListener('click', () => {
 /* ---------------- RESULTS (FIXED LOGIC & ACTIONS) ---------------- */
 // Result Validation
 function validateResults(inputs) {
-    const selectedIds = inputs.filter(i => i.sid).map(i => i.sid);
+    const selectedIds = inputs.filter(i => i.sid && i.sid !== '').map(i => i.sid);
     const uniqueIds = new Set(selectedIds);
     if (selectedIds.length !== uniqueIds.size) {
         return { valid: false, message: "1st, 2nd, and 3rd places must be unique students." };
@@ -1371,79 +1371,151 @@ $('resultEvent').addEventListener('change', () => {
 });
 
 
-$('saveResult').addEventListener('click', async () => saveRes(false, 'resultEvent', 'resultSelectFirst', 'resultPointsFirst', 'resultSelectSecond', 'resultPointsSecond', 'resultSelectThird', 'resultPointsThird'));
-
-$('publishAllResults').addEventListener('click', async () => saveRes(true, 'resultEvent', 'resultSelectFirst', 'resultPointsFirst', 'resultSelectSecond', 'resultPointsSecond', 'resultSelectThird', 'resultPointsThird'));
-
-async function saveRes(publish, eventIdElement, s1, p1, s2, p2, s3, p3){
-  const eid = $(eventIdElement).value; if(!eid) return toast('Select event','danger');
-  
-  const inputs = [
-    { pos:1, sid:$(s1).value, pts:Number($(p1).value)||0 },
-    { pos:2, sid:$(s2).value, pts:Number($(p2).value)||0 },
-    { pos:3, sid:$(s3).value, pts:Number($(p3).value)||0 }
-  ];
-  
-  const validation = validateResults(inputs);
-  if (!validation.valid) return toast(validation.message, 'danger');
-  
-  // 1. Clean slate/Unpublish and reset scores for this event first (Only if publishing)
-  if(publish) {
-      const oldResults = CACHE.results.filter(r => r.eventId === eid && r.published);
-      for(const oldR of oldResults) {
-          const oldStu = CACHE.students.find(s=>s.id === oldR.studentId);
-          if(oldStu && oldStu.teamId){
-             const tm = CACHE.teams.find(t=>t.id === oldStu.teamId);
-             if(tm) { // Check if team exists
-                const tmKey = KEYMAP.teams[tm.id];
-                await update(ref(db, `teams/${tmKey}`), { score: (tm.score||0) - oldR.points });
-             }
-          }
-          const oldRKey = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === oldR.id);
-          if (oldRKey) await update(ref(db, `results/${oldRKey}`), { published: false });
-      }
-  }
-
-  // 2. Publish/Save new results
-  for(const i of inputs){
-    // Find existing entry by eventId and position
-    const existingEntry = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
+$('saveResult').addEventListener('click', async () => {
+    const eid = $('resultEvent').value; 
+    if(!eid) return toast('Select event','danger');
     
-    if(i.sid){ // Only save if a student is selected
-      const data = { eventId:eid, position:i.pos, studentId:i.sid, points:i.pts, published:publish, id: existingEntry?.id || Date.now()+Math.random().toString() };
-      
-      if(existingEntry) {
-          const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
-          await update(ref(db, `results/${key}`), data);
-      }
-      else {
-          await set(push(ref(db, 'results')), data);
-      }
-      
-      // Update Team Score (Only if publishing)
-      if(publish){
-         const stu = CACHE.students.find(s=>s.id === i.sid);
-         if(stu && stu.teamId){
-            const tm = CACHE.teams.find(t=>t.id === stu.teamId);
-             if(tm) { // Check if team exists
-                const tmKey = KEYMAP.teams[tm.id];
-                await update(ref(db, `teams/${tmKey}`), { score: (tm.score||0) + i.pts });
-             }
-         }
-      }
-    } else if (existingEntry) {
-        // If no student is selected but an old result exists, we should delete it.
-        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
-        if (key) await remove(ref(db, `results/${key}`));
+    // Get the actual values
+    const student1 = $('resultSelectFirst').value;
+    const points1 = Number($('resultPointsFirst').value) || 0;
+    const student2 = $('resultSelectSecond').value;
+    const points2 = Number($('resultPointsSecond').value) || 0;
+    const student3 = $('resultSelectThird').value;
+    const points3 = Number($('resultPointsThird').value) || 0;
+    
+    const inputs = [
+        { pos:1, sid: student1, pts: points1 },
+        { pos:2, sid: student2, pts: points2 },
+        { pos:3, sid: student3, pts: points3 }
+    ];
+    
+    const validation = validateResults(inputs);
+    if (!validation.valid) return toast(validation.message, 'danger');
+    
+    // Save as draft (not published)
+    for(const i of inputs){
+        if(i.sid && i.sid !== ''){
+            // Find existing entry
+            const existingEntry = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
+            const data = { 
+                eventId: eid, 
+                position: i.pos, 
+                studentId: i.sid, 
+                points: i.pts, 
+                published: false, 
+                id: existingEntry?.id || Date.now() + Math.random().toString() 
+            };
+            
+            if(existingEntry) {
+                const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
+                await update(ref(db, `results/${key}`), data);
+            } else {
+                await set(push(ref(db, 'results')), data);
+            }
+        }
     }
-  }
-  toast(publish ? 'Published & Scores Updated!' : 'Draft saved');
-  
-  if(eventIdElement === 'resultEvent') {
-      $(eventIdElement).value = ''; 
-      $('resultEvent').dispatchEvent(new Event('change')); // Trigger change to clear dropdowns
-  }
-}
+    
+    toast('Draft saved');
+    
+    // Clear form
+    $('resultEvent').value = '';
+    $('resultSelectFirst').value = '';
+    $('resultSelectSecond').value = '';
+    $('resultSelectThird').value = '';
+    $('resultPointsFirst').value = '';
+    $('resultPointsSecond').value = '';
+    $('resultPointsThird').value = '';
+});
+
+$('publishAllResults').addEventListener('click', async () => {
+    const eid = $('resultEvent').value; 
+    if(!eid) return toast('Select event','danger');
+    
+    // Get the actual values
+    const student1 = $('resultSelectFirst').value;
+    const points1 = Number($('resultPointsFirst').value) || 0;
+    const student2 = $('resultSelectSecond').value;
+    const points2 = Number($('resultPointsSecond').value) || 0;
+    const student3 = $('resultSelectThird').value;
+    const points3 = Number($('resultPointsThird').value) || 0;
+    
+    const inputs = [
+        { pos:1, sid: student1, pts: points1 },
+        { pos:2, sid: student2, pts: points2 },
+        { pos:3, sid: student3, pts: points3 }
+    ];
+    
+    const validation = validateResults(inputs);
+    if (!validation.valid) return toast(validation.message, 'danger');
+    
+    // 1. Clean slate/Unpublish and reset scores for this event first
+    const oldResults = CACHE.results.filter(r => r.eventId === eid && r.published);
+    for(const oldR of oldResults) {
+        const oldStu = CACHE.students.find(s=>s.id === oldR.studentId);
+        if(oldStu && oldStu.teamId){
+           const tm = CACHE.teams.find(t=>t.id === oldStu.teamId);
+           if(tm) {
+              const tmKey = KEYMAP.teams[tm.id];
+              await update(ref(db, `teams/${tmKey}`), { 
+                score: Math.max(0, (tm.score||0) - (oldR.points || 0)) 
+              });
+           }
+        }
+        const oldRKey = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === oldR.id);
+        if (oldRKey) await update(ref(db, `results/${oldRKey}`), { published: false });
+    }
+
+    // 2. Publish new results
+    for(const i of inputs){
+        // Find existing entry by eventId and position
+        const existingEntry = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
+        
+        if(i.sid && i.sid !== ''){ // Only save if a student is selected
+            const data = { 
+                eventId: eid, 
+                position: i.pos, 
+                studentId: i.sid, 
+                points: i.pts, 
+                published: true, 
+                id: existingEntry?.id || Date.now() + Math.random().toString() 
+            };
+            
+            if(existingEntry) {
+                const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
+                await update(ref(db, `results/${key}`), data);
+            }
+            else {
+                await set(push(ref(db, 'results')), data);
+            }
+            
+            // Update Team Score
+            const stu = CACHE.students.find(s=>s.id === i.sid);
+            if(stu && stu.teamId){
+                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
+                if(tm) {
+                    const tmKey = KEYMAP.teams[tm.id];
+                    const newScore = (tm.score || 0) + i.pts;
+                    await update(ref(db, `teams/${tmKey}`), { score: newScore });
+                }
+            }
+        } else if (existingEntry) {
+            // If no student is selected but an old result exists, delete it
+            const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
+            if (key) await remove(ref(db, `results/${key}`));
+        }
+    }
+    
+    toast('Published & Scores Updated!');
+    
+    // Clear form after publishing
+    $('resultEvent').value = '';
+    $('resultSelectFirst').value = '';
+    $('resultSelectSecond').value = '';
+    $('resultSelectThird').value = '';
+    $('resultPointsFirst').value = '';
+    $('resultPointsSecond').value = '';
+    $('resultPointsThird').value = '';
+});
 
 function renderResults(){
   const tbody = $('resultsTable');
@@ -1473,9 +1545,7 @@ function renderResults(){
 }
 
 // FIX: New Management Modal Logic (Called by btn-edit-results)
-// IMPORTANT: Event delegation used to catch dynamically created buttons
 $('resultsTable').addEventListener('click', (e) => {
-    // Check if the clicked element OR its closest ancestor is the edit button
     const btn = e.target.closest('.btn-edit-results');
     if (btn) {
         const eid = btn.dataset.eid;
@@ -1512,60 +1582,151 @@ $('resultsTable').addEventListener('click', (e) => {
         $('manageEventId').value = eid;
         $('resultEventNameDisplay').textContent = ev.name;
         
-        // **CRITICAL FIX AREA:** Display the modal. 
-        try {
-            // This relies on bootstrap.bundle.min.js being loaded BEFORE this module executes.
-            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                 new bootstrap.Modal($('#resultManageModal')).show(); 
-            } else {
-                console.error("Bootstrap Modal object is undefined. Check CDN load.");
-                toast("Error: Bootstrap modal failed to initialize. Check console for details.", "danger");
-            }
-        } catch (error) {
-            console.error("Failed to show modal. Potential issue with Bootstrap loading or Modal constructor.", error);
-            toast("Error: Bootstrap modal failed to initialize. Check console for details.", "danger");
-        }
+        // Display the modal
+        new bootstrap.Modal($('resultManageModal')).show();
     }
 });
 
 // FIX: Handle Management Modal Form Submission (Save Draft)
-$('#resultManageForm').addEventListener('submit', async (e) => {
+$('resultManageForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const eid = $('#manageEventId').value;
-    const s1 = $('#manageResultSelectFirst').id;
-    const p1 = $('#manageResultPointsFirst').id;
-    const s2 = $('#manageResultSelectSecond').id;
-    const p2 = $('#manageResultPointsSecond').id;
-    const s3 = $('#manageResultSelectThird').id;
-    const p3 = $('#manageResultPointsThird').id;
+    const eid = $('manageEventId').value;
     
-    await saveRes(false, 'manageEventId', s1, p1, s2, p2, s3, p3);
+    // Get the actual values
+    const student1 = $('manageResultSelectFirst').value;
+    const points1 = Number($('manageResultPointsFirst').value) || 0;
+    const student2 = $('manageResultSelectSecond').value;
+    const points2 = Number($('manageResultPointsSecond').value) || 0;
+    const student3 = $('manageResultSelectThird').value;
+    const points3 = Number($('manageResultPointsThird').value) || 0;
+    
+    const inputs = [
+        { pos:1, sid: student1, pts: points1 },
+        { pos:2, sid: student2, pts: points2 },
+        { pos:3, sid: student3, pts: points3 }
+    ];
+    
+    const validation = validateResults(inputs);
+    if (!validation.valid) return toast(validation.message, 'danger');
+    
+    // Save as draft (not published)
+    for(const i of inputs){
+        if(i.sid && i.sid !== ''){
+            // Find existing entry
+            const existingEntry = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
+            const data = { 
+                eventId: eid, 
+                position: i.pos, 
+                studentId: i.sid, 
+                points: i.pts, 
+                published: false, 
+                id: existingEntry?.id || Date.now() + Math.random().toString() 
+            };
+            
+            if(existingEntry) {
+                const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
+                await update(ref(db, `results/${key}`), data);
+            } else {
+                await set(push(ref(db, 'results')), data);
+            }
+        }
+    }
+    
+    toast('Draft saved');
     try {
-        bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+        bootstrap.Modal.getInstance($('resultManageModal')).hide();
     } catch (e) {}
 });
 
 // FIX: Handle Management Modal Publish Button
-$('#managePublishBtn').addEventListener('click', async () => {
-    const eid = $('#manageEventId').value;
-    const s1 = $('#manageResultSelectFirst').id;
-    const p1 = $('#manageResultPointsFirst').id;
-    const s2 = $('#manageResultSelectSecond').id;
-    const p2 = $('#manageResultPointsSecond').id;
-    const s3 = $('#manageResultSelectThird').id;
-    const p3 = $('#manageResultPointsThird').id;
+$('managePublishBtn').addEventListener('click', async () => {
+    const eid = $('manageEventId').value;
     
-    await saveRes(true, 'manageEventId', s1, p1, s2, p2, s3, p3);
+    // Get the actual values
+    const student1 = $('manageResultSelectFirst').value;
+    const points1 = Number($('manageResultPointsFirst').value) || 0;
+    const student2 = $('manageResultSelectSecond').value;
+    const points2 = Number($('manageResultPointsSecond').value) || 0;
+    const student3 = $('manageResultSelectThird').value;
+    const points3 = Number($('manageResultPointsThird').value) || 0;
+    
+    const inputs = [
+        { pos:1, sid: student1, pts: points1 },
+        { pos:2, sid: student2, pts: points2 },
+        { pos:3, sid: student3, pts: points3 }
+    ];
+    
+    const validation = validateResults(inputs);
+    if (!validation.valid) return toast(validation.message, 'danger');
+    
+    // 1. Clean slate/Unpublish and reset scores for this event first
+    const oldResults = CACHE.results.filter(r => r.eventId === eid && r.published);
+    for(const oldR of oldResults) {
+        const oldStu = CACHE.students.find(s=>s.id === oldR.studentId);
+        if(oldStu && oldStu.teamId){
+           const tm = CACHE.teams.find(t=>t.id === oldStu.teamId);
+           if(tm) {
+              const tmKey = KEYMAP.teams[tm.id];
+              await update(ref(db, `teams/${tmKey}`), { 
+                score: Math.max(0, (tm.score||0) - (oldR.points || 0)) 
+              });
+           }
+        }
+        const oldRKey = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === oldR.id);
+        if (oldRKey) await update(ref(db, `results/${oldRKey}`), { published: false });
+    }
+
+    // 2. Publish new results
+    for(const i of inputs){
+        // Find existing entry by eventId and position
+        const existingEntry = CACHE.results.find(r => r.eventId === eid && r.position === i.pos);
+        
+        if(i.sid && i.sid !== ''){ // Only save if a student is selected
+            const data = { 
+                eventId: eid, 
+                position: i.pos, 
+                studentId: i.sid, 
+                points: i.pts, 
+                published: true, 
+                id: existingEntry?.id || Date.now() + Math.random().toString() 
+            };
+            
+            if(existingEntry) {
+                const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
+                await update(ref(db, `results/${key}`), data);
+            }
+            else {
+                await set(push(ref(db, 'results')), data);
+            }
+            
+            // Update Team Score
+            const stu = CACHE.students.find(s=>s.id === i.sid);
+            if(stu && stu.teamId){
+                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
+                if(tm) {
+                    const tmKey = KEYMAP.teams[tm.id];
+                    const newScore = (tm.score || 0) + i.pts;
+                    await update(ref(db, `teams/${tmKey}`), { score: newScore });
+                }
+            }
+        } else if (existingEntry) {
+            // If no student is selected but an old result exists, delete it
+            const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existingEntry.id);
+            if (key) await remove(ref(db, `results/${key}`));
+        }
+    }
+    
+    toast('Published & Scores Updated!');
     try {
-        bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+        bootstrap.Modal.getInstance($('resultManageModal')).hide();
     } catch (e) {}
 });
 
 // FIX: Handle Management Modal Delete Button
-$('#deleteEventResultsBtn').addEventListener('click', async () => {
+$('deleteEventResultsBtn').addEventListener('click', async () => {
     if (!confirm('Are you sure you want to delete ALL results for this event? This includes scores and publication status.')) return;
     
-    const eid = $('#manageEventId').value;
+    const eid = $('manageEventId').value;
     const resultsToDelete = CACHE.results.filter(r => r.eventId === eid);
     
     // 1. Unpublish and reset scores
@@ -1574,9 +1735,9 @@ $('#deleteEventResultsBtn').addEventListener('click', async () => {
              const stu = CACHE.students.find(s=>s.id === r.studentId);
              if(stu && stu.teamId){
                 const tm = CACHE.teams.find(t=>t.id === stu.teamId);
-                if(tm) { // Check if team exists
+                if(tm) {
                     const tmKey = KEYMAP.teams[tm.id];
-                    await update(ref(db, `teams/${tmKey}`), { score: (tm.score||0) - r.points });
+                    await update(ref(db, `teams/${tmKey}`), { score: Math.max(0, (tm.score||0) - r.points) });
                 }
              }
         }
@@ -1587,7 +1748,7 @@ $('#deleteEventResultsBtn').addEventListener('click', async () => {
     
     toast('All results deleted for this event.', 'danger');
     try {
-        bootstrap.Modal.getInstance($('#resultManageModal')).hide();
+        bootstrap.Modal.getInstance($('resultManageModal')).hide();
     } catch (e) {}
 });
 
