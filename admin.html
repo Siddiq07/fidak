@@ -15,23 +15,36 @@
     /* ROOT THEME VARIABLES */
     /* -------------------------------------- */
     :root{
-      /* Dark Mode (Default) */
-      --bg: #0d121c; --card: #1c2738; --text: #e2e8f0; --muted: #94a3b8;
-      --border: #334155; 
-      --input-bg: #334155;
-      --accent-main: #f97316; --accent-secondary: #3b82f6;
-      --success: #10b981; --danger: #ef4444; --warning: #facc15;
-    }
-    /* Light Mode Toggle */
-    .light-mode {
+      /* Light Mode (Default) */
       --bg: #f8f9fa; /* Light Grey/White */
       --card: #ffffff; /* White Card */
       --text: #212529; /* Dark Text */
       --muted: #6c757d; /* Grey Muted */
       --border: #dee2e6;
       --input-bg: #e9ecef;
-      --accent-main: #dc3545; /* Red (Example, could be anything) */
-      --accent-secondary: #0d6efd; /* Bootstrap Blue */
+      --accent-main: #0d6efd; /* Bootstrap Blue */
+      --accent-secondary: #198754; /* Bootstrap Green */
+      --success: #198754; --danger: #dc3545; --warning: #ffc107;
+      --sidebar-bg: #ffffff;
+      --sidebar-text: #495057;
+      --sidebar-active: #0d6efd;
+      --sidebar-hover: #f8f9fa;
+    }
+    /* Dark Mode Toggle */
+    .dark-mode {
+      --bg: #0d121c; 
+      --card: #1c2738; 
+      --text: #e2e8f0; 
+      --muted: #94a3b8;
+      --border: #334155; 
+      --input-bg: #334155;
+      --accent-main: #3b82f6; 
+      --accent-secondary: #10b981;
+      --success: #10b981; --danger: #ef4444; --warning: #facc15;
+      --sidebar-bg: #1c2738;
+      --sidebar-text: #cbd5e1;
+      --sidebar-active: #3b82f6;
+      --sidebar-hover: #334155;
     }
 
     *{box-sizing:border-box}
@@ -41,8 +54,8 @@
     .app-wrap{display:flex;min-height:100vh;align-items:stretch}
     
     .sidebar{
-        width:68px; 
-        background:var(--card); 
+        width:70px; 
+        background:var(--sidebar-bg); 
         border-right:1px solid var(--border); 
         display:flex;
         flex-direction:column;
@@ -54,71 +67,343 @@
         top: 0; 
         bottom: 0;
         height: 100vh;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.05);
     }
-    .sidebar .icon-btn{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:8px 0;color:var(--muted);cursor:pointer; transition: background 0.2s;}
-    .sidebar .icon-btn:hover:not(.active) { background: var(--border); color: var(--text); }
-    .sidebar .icon-btn.active{background:var(--accent-secondary);color:#fff}
-    .sidebar .brand{margin-bottom:6px;font-weight:800;color:var(--accent-main)}
+    .sidebar .icon-btn{
+        width:52px;
+        height:52px;
+        border-radius:12px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        margin:6px 0;
+        color:var(--sidebar-text);
+        cursor:pointer; 
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    .sidebar .icon-btn:hover:not(.active) { 
+        background: var(--sidebar-hover); 
+        color: var(--accent-main);
+        border-color: var(--border);
+        transform: translateY(-2px);
+    }
+    .sidebar .icon-btn.active{
+        background:var(--sidebar-active);
+        color:#fff;
+        border-color: var(--sidebar-active);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+    }
+    .sidebar .brand{
+        margin-bottom:10px;
+        font-weight:800;
+        color:var(--accent-main);
+        font-size: 20px;
+        padding: 8px;
+    }
     
     /* UI FIX: Main content needs margin for fixed sidebar */
-    .main-area{flex:1;padding:16px 20px;overflow:auto; margin-left: 68px;}
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
-    .topbar h3{color:var(--accent-main);}
+    .main-area{
+        flex:1;
+        padding:16px 20px;
+        overflow:auto; 
+        margin-left: 70px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 60px;
+            padding: 8px 4px;
+        }
+        .sidebar .icon-btn {
+            width: 46px;
+            height: 46px;
+            margin: 4px 0;
+        }
+        .main-area {
+            margin-left: 60px;
+            padding: 12px 15px;
+        }
+        .topbar h3 {
+            font-size: 1.2rem;
+        }
+    }
+    
+    .topbar{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:16px; 
+        border-bottom: 1px solid var(--border); 
+        padding-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .topbar h3{
+        color:var(--accent-main);
+        margin: 0;
+        font-weight: 700;
+    }
     
     /* Components */
-    .card-neo{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,0.3);margin-bottom:14px;border:1px solid var(--border); transition: background 0.3s, border-color 0.3s;}
-    .section-title{font-weight:700;margin-bottom:12px;color:var(--text);font-size:1.1rem;}
+    .card-neo{
+        background:var(--card);
+        border-radius:12px;
+        padding:20px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom:16px;
+        border:1px solid var(--border); 
+        transition: background 0.3s, border-color 0.3s;
+    }
+    .section-title{
+        font-weight:700;
+        margin-bottom:16px;
+        color:var(--text);
+        font-size:1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
     .muted{color:var(--muted)}
-    .form-control, .form-select{background:var(--input-bg);color:var(--text);border:1px solid #475569; transition: background 0.3s, border-color 0.3s, color 0.3s;}
+    .form-control, .form-select{
+        background:var(--input-bg);
+        color:var(--text);
+        border:1px solid var(--border);
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--accent-main);
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    }
     .form-control::placeholder{color:var(--muted);}
     
     /* Tables */
-    .table{--bs-table-bg: var(--card); --bs-table-color: var(--text); transition: background 0.3s, color 0.3s;}
-    table.table td, table.table th{vertical-align:middle; border-color: var(--border);}
-    .table-light{background-color:var(--input-bg) !important;}
-    .participated-row{background:rgba(59, 130, 246, 0.1) !important;} 
+    .table{
+        --bs-table-bg: var(--card); 
+        --bs-table-color: var(--text); 
+        --bs-table-border-color: var(--border);
+        transition: background 0.3s, color 0.3s;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    table.table td, table.table th{
+        vertical-align:middle; 
+        border-color: var(--border);
+        padding: 12px 16px;
+    }
+    .table-light{
+        background-color:var(--input-bg) !important;
+    }
+    .participated-row{background:rgba(13, 110, 253, 0.05) !important;} 
     
     /* Dashboard Scores */
-    .score-card {text-align: center; padding: 20px;}
-    .score-value {font-size: 2.5rem; font-weight: 800; margin-top: 5px; color: var(--accent-secondary);}
+    .score-card {
+        text-align: center; 
+        padding: 20px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--card) 0%, rgba(13, 110, 253, 0.05) 100%);
+    }
+    .score-value {
+        font-size: 2.5rem; 
+        font-weight: 800; 
+        margin-top: 5px; 
+        color: var(--accent-main);
+    }
 
     /* Small Boxes (Program Management) */
-    .small-box{width:80px;height:50px;border-radius:8px;background:var(--input-bg);color:var(--text);display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700;padding:2px;position:relative;border:1px solid #475569; transition: background 0.2s, border-color 0.2s;}
-    .small-box.present{background:var(--success);color:#fff;border-color:var(--success);}
-    .small-box.absent{background:var(--danger);color:#fff;border-color:var(--danger);}
-    .small-box-id{font-size:10px;font-weight:400;color:rgba(255,255,255,0.8);}
-    .small-box-code{position:absolute;top:-8px;right:-8px;background:var(--warning);color:#000;font-size:11px;padding:2px 6px;border-radius:10px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.5);}
+    .small-box{
+        width:80px;
+        height:50px;
+        border-radius:8px;
+        background:var(--input-bg);
+        color:var(--text);
+        display:inline-flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        margin:6px;
+        cursor:pointer;
+        font-weight:700;
+        padding:2px;
+        position:relative;
+        border:1px solid var(--border);
+        transition: all 0.2s;
+    }
+    .small-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .small-box.present{
+        background:var(--success);
+        color:#fff;
+        border-color:var(--success);
+    }
+    .small-box.absent{
+        background:var(--danger);
+        color:#fff;
+        border-color:var(--danger);
+    }
+    .small-box-id{
+        font-size:10px;
+        font-weight:400;
+        color:rgba(255,255,255,0.8);
+    }
+    .small-box-code{
+        position:absolute;
+        top:-8px;
+        right:-8px;
+        background:var(--warning);
+        color:#000;
+        font-size:11px;
+        padding:2px 6px;
+        border-radius:10px;
+        font-weight:bold;
+        box-shadow:0 2px 4px rgba(0,0,0,0.2);
+    }
 
     /* Modals */
-    .modal-content{background:var(--card);color:var(--text); transition: background 0.3s, color 0.3s;}
-    .modal-header{border-bottom-color: var(--border);}
-    .modal-footer{border-top-color: var(--border);}
-    .btn-close{filter: invert(1) grayscale(100%) brightness(200%);}
-    .light-mode .btn-close{filter: none;}
-    .btn-accent{background:var(--accent-main);color:#fff;border:0}
-    .btn-accent:hover{background:#ea580c;color:#fff}
+    .modal-content{
+        background:var(--card);
+        color:var(--text);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        transition: background 0.3s, color 0.3s;
+    }
+    .modal-header{
+        border-bottom-color: var(--border);
+        padding: 16px 20px;
+    }
+    .modal-footer{
+        border-top-color: var(--border);
+        padding: 16px 20px;
+    }
+    .btn-close{
+        filter: invert(0.5);
+    }
+    .dark-mode .btn-close{
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    .btn-accent{
+        background:var(--accent-main);
+        color:#fff;
+        border:0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn-accent:hover{
+        background:#0b5ed7;
+        color:#fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+    }
+    
+    /* Button Styles */
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+    .btn-sm {
+        padding: 4px 12px;
+        font-size: 0.875rem;
+    }
+    
+    /* Approval buttons */
+    .btn-approve {
+        background: var(--success);
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+    .btn-approve:hover {
+        background: #157347;
+        color: white;
+    }
+    .btn-reject {
+        background: var(--danger);
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+    .btn-reject:hover {
+        background: #bb2d3b;
+        color: white;
+    }
+    .btn-undo {
+        background: var(--warning);
+        color: #000;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+    .btn-undo:hover {
+        background: #ffca2c;
+        color: #000;
+    }
+    
+    /* Action buttons in tables */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    /* Badges */
+    .badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 576px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        .action-buttons .btn {
+            width: 100%;
+        }
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        .card-neo {
+            padding: 16px;
+        }
+    }
   </style>
 </head>
 <body>
 <div class="app-wrap">
   <aside class="sidebar">
-    <div class="brand"><i class="bi bi-palette-fill" style="font-size:20px"></i></div>
-    <div class="icon-btn active" data-target="#panel-overview" title="Dashboard"><i class="bi bi-columns-gap" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-student-details" title="Search Details"><i class="bi bi-search" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-students" title="Students"><i class="bi bi-people-fill" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-teams" title="Teams"><i class="bi bi-people" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-events" title="Events"><i class="bi bi-calendar-event" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-attendance" title="Gen Attendance"><i class="bi bi-list-check" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-approvals" title="Approvals"><i class="bi bi-check2-square" style="font-size:18px"></i></div>
-    <div class="icon-btn" data-target="#panel-results" title="Results"><i class="bi bi-trophy" style="font-size:18px"></i></div>
+    <div class="brand"><i class="bi bi-trophy-fill"></i></div>
+    <div class="icon-btn active" data-target="#panel-overview" title="Dashboard"><i class="bi bi-columns-gap"></i></div>
+    <div class="icon-btn" data-target="#panel-student-details" title="Search Details"><i class="bi bi-search"></i></div>
+    <div class="icon-btn" data-target="#panel-students" title="Students"><i class="bi bi-people-fill"></i></div>
+    <div class="icon-btn" data-target="#panel-teams" title="Teams"><i class="bi bi-people"></i></div>
+    <div class="icon-btn" data-target="#panel-events" title="Events"><i class="bi bi-calendar-event"></i></div>
+    <div class="icon-btn" data-target="#panel-attendance" title="Gen Attendance"><i class="bi bi-list-check"></i></div>
+    <div class="icon-btn" data-target="#panel-approvals" title="Approvals"><i class="bi bi-check2-square"></i></div>
+    <div class="icon-btn" data-target="#panel-results" title="Results"><i class="bi bi-trophy"></i></div>
     <div style="flex:1"></div>
-    <div class="icon-btn" id="logoutBtn" title="Logout"><i class="bi bi-box-arrow-right" style="font-size:18px"></i></div>
+    <div class="icon-btn" id="logoutBtn" title="Logout"><i class="bi bi-box-arrow-right"></i></div>
   </aside>
 
   <main class="main-area">
     <div class="topbar">
       <div>
-        <h3 style="margin:0">Admin Dashboard</h3>
+        <h3>Admin Dashboard</h3>
         <div class="muted">Fidak Fest Management System</div>
       </div>
       <div>
@@ -128,11 +413,11 @@
 
     <div id="panels">
       <section id="panel-overview" class="card-neo">
-        <div class="section-title">Live Overview</div>
+        <div class="section-title"><i class="bi bi-speedometer2"></i> Live Overview</div>
         <div class="row g-3">
             <div class="col-lg-6">
                 <div class="card-neo">
-                    <div class="section-title">Team Score Leaderboard</div>
+                    <div class="section-title"><i class="bi bi-trophy"></i> Team Score Leaderboard</div>
                     <div class="table-responsive" style="max-height: 250px; overflow: auto;">
                         <table class="table align-middle">
                             <thead class="table-light"><tr><th>Rank</th><th>Team</th><th>Score</th></tr></thead>
@@ -177,8 +462,8 @@
       
       <section id="panel-student-details" class="card-neo d-none">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="section-title">Search Details Lookup (Student/Event)</div>
-            <button id="searchPdfBtn" class="btn btn-sm btn-outline-secondary d-none"><i class="bi bi-file-earmark-pdf"></i> PDF Roster</button>
+            <div class="section-title"><i class="bi bi-search"></i> Search Details Lookup (Student/Event)</div>
+            <button id="searchPdfBtn" class="btn btn-outline-secondary btn-sm d-none"><i class="bi bi-file-earmark-pdf"></i> PDF Roster</button>
         </div>
         <input id="studentLookupSearch" class="form-control mb-3" placeholder="Search Student Name/ID (e.g., S101 or Ali) or Event Name (e.g., Quiz)">
         <div id="studentLookupDetails">
@@ -208,7 +493,7 @@
         <div class="row g-3">
           <div class="col-lg-4">
             <div class="card-neo">
-              <div class="section-title">Import / Add Student</div>
+              <div class="section-title"><i class="bi bi-person-plus"></i> Import / Add Student</div>
               <div class="muted small mb-1">Columns: Chess, Name, Level, Team</div>
               <input id="studentFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
               <div class="d-flex gap-2 mb-3">
@@ -226,13 +511,13 @@
           </div>
           <div class="col-lg-8">
             <div class="card-neo">
-              <div class="d-flex justify-content-between mb-2">
-                <div class="section-title">All Students</div>
-                <input id="searchStudents" class="form-control form-control-sm w-50" placeholder="Search...">
+              <div class="d-flex justify-content-between mb-2 align-items-center">
+                <div class="section-title"><i class="bi bi-people-fill"></i> All Students</div>
+                <input id="searchStudents" class="form-control form-control-sm" style="width: 200px;" placeholder="Search...">
               </div>
               <div class="table-responsive" style="max-height:600px;overflow:auto">
                 <table class="table table-sm align-middle">
-                  <thead class="table-light"><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th><th>Act</th></tr></thead>
+                  <thead class="table-light"><tr><th>Chess</th><th>Name</th><th>Level</th><th>Team</th><th>Actions</th></tr></thead>
                   <tbody id="studentsTable"></tbody>
                 </table>
               </div>
@@ -245,20 +530,22 @@
         <div class="row g-3">
           <div class="col-lg-4">
             <div class="card-neo">
-              <div class="section-title">Create Team</div>
+              <div class="section-title"><i class="bi bi-plus-circle"></i> Create Team</div>
               <input id="teamName" class="form-control mb-2" placeholder="Team Name">
-              <select id="teamLeader" class="form-select mb-2"><option value="">Leader</option></select>
+              <select id="teamLeader" class="form-select mb-2"><option value="">Select Leader</option></select>
               <input id="teamPassword" class="form-control mb-2" placeholder="Password">
               <button id="saveTeam" class="btn btn-success w-100">Save Team</button>
             </div>
           </div>
           <div class="col-lg-8">
             <div class="card-neo">
-              <div class="section-title">Teams List</div>
-              <table class="table align-middle">
-                <thead class="table-light"><tr><th>Team</th><th>Leader</th><th>Members</th><th>Score</th><th>Act</th></tr></thead>
-                <tbody id="teamsTable"></tbody>
-              </table>
+              <div class="section-title"><i class="bi bi-people"></i> Teams List</div>
+              <div class="table-responsive">
+                <table class="table align-middle">
+                  <thead class="table-light"><tr><th>Team</th><th>Leader</th><th>Members</th><th>Score</th><th>Actions</th></tr></thead>
+                  <tbody id="teamsTable"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -268,7 +555,7 @@
         <div class="row g-3">
           <div class="col-lg-4">
             <div class="card-neo">
-              <div class="section-title">Add / Import Events</div>
+              <div class="section-title"><i class="bi bi-calendar-plus"></i> Add / Import Events</div>
               <input id="eventName" class="form-control mb-2" placeholder="Event Name">
               <select id="eventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option><option>Group</option><option>Open</option></select>
               <select id="eventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option></select>
@@ -282,13 +569,13 @@
           </div>
           <div class="col-lg-8">
             <div class="card-neo">
-              <div class="d-flex justify-content-between mb-2">
-                <div class="section-title">Events List</div>
-                <input id="filterEventSearch" class="form-control form-control-sm w-50" placeholder="Search events...">
+              <div class="d-flex justify-content-between mb-2 align-items-center">
+                <div class="section-title"><i class="bi bi-calendar-event"></i> Events List</div>
+                <input id="filterEventSearch" class="form-control form-control-sm" style="width: 200px;" placeholder="Search events...">
               </div>
               <div class="table-responsive" style="max-height:600px;overflow:auto">
                 <table class="table table-sm align-middle">
-                  <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Level</th><th>Act</th></tr></thead>
+                  <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Level</th><th>Actions</th></tr></thead>
                   <tbody id="eventsTable"></tbody>
                 </table>
               </div>
@@ -299,6 +586,7 @@
 
       <section id="panel-attendance" class="card-neo d-none">
         <div class="card-neo mb-3">
+          <div class="section-title"><i class="bi bi-list-check"></i> Generate Attendance</div>
           <div class="row g-2 align-items-center">
             <div class="col-md-3"><input id="attDate" type="date" class="form-control"></div>
             <div class="col-md-3"><select id="attMethod" class="form-select"><option value="all">All Students</option><option value="team">By Team</option></select></div>
@@ -308,29 +596,31 @@
           <input id="attDescription" class="form-control form-control-sm mt-2" placeholder="Add a description/comment for this session (e.g., Morning Session, Day 1)">
         </div>
         <div id="attendanceMarkCard" class="card-neo" style="display:none">
-          <div class="d-flex justify-content-between mb-2">
-             <div class="section-title">Mark Attendance</div>
+          <div class="d-flex justify-content-between mb-2 align-items-center">
+             <div class="section-title"><i class="bi bi-check2-circle"></i> Mark Attendance</div>
              <div class="d-flex gap-2"><button id="toggleAll" class="btn btn-outline-secondary btn-sm">Toggle All</button><button id="saveAttendance" class="btn btn-success btn-sm">Save Session</button></div>
           </div>
           <div id="attendanceBoxes" class="d-flex flex-wrap gap-2"></div>
         </div>
         <div class="card-neo mt-3">
-          <div class="section-title">History</div>
-          <table class="table table-sm"><thead class="table-light"><tr><th>Date</th><th>Description</th><th>Count</th><th>Saved At</th><th>Act</th></tr></thead><tbody id="attendanceSessions"></tbody></table>
+          <div class="section-title"><i class="bi bi-clock-history"></i> History</div>
+          <div class="table-responsive">
+            <table class="table table-sm"><thead class="table-light"><tr><th>Date</th><th>Description</th><th>Count</th><th>Saved At</th><th>Actions</th></tr></thead><tbody id="attendanceSessions"></tbody></table>
+          </div>
         </div>
       </section>
 
       <section id="panel-approvals" class="card-neo d-none">
-        <div class="d-flex justify-content-between mb-2">
-          <div class="section-title">Participation Approvals & Program Management</div>
+        <div class="d-flex justify-content-between mb-2 align-items-center flex-wrap gap-2">
+          <div class="section-title"><i class="bi bi-check2-square"></i> Participation Approvals & Program Management</div>
           <div class="d-flex gap-2">
-            <input id="searchApprovals" class="form-control form-control-sm" placeholder="Search...">
+            <input id="searchApprovals" class="form-control form-control-sm" placeholder="Search..." style="min-width: 150px;">
             <button id="downloadApprovalsPdf" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Approved Roster</button>
           </div>
         </div>
         <div class="table-responsive">
           <table class="table table-hover">
-            <thead><tr><th>Event</th><th>Category</th><th>Pending</th><th>Approved</th><th>Act</th></tr></thead>
+            <thead><tr><th>Event</th><th>Category</th><th>Pending</th><th>Approved</th><th>Actions</th></tr></thead>
             <tbody id="approvalsTable"></tbody>
           </table>
         </div>
@@ -338,7 +628,7 @@
 
       <section id="panel-results" class="card-neo d-none">
         <div class="card-neo mb-3">
-          <div class="section-title">Enter Results</div>
+          <div class="section-title"><i class="bi bi-trophy"></i> Enter Results</div>
           <div class="row g-2">
             <div class="col-md-3"><select id="resultEvent" class="form-select"><option value="">Select Event</option></select></div>
             <div class="col-md-3">
@@ -363,39 +653,126 @@
           </div>
         </div>
         <div class="card-neo">
-          <div class="section-title">All Events & Results</div>
+          <div class="section-title"><i class="bi bi-trophy-fill"></i> All Events & Results</div>
           <div class="table-responsive">
             <table class="table align-middle">
-              <thead class="table-light"><tr><th>Event</th><th>Type</th><th>1st (Pts)</th><th>2nd (Pts)</th><th>3rd (Pts)</th><th>Status</th><th>Act</th></tr></thead>
+              <thead class="table-light"><tr><th>Event</th><th>Type</th><th>1st (Pts)</th><th>2nd (Pts)</th><th>3rd (Pts)</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody id="resultsTable"></tbody>
             </table>
           </div>
         </div>
       </section>
-
-      <section id="panel-programs" class="card-neo d-none"></section>
-
     </div> 
   </main>
 </div>
 
-<div class="modal fade" id="editStudentModal" tabindex="-1"><div class="modal-dialog"><form id="editStudentForm" class="modal-content"><div class="modal-header"><h5>Edit Student</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="editStudentDbKey"><input id="editChess" class="form-control mb-2" readonly><input id="editName" class="form-control mb-2"><select id="editLevel" class="form-select mb-2"><option>Senior</option><option>Junior</option></select><select id="editTeam" class="form-select mb-2"></select></div><div class="modal-footer"><button type="button" id="deleteStudentBtn" class="btn btn-danger">Delete</button><button type="submit" class="btn btn-primary">Save</button></div></form></div></div>
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editStudentForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-person-gear"></i> Edit Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editStudentDbKey">
+        <input id="editChess" class="form-control mb-2" readonly>
+        <input id="editName" class="form-control mb-2" placeholder="Full Name">
+        <select id="editLevel" class="form-select mb-2"><option>Senior</option><option>Junior</option></select>
+        <select id="editTeam" class="form-select mb-2"></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="deleteStudentBtn" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-<div class="modal fade" id="editEventModal" tabindex="-1"><div class="modal-dialog"><form id="editEventForm" class="modal-content"><div class="modal-header"><h5>Edit Event</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="editEventDbKey"><input id="editEventId" class="form-control mb-2" readonly><input id="editEventName" class="form-control mb-2" placeholder="Event Name"><select id="editEventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option><option>Group</option><option>Open</option></select><select id="editEventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option></select></div><div class="modal-footer"><button type="button" id="deleteEventBtn" class="btn btn-danger">Delete</button><button type="submit" class="btn btn-primary">Save</button></div></form></div></div>
+<!-- Edit Event Modal -->
+<div class="modal fade" id="editEventModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editEventForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-calendar-event"></i> Edit Event</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editEventDbKey">
+        <input id="editEventId" class="form-control mb-2" readonly>
+        <input id="editEventName" class="form-control mb-2" placeholder="Event Name">
+        <select id="editEventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option><option>Group</option><option>Open</option></select>
+        <select id="editEventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="deleteEventBtn" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-<div class="modal fade" id="editTeamModal" tabindex="-1"><div class="modal-dialog"><form id="editTeamForm" class="modal-content"><div class="modal-header"><h5>Edit Team</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="editTeamDbKey"><input id="editTeamId" class="form-control mb-2" readonly><input id="editTeamName" class="form-control mb-2" placeholder="Team Name"><select id="editTeamLeader" class="form-select mb-2"><option value="">Leader</option></select><input id="editTeamPassword" class="form-control mb-2" placeholder="Password (leave blank to keep old)"></div><div class="modal-footer"><button type="button" id="deleteTeamBtn" class="btn btn-danger">Delete</button><button type="submit" class="btn btn-primary">Save</button></div></form></div></div>
+<!-- Edit Team Modal -->
+<div class="modal fade" id="editTeamModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="editTeamForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-people"></i> Edit Team</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editTeamDbKey">
+        <input id="editTeamId" class="form-control mb-2" readonly>
+        <input id="editTeamName" class="form-control mb-2" placeholder="Team Name">
+        <select id="editTeamLeader" class="form-select mb-2"><option value="">Select Leader</option></select>
+        <input id="editTeamPassword" class="form-control mb-2" placeholder="Password (leave blank to keep old)">
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="deleteTeamBtn" class="btn btn-danger">Delete</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
 
+<!-- Approvals Detail Modal -->
+<div class="modal fade" id="approvalsDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="approvalModalTitle"><i class="bi bi-people"></i> Participants</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h6 class="text-warning"><i class="bi bi-clock"></i> Pending</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <tbody id="pendingParticipantsTable"></tbody>
+          </table>
+        </div>
+        <h6 class="text-success mt-3"><i class="bi bi-check-circle"></i> Approved</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <tbody id="approvedParticipantsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<div class="modal fade" id="approvalsDetailModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 id="approvalModalTitle">Participants</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><h6 class="text-warning">Pending</h6><table class="table table-sm"><tbody id="pendingParticipantsTable"></tbody></table><h6 class="text-success mt-3">Approved</h6><table class="table table-sm"><tbody id="approvedParticipantsTable"></tbody></table></div></div></div></div>
-
+<!-- Result Manage Modal -->
 <div class="modal fade" id="resultManageModal" tabindex="-1">
     <div class="modal-dialog">
         <form id="resultManageForm" class="modal-content">
-            <div class="modal-header"><h5 class="modal-title" id="resultManageTitle">Manage Results</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header">
+              <h5 class="modal-title" id="resultManageTitle"><i class="bi bi-trophy"></i> Manage Results</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <div class="modal-body">
                 <input type="hidden" id="manageEventId">
                 <div class="alert alert-info py-2 small">
-                    This form allows you to edit the saved results for <strong id="resultEventNameDisplay"></strong>.
+                    <i class="bi bi-info-circle"></i> This form allows you to edit the saved results for <strong id="resultEventNameDisplay"></strong>.
                 </div>
                 
                 <h6 class="mt-3">1st Place</h6>
@@ -409,7 +786,6 @@
                 <h6>3rd Place</h6>
                 <select id="manageResultSelectThird" class="form-select mb-2"></select>
                 <input id="manageResultPointsThird" type="number" class="form-control form-control-sm mb-3" placeholder="Points">
-
             </div>
             <div class="modal-footer">
                 <button type="button" id="deleteEventResultsBtn" class="btn btn-danger me-auto">Delete All Results</button>
@@ -420,23 +796,26 @@
     </div>
 </div>
 
-
+<!-- Program Detail Modal -->
 <div class="modal fade" id="programDetailModal" tabindex="-1">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title" id="programModalTitle">Manage Program</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header">
+        <h5 class="modal-title" id="programModalTitle"><i class="bi bi-card-checklist"></i> Manage Program</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
       <div class="modal-body">
         <div class="alert alert-info py-2 small">
           <i class="bi bi-info-circle"></i> <strong>Scratch Card Codes:</strong> Use the "Assign Codes" button to generate a unique code letter for each participant (for use with scratch cards). Click a box to toggle attendance.
         </div>
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <div class="section-title mb-0">Participants</div>
           <div class="d-flex gap-2">
             <button id="assignRandomLetters" class="btn btn-warning"><i class="bi bi-shuffle"></i> Assign Codes</button>
             <button id="saveProgramData" class="btn btn-success"><i class="bi bi-save"></i> Save Data</button>
           </div>
         </div>
-        <div id="programParticipantsGrid" class="d-flex flex-wrap gap-2 p-2" style="background:#0d121c; border-radius:8px; min-height:100px;"></div>
+        <div id="programParticipantsGrid" class="d-flex flex-wrap gap-2 p-2" style="background:var(--input-bg); border-radius:8px; min-height:100px;"></div>
       </div>
     </div>
   </div>
@@ -518,9 +897,17 @@ document.querySelectorAll('.sidebar .icon-btn').forEach(btn=>{
   });
 });
 
-/* UI FIX: Theme Toggle */
+/* UI FIX: Theme Toggle - Now default is light, toggle to dark */
 $('toggleThemeBtn').addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
+    document.body.classList.toggle('dark-mode');
+    const icon = $('toggleThemeBtn').querySelector('i');
+    if(document.body.classList.contains('dark-mode')) {
+        icon.className = 'bi bi-sun';
+        $('toggleThemeBtn').innerHTML = '<i class="bi bi-sun"></i> Light';
+    } else {
+        icon.className = 'bi bi-moon-stars';
+        $('toggleThemeBtn').innerHTML = '<i class="bi bi-moon-stars"></i> Dark';
+    }
 });
 
 function renderAll(){
@@ -770,7 +1157,7 @@ $('previewStudents').addEventListener('click', () => {
   const f = $('studentFile').files[0]; if(!f) return toast('Select File','warning');
   readExcel(f, (json) => {
     tempImportData = json;
-    let html = '<table class="table table-sm table-dark"><thead><tr><th>Chess</th><th>Name</th><th><th>Level</th><th>Team</th></tr></thead><tbody>';
+    let html = '<table class="table table-sm"><thead><tr><th>Chess</th><th>Name</th><th><th>Level</th><th>Team</th></tr></thead><tbody>';
     json.slice(0,5).forEach(r => {
       const chess = r['Chess']||r['ID']||'';
       const name = r['Name']||r['Student']||'';
@@ -812,7 +1199,7 @@ function renderStudents(){
     const dbKey = KEYMAP.students[s.id]; // FIX: Get the unique DB key
     if(q && !`${s.id} ${s.name}`.toLowerCase().includes(q)) return;
     // FIX: Changed button to 'Edit' and added logic below
-    html += `<tr data-id="${s.id}"><td>${s.id}</td><td>${escapeHtml(s.name)}</td><td>${s.level}</td><td>${escapeHtml(tm[s.teamId]||'-')}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-stu" data-dbkey="${dbKey}">Edit</button></td></tr>`;
+    html += `<tr data-id="${s.id}"><td>${s.id}</td><td>${escapeHtml(s.name)}</td><td>${s.level}</td><td>${escapeHtml(tm[s.teamId]||'-')}</td><td><div class="action-buttons"><button class="btn btn-sm btn-outline-primary btn-edit-stu" data-dbkey="${dbKey}">Edit</button></div></td></tr>`;
   });
   $('studentsTable').innerHTML = html;
 }
@@ -864,7 +1251,7 @@ function renderTeams(){
     const cnt = CACHE.students.filter(s=>s.teamId==t.id).length;
     const dbKey = KEYMAP.teams[t.id]; // FIX: Get the unique DB key
     // FIX: Changed button to 'Edit' and added 'Delete' logic
-    html += `<tr data-id="${t.id}"><td>${escapeHtml(t.name)}</td><td>${l?l.name:'-'}</td><td>${cnt}</td><td>${t.score||0}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-team me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-team" data-dbkey="${dbKey}">Del</button></td></tr>`;
+    html += `<tr data-id="${t.id}"><td>${escapeHtml(t.name)}</td><td>${l?l.name:'-'}</td><td>${cnt}</td><td>${t.score||0}</td><td><div class="action-buttons"><button class="btn btn-sm btn-outline-primary btn-edit-team me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-team" data-dbkey="${dbKey}">Del</button></div></td></tr>`;
   });
   tbody.innerHTML = html;
 }
@@ -952,7 +1339,7 @@ $('previewEvents').addEventListener('click', () => {
   const f = $('eventFile').files[0]; if(!f) return toast('Select File','warning');
   readExcel(f, (json) => {
     tempEventData = json;
-    let html = '<table class="table table-sm table-dark"><thead><tr><th>Name</th><th>Type</th><th>Level</th></tr></thead><tbody>';
+    let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Level</th></tr></thead><tbody>';
     json.slice(0,5).forEach(r => {
       html += `<tr><td>${r['Name']||r['Event']||''}</td><td>${r['Type']||''}</td><td>${r['Level']||''}</td></tr>`;
     });
@@ -983,7 +1370,7 @@ function renderEvents(){
     const dbKey = KEYMAP.events[e.id]; // FIX: Get the unique DB key
     if(q && !e.name.toLowerCase().includes(q)) return;
     // FIX: Added 'Edit' button
-    html += `<tr data-id="${e.id}"><td>${e.name}</td><td>${e.type}</td><td>${e.level}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-ev me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">Del</button></td></tr>`;
+    html += `<tr data-id="${e.id}"><td>${e.name}</td><td>${e.type}</td><td>${e.level}</td><td><div class="action-buttons"><button class="btn btn-sm btn-outline-primary btn-edit-ev me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">Del</button></div></td></tr>`;
   });
   $('eventsTable').innerHTML = html;
 }
@@ -1086,7 +1473,7 @@ function renderAttendanceHistory(){
   Object.entries(CACHE.attendance).sort((a,b)=>b[1].timestamp-a[1].timestamp).forEach(([k,v])=>{
     const c = v.students ? Object.values(v.students).filter(x=>x=='Present').length : 0;
     const dateStr = v.timestamp ? new Date(v.timestamp).toLocaleTimeString() : '';
-    html += `<tr data-key="${k}"><td>${v.date}</td><td>${escapeHtml(v.description||'-')}</td><td>${c}</td><td><small>${dateStr}</small></td><td><button class="btn btn-sm btn-outline-info btn-view-absent me-1" data-key="${k}">View Absent</button><button class="btn btn-sm btn-outline-primary btn-edit-att-session me-1" data-key="${k}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-att" data-key="${k}">Del</button></td></tr>`;
+    html += `<tr data-key="${k}"><td>${v.date}</td><td>${escapeHtml(v.description||'-')}</td><td>${c}</td><td><small>${dateStr}</small></td><td><div class="action-buttons"><button class="btn btn-sm btn-outline-info btn-view-absent me-1" data-key="${k}">View Absent</button><button class="btn btn-sm btn-outline-primary btn-edit-att-session me-1" data-key="${k}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-att" data-key="${k}">Del</button></div></td></tr>`;
   });
   $('attendanceSessions').innerHTML = html;
 }
@@ -1155,12 +1542,12 @@ function renderApprovals(){
   let html='';
   Object.values(summary).forEach(x => {
     if(q && !x.ev.name.toLowerCase().includes(q)) return;
-    html += `<tr><td>${escapeHtml(x.ev.name)}</td><td>${x.ev.type}</td><td><span class="badge bg-warning text-dark">${x.p}</span></td><td><span class="badge bg-success">${x.a}</span></td><td><button class="btn btn-sm btn-primary btn-view-app me-1" data-eid="${x.ev.id}">View</button> <button class="btn btn-sm btn-outline-info btn-manage-prog" data-eid="${x.ev.id}">Manage Program</button></td></tr>`;
+    html += `<tr><td>${escapeHtml(x.ev.name)}</td><td>${x.ev.type}</td><td><span class="badge bg-warning text-dark">${x.p}</span></td><td><span class="badge bg-success">${x.a}</span></td><td><div class="action-buttons"><button class="btn btn-sm btn-primary btn-view-app me-1" data-eid="${x.ev.id}">View</button> <button class="btn btn-sm btn-outline-info btn-manage-prog" data-eid="${x.ev.id}">Manage Program</button></div></td></tr>`;
   });
   $('approvalsTable').innerHTML = html;
 }
 
-// APPROVAL VIEW
+// APPROVAL VIEW - FIXED APPROVE/REJECT BUTTONS
 $('approvalsTable').addEventListener('click', e => {
   if(e.target.classList.contains('btn-view-app')){
     const eid = e.target.dataset.eid;
@@ -1169,11 +1556,36 @@ $('approvalsTable').addEventListener('click', e => {
     const approved = parts.filter(p=>p.status=='approved');
     const tm = {}; CACHE.teams.forEach(t=>tm[t.id]=t.name);
     
-    let pHtml = ''; pending.forEach(p => { const s = CACHE.students.find(x=>x.id==p.studentId); pHtml += `<tr><td>${s?s.name:p.studentId} (${p.studentId}) - ${tm[p.teamId]||''}</td><td class="text-end"><button onclick="setStatus('${p.id}','approved')" class="btn btn-sm btn-success">Approve</button> <button onclick="setStatus('${p.id}','rejected')" class="btn btn-sm btn-danger">Reject</button></td></tr>`; });
-    $('pendingParticipantsTable').innerHTML = pHtml || '<tr><td colspan="2" class="muted">No pending</td></tr>';
+    let pHtml = ''; 
+    pending.forEach(p => { 
+        const s = CACHE.students.find(x=>x.id==p.studentId); 
+        const studentName = s ? s.name : p.studentId;
+        pHtml += `<tr>
+            <td>${escapeHtml(studentName)} (${p.studentId}) - ${tm[p.teamId]||''}</td>
+            <td class="text-end">
+                <div class="action-buttons justify-content-end">
+                    <button class="btn-approve" onclick="setStatus('${p.id}','approved')">Approve</button>
+                    <button class="btn-reject" onclick="setStatus('${p.id}','rejected')">Reject</button>
+                </div>
+            </td>
+        </tr>`; 
+    });
+    $('pendingParticipantsTable').innerHTML = pHtml || '<tr><td colspan="2" class="text-center muted">No pending approvals</td></tr>';
 
-    let aHtml = ''; approved.forEach(p => { const s = CACHE.students.find(x=>x.id==p.studentId); aHtml += `<tr><td>${s?s.name:p.studentId} (${p.studentId})</td><td class="text-end"><button onclick="setStatus('${p.id}','pending')" class="btn btn-sm btn-warning">Undo</button></td></tr>`; });
-    $('approvedParticipantsTable').innerHTML = aHtml || '<tr><td colspan="2" class="muted">No approved</td></tr>';
+    let aHtml = ''; 
+    approved.forEach(p => { 
+        const s = CACHE.students.find(x=>x.id==p.studentId); 
+        const studentName = s ? s.name : p.studentId;
+        aHtml += `<tr>
+            <td>${escapeHtml(studentName)} (${p.studentId})</td>
+            <td class="text-end">
+                <div class="action-buttons justify-content-end">
+                    <button class="btn-undo" onclick="setStatus('${p.id}','pending')">Undo</button>
+                </div>
+            </td>
+        </tr>`; 
+    });
+    $('approvedParticipantsTable').innerHTML = aHtml || '<tr><td colspan="2" class="text-center muted">No approved participants</td></tr>';
 
     const ev = CACHE.events.find(x=>x.id==eid);
     $('approvalModalTitle').textContent = ev ? ev.name : 'Participants';
@@ -1190,8 +1602,14 @@ $('approvalsTable').addEventListener('click', e => {
 
 window.setStatus = async (id, st) => {
   const k = KEYMAP.participations[id];
-  if(k) await update(ref(db, `participations/${k}`), { status:st });
-  try { bootstrap.Modal.getInstance($('approvalsDetailModal')).hide(); } catch(e){}
+  if(k) {
+    await update(ref(db, `participations/${k}`), { status:st });
+    toast(`Status updated to ${st}`, 'success');
+    // Close modal after successful update
+    try { bootstrap.Modal.getInstance($('approvalsDetailModal')).hide(); } catch(e){}
+  } else {
+    toast('Error: Participation not found', 'danger');
+  }
 };
 
 
@@ -1203,8 +1621,9 @@ function loadProgramDetails(eid) {
     
     const grid = $('programParticipantsGrid'); grid.innerHTML = '';
     
-    if(!approvedParts.length) { grid.innerHTML = '<div class="text-muted w-100 text-center py-4">No approved participants.</div>'; } 
-    else {
+    if(!approvedParts.length) { 
+        grid.innerHTML = '<div class="text-muted w-100 text-center py-4">No approved participants.</div>'; 
+    } else {
       approvedParts.forEach(p => {
         const s = CACHE.students.find(x => x.id == p.studentId);
         const name = s ? s.name : p.studentId;
@@ -1217,8 +1636,13 @@ function loadProgramDetails(eid) {
         box.dataset.sid = p.studentId;
         box.innerHTML = `${code ? `<div class="small-box-code">${code}</div>` : ''}<div>${p.studentId}</div><div class="small-box-id">${name.split(' ')[0]}</div>`;
         box.addEventListener('click', () => {
-          if(box.classList.contains('absent')) { box.classList.remove('absent'); box.classList.add('present'); }
-          else { box.classList.remove('present'); box.classList.add('absent'); }
+          if(box.classList.contains('absent')) { 
+              box.classList.remove('absent'); 
+              box.classList.add('present'); 
+          } else { 
+              box.classList.remove('present'); 
+              box.classList.add('absent'); 
+          }
         });
         grid.appendChild(box);
       });
@@ -1286,7 +1710,7 @@ $('downloadApprovalsPdf').addEventListener('click', () => {
     Object.values(eventsMap).sort((a,b)=>a.name.localeCompare(b.name)).forEach(ev => {
         if(ev.list.length){
             htmlContent += `<div style="margin-bottom:25px; border:1px solid #dee2e6; padding:15px; border-radius: 4px;">
-              <h3 style="margin:0 0 5px 0; font-size:16px; color:#f97316;">${escapeHtml(ev.name)}</h3>
+              <h3 style="margin:0 0 5px 0; font-size:16px; color:#0d6efd;">${escapeHtml(ev.name)}</h3>
               <p style="margin:0 0 10px 0; font-size:11px; color:#6c757d;">Category: ${ev.type} / ${ev.level}</p>
               <table style="width:100%; border-collapse:collapse; font-size:11px; color:#212529;">
                 <tr style="background:#f8f9fa; text-align:left;">
@@ -1538,17 +1962,31 @@ function renderResults(){
         return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
     };
     
-    // CHANGE: Added 'Edit' button with icon and data-eid attribute
-    html += `<tr><td>${escapeHtml(ev.name)}</td><td><small>${ev.type}</small></td><td>${getName(p1)}</td><td>${getName(p2)}</td><td>${getName(p3)}</td><td>${status}</td><td><button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}"><i class="bi bi-pencil"></i> Edit</button></td></tr>`;
+    html += `<tr>
+        <td>${escapeHtml(ev.name)}</td>
+        <td><small>${ev.type}</small></td>
+        <td>${getName(p1)}</td>
+        <td>${getName(p2)}</td>
+        <td>${getName(p3)}</td>
+        <td>${status}</td>
+        <td>
+            <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}"><i class="bi bi-pencil"></i> Edit</button>
+                <button class="btn btn-sm btn-outline-danger btn-delete-results" data-eid="${ev.id}"><i class="bi bi-trash"></i> Delete</button>
+            </div>
+        </td>
+    </tr>`;
   });
   tbody.innerHTML = html;
 }
 
 // FIX: New Management Modal Logic (Called by btn-edit-results)
 $('resultsTable').addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-edit-results');
-    if (btn) {
-        const eid = btn.dataset.eid;
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const eid = btn.dataset.eid;
+    
+    if (btn.classList.contains('btn-edit-results')) {
         const ev = CACHE.events.find(x => x.id === eid);
         if (!ev) return toast('Event not found', 'danger');
 
@@ -1585,7 +2023,40 @@ $('resultsTable').addEventListener('click', (e) => {
         // Display the modal
         new bootstrap.Modal($('resultManageModal')).show();
     }
+    
+    // FIX: Handle Delete Results Button
+    if (btn.classList.contains('btn-delete-results')) {
+        if (confirm('Are you sure you want to delete ALL results for this event? This action will remove scores and cannot be undone.')) {
+            deleteAllEventResults(eid);
+        }
+    }
 });
+
+// FIX: Function to delete all results for an event
+async function deleteAllEventResults(eid) {
+    const resultsToDelete = CACHE.results.filter(r => r.eventId === eid);
+    
+    // 1. Unpublish and reset scores
+    for(const r of resultsToDelete) {
+        if(r.published) {
+             const stu = CACHE.students.find(s=>s.id === r.studentId);
+             if(stu && stu.teamId){
+                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
+                if(tm) {
+                    const tmKey = KEYMAP.teams[tm.id];
+                    await update(ref(db, `teams/${tmKey}`), { score: Math.max(0, (tm.score||0) - r.points) });
+                }
+             }
+        }
+        // 2. Delete entry from Firebase
+        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === r.id);
+        if (key) await remove(ref(db, `results/${key}`));
+    }
+    
+    toast('All results deleted for this event.', 'success');
+    // Refresh the display
+    renderResults();
+}
 
 // FIX: Handle Management Modal Form Submission (Save Draft)
 $('resultManageForm').addEventListener('submit', async (e) => {
@@ -1727,26 +2198,7 @@ $('deleteEventResultsBtn').addEventListener('click', async () => {
     if (!confirm('Are you sure you want to delete ALL results for this event? This includes scores and publication status.')) return;
     
     const eid = $('manageEventId').value;
-    const resultsToDelete = CACHE.results.filter(r => r.eventId === eid);
-    
-    // 1. Unpublish and reset scores
-    for(const r of resultsToDelete) {
-        if(r.published) {
-             const stu = CACHE.students.find(s=>s.id === r.studentId);
-             if(stu && stu.teamId){
-                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
-                if(tm) {
-                    const tmKey = KEYMAP.teams[tm.id];
-                    await update(ref(db, `teams/${tmKey}`), { score: Math.max(0, (tm.score||0) - r.points) });
-                }
-             }
-        }
-        // 2. Delete entry from Firebase
-        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === r.id);
-        if (key) await remove(ref(db, `results/${key}`));
-    }
-    
-    toast('All results deleted for this event.', 'danger');
+    await deleteAllEventResults(eid);
     try {
         bootstrap.Modal.getInstance($('resultManageModal')).hide();
     } catch (e) {}
