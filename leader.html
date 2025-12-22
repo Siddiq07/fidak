@@ -7,164 +7,156 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    :root {
+    :root{
       --bg: #0d121c; --card: #1c2738; --text: #e2e8f0; --muted: #94a3b8;
       --accent-main: #f97316; --accent-secondary: #3b82f6;
+      --stat-red: #dc2626; --stat-orange: #f97316; --stat-pink: #d946ef; --stat-dark: #1d4ed8; 
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-    .container-wide { max-width: 1100px; margin: auto; padding: 15px; }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:var(--text);background:var(--bg)}
+    .container-wide{max-width:1100px;margin:14px auto;padding:0 12px}
+    .card-neo{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,0.3);margin-bottom:14px;border:1px solid #334155;}
+    .section-title{font-weight:700;margin-bottom:12px;color:var(--text);font-size:1.2rem;}
+    .muted-small{color:var(--muted);font-size:13px}
     
-    /* Navigation */
-    .top-nav { background: var(--bg); border-bottom: 1px solid #334155; padding: 10px 0; }
-    .nav-btn { color: var(--muted); border: 1px solid #334155; background: var(--card); margin-right: 5px; }
-    .nav-btn.active { background: var(--accent-secondary); color: #fff; }
+    /* Buttons & Forms */
+    .btn-accent{background:var(--accent-main);color:#fff;border:0}
+    .btn-accent:hover{background:#ea580c;color:#fff}
+    .form-control, .form-select{background:#334155;color:var(--text);border:1px solid #475569;}
+    
+    /* Nav */
+    .top-nav{background:var(--bg);border-bottom:1px solid #334155;}
+    .brand{font-weight:800;color:var(--accent-main);font-size:1.5rem}
+    .nav-btn{color:var(--muted);border:1px solid #334155;background:var(--card);}
+    .nav-btn.active{background:var(--accent-secondary);color:#fff;border-color:var(--accent-secondary);}
 
-    /* Dashboard Cards */
-    .card-neo { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; }
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-    .stat-box { padding: 20px; border-radius: 10px; color: #fff; }
+    /* Stats */
+    .stat{padding:20px;border-radius:10px;color:#fff;height: 100px;}
+    .stat .big{font-weight:800;font-size:2rem;line-height:1}
 
-    /* --- RESULTS VIEW (MATCHING VIDEO) --- */
-    .results-wrapper { padding: 10px 0; }
-    .result-card {
-      background: #ffffff; /* Pure white as seen in video */
-      border-radius: 10px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      overflow: hidden;
-      color: #1e293b;
+    /* --- RESULTS UI (MATCHING VIDEO) --- */
+    .results-container { padding: 0; background: transparent; }
+    .result-list-item {
+        background: #fff; /* White Card */
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: none;
     }
     .result-header {
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
     }
-    .result-info .category {
-      font-size: 11px;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .result-info .event-name {
-      font-size: 18px;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 2px 0;
-    }
-    .result-actions { display: flex; align-items: center; gap: 10px; }
-    .event-id-badge {
-      font-size: 12px;
-      font-weight: 600;
-      color: #3b82f6;
-      background: #eff6ff;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-    .btn-view {
-      background: #0f172a;
-      color: #fff;
-      border: none;
-      padding: 6px 18px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-    .result-body {
-      background: #ffffff;
-      padding: 0 16px 16px;
-      border-top: 1px solid #f1f5f9;
-    }
-    .winner-item {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      background: #f8fafc;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    .rank-circle {
-      width: 30px; height: 30px; border-radius: 50%;
-      background: #3b82f6; color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; margin-right: 12px;
-    }
-    /* --- END RESULTS VIEW --- */
+    .res-cat { font-weight: 700; font-size: 11px; color: #64748b; text-transform: uppercase; }
+    .res-name { font-weight: 800; font-size: 1.15rem; color: #0f172a; }
+    .btn-view-res { background: #0f172a; color: #fff; border: none; padding: 6px 20px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+    .result-body { padding: 0 16px 16px; background: #fff; border-top: 1px solid #f1f5f9; }
+    .winner-box { display: flex; align-items: center; padding: 12px; background: #f8fafc; border-radius: 8px; margin-top: 10px; color: #1e293b; }
+    .rank-num { width: 30px; height: 30px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-right: 12px; }
 
-    .small-box { width: 65px; height: 65px; background: #334155; border-radius: 8px; margin: 5px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; }
-    .small-box.selected { background: var(--accent-secondary); }
+    /* Selection Boxes */
+    .small-box{width:70px;height:70px;border-radius:8px;background:#334155;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;margin:6px;cursor:pointer;font-weight:700;}
+    .small-box.selected{background:var(--accent-secondary);color:#fff}
+    .modal-content{background:var(--card);color:var(--text);}
+    .btn-close{filter: invert(1) grayscale(100%) brightness(200%);}
+    @media (max-width:768px){.stats-grid{display:grid;grid-template-columns: 1fr 1fr; gap:10px;}}
   </style>
 </head>
 <body>
-
-<nav class="top-nav">
-  <div class="container-wide d-flex justify-content-between align-items-center">
-    <div style="font-weight: 900; color: var(--accent-main); font-size: 20px;">LEADER PANEL</div>
-    <button id="btnLogout" class="btn btn-sm btn-outline-danger">Logout</button>
-  </div>
-  <div class="container-wide overflow-x-auto d-flex">
-    <button class="btn nav-btn active" data-target="dashboard">Dashboard</button>
-    <button class="btn nav-btn" data-target="events">Events</button>
-    <button class="btn nav-btn" data-target="results">Results</button>
-    <button class="btn nav-btn" data-target="team">Team</button>
-  </div>
-</nav>
-
-<main class="container-wide">
-  <section id="dashboard">
-    <div class="card-neo d-flex align-items-center gap-3">
-      <div id="u-avatar" style="width:50px; height:50px; background:var(--accent-secondary); border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:bold;">L</div>
-      <div>
-        <h4 id="u-name" style="margin:0;">Leader Name</h4>
-        <small id="u-team" class="text-muted">Team ID: --</small>
-      </div>
+  <nav class="top-nav">
+    <div class="container container-wide d-flex align-items-center justify-content-between py-3">
+      <div class="brand"><i class="bi bi-person-badge-fill"></i> Leader Panel</div>
+      <button id="btnLogout" class="btn btn-outline-danger btn-sm">Logout</button>
     </div>
-    <div class="stat-grid">
-      <div class="stat-box" style="background: #dc2626;"> <small>Score</small> <h2 id="s-score">0</h2> </div>
-      <div class="stat-box" style="background: #f97316;"> <small>Members</small> <h2 id="s-members">0</h2> </div>
+    <div class="container container-wide d-flex gap-2 py-2 overflow-x-auto">
+      <button class="btn nav-btn active" data-target="#panel-dashboard">Dashboard</button>
+      <button class="btn nav-btn" data-target="#panel-events">Events</button>
+      <button class="btn nav-btn" data-target="#panel-results">Results</button>
+      <button class="btn nav-btn" data-target="#panel-team">Team Info</button>
     </div>
-  </section>
+  </nav>
 
-  <section id="events" class="d-none">
-    <div class="row">
-      <div class="col-md-5">
-        <div class="card-neo">
-          <h5>Events List</h5>
-          <input type="text" id="eventSearch" class="form-control mb-2" placeholder="Search...">
-          <div id="events-list" style="max-height: 400px; overflow-y: auto;"></div>
+  <main class="container container-wide">
+    <div id="toastRoot" class="position-fixed bottom-0 end-0 p-3" style="z-index:12000"></div>
+
+    <section id="panel-dashboard">
+      <div class="leader-info card-neo">
+        <div id="leaderAvatar" class="leader-avatar">?</div>
+        <div>
+          <div id="leaderName" style="font-weight:800; font-size: 1.5rem;">Loading...</div>
+          <div id="leaderTeamName" class="muted-small">Team ID: -</div>
         </div>
       </div>
-      <div class="col-md-7">
-        <div class="card-neo">
-          <h5 id="sel-event-title">Select an event</h5>
-          <div id="members-list" class="d-flex flex-wrap"></div>
-          <button id="btnSubmit" class="btn btn-primary mt-3 w-100">Submit Selection</button>
+      <div class="stats-grid">
+        <div class="stat" style="background:var(--stat-red)"><div class="muted-small text-white">Team Score</div><div id="statScore" class="big">0</div></div>
+        <div class="stat" style="background:var(--stat-orange)"><div class="muted-small text-white">Members</div><div id="statMembers" class="big">0</div></div>
+        <div class="stat" style="background:var(--stat-pink)"><div class="muted-small text-white">Attendance</div><div id="statAttendance" class="big">0%</div></div>
+        <div class="stat" style="background:var(--stat-dark)"><div class="muted-small text-white">Approved</div><div id="quickApproved" class="big">0</div></div>
+      </div>
+      <div class="mt-4 card-neo d-flex justify-content-between">
+        <span class="muted-small">Export Team Data</span>
+        <button id="btnDownloadTeamPdf" class="btn btn-outline-info btn-sm"><i class="bi bi-file-pdf"></i> Download PDF</button>
+      </div>
+    </section>
+
+    <section id="panel-events" class="card-neo d-none">
+      <div class="row g-3">
+        <div class="col-lg-5">
+          <input id="eventSearch" class="form-control mb-3" placeholder="Filter events...">
+          <div class="table-responsive" style="max-height:500px; overflow:auto">
+            <table class="table table-sm table-dark table-hover">
+              <tbody id="eventsList"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="card-neo" style="min-height: 400px;">
+            <h4 id="selectedEventName" class="text-accent-main">Select an event to start</h4>
+            <hr class="border-secondary">
+            <div id="membersSelection" class="d-flex flex-wrap"></div>
+            <div class="mt-4 pt-3 border-top border-secondary d-flex gap-2">
+              <button id="btnSubmitParticipation" class="btn btn-accent px-4">Submit Participation</button>
+              <button id="btnViewSubmissions" class="btn btn-outline-info">View Nominations</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-results" class="d-none">
+      <div class="section-title">Published Results</div>
+      <div id="leaderResultsList" class="results-container"></div>
+    </section>
+
+    <section id="panel-team" class="card-neo d-none">
+      <div id="teamInfoWrap" class="mb-3"></div>
+      <div class="section-title">Members List</div>
+      <div id="teamMembersSmall" class="list-group list-group-flush"></div>
+    </section>
+
+    <div class="modal fade" id="participationStatusModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header"><h5>Your Team Nominations</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body"><div id="yourSubmissionsList"></div></div>
+          <div class="modal-footer"><button id="btnDownloadSubmissionsPdf" class="btn btn-success">Export Approved PDF</button></div>
         </div>
       </div>
     </div>
-  </section>
-
-  <section id="results" class="d-none">
-    <h4 class="mb-3">Official Results</h4>
-    <div id="results-container" class="results-wrapper">
-      </div>
-  </section>
-
-  <section id="team" class="d-none">
-    <div class="card-neo">
-      <h5>Your Team Members</h5>
-      <div id="team-members-list"></div>
-    </div>
-  </section>
-</main>
+  </main>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getDatabase, ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  import { getDatabase, ref, push, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
@@ -179,142 +171,236 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  let CACHE = { students: [], teams: [], events: [], results: [], parts: [] };
-  let currentEventId = null;
+  // CACHE & MAPPING (Crucial for large DB logic)
+  let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
+  let KEYMAP = { participations: {}, teams: {} };
+  let LEADER = { active: false, leaderId: null, teamId: null, teamDbKey: null };
 
-  // Real-time Data Sync
-  onValue(ref(db, '/'), (snap) => {
-    const data = snap.val() || {};
-    CACHE.students = Object.values(data.students || {});
-    CACHE.teams = Object.values(data.teams || {});
-    CACHE.events = Object.values(data.events || {});
-    CACHE.results = Object.values(data.results || {});
-    CACHE.parts = Object.values(data.participations || {});
-    initApp();
+  const $ = id => document.getElementById(id);
+  function toast(m, t='success'){ 
+    const e=document.createElement('div'); e.className=`toast align-items-center text-bg-${t} border-0`; 
+    e.innerHTML=`<div class="d-flex"><div class="toast-body">${m}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`; 
+    $('toastRoot').appendChild(e); (new bootstrap.Toast(e)).show(); 
+    e.addEventListener('hidden.bs.toast', () => e.remove());
+  }
+
+  // --- DATA SYNC ---
+  onValue(ref(db, '/'), snap => {
+    const d = snap.val() || {};
+    CACHE.students = Object.values(d.students || {});
+    CACHE.teams = Object.values(d.teams || {});
+    CACHE.events = Object.values(d.events || {});
+    CACHE.participations = Object.values(d.participations || {});
+    CACHE.results = Object.values(d.results || {});
+    CACHE.attendance = d.attendance || {};
+
+    // Mapping for updates/deletes
+    if(d.participations) Object.entries(d.participations).forEach(([k,v]) => KEYMAP.participations[v.id] = k);
+    if(d.teams) Object.entries(d.teams).forEach(([k,v]) => KEYMAP.teams[v.id] = k);
+
+    initLeaderSession();
+    renderAll();
   });
 
-  function initApp() {
-    const leaderId = sessionStorage.getItem('leaderId') || new URLSearchParams(window.location.search).get('leader');
-    if (!leaderId) { window.location.href = 'index.html'; return; }
-    sessionStorage.setItem('leaderId', leaderId);
+  function initLeaderSession() {
+    const lid = sessionStorage.getItem('leaderId') || new URLSearchParams(location.search).get('leader');
+    if (!lid) return;
+    const stud = CACHE.students.find(s => String(s.id) === String(lid));
+    const team = CACHE.teams.find(t => String(t.id) === String(stud?.teamId));
+    if (stud && team) {
+        LEADER = { active: true, leaderId: lid, teamId: team.id, teamDbKey: KEYMAP.teams[team.id] };
+        sessionStorage.setItem('leaderId', lid);
+        $('leaderName').textContent = stud.name;
+        $('leaderTeamName').textContent = `Team: ${team.name}`;
+        $('leaderAvatar').textContent = stud.name[0].toUpperCase();
+    }
+  }
 
-    const leader = CACHE.students.find(s => String(s.id) === String(leaderId));
-    const team = CACHE.teams.find(t => String(t.id) === String(leader?.teamId));
+  function renderAll() {
+    renderDashboard();
+    populateEventsTable();
+    renderResultsList();
+    populateTeamSection();
+  }
 
-    if (team) {
-      document.getElementById('u-name').innerText = leader.name;
-      document.getElementById('u-team').innerText = `Team: ${team.name} (${team.id})`;
-      document.getElementById('s-score').innerText = team.score || 0;
-      document.getElementById('s-members').innerText = CACHE.students.filter(s => s.teamId === team.id).length;
+  // --- DASHBOARD & STATS ---
+  function renderDashboard() {
+    const t = CACHE.teams.find(x => x.id === LEADER.teamId);
+    if (!t) return;
+    $('statScore').textContent = t.score || 0;
+    $('statMembers').textContent = CACHE.students.filter(s => s.teamId === LEADER.teamId).length;
+    $('quickApproved').textContent = CACHE.participations.filter(p => p.teamId === LEADER.teamId && p.status === 'approved').length;
+
+    // Attendance Calc
+    const members = CACHE.students.filter(s => s.teamId === LEADER.teamId).map(s=>String(s.id));
+    let present=0, possible=0;
+    Object.values(CACHE.attendance).forEach(session => {
+        if(!session.students) return;
+        members.forEach(mid => { if(session.students[mid]) { possible++; if(session.students[mid]==='present') present++; }});
+    });
+    $('statAttendance').textContent = possible ? Math.round((present/possible)*100)+'%' : '0%';
+  }
+
+  // --- NOMINATION SYSTEM ---
+  function populateEventsTable() {
+    const list = $('eventsList'); list.innerHTML = '';
+    const q = $('eventSearch').value.toLowerCase();
+    CACHE.events.filter(e => e.name.toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name)).forEach(ev => {
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.innerHTML = `<td><div class="fw-bold">${ev.name}</div><div class="muted-small">${ev.level} | ${ev.type}</div></td><td class="text-end py-3"><i class="bi bi-chevron-right"></i></td>`;
+        tr.onclick = () => selectEventForNomination(ev.id);
+        list.appendChild(tr);
+    });
+  }
+
+  function selectEventForNomination(id) {
+    const ev = CACHE.events.find(e => String(e.id) === String(id));
+    $('selectedEventName').textContent = ev.name;
+    $('selectedEventName').dataset.id = id;
+    const wrap = $('membersSelection'); wrap.innerHTML = '';
+    
+    const teamMembers = CACHE.students.filter(s => String(s.teamId) === String(LEADER.teamId));
+    const current = CACHE.participations.filter(p => String(p.eventId) === String(id) && String(p.teamId) === String(LEADER.teamId)).map(p => String(p.studentId));
+
+    teamMembers.forEach(m => {
+        const d = document.createElement('div');
+        d.className = 'small-box' + (current.includes(String(m.id)) ? ' selected' : '');
+        d.innerHTML = `<div>${m.id}</div><div style="font-size:9px">${m.name.split(' ')[0]}</div>`;
+        d.onclick = () => {
+            const selectedCount = wrap.querySelectorAll('.selected').length;
+            if(!d.classList.contains('selected') && selectedCount >= 2) return toast('Event Limit: 2 participants per team', 'danger');
+            d.classList.toggle('selected');
+        };
+        wrap.appendChild(d);
+    });
+  }
+
+  $('btnSubmitParticipation').onclick = async () => {
+    const evId = $('selectedEventName').dataset.id;
+    if(!evId) return toast('Please select an event first', 'warning');
+    const selectedIds = Array.from($('membersSelection').querySelectorAll('.selected')).map(el => el.children[0].innerText);
+    
+    // Logic: Remove existing that aren't in selection, add new
+    const existing = CACHE.participations.filter(p => String(p.eventId) === String(evId) && String(p.teamId) === String(LEADER.teamId));
+    
+    // Process removals
+    for(let p of existing) {
+        if(!selectedIds.includes(String(p.studentId))) {
+            if(p.status === 'pending') {
+                const dbKey = KEYMAP.participations[p.id];
+                if(dbKey) await remove(ref(db, `participations/${dbKey}`));
+            } else {
+                toast(`Cannot remove ${p.studentId}: Already ${p.status}`, 'danger');
+            }
+        }
     }
 
-    renderEvents();
-    renderResults();
-    renderTeamMembers(team?.id);
-  }
-
-  function renderEvents() {
-    const container = document.getElementById('events-list');
-    container.innerHTML = CACHE.events.map(ev => `
-      <div class="p-2 border-bottom d-flex justify-content-between align-items-center">
-        <span>${ev.name} <br><small class="text-muted">${ev.level}</small></span>
-        <button class="btn btn-sm btn-primary" onclick="window.selectEvent('${ev.id}')">Select</button>
-      </div>
-    `).join('');
-  }
-
-  window.selectEvent = (id) => {
-    currentEventId = id;
-    const ev = CACHE.events.find(e => String(e.id) === String(id));
-    document.getElementById('sel-event-title').innerText = ev.name;
-    const leaderId = sessionStorage.getItem('leaderId');
-    const leader = CACHE.students.find(s => String(s.id) === String(leaderId));
-    
-    const members = CACHE.students.filter(s => s.teamId === leader.teamId);
-    document.getElementById('members-list').innerHTML = members.map(m => `
-      <div class="small-box" id="mb-${m.id}" onclick="this.classList.toggle('selected')">
-        <b>${m.id}</b>
-        <span style="font-size:9px;">${m.name.split(' ')[0]}</span>
-      </div>
-    `).join('');
+    // Process additions
+    for(let sid of selectedIds) {
+        if(!existing.find(p => String(p.studentId) === String(sid))) {
+            const newId = Date.now().toString() + sid;
+            await set(ref(db, `participations/${newId}`), {
+                id: newId, eventId: evId, studentId: sid, teamId: LEADER.teamId, status: 'pending', submittedAt: Date.now()
+            });
+        }
+    }
+    toast('Selection Saved Successfully');
   };
 
-  // --- RENDER RESULTS (UI FIX) ---
-  function renderResults() {
-    const container = document.getElementById('results-container');
+  // --- RESULTS LOGIC (MATCHING VIDEO) ---
+  function renderResultsList() {
+    const wrap = $('leaderResultsList'); wrap.innerHTML = '';
     const publishedIds = [...new Set(CACHE.results.filter(r => r.published).map(r => String(r.eventId)))];
-    
-    if (publishedIds.length === 0) {
-      container.innerHTML = `<div class="text-center p-5 text-muted">No results published yet.</div>`;
-      return;
+
+    if(!publishedIds.length) {
+        wrap.innerHTML = `<div class="card-neo text-center p-5 text-muted">No results published yet</div>`;
+        return;
     }
 
-    container.innerHTML = CACHE.events
-      .filter(ev => publishedIds.includes(String(ev.id)))
-      .map(ev => {
-        const winners = CACHE.results
-          .filter(r => String(r.eventId) === String(ev.id) && r.published)
-          .sort((a,b) => a.position - b.position);
-
-        const winnersHtml = winners.map(w => {
-          const student = CACHE.students.find(s => String(s.id) === String(w.studentId));
-          return `
-            <div class="winner-item">
-              <div class="rank-circle">${w.position}</div>
-              <div>
-                <div style="font-weight: 700; color: #0f172a;">${student?.name || 'Unknown'}</div>
-                <div style="font-size: 12px; color: #64748b;">${w.alias || ''}</div>
-              </div>
-            </div>
-          `;
+    CACHE.events.filter(e => publishedIds.includes(String(e.id))).sort((a,b)=>a.name.localeCompare(b.name)).forEach(ev => {
+        const winners = CACHE.results.filter(r => String(r.eventId) === String(ev.id) && r.published).sort((a,b)=>a.position-b.position);
+        
+        let winHtml = winners.map(w => {
+            const s = CACHE.students.find(st => String(st.id) === String(w.studentId)) || {name: 'Unknown'};
+            return `
+                <div class="winner-box">
+                    <div class="rank-num">${w.position}</div>
+                    <div>
+                        <div style="font-weight:700">${s.name}</div>
+                        <div class="muted-small">${w.alias || 'Participant'}</div>
+                    </div>
+                </div>`;
         }).join('');
 
-        return `
-          <div class="result-card">
-            <div class="result-header" data-bs-toggle="collapse" data-bs-target="#res-collapse-${ev.id}">
-              <div class="result-info">
-                <div class="category">${ev.level || 'General'}</div>
-                <div class="event-name">${ev.name}</div>
-              </div>
-              <div class="result-actions">
-                <span class="event-id-badge">#${ev.id}</span>
-                <button class="btn-view">View</button>
-              </div>
+        const card = document.createElement('div');
+        card.className = 'result-list-item';
+        card.innerHTML = `
+            <div class="result-header" onclick="const b = this.nextElementSibling; b.style.display = b.style.display==='none'?'block':'none';">
+                <div class="result-header-left">
+                    <div class="res-cat">${ev.level || 'General'}</div>
+                    <div class="res-name">${ev.name}</div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="event-id-badge me-2">#${ev.id}</span>
+                    <button class="btn-view-res">View</button>
+                </div>
             </div>
-            <div class="collapse" id="res-collapse-${ev.id}">
-              <div class="result-body">
-                ${winnersHtml}
-              </div>
+            <div class="result-body" style="display:none">
+                ${winHtml}
             </div>
-          </div>
         `;
-      }).join('');
+        wrap.appendChild(card);
+    });
   }
 
-  function renderTeamMembers(teamId) {
-    const list = document.getElementById('team-members-list');
-    list.innerHTML = CACHE.students.filter(s => s.teamId === teamId).map(m => `
-      <div class="p-2 border-bottom d-flex justify-content-between">
-        <span>${m.name}</span>
-        <span class="text-muted">${m.id}</span>
-      </div>
-    `).join('');
-  }
+  // --- PDF EXPORT LOGIC ---
+  $('btnDownloadTeamPdf').onclick = () => {
+    const t = CACHE.teams.find(x => x.id === LEADER.teamId);
+    const m = CACHE.students.filter(s => s.teamId === LEADER.teamId);
+    let h = `<h2>Team: ${t.name}</h2><table border="1" width="100%" style="border-collapse:collapse"><tr><th>ID</th><th>Name</th><th>Level</th></tr>`;
+    m.forEach(s => h+=`<tr><td>${s.id}</td><td>${s.name}</td><td>${s.level}</td></tr>`);
+    h += `</table>`;
+    html2pdf().from(h).set({margin:10, filename:`Team_${t.name}.pdf`}).save();
+  };
 
-  // Navigation Logic
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('section').forEach(s => s.classList.add('d-none'));
-      document.getElementById(btn.dataset.target).classList.remove('d-none');
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  // Navigation
+  document.querySelectorAll('[data-target]').forEach(b => {
+    b.onclick = () => {
+        document.querySelectorAll('main > section').forEach(s => s.classList.add('d-none'));
+        $(b.dataset.target.replace('#','')).classList.remove('d-none');
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+        window.scrollTo(0,0);
     };
   });
 
-  document.getElementById('btnLogout').onclick = () => { sessionStorage.clear(); window.location.href='index.html'; };
+  $('btnLogout').onclick = () => { sessionStorage.clear(); location.href='index.html'; };
+
+  $('btnViewSubmissions').onclick = () => {
+    const wrap = $('yourSubmissionsList'); wrap.innerHTML = '';
+    const myParts = CACHE.participations.filter(p => p.teamId === LEADER.teamId);
+    myParts.forEach(p => {
+        const ev = CACHE.events.find(e => String(e.id) === String(p.eventId));
+        wrap.innerHTML += `<div class="p-2 border-bottom border-secondary"><b>${ev?.name}</b>: ${p.studentId} <span class="badge bg-secondary float-end">${p.status}</span></div>`;
+    });
+    (new bootstrap.Modal($('participationStatusModal'))).show();
+  };
+
+  function populateTeamSection() {
+    const t = CACHE.teams.find(x => x.id === LEADER.teamId);
+    if(!t) return;
+    $('teamInfoWrap').innerHTML = `<h4>${t.name}</h4><div class="muted-small">Team ID: ${t.id} | Score: ${t.score || 0}</div>`;
+    const wrap = $('teamMembersSmall'); wrap.innerHTML = '';
+    CACHE.students.filter(s => s.teamId === LEADER.teamId).forEach(s => {
+        wrap.innerHTML += `<div class="list-group-item bg-transparent text-white border-secondary">${s.name} <span class="float-end muted-small">${s.id}</span></div>`;
+    });
+  }
+
+  // Initial event filter listener
+  $('eventSearch').oninput = populateEventsTable;
 
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
