@@ -11,29 +11,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* Modern UI Theme */
+    /* Modern UI Theme - LIGHT MODE DEFAULT */
     :root {
-        --bg: #0f1529;
-        --card: #1a2238;
-        --text: #e2e8f0;
-        --muted: #94a3b8;
-        --border: #2d3748;
-        --surface: #252e44;
-        --accent-main: #ff6b6b;
-        --accent-secondary: #4ecdc4;
-        --accent-tertiary: #45b7d1;
-        --success: #69ff97;
-        --danger: #ff6b6b;
-        --warning: #ffd166;
-        --info: #4ecdc4;
-        --gradient-primary: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
-        --gradient-secondary: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-        --gradient-card: linear-gradient(145deg, #1a2238 0%, #151b2b 100%);
-        --glow-primary: 0 0 20px rgba(255, 107, 107, 0.3);
-        --glow-secondary: 0 0 20px rgba(78, 205, 196, 0.3);
-    }
-
-    .light-mode {
         --bg: #f8fafc;
         --card: #ffffff;
         --text: #1e293b;
@@ -52,6 +31,27 @@
         --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
         --glow-primary: 0 0 20px rgba(59, 130, 246, 0.1);
         --glow-secondary: 0 0 20px rgba(16, 185, 129, 0.1);
+    }
+
+    .dark-mode {
+        --bg: #0f1529;
+        --card: #1a2238;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --border: #2d3748;
+        --surface: #252e44;
+        --accent-main: #ff6b6b;
+        --accent-secondary: #4ecdc4;
+        --accent-tertiary: #45b7d1;
+        --success: #69ff97;
+        --danger: #ff6b6b;
+        --warning: #ffd166;
+        --info: #4ecdc4;
+        --gradient-primary: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+        --gradient-secondary: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        --gradient-card: linear-gradient(145deg, #1a2238 0%, #151b2b 100%);
+        --glow-primary: 0 0 20px rgba(255, 107, 107, 0.3);
+        --glow-secondary: 0 0 20px rgba(78, 205, 196, 0.3);
     }
 
     * {
@@ -101,7 +101,8 @@
         top: 0;
         bottom: 0;
         height: 100vh;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
     }
 
     .sidebar .brand {
@@ -124,6 +125,7 @@
         transition: all 0.3s ease;
         border: 2px solid transparent;
         position: relative;
+        background: transparent;
     }
 
     .sidebar .icon-btn:hover:not(.active) {
@@ -196,7 +198,7 @@
         border-radius: 20px;
         padding: 25px;
         border: 1px solid var(--border);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         margin-bottom: 25px;
         transition: all 0.3s ease;
         position: relative;
@@ -220,8 +222,8 @@
     }
 
     .card-neo:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         border-color: var(--accent-main);
     }
 
@@ -254,7 +256,7 @@
     .form-control:focus, .form-select:focus {
         background: var(--card);
         border-color: var(--accent-main);
-        box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         outline: none;
     }
 
@@ -271,6 +273,7 @@
         border: none;
         position: relative;
         overflow: hidden;
+        cursor: pointer;
     }
 
     .btn:hover {
@@ -324,17 +327,17 @@
     }
 
     .btn-warning {
-        background: linear-gradient(135deg, #ffd166 0%, #ffb347 100%);
-        color: #000;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
     }
 
     .btn-danger {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
     }
 
     .btn-danger:hover {
-        box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
     }
 
     .btn-outline-primary {
@@ -366,6 +369,7 @@
         --bs-table-border-color: var(--border);
         border-radius: 12px;
         overflow: hidden;
+        margin-bottom: 0;
     }
 
     .table th {
@@ -388,7 +392,7 @@
 
     .table tbody tr:hover {
         background: var(--surface);
-        transform: translateX(5px);
+        transform: translateX(3px);
     }
 
     .table-responsive {
@@ -408,7 +412,7 @@
 
     .score-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     }
 
     .score-value {
@@ -445,6 +449,7 @@
     .search-input {
         padding-left: 45px;
         border-radius: 12px;
+        width: 100%;
     }
 
     /* Small Boxes (Attendance/Program) */
@@ -465,16 +470,17 @@
         position: relative;
         border: 2px solid var(--border);
         transition: all 0.2s ease;
+        user-select: none;
     }
 
     .small-box:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     }
 
     .small-box.present {
         background: var(--success);
-        color: #000;
+        color: white;
         border-color: var(--success);
     }
 
@@ -501,7 +507,7 @@
         padding: 2px 6px;
         border-radius: 10px;
         font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     /* Badges */
@@ -518,7 +524,7 @@
         border: 1px solid var(--border);
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     }
 
     .modal-header {
@@ -548,8 +554,8 @@
         transform: rotate(90deg);
     }
 
-    .light-mode .btn-close {
-        filter: none;
+    .dark-mode .btn-close {
+        filter: invert(1);
     }
 
     /* Alert Boxes */
@@ -717,9 +723,28 @@
         content: ' *';
         color: var(--danger);
     }
+
+    /* Loading States */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--muted);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
   </style>
 </head>
-<body>
+<body class="light-mode">
 <div class="app-wrap">
   <aside class="sidebar">
     <div class="brand"><i class="bi bi-trophy-fill"></i></div>
@@ -743,7 +768,7 @@
         <div class="muted">Fidak Fest Management System</div>
       </div>
       <div>
-        <button id="toggleThemeBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-moon-stars"></i> Theme</button>
+        <button id="toggleThemeBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-moon"></i> Dark Mode</button>
       </div>
     </div>
 
@@ -782,13 +807,13 @@
                     <div class="col-md-6">
                         <div class="score-card">
                             <div class="muted">Pending Approvals</div>
-                            <div id="pendingApprovalsCount" class="score-value" style="color:var(--danger)">0</div>
+                            <div id="pendingApprovalsCount" class="score-value" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%);-webkit-background-clip:text;background-clip:text;">0</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="score-card">
                             <div class="muted">Draft Results</div>
-                            <div id="draftResultsCount" class="score-value" style="color:var(--warning)">0</div>
+                            <div id="draftResultsCount" class="score-value" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%);-webkit-background-clip:text;background-clip:text;">0</div>
                         </div>
                     </div>
                 </div>
@@ -804,7 +829,7 @@
         </div>
         <div class="search-container mb-4">
             <i class="bi bi-search search-icon"></i>
-            <input id="studentLookupSearch" class="form-control search-input" placeholder="Search Student Name/ID or Event Name...">
+            <input id="studentLookupSearch" class="form-control search-input" placeholder="Search Student Name/ID or Event Name..." type="text">
         </div>
         <div id="studentLookupDetails" class="fade-in">
           <div class="card-neo">
@@ -873,7 +898,7 @@
                 <div class="section-title"><i class="bi bi-people-fill"></i> All Students</div>
                 <div class="search-container" style="width: 250px;">
                   <i class="bi bi-search search-icon"></i>
-                  <input id="searchStudents" class="form-control search-input" placeholder="Search students...">
+                  <input id="searchStudents" class="form-control search-input" placeholder="Search students..." type="text">
                 </div>
               </div>
               <div class="table-responsive" style="max-height:600px;overflow:auto">
@@ -954,7 +979,7 @@
                 <div class="section-title"><i class="bi bi-calendar-event"></i> Events List</div>
                 <div class="search-container" style="width: 250px;">
                   <i class="bi bi-search search-icon"></i>
-                  <input id="filterEventSearch" class="form-control search-input" placeholder="Search events...">
+                  <input id="filterEventSearch" class="form-control search-input" placeholder="Search events..." type="text">
                 </div>
               </div>
               <div class="table-responsive" style="max-height:600px;overflow:auto">
@@ -1031,7 +1056,7 @@
           <div class="d-flex gap-2">
             <div class="search-container" style="width: 200px;">
               <i class="bi bi-search search-icon"></i>
-              <input id="searchApprovals" class="form-control search-input" placeholder="Search approvals...">
+              <input id="searchApprovals" class="form-control search-input" placeholder="Search approvals..." type="text">
             </div>
             <button id="downloadApprovalsPdf" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export Roster</button>
           </div>
@@ -1046,7 +1071,7 @@
         </div>
       </section>
 
-      <!-- Results Panel (Fixed) -->
+      <!-- Results Panel -->
       <section id="panel-results" class="card-neo d-none">
         <div class="card-neo mb-4">
           <div class="section-title"><i class="bi bi-trophy"></i> Enter Results</div>
@@ -1086,7 +1111,7 @@
             <div class="col-md-8">
               <div class="search-container">
                 <i class="bi bi-search search-icon"></i>
-                <input id="searchResults" class="form-control search-input" placeholder="Search events, teams, or students...">
+                <input id="searchResults" class="form-control search-input" placeholder="Search events, teams, or students..." type="text">
               </div>
             </div>
             <div class="col-md-4">
@@ -1406,7 +1431,9 @@ Object.entries(refs).forEach(([key, path]) => {
             CACHE[key] = val;
             if (key === 'attendance') {
                 KEYMAP[key] = {};
-                Object.entries(val).forEach(([k, v]) => { KEYMAP[key][v.timestamp] = k; });
+                Object.entries(val).forEach(([k, v]) => { 
+                    if (v && v.timestamp) KEYMAP[key][v.timestamp] = k; 
+                });
             }
         } else {
             CACHE[key] = Object.values(val);
@@ -1421,11 +1448,16 @@ Object.entries(refs).forEach(([key, path]) => {
 
 /* Navigation */
 document.querySelectorAll('.sidebar .icon-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
         if (btn.id === 'logoutBtn') { 
-            window.location.href = 'index.html'; 
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'index.html'; 
+            }
             return; 
         }
+        
         if (btn.id === 'resetAllBtn') { 
             showResetModal(); 
             return; 
@@ -1441,14 +1473,18 @@ document.querySelectorAll('.sidebar .icon-btn').forEach(btn => {
 
 /* Theme Toggle */
 $('toggleThemeBtn').addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
+    document.body.classList.toggle('dark-mode');
     const icon = $('toggleThemeBtn').querySelector('i');
-    if (document.body.classList.contains('light-mode')) {
-        icon.className = 'bi bi-moon';
-        $('toggleThemeBtn').innerHTML = '<i class="bi bi-moon"></i> Dark Mode';
-    } else {
+    if (document.body.classList.contains('dark-mode')) {
         icon.className = 'bi bi-sun';
         $('toggleThemeBtn').innerHTML = '<i class="bi bi-sun"></i> Light Mode';
+        $('toggleThemeBtn').classList.remove('btn-outline-primary');
+        $('toggleThemeBtn').classList.add('btn-outline-warning');
+    } else {
+        icon.className = 'bi bi-moon';
+        $('toggleThemeBtn').innerHTML = '<i class="bi bi-moon"></i> Dark Mode';
+        $('toggleThemeBtn').classList.remove('btn-outline-warning');
+        $('toggleThemeBtn').classList.add('btn-outline-primary');
     }
 });
 
@@ -1512,7 +1548,7 @@ function renderOverview() {
     tbody.innerHTML = leaderboard.length ? 
         leaderboard.map((t, i) => `
             <tr>
-                <td><span class="badge bg-primary">${i + 1}</span></td>
+                <td><span class="badge ${i < 3 ? 'bg-warning' : 'bg-secondary'}">${i + 1}</span></td>
                 <td><strong>${escapeHtml(t.name)}</strong></td>
                 <td><span class="badge bg-success">${t.score || 0}</span></td>
                 <td><small>${CACHE.students.filter(s => s.teamId === t.id).length} members</small></td>
@@ -1549,7 +1585,7 @@ function renderStudents() {
                     <td>${escapeHtml(teamMap[s.teamId] || 'Unassigned')}</td>
                     <td class="text-end">
                         <div class="action-buttons">
-                            <button class="btn btn-sm btn-outline-primary btn-edit-stu" data-dbkey="${dbKey}">
+                            <button class="btn btn-sm btn-outline-primary btn-edit-stu" data-dbkey="${dbKey}" data-id="${s.id}">
                                 <i class="bi bi-pencil"></i> Edit
                             </button>
                         </div>
@@ -1582,8 +1618,9 @@ $('addManualStudent')?.addEventListener('click', async () => {
 
 // Edit Student
 $('studentsTable')?.addEventListener('click', e => {
-    if (e.target.closest('.btn-edit-stu')) {
-        const dbKey = e.target.closest('.btn-edit-stu').dataset.dbkey;
+    const editBtn = e.target.closest('.btn-edit-stu');
+    if (editBtn) {
+        const dbKey = editBtn.dataset.dbkey;
         const student = CACHE.students.find(s => KEYMAP.students[s.id] === dbKey);
         if (student) {
             $('editStudentDbKey').value = dbKey;
@@ -1592,7 +1629,8 @@ $('studentsTable')?.addEventListener('click', e => {
             $('editLevel').value = student.level;
             $('editTeam').value = student.teamId || '';
             
-            new bootstrap.Modal($('editStudentModal')).show();
+            const modal = new bootstrap.Modal($('editStudentModal'));
+            modal.show();
         }
     }
 });
@@ -1610,7 +1648,7 @@ $('editStudentForm')?.addEventListener('submit', async e => {
 });
 
 $('deleteStudentBtn')?.addEventListener('click', async () => {
-    if (!confirm('Delete this student?')) return;
+    if (!confirm('Are you sure you want to delete this student?')) return;
     const key = $('editStudentDbKey').value;
     await remove(ref(db, `students/${key}`));
     bootstrap.Modal.getInstance($('editStudentModal')).hide();
@@ -1638,7 +1676,7 @@ function renderTeams() {
                         <button class="btn btn-sm btn-outline-primary btn-edit-team" data-dbkey="${dbKey}">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
-                        <button class="btn btn-sm btn-outline-danger btn-del-team" data-dbkey="${dbKey}">
+                        <button class="btn btn-sm btn-outline-danger btn-del-team" data-dbkey="${dbKey}" data-id="${t.id}">
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
@@ -1664,6 +1702,35 @@ $('saveTeam')?.addEventListener('click', async () => {
     $('teamName').value = '';
     $('teamPassword').value = '';
     toast('Team created successfully');
+});
+
+// Team deletion
+$('teamsTable')?.addEventListener('click', async e => {
+    const delBtn = e.target.closest('.btn-del-team');
+    if (delBtn) {
+        const dbKey = delBtn.dataset.dbkey;
+        const teamId = delBtn.dataset.id;
+        
+        if (!confirm('Are you sure you want to delete this team? This will unassign all team members.')) return;
+        
+        // Unassign all students from this team
+        const updates = {};
+        CACHE.students.forEach(s => {
+            if (s.teamId === teamId) {
+                const studentKey = KEYMAP.students[s.id];
+                if (studentKey) {
+                    updates[`students/${studentKey}/teamId`] = null;
+                }
+            }
+        });
+        
+        if (Object.keys(updates).length > 0) {
+            await update(ref(db), updates);
+        }
+        
+        await remove(ref(db, `teams/${dbKey}`));
+        toast('Team deleted successfully');
+    }
 });
 
 /* Events Panel */
@@ -1692,7 +1759,7 @@ function renderEvents() {
                         <button class="btn btn-sm btn-outline-primary btn-edit-ev" data-dbkey="${dbKey}">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
-                        <button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">
+                        <button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}" data-id="${e.id}">
                             <i class="bi bi-trash"></i> Delete
                         </button>
                     </div>
@@ -1718,6 +1785,82 @@ $('saveEvent')?.addEventListener('click', async () => {
     toast('Event added successfully');
 });
 
+// Event deletion
+$('eventsTable')?.addEventListener('click', async e => {
+    const delBtn = e.target.closest('.btn-del-ev');
+    if (delBtn) {
+        const dbKey = delBtn.dataset.dbkey;
+        const eventId = delBtn.dataset.id;
+        
+        if (!confirm('Are you sure you want to delete this event? This will also delete all participations and results for this event.')) return;
+        
+        // Delete related participations
+        const participationsToDelete = [];
+        CACHE.participations.forEach(p => {
+            if (p.eventId === eventId) {
+                const partKey = KEYMAP.participations[p.id];
+                if (partKey) participationsToDelete.push(remove(ref(db, `participations/${partKey}`)));
+            }
+        });
+        
+        // Delete related results
+        const resultsToDelete = [];
+        CACHE.results.forEach(r => {
+            if (r.eventId === eventId) {
+                const resultKey = KEYMAP.results[r.id];
+                if (resultKey) resultsToDelete.push(remove(ref(db, `results/${resultKey}`)));
+            }
+        });
+        
+        // Delete the event
+        await Promise.all([
+            remove(ref(db, `events/${dbKey}`)),
+            ...participationsToDelete,
+            ...resultsToDelete
+        ]);
+        
+        toast('Event deleted successfully');
+    }
+});
+
+// Event editing
+$('eventsTable')?.addEventListener('click', e => {
+    const editBtn = e.target.closest('.btn-edit-ev');
+    if (editBtn) {
+        const dbKey = editBtn.dataset.dbkey;
+        const event = CACHE.events.find(ev => KEYMAP.events[ev.id] === dbKey);
+        if (event) {
+            $('editEventDbKey').value = dbKey;
+            $('editEventId').value = event.id;
+            $('editEventName').value = event.name;
+            $('editEventType').value = event.type;
+            $('editEventLevel').value = event.level;
+            
+            new bootstrap.Modal($('editEventModal')).show();
+        }
+    }
+});
+
+$('editEventForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const key = $('editEventDbKey').value;
+    await update(ref(db, `events/${key}`), { 
+        name: $('editEventName').value, 
+        type: $('editEventType').value, 
+        level: $('editEventLevel').value 
+    });
+    bootstrap.Modal.getInstance($('editEventModal')).hide();
+    toast('Event updated');
+});
+
+$('deleteEventBtn')?.addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    const key = $('editEventDbKey').value;
+    await remove(ref(db, `events/${key}`));
+    bootstrap.Modal.getInstance($('editEventModal')).hide();
+    toast('Event deleted');
+});
+
 /* Attendance Panel */
 function renderAttendanceHistory() {
     const tbody = $('attendanceSessions');
@@ -1730,7 +1873,7 @@ function renderAttendanceHistory() {
         const presentCount = session.students ? 
             Object.values(session.students).filter(s => s === 'Present').length : 0;
         const dateStr = session.timestamp ? 
-            new Date(session.timestamp).toLocaleTimeString() : '';
+            new Date(session.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
         
         return `
             <tr>
@@ -1755,6 +1898,101 @@ function renderAttendanceHistory() {
         `;
     }).join('') || '<tr><td colspan="5" class="text-center muted">No attendance sessions</td></tr>';
 }
+
+// Load Attendance
+$('loadAttendance')?.addEventListener('click', () => {
+    const date = $('attDate').value;
+    const method = $('attMethod').value;
+    const teamId = $('attTeam').value;
+    
+    if (!date) return toast('Please select a date', 'danger');
+    
+    let students = CACHE.students;
+    if (method === 'team' && teamId) {
+        students = students.filter(s => s.teamId === teamId);
+        if (students.length === 0) return toast('No students found in this team', 'warning');
+    }
+    
+    const attendanceBoxes = $('attendanceBoxes');
+    attendanceBoxes.innerHTML = students.map(s => `
+        <div class="small-box" data-id="${s.id}" onclick="toggleAttendance(this)">
+            <div class="small-box-id">${s.id}</div>
+            <div>${s.name.split(' ')[0]}</div>
+        </div>
+    `).join('');
+    
+    $('attendanceMarkCard').style.display = 'block';
+});
+
+// Toggle attendance function (global)
+window.toggleAttendance = function(box) {
+    box.classList.toggle('present');
+    box.classList.toggle('absent');
+    if (!box.classList.contains('present') && !box.classList.contains('absent')) {
+        box.classList.remove('present', 'absent');
+    }
+};
+
+// Toggle all attendance
+$('toggleAll')?.addEventListener('click', () => {
+    const boxes = $('attendanceBoxes').querySelectorAll('.small-box');
+    const allPresent = Array.from(boxes).every(box => box.classList.contains('present'));
+    
+    boxes.forEach(box => {
+        if (allPresent) {
+            box.classList.remove('present', 'absent');
+        } else {
+            box.classList.remove('absent');
+            box.classList.add('present');
+        }
+    });
+});
+
+// Save attendance
+$('saveAttendance')?.addEventListener('click', async () => {
+    const date = $('attDate').value;
+    const description = $('attDescription').value || 'Attendance Session';
+    const boxes = $('attendanceBoxes').querySelectorAll('.small-box');
+    
+    if (!date) return toast('Please select a date', 'danger');
+    if (boxes.length === 0) return toast('No students loaded', 'warning');
+    
+    const attendanceData = {
+        date,
+        description,
+        timestamp: Date.now(),
+        students: {}
+    };
+    
+    boxes.forEach(box => {
+        const studentId = box.dataset.id;
+        if (box.classList.contains('present')) {
+            attendanceData.students[studentId] = 'Present';
+        } else if (box.classList.contains('absent')) {
+            attendanceData.students[studentId] = 'Absent';
+        } else {
+            attendanceData.students[studentId] = 'Not Marked';
+        }
+    });
+    
+    await set(push(ref(db, 'attendance')), attendanceData);
+    
+    // Clear form
+    $('attDate').value = '';
+    $('attDescription').value = '';
+    $('attendanceMarkCard').style.display = 'none';
+    
+    toast('Attendance saved successfully');
+});
+
+// Attendance method change
+$('attMethod')?.addEventListener('change', function() {
+    if (this.value === 'team') {
+        $('attTeamWrap').classList.remove('d-none');
+    } else {
+        $('attTeamWrap').classList.add('d-none');
+    }
+});
 
 /* Approvals Panel */
 function renderApprovals() {
@@ -1803,9 +2041,116 @@ function renderApprovals() {
     `).join('') || '<tr><td colspan="5" class="text-center muted">No events found</td></tr>';
 }
 
-/* Results Panel - Fixed Functions */
-// This section would include all the fixed results functions from previous code
-// Including saveResults(), renderResults(), search and filter functionality
+// View approvals details
+$('approvalsTable')?.addEventListener('click', async e => {
+    const viewBtn = e.target.closest('.btn-view-app');
+    if (viewBtn) {
+        const eventId = viewBtn.dataset.eid;
+        const event = CACHE.events.find(e => e.id === eventId);
+        if (!event) return;
+        
+        const pending = CACHE.participations.filter(p => p.eventId === eventId && p.status === 'pending');
+        const approved = CACHE.participations.filter(p => p.eventId === eventId && p.status === 'approved');
+        
+        $('approvalModalTitle').innerHTML = `<i class="bi bi-people"></i> Participants - ${escapeHtml(event.name)}`;
+        
+        // Render pending participants
+        const pendingTable = $('pendingParticipantsTable');
+        pendingTable.innerHTML = pending.map(p => {
+            const student = CACHE.students.find(s => s.id === p.studentId);
+            return `
+                <tr>
+                    <td>${student ? escapeHtml(student.name) : 'Unknown'} (${p.studentId})</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-success btn-approve-participant" data-id="${p.id}">
+                            <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('') || '<tr><td colspan="2" class="text-center muted">No pending participants</td></tr>';
+        
+        // Render approved participants
+        const approvedTable = $('approvedParticipantsTable');
+        approvedTable.innerHTML = approved.map(p => {
+            const student = CACHE.students.find(s => s.id === p.studentId);
+            return `
+                <tr>
+                    <td>${student ? escapeHtml(student.name) : 'Unknown'} (${p.studentId})</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-danger btn-reject-participant" data-id="${p.id}">
+                            <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('') || '<tr><td colspan="2" class="text-center muted">No approved participants</td></tr>';
+        
+        const modal = new bootstrap.Modal($('approvalsDetailModal'));
+        modal.show();
+    }
+});
+
+/* Results Panel - Basic Implementation */
+function renderResults() {
+    const searchTerm = ($('searchResults')?.value || '').toLowerCase();
+    const filter = $('filterResults')?.value || 'all';
+    const tbody = $('resultsTable');
+    if (!tbody) return;
+    
+    let filtered = CACHE.events;
+    
+    // Apply search filter
+    if (searchTerm) {
+        filtered = filtered.filter(e => 
+            e.name.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Apply status filter
+    if (filter === 'published') {
+        filtered = filtered.filter(e => {
+            const eventResults = CACHE.results.filter(r => r.eventId === e.id);
+            return eventResults.length > 0 && eventResults.every(r => r.published === true);
+        });
+    } else if (filter === 'draft') {
+        filtered = filtered.filter(e => {
+            const eventResults = CACHE.results.filter(r => r.eventId === e.id);
+            return eventResults.length > 0 && eventResults.some(r => r.published !== true);
+        });
+    } else if (filter === 'no-results') {
+        filtered = filtered.filter(e => {
+            return !CACHE.results.some(r => r.eventId === e.id);
+        });
+    }
+    
+    tbody.innerHTML = filtered.map(e => {
+        const eventResults = CACHE.results.filter(r => r.eventId === e.id);
+        const firstPlace = eventResults.find(r => r.position === 1);
+        const secondPlace = eventResults.find(r => r.position === 2);
+        const thirdPlace = eventResults.find(r => r.position === 3);
+        
+        const isPublished = eventResults.length > 0 && eventResults.every(r => r.published === true);
+        
+        return `
+            <tr>
+                <td><strong>${escapeHtml(e.name)}</strong></td>
+                <td><span class="badge ${e.type === 'Stage' ? 'bg-primary' : 'bg-info'}">${e.type}</span></td>
+                <td>${firstPlace ? `${firstPlace.studentName || firstPlace.teamName || 'Unknown'} (${firstPlace.points})` : '-'}</td>
+                <td>${secondPlace ? `${secondPlace.studentName || secondPlace.teamName || 'Unknown'} (${secondPlace.points})` : '-'}</td>
+                <td>${thirdPlace ? `${thirdPlace.studentName || thirdPlace.teamName || 'Unknown'} (${thirdPlace.points})` : '-'}</td>
+                <td><span class="${isPublished ? 'status-published' : 'status-draft'}">${isPublished ? 'Published' : 'Draft'}</span></td>
+                <td class="text-end">
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-outline-primary btn-manage-result" data-eid="${e.id}">
+                            <i class="bi bi-pencil"></i> Manage
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('') || '<tr><td colspan="7" class="text-center muted">No events found</td></tr>';
+}
 
 /* Reset All Data */
 function showResetModal() {
@@ -1846,16 +2191,142 @@ $('confirmResetBtn').addEventListener('click', async () => {
 $('searchStudents')?.addEventListener('input', renderStudents);
 $('filterEventSearch')?.addEventListener('input', renderEvents);
 $('searchApprovals')?.addEventListener('input', renderApprovals);
+$('searchResults')?.addEventListener('input', renderResults);
+$('filterResults')?.addEventListener('change', renderResults);
+
+/* File Import Functions */
+$('previewStudents')?.addEventListener('click', () => {
+    const fileInput = $('studentFile');
+    if (!fileInput.files.length) return toast('Please select a file', 'warning');
+    
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+            
+            const previewDiv = $('studentsPreview');
+            previewDiv.innerHTML = `
+                <h6>Preview (${jsonData.length} rows)</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Chess ID</th>
+                                <th>Name</th>
+                                <th>Level</th>
+                                <th>Team</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${jsonData.slice(0, 5).map(row => `
+                                <tr>
+                                    <td>${escapeHtml(row.Chess || row['Chess ID'] || '')}</td>
+                                    <td>${escapeHtml(row.Name || '')}</td>
+                                    <td>${escapeHtml(row.Level || '')}</td>
+                                    <td>${escapeHtml(row.Team || '')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${jsonData.length > 5 ? `<p class="text-muted small">... and ${jsonData.length - 5} more rows</p>` : ''}
+            `;
+        } catch (error) {
+            toast('Error reading file: ' + error.message, 'danger');
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+});
+
+$('importStudents')?.addEventListener('click', async () => {
+    const fileInput = $('studentFile');
+    if (!fileInput.files.length) return toast('Please select a file', 'warning');
+    
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+            
+            let imported = 0;
+            let skipped = 0;
+            
+            for (const row of jsonData) {
+                const chessId = String(row.Chess || row['Chess ID'] || '').trim();
+                const name = String(row.Name || '').trim();
+                const level = String(row.Level || 'Senior').trim();
+                const team = String(row.Team || '').trim();
+                
+                if (!chessId || !name) {
+                    skipped++;
+                    continue;
+                }
+                
+                if (KEYMAP.students[chessId]) {
+                    skipped++;
+                    continue;
+                }
+                
+                // Find team ID by name
+                let teamId = null;
+                if (team) {
+                    const foundTeam = CACHE.teams.find(t => t.name === team);
+                    if (foundTeam) teamId = foundTeam.id;
+                }
+                
+                const newRef = push(ref(db, 'students'));
+                await set(newRef, {
+                    id: chessId,
+                    name,
+                    level: ['Senior', 'Junior'].includes(level) ? level : 'Senior',
+                    teamId
+                });
+                
+                imported++;
+            }
+            
+            fileInput.value = '';
+            $('studentsPreview').innerHTML = '';
+            toast(`Imported ${imported} students, skipped ${skipped}`, 'success');
+        } catch (error) {
+            toast('Error importing: ' + error.message, 'danger');
+        }
+    };
+    
+    reader.readAsArrayBuffer(file);
+});
 
 /* Initialize */
 document.addEventListener('DOMContentLoaded', () => {
+    // Set default date for attendance
+    const today = new Date().toISOString().split('T')[0];
+    $('attDate').value = today;
+    
+    // Initialize theme button text
+    if (document.body.classList.contains('dark-mode')) {
+        $('toggleThemeBtn').innerHTML = '<i class="bi bi-sun"></i> Light Mode';
+        $('toggleThemeBtn').classList.remove('btn-outline-primary');
+        $('toggleThemeBtn').classList.add('btn-outline-warning');
+    }
+    
+    // Auto-click overview panel on load
     setTimeout(() => {
         const initialBtn = document.querySelector('.sidebar .icon-btn[data-target="#panel-overview"]');
         if (initialBtn) initialBtn.click();
     }, 100);
 });
 
-console.log('Admin System Fully Loaded');
+console.log('Admin System Fully Loaded - Light Mode Default');
 </script>
 </body>
 </html>
