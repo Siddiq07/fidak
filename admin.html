@@ -398,6 +398,51 @@
         color: white;
         transform: translateY(-1px);
     }
+    
+    /* Clear button styling for result modal */
+    .btn-clear-first, .btn-clear-second, .btn-clear-third {
+        padding: 2px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .modal-body .d-flex.gap-2 {
+        align-items: center;
+    }
+    
+    .modal-body .form-select {
+        flex: 1;
+    }
+    
+    .modal-body .form-control[style*="width: 80px"] {
+        min-width: 80px;
+    }
+    
+    /* Result modal specific styling */
+    .result-position-group {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 16px;
+        background: var(--input-bg);
+    }
+    
+    .result-position-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .result-position-header h6 {
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .result-fields {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -779,7 +824,7 @@
   </div>
 </div>
 
-<!-- Result Manage Modal -->
+<!-- Result Manage Modal - FIXED STRUCTURE -->
 <div class="modal fade" id="resultManageModal" tabindex="-1">
     <div class="modal-dialog">
         <form id="resultManageForm" class="modal-content">
@@ -789,26 +834,62 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="manageEventId">
-                <div class="alert alert-info py-2 small">
+                <div class="alert alert-info py-2 small mb-3">
                     <i class="bi bi-info-circle"></i> This form allows you to edit the saved results for <strong id="resultEventNameDisplay"></strong>.
                 </div>
                 
-                <h6 class="mt-3">1st Place</h6>
-                <select id="manageResultSelectFirst" class="form-select mb-2"></select>
-                <input id="manageResultPointsFirst" type="number" class="form-control form-control-sm mb-3" placeholder="Points">
+                <!-- 1st Place Section -->
+                <div class="mb-3 result-position-group">
+                    <div class="result-position-header">
+                        <h6>1st Place</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-clear-first">Clear</button>
+                    </div>
+                    <div class="result-fields">
+                        <select id="manageResultSelectFirst" class="form-select">
+                            <option value="">Select Student</option>
+                        </select>
+                        <input id="manageResultPointsFirst" type="number" class="form-control" style="width: 80px;" placeholder="Points" value="60">
+                    </div>
+                </div>
                 
-                <h6>2nd Place</h6>
-                <select id="manageResultSelectSecond" class="form-select mb-2"></select>
-                <input id="manageResultPointsSecond" type="number" class="form-control form-control-sm mb-3" placeholder="Points">
+                <!-- 2nd Place Section -->
+                <div class="mb-3 result-position-group">
+                    <div class="result-position-header">
+                        <h6>2nd Place</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-clear-second">Clear</button>
+                    </div>
+                    <div class="result-fields">
+                        <select id="manageResultSelectSecond" class="form-select">
+                            <option value="">Select Student</option>
+                        </select>
+                        <input id="manageResultPointsSecond" type="number" class="form-control" style="width: 80px;" placeholder="Points" value="30">
+                    </div>
+                </div>
                 
-                <h6>3rd Place</h6>
-                <select id="manageResultSelectThird" class="form-select mb-2"></select>
-                <input id="manageResultPointsThird" type="number" class="form-control form-control-sm mb-3" placeholder="Points">
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="deleteEventResultsBtn" class="btn btn-danger me-auto">Delete All Results</button>
-                <button type="button" id="managePublishBtn" class="btn btn-success">Publish & Update Scores</button>
-                <button type="submit" class="btn btn-warning">Save Draft</button>
+                <!-- 3rd Place Section -->
+                <div class="mb-3 result-position-group">
+                    <div class="result-position-header">
+                        <h6>3rd Place</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-clear-third">Clear</button>
+                    </div>
+                    <div class="result-fields">
+                        <select id="manageResultSelectThird" class="form-select">
+                            <option value="">Select Student</option>
+                        </select>
+                        <input id="manageResultPointsThird" type="number" class="form-control" style="width: 80px;" placeholder="Points">
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Action Buttons for Entire Form -->
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button type="button" id="deleteEventResultsBtn" class="btn btn-danger btn-sm">Delete All Results</button>
+                    <div class="ms-auto d-flex gap-2">
+                        <button type="button" id="managePublishBtn" class="btn btn-success btn-sm">Publish & Update Scores</button>
+                        <button type="submit" class="btn btn-warning btn-sm">Save Draft</button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -2049,6 +2130,34 @@ function renderResults(){
   tbody.innerHTML = html;
 }
 
+/* ---------------- RESULT MANAGE MODAL FUNCTIONS ---------------- */
+
+// Function to clear all form fields
+function clearResultManageForm() {
+    $('#manageResultSelectFirst').value = '';
+    $('#manageResultSelectSecond').value = '';
+    $('#manageResultSelectThird').value = '';
+    $('#manageResultPointsFirst').value = '';
+    $('#manageResultPointsSecond').value = '';
+    $('#manageResultPointsThird').value = '';
+    $('#manageEventId').value = '';
+    $('#resultEventNameDisplay').textContent = '';
+}
+
+// Function to clear a specific position
+function clearPosition(position) {
+    if (position === 1) {
+        $('#manageResultSelectFirst').value = '';
+        $('#manageResultPointsFirst').value = '';
+    } else if (position === 2) {
+        $('#manageResultSelectSecond').value = '';
+        $('#manageResultPointsSecond').value = '';
+    } else if (position === 3) {
+        $('#manageResultSelectThird').value = '';
+        $('#manageResultPointsThird').value = '';
+    }
+}
+
 // FIX: Edit Results Modal Logic
 $('resultsTable').addEventListener('click', (e) => {
     const btn = e.target.closest('button');
@@ -2082,7 +2191,14 @@ $('resultsTable').addEventListener('click', (e) => {
                 $(points[index]).value = res.points || 0;
             } else {
                 $(sId).value = '';
-                $(points[index]).value = '';
+                // Set default points based on position (like in your images)
+                if (pos === 1) {
+                    $(points[index]).value = '60'; // Default 1st place points
+                } else if (pos === 2) {
+                    $(points[index]).value = '30'; // Default 2nd place points
+                } else {
+                    $(points[index]).value = '';
+                }
             }
         });
 
@@ -2273,6 +2389,27 @@ $('deleteEventResultsBtn').addEventListener('click', async () => {
     try {
         bootstrap.Modal.getInstance($('resultManageModal')).hide();
     } catch (e) {}
+});
+
+// Add clear button functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Clear 1st place
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-clear-first')) {
+            $('#manageResultSelectFirst').value = '';
+            $('#manageResultPointsFirst').value = '';
+        }
+        
+        if (e.target.classList.contains('btn-clear-second')) {
+            $('#manageResultSelectSecond').value = '';
+            $('#manageResultPointsSecond').value = '';
+        }
+        
+        if (e.target.classList.contains('btn-clear-third')) {
+            $('#manageResultSelectThird').value = '';
+            $('#manageResultPointsThird').value = '';
+        }
+    });
 });
 
 /* ---------------- SYSTEM RESET FUNCTIONALITY ---------------- */
