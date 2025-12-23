@@ -688,38 +688,55 @@
         </div>
       </section>
 
+      <!-- RESULTS SECTION REPLACED -->
       <section id="panel-results" class="card-neo d-none">
-        <div class="card-neo mb-3">
-          <div class="section-title"><i class="bi bi-trophy"></i> Enter Results</div>
-          <div class="row g-2">
-            <div class="col-md-3"><select id="resultEvent" class="form-select"><option value="">Select Event</option></select></div>
-            <div class="col-md-3">
-              <label class="form-label mb-1 small text-info">1st Place</label>
-              <select id="resultSelectFirst" class="form-select mb-1"></select>
-              <input id="resultPointsFirst" type="number" class="form-control form-control-sm" placeholder="Points">
+        <div class="card-neo">
+          <div class="section-title">Add / Manage Results</div>
+          <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+              <select id="resultEvent" class="form-select"><option value="">Select event</option></select>
             </div>
             <div class="col-md-3">
-              <label class="form-label mb-1 small text-info">2nd Place</label>
-              <select id="resultSelectSecond" class="form-select mb-1"></select>
-              <input id="resultPointsSecond" type="number" class="form-control form-control-sm" placeholder="Points">
+              <select id="resultSelectFirst" class="form-select"><option value="">1st — select</option></select>
             </div>
+            <div class="col-md-2"><input id="resultPointsFirst" type="number" class="form-control" placeholder="Points"></div>
+
+            <div class="col-md-3"></div>
+
             <div class="col-md-3">
-              <label class="form-label mb-1 small text-info">3rd Place</label>
-              <select id="resultSelectThird" class="form-select mb-1"></select>
-              <input id="resultPointsThird" type="number" class="form-control form-control-sm" placeholder="Points">
+              <select id="resultSelectSecond" class="form-select"><option value="">2nd — select</option></select>
             </div>
-          </div>
-          <div class="mt-3 text-end">
-            <button id="clearResultForm" class="btn btn-outline-secondary">Clear Form</button>
-            <button id="saveResult" class="btn btn-warning">Save Draft</button>
-            <button id="publishAllResults" class="btn btn-success">Publish & Add Points</button>
+            <div class="col-md-2"><input id="resultPointsSecond" type="number" class="form-control" placeholder="Points"></div>
+
+            <div class="col-md-3"></div>
+
+            <div class="col-md-3">
+              <select id="resultSelectThird" class="form-select"><option value="">3rd — select</option></select>
+            </div>
+            <div class="col-md-2"><input id="resultPointsThird" type="number" class="form-control" placeholder="Points"></div>
+
+            <div class="col-md-2 d-flex gap-2">
+              <button id="saveResult" class="btn btn-success">Save (Draft)</button>
+              <button id="publishAllResults" class="btn btn-outline-secondary">Publish</button>
+            </div>
           </div>
         </div>
-        <div class="card-neo">
-          <div class="section-title"><i class="bi bi-trophy-fill"></i> All Events & Results</div>
+
+        <div class="card-neo mt-3">
+          <div class="section-title">Results List</div>
+          <div class="muted mb-2">Light rows indicate at least one result is uploaded for that event</div>
           <div class="table-responsive">
             <table class="table align-middle">
-              <thead class="table-light"><tr><th>Event</th><th>Type</th><th>1st (Pts)</th><th>2nd (Pts)</th><th>3rd (Pts)</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead class="table-light">
+                <tr>
+                  <th>Event</th>
+                  <th>1st</th>
+                  <th>2nd</th>
+                  <th>3rd</th>
+                  <th>Published</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
               <tbody id="resultsTable"></tbody>
             </table>
           </div>
@@ -1890,526 +1907,141 @@ $('downloadApprovalsPdf').addEventListener('click', () => {
 });
 
 
-/* ---------------- RESULTS (COMPLETELY FIXED) ---------------- */
-// Result Validation
-function validateResults(inputs) {
-    const selectedIds = inputs.filter(i => i.sid && i.sid !== '').map(i => i.sid);
-    const uniqueIds = new Set(selectedIds);
-    if (selectedIds.length !== uniqueIds.size) {
-        return { valid: false, message: "1st, 2nd, and 3rd places must be unique students." };
-    }
-    return { valid: true };
-}
-
-// FIX: Added logic to load participants on event change
-$('resultEvent').addEventListener('change', () => {
-    const eid = $('resultEvent').value;
-    const s1 = $('resultSelectFirst');
-    const s2 = $('resultSelectSecond');
-    const s3 = $('resultSelectThird');
-
-    if (!eid) {
-        s1.innerHTML = s2.innerHTML = s3.innerHTML = '<option value="">Select Student</option>';
-        return;
-    }
-
-    const parts = CACHE.participations.filter(p => p.eventId === eid && p.status === 'approved');
-    let html = '<option value="">Select Student</option>';
-    parts.forEach(p => { 
-        const s = CACHE.students.find(x => x.id === p.studentId); 
-        html += `<option value="${p.studentId}">${s ? s.name : p.studentId}</option>`; 
-    });
-    s1.innerHTML = s2.innerHTML = s3.innerHTML = html;
-    
-    // Also load existing draft results
-    const eventResults = CACHE.results.filter(r => r.eventId === eid);
-    const points = ['resultPointsFirst', 'resultPointsSecond', 'resultPointsThird'];
-    
-    [s1, s2, s3].forEach((selectEl, index) => {
-        const pos = index + 1;
-        const res = eventResults.find(r => r.position === pos);
-        if (res) {
-            selectEl.value = res.studentId || '';
-            $(points[index]).value = res.points || '';
-        } else {
-            selectEl.value = '';
-            $(points[index]).value = '';
-        }
-    });
+/* ---------------- RESULTS (REPLACED WITH SECOND CODE VERSION) ---------------- */
+// When event selected, auto load approved participants
+$('resultEvent').addEventListener('change', ()=> {
+  const ev = $('resultEvent').value; if(!ev){ ['resultSelectFirst','resultSelectSecond','resultSelectThird'].forEach(id=> $(id).innerHTML = '<option value="">Select</option>'); return; }
+  const participants = CACHE.participations.filter(p => String(p.eventId) === String(ev) && String(p.status||'').toLowerCase()==='approved');
+  const map = {}; CACHE.students.forEach(s => map[s.id] = s.name);
+  ['resultSelectFirst','resultSelectSecond','resultSelectThird'].forEach(id => {
+    const sel = $(id); sel.innerHTML = `<option value="">Select</option>`;
+    participants.forEach(p => sel.innerHTML += `<option value="${escapeHtml(p.studentId)}">${escapeHtml(map[p.studentId]||p.studentId)} (${escapeHtml(p.studentId)})</option>`);
+  });
 });
 
-// Clear Form Button
-$('clearResultForm').addEventListener('click', () => {
-    $('resultEvent').value = '';
-    $('resultSelectFirst').value = '';
-    $('resultSelectSecond').value = '';
-    $('resultSelectThird').value = '';
-    $('resultPointsFirst').value = '';
-    $('resultPointsSecond').value = '';
-    $('resultPointsThird').value = '';
-    toast('Form cleared');
+// Save individual results (draft)
+$('saveResult').addEventListener('click', async ()=>{
+  const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
+  const firstId = $('resultSelectFirst').value; const fPts = Number($('resultPointsFirst').value)||0;
+  const secondId = $('resultSelectSecond').value; const sPts = Number($('resultPointsSecond').value)||0;
+  const thirdId = $('resultSelectThird').value; const tPts = Number($('resultPointsThird').value)||0;
+  async function upsertPosition(position, studentId, points){
+    if(!studentId) return;
+    const existing = CACHE.results.find(r => String(r.eventId) === String(ev) && Number(r.position) === Number(position));
+    if(existing){
+      const dbKey = KEYMAP.results[existing.id] || existing.id;
+      await update(ref(db, `results/${dbKey}`), { studentId, points, published:false, updatedAt: Date.now() });
+    } else {
+      const p = push(ref(db, 'results')); const id = Date.now().toString() + Math.floor(Math.random()*9999);
+      await set(p, { id, eventId: ev, position, studentId, points, published:false, createdAt: Date.now() });
+    }
+  }
+  await upsertPosition(1, firstId, fPts);
+  await upsertPosition(2, secondId, sPts);
+  await upsertPosition(3, thirdId, tPts);
+  toast('Results saved as draft');
+  renderResults();
 });
 
-$('saveResult').addEventListener('click', async () => {
-    const eid = $('resultEvent').value; 
-    if(!eid) return toast('Select event','danger');
-    
-    // Get the actual values
-    const student1 = $('resultSelectFirst').value;
-    const points1 = Number($('resultPointsFirst').value) || 0;
-    const student2 = $('resultSelectSecond').value;
-    const points2 = Number($('resultPointsSecond').value) || 0;
-    const student3 = $('resultSelectThird').value;
-    const points3 = Number($('resultPointsThird').value) || 0;
-    
-    const inputs = [
-        { pos:1, sid: student1, pts: points1 },
-        { pos:2, sid: student2, pts: points2 },
-        { pos:3, sid: student3, pts: points3 }
-    ];
-    
-    const validation = validateResults(inputs);
-    if (!validation.valid) return toast(validation.message, 'danger');
-    
-    // Delete existing results for this event first
-    const existingResults = CACHE.results.filter(r => r.eventId === eid);
-    for(const existing of existingResults) {
-        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existing.id);
-        if (key) await remove(ref(db, `results/${key}`));
+// Publish all results for selected event
+$('publishAllResults').addEventListener('click', async ()=>{
+  const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
+  const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
+  if(!eventResults.length) return toast('No results to publish','danger');
+  for(const r of eventResults){
+    const dbKey = KEYMAP.results[r.id] || r.id;
+    if(r.published) continue;
+    await update(ref(db, `results/${dbKey}`), { published:true, publishedAt: Date.now() });
+    const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+    if(stud && stud.teamId){
+      const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+      if(team){
+        const dbTeamKey = KEYMAP.teams[team.id];
+        const newScore = (Number(team.score)||0) + (Number(r.points)||0);
+        await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+      }
     }
-    
-    // Save as draft (not published)
-    for(const i of inputs){
-        if(i.sid && i.sid !== ''){
-            const data = { 
-                eventId: eid, 
-                position: i.pos, 
-                studentId: i.sid, 
-                points: i.pts, 
-                published: false, 
-                id: Date.now() + Math.random().toString() 
-            };
-            await set(push(ref(db, 'results')), data);
-        }
-    }
-    
-    toast('Draft saved');
-    
-    // Clear form
-    $('clearResultForm').click();
+  }
+  toast('Published results for event');
+  renderResults();
 });
 
-$('publishAllResults').addEventListener('click', async () => {
-    const eid = $('resultEvent').value; 
-    if(!eid) return toast('Select event','danger');
-    
-    // Get the actual values
-    const student1 = $('resultSelectFirst').value;
-    const points1 = Number($('resultPointsFirst').value) || 0;
-    const student2 = $('resultSelectSecond').value;
-    const points2 = Number($('resultPointsSecond').value) || 0;
-    const student3 = $('resultSelectThird').value;
-    const points3 = Number($('resultPointsThird').value) || 0;
-    
-    const inputs = [
-        { pos:1, sid: student1, pts: points1 },
-        { pos:2, sid: student2, pts: points2 },
-        { pos:3, sid: student3, pts: points3 }
-    ];
-    
-    const validation = validateResults(inputs);
-    if (!validation.valid) return toast(validation.message, 'danger');
-    
-    // 1. Reset scores from old published results
-    const oldResults = CACHE.results.filter(r => r.eventId === eid && r.published);
-    for(const oldR of oldResults) {
-        const oldStu = CACHE.students.find(s=>s.id === oldR.studentId);
-        if(oldStu && oldStu.teamId){
-            const tm = CACHE.teams.find(t=>t.id === oldStu.teamId);
-            if(tm) {
-                const tmKey = KEYMAP.teams[tm.id];
-                const newScore = Math.max(0, (tm.score||0) - (oldR.points || 0));
-                await update(ref(db, `teams/${tmKey}`), { score: newScore });
-            }
-        }
-    }
-    
-    // 2. Delete all existing results for this event
-    const allExisting = CACHE.results.filter(r => r.eventId === eid);
-    for(const existing of allExisting) {
-        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existing.id);
-        if (key) await remove(ref(db, `results/${key}`));
-    }
-
-    // 3. Publish new results
-    for(const i of inputs){
-        if(i.sid && i.sid !== ''){
-            const data = { 
-                eventId: eid, 
-                position: i.pos, 
-                studentId: i.sid, 
-                points: i.pts, 
-                published: true, 
-                id: Date.now() + Math.random().toString() 
-            };
-            
-            await set(push(ref(db, 'results')), data);
-            
-            // Update Team Score
-            const stu = CACHE.students.find(s=>s.id === i.sid);
-            if(stu && stu.teamId){
-                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
-                if(tm) {
-                    const tmKey = KEYMAP.teams[tm.id];
-                    const newScore = (tm.score || 0) + i.pts;
-                    await update(ref(db, `teams/${tmKey}`), { score: newScore });
-                }
-            }
-        }
-    }
-    
-    toast('Published & Scores Updated!');
-    
-    // Clear form after publishing
-    $('clearResultForm').click();
-});
-
+// Render results
 function renderResults(){
   const tbody = $('resultsTable');
-  let html = '';
-  const studentMap = {}; CACHE.students.forEach(s => studentMap[s.id] = s);
-
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No events</td></tr>'; return; }
+  const evMap = {};
+  CACHE.results.forEach(r => { if(!evMap[r.eventId]) evMap[r.eventId] = {}; evMap[r.eventId][r.position] = r; });
+  let rows = [];
+  CACHE.events.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
   CACHE.events.forEach(ev => {
-    const res = CACHE.results.filter(r => r.eventId == ev.id);
-    
-    // If no results, show empty row
-    if (res.length === 0) {
-        html += `<tr>
-            <td>${escapeHtml(ev.name)}</td>
-            <td><small>${ev.type}</small></td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td><span class="badge bg-secondary">No Results</span></td>
-            <td>
-                <div class="action-buttons">
-                    <button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}"><i class="bi bi-pencil"></i> Edit</button>
-                </div>
-            </td>
-        </tr>`;
-        return;
-    }
-    
-    const p1 = res.find(r=>r.position==1);
-    const p2 = res.find(r=>r.position==2);
-    const p3 = res.find(r=>r.position==3);
-    const isPub = res.some(r=>r.published);
-    const status = isPub ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-warning text-dark">Draft</span>';
-    
-    const getName = (r) => { 
-        if(!r) return '-'; 
-        const s = studentMap[r.studentId]; 
-        return s ? `${s.name} (${r.points})` : `${r.studentId} (${r.points})`; 
-    };
-    
-    html += `<tr>
-        <td>${escapeHtml(ev.name)}</td>
-        <td><small>${ev.type}</small></td>
-        <td>${getName(p1)}</td>
-        <td>${getName(p2)}</td>
-        <td>${getName(p3)}</td>
-        <td>${status}</td>
-        <td>
-            <div class="action-buttons">
-                <button class="btn btn-sm btn-outline-primary btn-edit-results" data-eid="${ev.id}"><i class="bi bi-pencil"></i> Edit</button>
-                <button class="btn btn-sm btn-outline-danger btn-delete-results" data-eid="${ev.id}"><i class="bi bi-trash"></i> Delete</button>
-            </div>
-        </td>
-    </tr>`;
+    const pos = evMap[ev.id] || {};
+    const first = pos[1] ? (CACHE.students.find(s=>String(s.id)===String(pos[1].studentId))||{name:pos[1].studentId,id:pos[1].studentId}) : {name:'', id:''};
+    const second = pos[2] ? (CACHE.students.find(s=>String(s.id)===String(pos[2].studentId))||{name:pos[2].studentId,id:pos[2].studentId}) : {name:'', id:''};
+    const third = pos[3] ? (CACHE.students.find(s=>String(s.id)===String(pos[3].studentId))||{name:pos[3].studentId,id:pos[3].studentId}) : {name:'', id:''};
+    const anyUploaded = !!pos[1] || !!pos[2] || !!pos[3];
+    const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
+    const pubBadge = pub ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
+    const rowClass = anyUploaded ? 'participated-row' : '';
+    // single edit/delete/publish actions for event (as requested)
+    rows.push(`<tr class="${rowClass}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(first.name)} ${first.id?`(${escapeHtml(first.id)})`:''}</td><td>${escapeHtml(second.name)} ${second.id?`(${escapeHtml(second.id)})`:''}</td><td>${escapeHtml(third.name)} ${third.id?`(${escapeHtml(third.id)})`:''}</td><td>${pubBadge}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event-results" data-ev="${escapeHtml(ev.id)}">Edit</button> <button class="btn btn-sm btn-outline-secondary btn-toggle-publish-event" data-ev="${escapeHtml(ev.id)}">${pub? 'Unpublish' : 'Publish'}</button> <button class="btn btn-sm btn-outline-danger btn-delete-event-results" data-ev="${escapeHtml(ev.id)}">Delete</button></td></tr>`);
   });
-  tbody.innerHTML = html;
+  tbody.innerHTML = rows.join('') || '<tr><td colspan="6" class="text-center muted">No results</td></tr>';
 }
 
-/* ---------------- RESULT MANAGE MODAL FUNCTIONS ---------------- */
-
-// Function to clear all form fields
-function clearResultManageForm() {
-    $('#manageResultSelectFirst').value = '';
-    $('#manageResultSelectSecond').value = '';
-    $('#manageResultSelectThird').value = '';
-    $('#manageResultPointsFirst').value = '';
-    $('#manageResultPointsSecond').value = '';
-    $('#manageResultPointsThird').value = '';
-    $('#manageEventId').value = '';
-    $('#resultEventNameDisplay').textContent = '';
-}
-
-// Function to clear a specific position
-function clearPosition(position) {
-    if (position === 1) {
-        $('#manageResultSelectFirst').value = '';
-        $('#manageResultPointsFirst').value = '';
-    } else if (position === 2) {
-        $('#manageResultSelectSecond').value = '';
-        $('#manageResultPointsSecond').value = '';
-    } else if (position === 3) {
-        $('#manageResultSelectThird').value = '';
-        $('#manageResultPointsThird').value = '';
-    }
-}
-
-// FIX: Edit Results Modal Logic
-$('resultsTable').addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    const eid = btn.dataset.eid;
-    
-    if (btn.classList.contains('btn-edit-results')) {
-        const ev = CACHE.events.find(x => x.id === eid);
-        if (!ev) return toast('Event not found', 'danger');
-
-        const parts = CACHE.participations.filter(p => p.eventId === eid && p.status === 'approved');
-        const eventResults = CACHE.results.filter(r => r.eventId === eid);
-
-        let html = '<option value="">Select Student</option>';
-        parts.forEach(p => { 
-            const s = CACHE.students.find(x => x.id === p.studentId); 
-            html += `<option value="${p.studentId}">${s ? s.name : p.studentId}</option>`; 
-        });
-
-        const selects = ['manageResultSelectFirst', 'manageResultSelectSecond', 'manageResultSelectThird'];
-        const points = ['manageResultPointsFirst', 'manageResultPointsSecond', 'manageResultPointsThird'];
-
-        selects.forEach(id => $(id).innerHTML = html);
-
-        // Load existing data or clear
-        selects.forEach((sId, index) => {
-            const pos = index + 1;
-            const res = eventResults.find(r => r.position === pos);
-            if (res) {
-                $(sId).value = res.studentId || '';
-                $(points[index]).value = res.points || 0;
-            } else {
-                $(sId).value = '';
-                // Set default points based on position (like in your images)
-                if (pos === 1) {
-                    $(points[index]).value = '60'; // Default 1st place points
-                } else if (pos === 2) {
-                    $(points[index]).value = '30'; // Default 2nd place points
-                } else {
-                    $(points[index]).value = '';
-                }
-            }
-        });
-
-        $('manageEventId').value = eid;
-        $('resultEventNameDisplay').textContent = ev.name;
-        
-        // Display the modal
-        new bootstrap.Modal($('resultManageModal')).show();
-    }
-    
-    // FIX: Handle Delete Results Button - COMPLETELY REMOVE RESULTS
-    if (btn.classList.contains('btn-delete-results')) {
-        if (confirm('Are you sure you want to delete ALL results for this event? This will remove scores and cannot be undone.')) {
-            deleteAllEventResults(eid);
+// Result event-level actions
+document.addEventListener('click', async (e)=>{
+  if(e.target.classList.contains('btn-toggle-publish-event')){
+    const ev = e.target.dataset.ev;
+    const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
+    if(!eventResults.length) return toast('No results for this event','danger');
+    // toggle: if any published -> unpublish all; else publish all
+    const anyPublished = eventResults.some(r=> r.published);
+    for(const r of eventResults){
+      const dbKey = KEYMAP.results[r.id] || r.id;
+      await update(ref(db, `results/${dbKey}`), { published: !anyPublished, publishedAt: !anyPublished?Date.now():null });
+      // update team score add/subtract
+      const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+      if(stud && stud.teamId){
+        const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+        if(team){
+          const dbTeamKey = KEYMAP.teams[team.id];
+          const delta = Number(r.points)||0;
+          const newScore = Math.max(0, (Number(team.score)||0) + (!anyPublished ? delta : -delta));
+          await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
         }
+      }
     }
-});
-
-// FIX: Function to COMPLETELY delete all results for an event
-async function deleteAllEventResults(eid) {
-    const resultsToDelete = CACHE.results.filter(r => r.eventId === eid);
-    
-    if (resultsToDelete.length === 0) {
-        toast('No results found for this event.', 'warning');
-        return;
-    }
-    
-    if (!confirm(`This will delete ${resultsToDelete.length} result(s) and remove all associated scores. Continue?`)) {
-        return;
-    }
-    
-    // 1. Reset team scores for published results
-    for(const r of resultsToDelete) {
-        if(r.published) {
-            const stu = CACHE.students.find(s=>s.id === r.studentId);
-            if(stu && stu.teamId){
-                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
-                if(tm) {
-                    const tmKey = KEYMAP.teams[tm.id];
-                    const newScore = Math.max(0, (tm.score||0) - (r.points || 0));
-                    await update(ref(db, `teams/${tmKey}`), { score: newScore });
-                }
-            }
-        }
-        // 2. Delete entry from Firebase
-        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === r.id);
-        if (key) await remove(ref(db, `results/${key}`));
-    }
-    
-    toast(`Deleted ${resultsToDelete.length} result(s) for this event.`, 'success');
-    // Refresh the display
+    toast(anyPublished ? 'Unpublished event results' : 'Published event results');
     renderResults();
-}
-
-// FIX: Handle Management Modal Form Submission (Save Draft)
-$('resultManageForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const eid = $('manageEventId').value;
-    
-    // Get the actual values
-    const student1 = $('manageResultSelectFirst').value;
-    const points1 = Number($('manageResultPointsFirst').value) || 0;
-    const student2 = $('manageResultSelectSecond').value;
-    const points2 = Number($('manageResultPointsSecond').value) || 0;
-    const student3 = $('manageResultSelectThird').value;
-    const points3 = Number($('manageResultPointsThird').value) || 0;
-    
-    const inputs = [
-        { pos:1, sid: student1, pts: points1 },
-        { pos:2, sid: student2, pts: points2 },
-        { pos:3, sid: student3, pts: points3 }
-    ];
-    
-    const validation = validateResults(inputs);
-    if (!validation.valid) return toast(validation.message, 'danger');
-    
-    // 1. Delete existing results for this event
-    const existingResults = CACHE.results.filter(r => r.eventId === eid);
-    for(const existing of existingResults) {
-        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existing.id);
-        if (key) await remove(ref(db, `results/${key}`));
-    }
-    
-    // 2. Save as draft (not published)
-    for(const i of inputs){
-        if(i.sid && i.sid !== ''){
-            const data = { 
-                eventId: eid, 
-                position: i.pos, 
-                studentId: i.sid, 
-                points: i.pts, 
-                published: false, 
-                id: Date.now() + Math.random().toString() 
-            };
-            await set(push(ref(db, 'results')), data);
-        }
-    }
-    
-    toast('Draft saved');
-    try {
-        bootstrap.Modal.getInstance($('resultManageModal')).hide();
-    } catch (e) {}
-    renderResults(); // Refresh the table
-});
-
-// FIX: Handle Management Modal Publish Button
-$('managePublishBtn').addEventListener('click', async () => {
-    const eid = $('manageEventId').value;
-    
-    // Get the actual values
-    const student1 = $('manageResultSelectFirst').value;
-    const points1 = Number($('manageResultPointsFirst').value) || 0;
-    const student2 = $('manageResultSelectSecond').value;
-    const points2 = Number($('manageResultPointsSecond').value) || 0;
-    const student3 = $('manageResultSelectThird').value;
-    const points3 = Number($('manageResultPointsThird').value) || 0;
-    
-    const inputs = [
-        { pos:1, sid: student1, pts: points1 },
-        { pos:2, sid: student2, pts: points2 },
-        { pos:3, sid: student3, pts: points3 }
-    ];
-    
-    const validation = validateResults(inputs);
-    if (!validation.valid) return toast(validation.message, 'danger');
-    
-    // 1. Reset scores from old published results
-    const oldResults = CACHE.results.filter(r => r.eventId === eid && r.published);
-    for(const oldR of oldResults) {
-        const oldStu = CACHE.students.find(s=>s.id === oldR.studentId);
-        if(oldStu && oldStu.teamId){
-            const tm = CACHE.teams.find(t=>t.id === oldStu.teamId);
-            if(tm) {
-                const tmKey = KEYMAP.teams[tm.id];
-                const newScore = Math.max(0, (tm.score||0) - (oldR.points || 0));
-                await update(ref(db, `teams/${tmKey}`), { score: newScore });
-            }
-        }
-    }
-    
-    // 2. Delete all existing results for this event
-    const allExisting = CACHE.results.filter(r => r.eventId === eid);
-    for(const existing of allExisting) {
-        const key = Object.keys(KEYMAP.results).find(k => CACHE.results.find(r=>r.id===k)?.id === existing.id);
-        if (key) await remove(ref(db, `results/${key}`));
-    }
-
-    // 3. Publish new results
-    for(const i of inputs){
-        if(i.sid && i.sid !== ''){
-            const data = { 
-                eventId: eid, 
-                position: i.pos, 
-                studentId: i.sid, 
-                points: i.pts, 
-                published: true, 
-                id: Date.now() + Math.random().toString() 
-            };
-            
-            await set(push(ref(db, 'results')), data);
-            
-            // Update Team Score
-            const stu = CACHE.students.find(s=>s.id === i.sid);
-            if(stu && stu.teamId){
-                const tm = CACHE.teams.find(t=>t.id === stu.teamId);
-                if(tm) {
-                    const tmKey = KEYMAP.teams[tm.id];
-                    const newScore = (tm.score || 0) + i.pts;
-                    await update(ref(db, `teams/${tmKey}`), { score: newScore });
-                }
-            }
-        }
-    }
-    
-    toast('Published & Scores Updated!');
-    try {
-        bootstrap.Modal.getInstance($('resultManageModal')).hide();
-    } catch (e) {}
-    renderResults(); // Refresh the table
-});
-
-// FIX: Handle Management Modal Delete Button
-$('deleteEventResultsBtn').addEventListener('click', async () => {
-    const eid = $('manageEventId').value;
-    if (!confirm('Are you sure you want to delete ALL results for this event? This includes scores and publication status.')) return;
-    
-    await deleteAllEventResults(eid);
-    try {
-        bootstrap.Modal.getInstance($('resultManageModal')).hide();
-    } catch (e) {}
-});
-
-// Add clear button functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Clear 1st place
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-clear-first')) {
-            $('#manageResultSelectFirst').value = '';
-            $('#manageResultPointsFirst').value = '';
-        }
-        
-        if (e.target.classList.contains('btn-clear-second')) {
-            $('#manageResultSelectSecond').value = '';
-            $('#manageResultPointsSecond').value = '';
-        }
-        
-        if (e.target.classList.contains('btn-clear-third')) {
-            $('#manageResultSelectThird').value = '';
-            $('#manageResultPointsThird').value = '';
-        }
+  } else if(e.target.classList.contains('btn-edit-event-results')){
+    const evId = e.target.dataset.ev;
+    // open the resultEvent select + pre-fill positions using admin UI controls
+    $('resultEvent').value = evId;
+    $('resultEvent').dispatchEvent(new Event('change'));
+    // prefill fields if existing
+    const positions = [1,2,3];
+    positions.forEach(pn=>{
+      const rr = CACHE.results.find(r => String(r.eventId) === String(evId) && Number(r.position) === pn);
+      if(rr){
+        if(pn===1){ $('resultSelectFirst').value = rr.studentId; $('resultPointsFirst').value = rr.points||0; }
+        if(pn===2){ $('resultSelectSecond').value = rr.studentId; $('resultPointsSecond').value = rr.points||0; }
+        if(pn===3){ $('resultSelectThird').value = rr.studentId; $('resultPointsThird').value = rr.points||0; }
+      }
     });
+    toast('Loaded results into the editor (save to update).');
+    document.querySelector('[data-target="#panel-results"]').click();
+  } else if(e.target.classList.contains('btn-delete-event-results')){
+    if(!confirm('Delete all results for this event?')) return;
+    const evId = e.target.dataset.ev;
+    const toDelete = CACHE.results.filter(r=> String(r.eventId)===String(evId));
+    for(const r of toDelete){
+      const dbKey = KEYMAP.results[r.id] || r.id;
+      await remove(ref(db, `results/${dbKey}`));
+    }
+    toast('Deleted results for event');
+    renderResults();
+  }
 });
 
 /* ---------------- SYSTEM RESET FUNCTIONALITY ---------------- */
@@ -2492,7 +2124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Data loading (renderAll) is handled by Firebase onValue listeners
 });
 
-console.log('Admin v6 Combined Loaded - Results Fixed & System Reset Added');
+console.log('Admin v6 Combined Loaded - Results Replaced with Second Code Version');
 </script>
 </body>
 </html>
