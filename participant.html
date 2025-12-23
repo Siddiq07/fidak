@@ -200,109 +200,104 @@ body {
 .badge-pending { background: #fef3c7; color: #92400e; }
 .badge-rejected { background: #fee2e2; color: #991b1b; }
 
-/* RESULTS CONTAINER */
-.results-container {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+/* RESULTS CONTAINER - LIKE LEADER PAGE */
+.res-container {
+  padding: 0;
+  background: transparent;
 }
-.result-header {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
-  padding: 20px;
+.res-card {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  border: none;
+}
+.res-header {
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: background 0.2s;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: white;
 }
-.result-header:hover {
-  background: linear-gradient(135deg, #1e293b, #334155);
-}
-.result-header h5 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-.result-category {
-  font-size: 12px;
-  opacity: 0.8;
+.res-cat {
+  font-weight: 700;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 4px;
 }
-.result-toggle {
-  font-size: 20px;
-  transition: transform 0.3s;
+.res-name {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: white;
+  margin-top: 4px;
 }
-.result-body {
-  padding: 0;
+.btn-view-res {
+  background: white;
+  color: #3b82f6;
+  border: none;
+  padding: 6px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: 0.2s;
+}
+.btn-view-res:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+.res-body {
+  padding: 0 20px 20px;
+  background: #fff;
+  border-top: 1px solid #f1f5f9;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.5s ease;
 }
-.result-body.expanded {
+.res-body.expanded {
   max-height: 1000px;
   padding: 20px;
 }
-
-/* WINNER ROWS */
 .winner-row {
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 12px;
   background: #f8fafc;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  transition: transform 0.2s;
+  border-radius: 8px;
+  margin-top: 10px;
+  color: #1e293b;
 }
-.winner-row:hover {
-  transform: translateX(5px);
-  background: #f1f5f9;
-}
-.rank {
-  width: 36px;
-  height: 36px;
+.rank-num {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
+  background: #3b82f6;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 16px;
-  margin-right: 15px;
+  margin-right: 12px;
   flex-shrink: 0;
-}
-.rank.gold { 
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #78350f;
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-}
-.rank.silver { 
-  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-  color: #374151;
-  box-shadow: 0 4px 12px rgba(209, 213, 219, 0.3);
-}
-.rank.bronze { 
-  background: linear-gradient(135deg, #fbcfe8, #f9a8d4);
-  color: #831843;
-  box-shadow: 0 4px 12px rgba(249, 168, 212, 0.3);
 }
 .winner-info {
   flex-grow: 1;
 }
 .winner-name {
   font-weight: 600;
-  color: var(--primary);
+  color: #1e293b;
   margin-bottom: 4px;
 }
-.winner-details {
-  font-size: 14px;
-  color: var(--muted);
+.winner-meta {
+  font-size: 12px;
+  color: #64748b;
 }
 .winner-points {
-  background: var(--info);
+  background: #3b82f6;
   color: white;
   padding: 4px 12px;
   border-radius: 20px;
@@ -310,8 +305,12 @@ body {
   font-weight: 600;
 }
 
-/* MY RESULT BADGE */
-.my-result-badge {
+/* MY RESULT INDICATOR */
+.my-result {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important;
+  border: 2px solid #22c55e !important;
+}
+.my-badge {
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: white;
   padding: 4px 12px;
@@ -325,67 +324,6 @@ body {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
-}
-
-/* ALL RESULTS SECTION */
-.all-results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-.result-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: transform 0.2s;
-}
-.result-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-.result-card-header {
-  background: linear-gradient(135deg, var(--info), #1e40af);
-  color: white;
-  padding: 20px;
-}
-.result-card-category {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
-  margin-bottom: 5px;
-}
-.result-card-title {
-  font-weight: 700;
-  font-size: 1.2rem;
-  margin: 0;
-}
-.result-card-body {
-  padding: 20px;
-}
-.winner-podium {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.podium-item {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 10px;
-}
-.podium-rank {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  margin-right: 12px;
-  flex-shrink: 0;
 }
 
 /* EMPTY STATES */
@@ -414,8 +352,14 @@ body {
 @media (max-width: 768px) {
   .topbar { flex-direction: row; }
   .stats { grid-template-columns: repeat(2, 1fr); }
-  .all-results-grid { grid-template-columns: 1fr; }
-  .event-meta { flex-wrap: wrap; }
+  .res-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .btn-view-res {
+    align-self: flex-end;
+  }
 }
 
 @media (max-width: 480px) {
@@ -479,19 +423,8 @@ body {
 </div>
 
 <div class="section">
-  <div class="section-title"><i class="bi bi-trophy"></i> My Achievements</div>
-  <div id="myResultsList">
-    <div class="empty-state">
-      <i class="bi bi-emoji-neutral"></i>
-      <h5>No Achievements Yet</h5>
-      <p>Keep participating! Your achievements will appear here</p>
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title"><i class="bi bi-list-stars"></i> All Event Results</div>
-  <div id="allResultsContainer">
+  <div class="section-title"><i class="bi bi-trophy"></i> All Event Results</div>
+  <div id="resultsContainer" class="res-container">
     <div class="empty-state">
       <i class="bi bi-trophy"></i>
       <h5>No Results Published</h5>
@@ -551,7 +484,6 @@ onValue(ref(db, '/'), (snap) => {
   
   initProfile();
   renderRegistrations();
-  renderMyAchievements();
   renderAllResults();
   updateStats();
 });
@@ -636,69 +568,18 @@ function renderRegistrations() {
   }).join('');
 }
 
-// Render My Achievements
-function renderMyAchievements() {
-  const container = document.getElementById('myResultsList');
-  const myResults = CACHE.results.filter(r => 
-    String(r.studentId) === String(participantId) && 
-    r.published === true
-  );
-
-  if (myResults.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="bi bi-emoji-neutral"></i>
-        <h5>No Achievements Yet</h5>
-        <p>Keep participating! Your achievements will appear here</p>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = myResults.map(result => {
-    const event = eventMap[result.eventId];
-    if (!event) return '';
-    
-    const rankClass = result.position === 1 ? 'gold' : 
-                     result.position === 2 ? 'silver' : 'bronze';
-    const rankText = result.position === 1 ? '1st Place' : 
-                    result.position === 2 ? '2nd Place' : '3rd Place';
-    
-    return `
-      <div class="results-container">
-        <div class="result-header" onclick="toggleResult(this)">
-          <div>
-            <div class="result-category">${event.level} • ${event.type}</div>
-            <h5>${event.name}</h5>
-          </div>
-          <i class="bi bi-chevron-down result-toggle"></i>
-        </div>
-        <div class="result-body">
-          <div class="winner-row">
-            <div class="rank ${rankClass}">${result.position}</div>
-            <div class="winner-info">
-              <div class="winner-name">${studentData?.name || 'You'}</div>
-              <div class="winner-details">
-                <i class="bi bi-person-circle me-1"></i>ID: ${result.studentId} • 
-                <i class="bi bi-trophy me-1"></i>${rankText}
-              </div>
-            </div>
-            <div class="winner-points">${result.points || 0} Points</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Render All Results
+// Render All Results - EXACTLY LIKE LEADER PAGE
 function renderAllResults() {
-  const container = document.getElementById('allResultsContainer');
+  const container = document.getElementById('resultsContainer');
   
-  // Group published results by event
-  const publishedResults = CACHE.results.filter(r => r.published === true);
+  // Get all published results
+  const publishedIds = [...new Set(
+    CACHE.results
+      .filter(r => r.published === true)
+      .map(r => String(r.eventId))
+  )];
   
-  if (publishedResults.length === 0) {
+  if (publishedIds.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
         <i class="bi bi-trophy"></i>
@@ -709,61 +590,52 @@ function renderAllResults() {
     return;
   }
 
-  // Create a map of eventId -> results
-  const resultsByEvent = {};
-  publishedResults.forEach(result => {
-    if (!resultsByEvent[result.eventId]) {
-      resultsByEvent[result.eventId] = [];
-    }
-    resultsByEvent[result.eventId].push(result);
-  });
-
-  container.innerHTML = Object.entries(resultsByEvent).map(([eventId, results]) => {
-    const event = eventMap[eventId];
-    if (!event) return '';
-    
-    // Sort results by position
-    results.sort((a, b) => a.position - b.position);
-    
-    // Check if participant won in this event
-    const myResult = results.find(r => String(r.studentId) === String(participantId));
-    
-    return `
-      <div class="result-card">
-        <div class="result-card-header">
-          <div class="result-card-category">${event.level} • ${event.type}</div>
-          <div class="result-card-title">${event.name}</div>
-          ${myResult ? '<span class="my-result-badge">You Won!</span>' : ''}
-        </div>
-        <div class="result-card-body">
-          <div class="winner-podium">
-            ${results.map(result => {
-              const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
-              const rankClass = result.position === 1 ? 'gold' : 
-                               result.position === 2 ? 'silver' : 'bronze';
-              const isMe = String(result.studentId) === String(participantId);
+  container.innerHTML = CACHE.events
+    .filter(e => publishedIds.includes(String(e.id)))
+    .map(ev => {
+      // Get all winners for this event
+      const winners = CACHE.results
+        .filter(r => String(r.eventId) === String(ev.id) && r.published === true)
+        .sort((a, b) => a.position - b.position);
+      
+      // Check if participant is a winner in this event
+      const myWin = winners.find(w => String(w.studentId) === String(participantId));
+      
+      return `
+        <div class="res-card">
+          <div class="res-header" onclick="toggleResult(this)">
+            <div>
+              <div class="res-cat">${ev.level}</div>
+              <div class="res-name">${ev.name}</div>
+            </div>
+            ${myWin ? '<span class="my-badge">You Won!</span>' : ''}
+            <button class="btn-view-res">View</button>
+          </div>
+          <div class="res-body">
+            ${winners.map(w => {
+              const student = CACHE.students.find(s => String(s.id) === String(w.studentId));
+              const isMe = String(w.studentId) === String(participantId);
               
               return `
-                <div class="podium-item ${isMe ? 'my-result' : ''}" style="${isMe ? 'background: linear-gradient(135deg, #dcfce7, #bbf7d0);' : ''}">
-                  <div class="podium-rank ${rankClass}">${result.position}</div>
-                  <div style="flex-grow: 1;">
-                    <div style="font-weight: 600; color: #1e293b;">
-                      ${student?.name || result.studentId}
-                      ${isMe ? ' <span style="color: #16a34a;">(You)</span>' : ''}
+                <div class="winner-row ${isMe ? 'my-result' : ''}">
+                  <div class="rank-num">${w.position}</div>
+                  <div class="winner-info">
+                    <div class="winner-name">
+                      ${student?.name || w.studentId}
+                      ${isMe ? ' <span style="color: #22c55e;">(You)</span>' : ''}
                     </div>
-                    <div style="font-size: 12px; color: #64748b;">ID: ${result.studentId}</div>
+                    <div class="winner-meta">
+                      <i class="bi bi-person-circle me-1"></i>ID: ${w.studentId}
+                    </div>
                   </div>
-                  <div style="background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;">
-                    ${result.points || 0} Points
-                  </div>
+                  <div class="winner-points">${w.points || 0} Points</div>
                 </div>
               `;
             }).join('')}
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
 }
 
 // Update Stats
@@ -787,15 +659,18 @@ function updateStats() {
   document.getElementById('statPoints').textContent = totalPoints;
 }
 
-// Toggle result expansion
+// Toggle result expansion - EXACTLY LIKE LEADER PAGE
 window.toggleResult = (header) => {
   const body = header.nextElementSibling;
-  const icon = header.querySelector('.result-toggle');
+  const btn = header.querySelector('.btn-view-res');
   
   body.classList.toggle('expanded');
-  icon.className = body.classList.contains('expanded') ? 
-    'bi bi-chevron-up result-toggle' : 
-    'bi bi-chevron-down result-toggle';
+  
+  if (body.classList.contains('expanded')) {
+    btn.innerHTML = '<i class="bi bi-chevron-up me-1"></i> Close';
+  } else {
+    btn.innerHTML = 'View';
+  }
 };
 
 // Logout
