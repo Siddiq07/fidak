@@ -200,6 +200,63 @@ body {
 .badge-pending { background: #fef3c7; color: #92400e; }
 .badge-rejected { background: #fee2e2; color: #991b1b; }
 
+/* SEARCH BAR */
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--info);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.search-btn {
+  background: var(--info);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.search-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+.clear-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.clear-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
 /* RESULTS CONTAINER - LIKE LEADER PAGE */
 .res-container {
   padding: 0;
@@ -326,6 +383,25 @@ body {
   100% { transform: scale(1); }
 }
 
+/* FILTER INFO */
+.filter-info {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--info);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.filter-text {
+  font-size: 14px;
+  color: var(--muted);
+}
+.filter-text strong {
+  color: var(--primary);
+}
+
 /* EMPTY STATES */
 .empty-state {
   text-align: center;
@@ -359,6 +435,12 @@ body {
   }
   .btn-view-res {
     align-self: flex-end;
+  }
+  .search-container {
+    flex-direction: column;
+  }
+  .search-input, .search-btn, .clear-btn {
+    width: 100%;
   }
 }
 
@@ -424,6 +506,29 @@ body {
 
 <div class="section">
   <div class="section-title"><i class="bi bi-trophy"></i> All Event Results</div>
+  
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search events... (type event name or level)">
+    <button id="searchBtn" class="search-btn">
+      <i class="bi bi-search"></i> Search
+    </button>
+    <button id="clearBtn" class="clear-btn">
+      <i class="bi bi-x-circle"></i> Clear
+    </button>
+  </div>
+  
+  <!-- Filter Info -->
+  <div id="filterInfo" class="filter-info" style="display: none;">
+    <div class="filter-text">
+      Showing results for: <strong id="filterText"></strong>
+    </div>
+    <button id="clearFilterBtn" class="clear-btn" style="padding: 6px 12px; font-size: 12px;">
+      <i class="bi bi-x-circle"></i> Clear Filter
+    </button>
+  </div>
+  
+  <!-- Results Container -->
   <div id="resultsContainer" class="res-container">
     <div class="empty-state">
       <i class="bi bi-trophy"></i>
@@ -467,6 +572,8 @@ let CACHE = {
   participations: [],
   results: []
 };
+
+let currentSearchQuery = '';
 
 // Load all data
 onValue(ref(db, '/'), (snap) => {
@@ -569,8 +676,10 @@ function renderRegistrations() {
 }
 
 // Render All Results - EXACTLY LIKE LEADER PAGE
-function renderAllResults() {
+function renderAllResults(searchQuery = '') {
   const container = document.getElementById('resultsContainer');
+  const filterInfo = document.getElementById('filterInfo');
+  const filterText = document.getElementById('filterText');
   
   // Get all published results
   const publishedIds = [...new Set(
@@ -579,63 +688,79 @@ function renderAllResults() {
       .map(r => String(r.eventId))
   )];
   
-  if (publishedIds.length === 0) {
+  // Filter events based on search query
+  let filteredEvents = CACHE.events.filter(e => publishedIds.includes(String(e.id)));
+  
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    filteredEvents = filteredEvents.filter(e => 
+      e.name.toLowerCase().includes(query) ||
+      e.level.toLowerCase().includes(query) ||
+      e.type.toLowerCase().includes(query)
+    );
+    
+    // Show filter info
+    filterInfo.style.display = 'flex';
+    filterText.textContent = `"${searchQuery}"`;
+  } else {
+    filterInfo.style.display = 'none';
+  }
+  
+  if (filteredEvents.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <i class="bi bi-trophy"></i>
-        <h5>No Results Published</h5>
-        <p>Event results will appear here once published</p>
+        ${searchQuery ? '<i class="bi bi-search"></i>' : '<i class="bi bi-trophy"></i>'}
+        <h5>${searchQuery ? 'No Results Found' : 'No Results Published'}</h5>
+        <p>${searchQuery ? 'No results match your search. Try a different term.' : 'Event results will appear here once published'}</p>
       </div>
     `;
     return;
   }
 
-  container.innerHTML = CACHE.events
-    .filter(e => publishedIds.includes(String(e.id)))
-    .map(ev => {
-      // Get all winners for this event
-      const winners = CACHE.results
-        .filter(r => String(r.eventId) === String(ev.id) && r.published === true)
-        .sort((a, b) => a.position - b.position);
-      
-      // Check if participant is a winner in this event
-      const myWin = winners.find(w => String(w.studentId) === String(participantId));
-      
-      return `
-        <div class="res-card">
-          <div class="res-header" onclick="toggleResult(this)">
-            <div>
-              <div class="res-cat">${ev.level}</div>
-              <div class="res-name">${ev.name}</div>
-            </div>
-            ${myWin ? '<span class="my-badge">You Won!</span>' : ''}
-            <button class="btn-view-res">View</button>
+  container.innerHTML = filteredEvents.map(ev => {
+    // Get all winners for this event
+    const winners = CACHE.results
+      .filter(r => String(r.eventId) === String(ev.id) && r.published === true)
+      .sort((a, b) => a.position - b.position);
+    
+    // Check if participant is a winner in this event
+    const myWin = winners.find(w => String(w.studentId) === String(participantId));
+    
+    return `
+      <div class="res-card">
+        <div class="res-header" onclick="toggleResult(this)">
+          <div>
+            <div class="res-cat">${ev.level}</div>
+            <div class="res-name">${ev.name}</div>
           </div>
-          <div class="res-body">
-            ${winners.map(w => {
-              const student = CACHE.students.find(s => String(s.id) === String(w.studentId));
-              const isMe = String(w.studentId) === String(participantId);
-              
-              return `
-                <div class="winner-row ${isMe ? 'my-result' : ''}">
-                  <div class="rank-num">${w.position}</div>
-                  <div class="winner-info">
-                    <div class="winner-name">
-                      ${student?.name || w.studentId}
-                      ${isMe ? ' <span style="color: #22c55e;">(You)</span>' : ''}
-                    </div>
-                    <div class="winner-meta">
-                      <i class="bi bi-person-circle me-1"></i>ID: ${w.studentId}
-                    </div>
-                  </div>
-                  <div class="winner-points">${w.points || 0} Points</div>
-                </div>
-              `;
-            }).join('')}
-          </div>
+          ${myWin ? '<span class="my-badge">You Won!</span>' : ''}
+          <button class="btn-view-res">View</button>
         </div>
-      `;
-    }).join('');
+        <div class="res-body">
+          ${winners.map(w => {
+            const student = CACHE.students.find(s => String(s.id) === String(w.studentId));
+            const isMe = String(w.studentId) === String(participantId);
+            
+            return `
+              <div class="winner-row ${isMe ? 'my-result' : ''}">
+                <div class="rank-num">${w.position}</div>
+                <div class="winner-info">
+                  <div class="winner-name">
+                    ${student?.name || w.studentId}
+                    ${isMe ? ' <span style="color: #22c55e;">(You)</span>' : ''}
+                  </div>
+                  <div class="winner-meta">
+                    <i class="bi bi-person-circle me-1"></i>ID: ${w.studentId}
+                  </div>
+                </div>
+                <div class="winner-points">${w.points || 0} Points</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // Update Stats
@@ -672,6 +797,37 @@ window.toggleResult = (header) => {
     btn.innerHTML = 'View';
   }
 };
+
+// Search functionality
+document.getElementById('searchBtn').addEventListener('click', () => {
+  const searchInput = document.getElementById('searchInput');
+  currentSearchQuery = searchInput.value.trim();
+  renderAllResults(currentSearchQuery);
+});
+
+// Clear search
+document.getElementById('clearBtn').addEventListener('click', () => {
+  const searchInput = document.getElementById('searchInput');
+  searchInput.value = '';
+  currentSearchQuery = '';
+  renderAllResults();
+});
+
+// Clear filter
+document.getElementById('clearFilterBtn').addEventListener('click', () => {
+  const searchInput = document.getElementById('searchInput');
+  searchInput.value = '';
+  currentSearchQuery = '';
+  renderAllResults();
+});
+
+// Search on Enter key
+document.getElementById('searchInput').addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') {
+    currentSearchQuery = e.target.value.trim();
+    renderAllResults(currentSearchQuery);
+  }
+});
 
 // Logout
 window.logout = () => {
