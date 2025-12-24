@@ -1907,7 +1907,7 @@ $('downloadApprovalsPdf').addEventListener('click', () => {
 });
 
 
-/* ---------------- RESULTS (REPLACED WITH SECOND CODE VERSION) ---------------- */
+/* ---------------- RESULTS (UPDATED WITH PROPER SCORE MANAGEMENT) ---------------- */
 // When event selected, auto load approved participants
 $('resultEvent').addEventListener('change', ()=> {
   const ev = $('resultEvent').value; if(!ev){ ['resultSelectFirst','resultSelectSecond','resultSelectThird'].forEach(id=> $(id).innerHTML = '<option value="">Select</option>'); return; }
@@ -1925,17 +1925,46 @@ $('saveResult').addEventListener('click', async ()=>{
   const firstId = $('resultSelectFirst').value; const fPts = Number($('resultPointsFirst').value)||0;
   const secondId = $('resultSelectSecond').value; const sPts = Number($('resultPointsSecond').value)||0;
   const thirdId = $('resultSelectThird').value; const tPts = Number($('resultPointsThird').value)||0;
+  
   async function upsertPosition(position, studentId, points){
     if(!studentId) return;
     const existing = CACHE.results.find(r => String(r.eventId) === String(ev) && Number(r.position) === Number(position));
     if(existing){
       const dbKey = KEYMAP.results[existing.id] || existing.id;
-      await update(ref(db, `results/${dbKey}`), { studentId, points, published:false, updatedAt: Date.now() });
+      // Check if changing from published to draft - need to remove score
+      if(existing.published && existing.studentId && existing.points){
+        // Remove old score since we're changing to draft
+        const oldStud = CACHE.students.find(s => String(s.id) === String(existing.studentId));
+        if(oldStud && oldStud.teamId){
+          const team = CACHE.teams.find(t => String(t.id) === String(oldStud.teamId));
+          if(team){
+            const dbTeamKey = KEYMAP.teams[team.id];
+            const newScore = Math.max(0, (Number(team.score)||0) - (Number(existing.points)||0));
+            await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+          }
+        }
+      }
+      await update(ref(db, `results/${dbKey}`), { 
+        studentId, 
+        points, 
+        published: false,  // Always save as draft when using "Save Draft"
+        updatedAt: Date.now() 
+      });
     } else {
-      const p = push(ref(db, 'results')); const id = Date.now().toString() + Math.floor(Math.random()*9999);
-      await set(p, { id, eventId: ev, position, studentId, points, published:false, createdAt: Date.now() });
+      const p = push(ref(db, 'results')); 
+      const id = Date.now().toString() + Math.floor(Math.random()*9999);
+      await set(p, { 
+        id, 
+        eventId: ev, 
+        position, 
+        studentId, 
+        points, 
+        published: false,  // New results are always drafts
+        createdAt: Date.now() 
+      });
     }
   }
+  
   await upsertPosition(1, firstId, fPts);
   await upsertPosition(2, secondId, sPts);
   await upsertPosition(3, thirdId, tPts);
@@ -1948,10 +1977,14 @@ $('publishAllResults').addEventListener('click', async ()=>{
   const ev = $('resultEvent').value; if(!ev) return toast('Select event','danger');
   const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
   if(!eventResults.length) return toast('No results to publish','danger');
+  
   for(const r of eventResults){
     const dbKey = KEYMAP.results[r.id] || r.id;
+    
+    // If already published, skip
     if(r.published) continue;
-    await update(ref(db, `results/${dbKey}`), { published:true, publishedAt: Date.now() });
+    
+    // Add score to team when publishing
     const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
     if(stud && stud.teamId){
       const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
@@ -1961,8 +1994,14 @@ $('publishAllResults').addEventListener('click', async ()=>{
         await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
       }
     }
+    
+    // Mark as published
+    await update(ref(db, `results/${dbKey}`), { 
+      published: true, 
+      publishedAt: Date.now() 
+    });
   }
-  toast('Published results for event');
+  toast('Published results for event and updated team scores');
   renderResults();
 });
 
@@ -1983,10 +2022,55 @@ function renderResults(){
     const pub = (pos[1] && pos[1].published) || (pos[2] && pos[2].published) || (pos[3] && pos[3].published);
     const pubBadge = pub ? '<span class="badge bg-success">Published</span>' : '<span class="badge bg-secondary">Draft</span>';
     const rowClass = anyUploaded ? 'participated-row' : '';
-    // single edit/delete/publish actions for event (as requested)
-    rows.push(`<tr class="${rowClass}"><td>${escapeHtml(ev.name)}</td><td>${escapeHtml(first.name)} ${first.id?`(${escapeHtml(first.id)})`:''}</td><td>${escapeHtml(second.name)} ${second.id?`(${escapeHtml(second.id)})`:''}</td><td>${escapeHtml(third.name)} ${third.id?`(${escapeHtml(third.id)})`:''}</td><td>${pubBadge}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary btn-edit-event-results" data-ev="${escapeHtml(ev.id)}">Edit</button> <button class="btn btn-sm btn-outline-secondary btn-toggle-publish-event" data-ev="${escapeHtml(ev.id)}">${pub? 'Unpublish' : 'Publish'}</button> <button class="btn btn-sm btn-outline-danger btn-delete-event-results" data-ev="${escapeHtml(ev.id)}">Delete</button></td></tr>`);
+    
+    rows.push(`<tr class="${rowClass}">
+      <td>${escapeHtml(ev.name)}</td>
+      <td>${escapeHtml(first.name)} ${first.id?`(${escapeHtml(first.id)})`:''}</td>
+      <td>${escapeHtml(second.name)} ${second.id?`(${escapeHtml(second.id)})`:''}</td>
+      <td>${escapeHtml(third.name)} ${third.id?`(${escapeHtml(third.id)})`:''}</td>
+      <td>${pubBadge}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-primary btn-edit-event-results" data-ev="${escapeHtml(ev.id)}">Edit</button>
+        <button class="btn btn-sm ${pub ? 'btn-outline-warning' : 'btn-outline-success'} btn-toggle-publish-event" data-ev="${escapeHtml(ev.id)}">${pub ? 'Unpublish' : 'Publish'}</button>
+        <button class="btn btn-sm btn-outline-danger btn-delete-event-results" data-ev="${escapeHtml(ev.id)}">Delete</button>
+      </td>
+    </tr>`);
   });
   tbody.innerHTML = rows.join('') || '<tr><td colspan="6" class="text-center muted">No results</td></tr>';
+}
+
+// Helper function to remove scores when unpublishing or deleting results
+async function removeResultScores(eventId) {
+  const eventResults = CACHE.results.filter(r => String(r.eventId) === String(eventId) && r.published);
+  
+  for(const r of eventResults){
+    const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+    if(stud && stud.teamId && r.points){
+      const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+      if(team){
+        const dbTeamKey = KEYMAP.teams[team.id];
+        const newScore = Math.max(0, (Number(team.score)||0) - (Number(r.points)||0));
+        await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+      }
+    }
+  }
+}
+
+// Helper function to add scores when publishing results
+async function addResultScores(eventId) {
+  const eventResults = CACHE.results.filter(r => String(r.eventId) === String(eventId));
+  
+  for(const r of eventResults){
+    const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
+    if(stud && stud.teamId && r.points){
+      const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
+      if(team){
+        const dbTeamKey = KEYMAP.teams[team.id];
+        const newScore = (Number(team.score)||0) + (Number(r.points)||0);
+        await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
+      }
+    }
+  }
 }
 
 // Result event-level actions
@@ -1995,51 +2079,82 @@ document.addEventListener('click', async (e)=>{
     const ev = e.target.dataset.ev;
     const eventResults = CACHE.results.filter(r => String(r.eventId) === String(ev));
     if(!eventResults.length) return toast('No results for this event','danger');
-    // toggle: if any published -> unpublish all; else publish all
-    const anyPublished = eventResults.some(r=> r.published);
-    for(const r of eventResults){
-      const dbKey = KEYMAP.results[r.id] || r.id;
-      await update(ref(db, `results/${dbKey}`), { published: !anyPublished, publishedAt: !anyPublished?Date.now():null });
-      // update team score add/subtract
-      const stud = CACHE.students.find(s => String(s.id) === String(r.studentId));
-      if(stud && stud.teamId){
-        const team = CACHE.teams.find(t => String(t.id) === String(stud.teamId));
-        if(team){
-          const dbTeamKey = KEYMAP.teams[team.id];
-          const delta = Number(r.points)||0;
-          const newScore = Math.max(0, (Number(team.score)||0) + (!anyPublished ? delta : -delta));
-          await update(ref(db, `teams/${dbTeamKey}`), { score: newScore });
-        }
+    
+    // Check if any results are published
+    const anyPublished = eventResults.some(r => r.published);
+    
+    if(anyPublished){
+      // Unpublish all - remove scores
+      await removeResultScores(ev);
+      
+      for(const r of eventResults){
+        const dbKey = KEYMAP.results[r.id] || r.id;
+        await update(ref(db, `results/${dbKey}`), { 
+          published: false, 
+          publishedAt: null 
+        });
       }
+      toast('Unpublished event results and removed scores from teams');
+    } else {
+      // Publish all - add scores
+      for(const r of eventResults){
+        const dbKey = KEYMAP.results[r.id] || r.id;
+        await update(ref(db, `results/${dbKey}`), { 
+          published: true, 
+          publishedAt: Date.now() 
+        });
+      }
+      
+      await addResultScores(ev);
+      toast('Published event results and added scores to teams');
     }
-    toast(anyPublished ? 'Unpublished event results' : 'Published event results');
+    
     renderResults();
+    
   } else if(e.target.classList.contains('btn-edit-event-results')){
     const evId = e.target.dataset.ev;
-    // open the resultEvent select + pre-fill positions using admin UI controls
+    // Open the resultEvent select + pre-fill positions using admin UI controls
     $('resultEvent').value = evId;
     $('resultEvent').dispatchEvent(new Event('change'));
-    // prefill fields if existing
+    
+    // Prefill fields if existing
     const positions = [1,2,3];
     positions.forEach(pn=>{
       const rr = CACHE.results.find(r => String(r.eventId) === String(evId) && Number(r.position) === pn);
       if(rr){
-        if(pn===1){ $('resultSelectFirst').value = rr.studentId; $('resultPointsFirst').value = rr.points||0; }
-        if(pn===2){ $('resultSelectSecond').value = rr.studentId; $('resultPointsSecond').value = rr.points||0; }
-        if(pn===3){ $('resultSelectThird').value = rr.studentId; $('resultPointsThird').value = rr.points||0; }
+        if(pn===1){ 
+          $('resultSelectFirst').value = rr.studentId; 
+          $('resultPointsFirst').value = rr.points||0; 
+        }
+        if(pn===2){ 
+          $('resultSelectSecond').value = rr.studentId; 
+          $('resultPointsSecond').value = rr.points||0; 
+        }
+        if(pn===3){ 
+          $('resultSelectThird').value = rr.studentId; 
+          $('resultPointsThird').value = rr.points||0; 
+        }
       }
     });
     toast('Loaded results into the editor (save to update).');
     document.querySelector('[data-target="#panel-results"]').click();
+    
   } else if(e.target.classList.contains('btn-delete-event-results')){
-    if(!confirm('Delete all results for this event?')) return;
+    if(!confirm('Delete all results for this event? This will also remove published scores from teams.')) return;
+    
     const evId = e.target.dataset.ev;
-    const toDelete = CACHE.results.filter(r=> String(r.eventId)===String(evId));
+    const toDelete = CACHE.results.filter(r => String(r.eventId) === String(evId));
+    
+    // Remove scores for published results
+    await removeResultScores(evId);
+    
+    // Delete the results
     for(const r of toDelete){
       const dbKey = KEYMAP.results[r.id] || r.id;
       await remove(ref(db, `results/${dbKey}`));
     }
-    toast('Deleted results for event');
+    
+    toast('Deleted results for event and removed scores from teams');
     renderResults();
   }
 });
@@ -2124,7 +2239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Data loading (renderAll) is handled by Firebase onValue listeners
 });
 
-console.log('Admin v6 Combined Loaded - Results Replaced with Second Code Version');
+console.log('Admin v6 Combined Loaded - Results with Proper Score Management');
 </script>
 </body>
 </html>
