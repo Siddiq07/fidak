@@ -170,7 +170,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* Nominations - Simplified */
+    /* Nominations */
     .nominations-container {
       display: grid;
       grid-template-columns: 300px 1fr;
@@ -273,39 +273,6 @@
       white-space: nowrap;
     }
 
-    /* Quick Selection */
-    .quick-selection {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      padding: 12px;
-      background: var(--bg-card);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
-    .quick-btn {
-      padding: 6px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .quick-btn:hover {
-      border-color: var(--accent-primary);
-      color: var(--accent-primary);
-    }
-
-    .quick-btn.active {
-      border-color: var(--accent-primary);
-      color: var(--accent-primary);
-      background: rgba(59, 130, 246, 0.1);
-    }
-
     /* Search */
     .search-box {
       position: relative;
@@ -391,6 +358,55 @@
       margin-top: 4px;
     }
 
+    /* Participation Table */
+    .participation-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .participation-table th {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 2px solid var(--border-color);
+      font-weight: 600;
+    }
+
+    .participation-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--accent-warning);
+    }
+
+    .status-approved {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-secondary);
+    }
+
+    /* Results Grid */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -451,6 +467,10 @@
         padding: 8px 12px;
         font-size: 12px;
       }
+      
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -482,7 +502,7 @@
         <i class="bi bi-calendar-plus"></i> Nominations
       </button>
       <button class="nav-tab" data-target="approved">
-        <i class="bi bi-check-circle"></i> Approved
+        <i class="bi bi-check-circle"></i> Approved/Pending
       </button>
       <button class="nav-tab" data-target="results">
         <i class="bi bi-trophy"></i> Results
@@ -521,7 +541,7 @@
       </div>
     </section>
 
-    <!-- Nominations Section - SIMPLIFIED -->
+    <!-- Nominations Section -->
     <section id="nominations" class="content-section d-none">
       <div class="simple-card">
         <h4 class="mb-4"><i class="bi bi-calendar-plus me-2"></i>Submit Nominations</h4>
@@ -531,10 +551,10 @@
           <i class="bi bi-info-circle me-2"></i>
           <strong>Nomination Rules:</strong>
           <ul class="mb-0 mt-1" style="font-size: 14px;">
-            <li><strong>Senior:</strong> Max 3 Stage events + 4 Off-Stage events per person</li>
-            <li><strong>Junior:</strong> Max 2 Stage events + 3 Off-Stage events per person</li>
-            <li><strong>Group/Special/Open:</strong> Any member can join (not counted in limits)</li>
-            <li><strong>Special events:</strong> Limited to 2 members per team</li>
+            <li><strong>Stage/Non-Stage:</strong> Max 2 persons per event</li>
+            <li><strong>Group Events:</strong> Max 5 persons per team (Junior for Junior events, Senior for Senior events)</li>
+            <li><strong>Special/Open/General:</strong> All members can join (no level restrictions)</li>
+            <li><strong>Personal Limits:</strong> Senior: 3 Stage + 4 Off-Stage | Junior: 2 Stage + 3 Off-Stage</li>
           </ul>
         </div>
 
@@ -560,22 +580,22 @@
               <p class="text-muted mb-3">Choose an event from the left panel</p>
             </div>
 
-            <div class="members-header">
+            <div class="members-header mb-3">
               <h6 id="membersTitle">Eligible Members</h6>
               <div class="d-flex gap-2">
-                <button class="quick-btn" onclick="selectAllMembers()">
-                  <i class="bi bi-check-all"></i> All
+                <button class="btn-secondary btn-sm" onclick="selectAllMembers()">
+                  <i class="bi bi-check-all me-1"></i> All
                 </button>
-                <button class="quick-btn" onclick="deselectAllMembers()">
-                  <i class="bi bi-x-circle"></i> Clear
+                <button class="btn-secondary btn-sm" onclick="deselectAllMembers()">
+                  <i class="bi bi-x-circle me-1"></i> Clear
                 </button>
               </div>
             </div>
 
-            <!-- Event Type Info -->
-            <div class="alert mb-3" id="eventTypeInfo" style="padding: 8px 12px; font-size: 13px;">
-              <i class="bi bi-info-circle me-2"></i>
-              <span id="typeInfoText">Select an event to see eligible members</span>
+            <!-- Event Capacity Info -->
+            <div class="alert mb-3" id="eventCapacityInfo" style="padding: 8px 12px; font-size: 13px;">
+              <i class="bi bi-people me-2"></i>
+              <span id="capacityText">Select an event to see capacity</span>
             </div>
 
             <!-- Search Members -->
@@ -609,17 +629,24 @@
       </div>
     </section>
 
-    <!-- Approved Section -->
+    <!-- Approved/Pending Section -->
     <section id="approved" class="content-section d-none">
       <div class="simple-card">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h4><i class="bi bi-check-circle me-2"></i>Approved Events</h4>
+          <h4><i class="bi bi-check-circle me-2"></i>Approved & Pending Nominations</h4>
           <button class="btn-primary" onclick="exportToPDF()">
             <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
           </button>
         </div>
+        
+        <!-- Search for this section -->
+        <div class="search-box mb-4">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" id="approvalSearch" class="search-input" placeholder="Search events or members..." oninput="filterApprovals()">
+        </div>
+        
         <div id="approvedEvents">
-          <!-- Approved events will be loaded here -->
+          <!-- Approved and pending events will be loaded here -->
         </div>
       </div>
     </section>
@@ -628,6 +655,13 @@
     <section id="results" class="content-section d-none">
       <div class="simple-card">
         <h4 class="mb-4"><i class="bi bi-trophy me-2"></i>Event Results</h4>
+        
+        <!-- Search for results -->
+        <div class="search-box mb-4">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" id="resultsSearch" class="search-input" placeholder="Search events or winners..." oninput="filterResults()">
+        </div>
+        
         <div id="resultsContainer">
           <!-- Results will be loaded here -->
         </div>
@@ -767,7 +801,7 @@
     function calculateMemberEventCounts() {
       const counts = {};
       
-      // Get all approved participations for this team
+      // Get all APPROVED participations for this team (only approved count toward limits)
       const teamParticipations = CACHE.participations.filter(p => 
         p.teamId === LEADER.teamId && 
         p.status === 'approved'
@@ -780,14 +814,15 @@
         const memberId = String(member.id);
         const memberParticipations = teamParticipations.filter(p => String(p.studentId) === memberId);
         
-        // Count by event type
+        // Count by event type (only Stage and Non-Stage count toward limits)
         counts[memberId] = {
           stage: 0,
           offStage: 0,
           group: 0,
           special: 0,
           open: 0,
-          total: memberParticipations.length
+          general: 0,
+          totalApproved: memberParticipations.length
         };
         
         memberParticipations.forEach(p => {
@@ -806,11 +841,28 @@
             counts[memberId].special++;
           } else if (eventType === 'open') {
             counts[memberId].open++;
+          } else if (eventType === 'general') {
+            counts[memberId].general++;
           }
         });
       });
       
       return counts;
+    }
+
+    // Check Event Capacity
+    function getEventCapacity(event) {
+      const eventType = event.type?.toLowerCase();
+      
+      if (eventType === 'stage' || eventType === 'non-stage') {
+        return 2; // Max 2 persons per Stage/Non-Stage event
+      } else if (eventType === 'group') {
+        return 5; // Max 5 persons per Group event
+      } else if (eventType === 'special' || eventType === 'open' || eventType === 'general') {
+        return null; // No limit for Special/Open/General events
+      }
+      
+      return 2; // Default
     }
 
     // Check if Member Can Join Event
@@ -824,11 +876,43 @@
       
       // Get member's event counts
       const memberCounts = calculateMemberEventCounts()[memberId] || {
-        stage: 0, offStage: 0, group: 0, special: 0, open: 0, total: 0
+        stage: 0, offStage: 0, group: 0, special: 0, open: 0, general: 0, totalApproved: 0
       };
       
-      // Check level restrictions (for Stage and Non-Stage events)
-      if (eventType === 'stage' || eventType === 'non-stage') {
+      // Check if already nominated for this event (pending or approved)
+      const alreadyNominated = CACHE.participations.some(p => 
+        String(p.studentId) === memberId && 
+        String(p.eventId) === String(event.id) && 
+        (p.status === 'pending' || p.status === 'approved')
+      );
+      
+      if (alreadyNominated) {
+        return { 
+          canJoin: false, 
+          reason: 'Already nominated for this event' 
+        };
+      }
+      
+      // Check event capacity
+      const eventCapacity = getEventCapacity(event);
+      if (eventCapacity !== null) {
+        const currentCount = CACHE.participations.filter(p => 
+          String(p.eventId) === String(event.id) && 
+          p.teamId === LEADER.teamId && 
+          (p.status === 'pending' || p.status === 'approved')
+        ).length;
+        
+        if (currentCount >= eventCapacity) {
+          return { 
+            canJoin: false, 
+            reason: `Event is full (max ${eventCapacity} members)` 
+          };
+        }
+      }
+      
+      // Check level restrictions
+      if (eventType === 'stage' || eventType === 'non-stage' || eventType === 'group') {
+        // For Stage, Non-Stage, and Group events, check level
         if (eventLevel !== 'general' && eventLevel !== memberLevel) {
           return { 
             canJoin: false, 
@@ -836,8 +920,9 @@
           };
         }
       }
+      // Special, Open, and General events allow all levels
       
-      // Check limits for Stage events
+      // Check personal limits (only for Stage and Non-Stage events)
       if (eventType === 'stage') {
         const maxStage = memberLevel === 'senior' ? 3 : 2;
         if (memberCounts.stage >= maxStage) {
@@ -848,7 +933,6 @@
         }
       }
       
-      // Check limits for Non-Stage events
       if (eventType === 'non-stage') {
         const maxOffStage = memberLevel === 'senior' ? 4 : 3;
         if (memberCounts.offStage >= maxOffStage) {
@@ -859,24 +943,7 @@
         }
       }
       
-      // Check Special event limits (2 members per team)
-      if (eventType === 'special') {
-        const teamSpecialCount = CACHE.participations.filter(p => 
-          p.eventId == event.id && 
-          p.teamId === LEADER.teamId && 
-          p.status === 'approved'
-        ).length;
-        
-        if (teamSpecialCount >= 2) {
-          return { 
-            canJoin: false, 
-            reason: 'Special event already has 2 members from your team' 
-          };
-        }
-      }
-      
-      // Group, Special, and Open events don't count toward limits
-      // Anyone can join regardless of level
+      // Group, Special, Open, and General events don't count toward personal limits
       
       return { canJoin: true, reason: '' };
     }
@@ -902,12 +969,12 @@
         );
       }
       
-      // Sort events
+      // Sort events by type and name
       events.sort((a, b) => {
-        if (a.level === b.level) {
+        if (a.type === b.type) {
           return a.name.localeCompare(b.name);
         }
-        return a.level.localeCompare(b.level);
+        return a.type.localeCompare(b.type);
       });
 
       if (events.length === 0) {
@@ -935,6 +1002,11 @@
           p.status === 'approved'
         ).length;
         
+        // Get event capacity
+        const capacity = getEventCapacity(ev);
+        const currentTotal = pendingCount + approvedCount;
+        const isFull = capacity !== null && currentTotal >= capacity;
+        
         // Get category color
         let categoryColor = '#3b82f6'; // Default blue
         if (ev.type === 'Stage') categoryColor = '#f59e0b'; // Orange
@@ -942,6 +1014,7 @@
         if (ev.type === 'Group') categoryColor = '#8b5cf6'; // Purple
         if (ev.type === 'Special') categoryColor = '#ef4444'; // Red
         if (ev.type === 'Open') categoryColor = '#ec4899'; // Pink
+        if (ev.type === 'General') categoryColor = '#6b7280'; // Gray
         
         return `
           <div class="event-item ${currentEventId === ev.id ? 'selected' : ''}" 
@@ -952,6 +1025,9 @@
                   ${ev.level} • ${ev.type}
                 </div>
                 <div class="event-name">${ev.name}</div>
+                <div class="event-type">
+                  ${capacity ? `Max ${capacity} members` : 'No member limit'}
+                </div>
               </div>
               <div class="d-flex flex-column align-items-end gap-1">
                 ${pendingCount > 0 ? `
@@ -962,6 +1038,11 @@
                 ${approvedCount > 0 ? `
                   <span class="badge bg-success" style="font-size: 10px;">
                     ${approvedCount} approved
+                  </span>
+                ` : ''}
+                ${isFull ? `
+                  <span class="badge bg-danger" style="font-size: 10px;">
+                    Full
                   </span>
                 ` : ''}
               </div>
@@ -983,8 +1064,8 @@
       
       const ev = CACHE.events.find(e => String(e.id) === String(evId));
       const infoDiv = document.getElementById('selectedEventInfo');
-      const typeInfoDiv = document.getElementById('eventTypeInfo');
-      const typeInfoText = document.getElementById('typeInfoText');
+      const capacityDiv = document.getElementById('eventCapacityInfo');
+      const capacityText = document.getElementById('capacityText');
       
       // Update event info
       let categoryColor = '#3b82f6';
@@ -993,6 +1074,7 @@
       if (ev.type === 'Group') categoryColor = '#8b5cf6';
       if (ev.type === 'Special') categoryColor = '#ef4444';
       if (ev.type === 'Open') categoryColor = '#ec4899';
+      if (ev.type === 'General') categoryColor = '#6b7280';
       
       infoDiv.innerHTML = `
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -1005,24 +1087,41 @@
       
       document.getElementById('membersTitle').textContent = `Select Members for ${ev.name}`;
       
-      // Update type info
-      let typeInfo = '';
-      let typeInfoClass = 'alert-info';
+      // Update capacity info
+      const capacity = getEventCapacity(ev);
+      const pendingCount = CACHE.participations.filter(p => 
+        p.eventId == evId && 
+        p.teamId == LEADER.teamId && 
+        p.status === 'pending'
+      ).length;
       
-      if (ev.type === 'Stage' || ev.type === 'Non-Stage') {
-        const levelText = ev.level === 'General' ? 'All levels' : `${ev.level} only`;
-        typeInfo = `${ev.type} event • ${levelText} • Counts toward member limits`;
-        typeInfoClass = ev.level === 'Senior' ? 'alert-warning' : 'alert-primary';
-      } else if (ev.type === 'Group' || ev.type === 'Special' || ev.type === 'Open') {
-        typeInfo = `${ev.type} event • All levels can join • Does NOT count toward limits`;
-        typeInfoClass = 'alert-success';
-        if (ev.type === 'Special') {
-          typeInfo += ' • Max 2 members per team';
+      const approvedCount = CACHE.participations.filter(p => 
+        p.eventId == evId && 
+        p.teamId == LEADER.teamId && 
+        p.status === 'approved'
+      ).length;
+      
+      const currentTotal = pendingCount + approvedCount;
+      const remaining = capacity ? capacity - currentTotal : 'Unlimited';
+      
+      let capacityMessage = '';
+      let capacityClass = 'alert-info';
+      
+      if (capacity === null) {
+        capacityMessage = 'No member limit for this event';
+        capacityClass = 'alert-success';
+      } else {
+        capacityMessage = `Capacity: ${currentTotal}/${capacity} members (${remaining} slots remaining)`;
+        if (remaining <= 0) {
+          capacityClass = 'alert-danger';
+          capacityMessage = `Event is full! ${currentTotal}/${capacity} members`;
+        } else if (remaining <= 2) {
+          capacityClass = 'alert-warning';
         }
       }
       
-      typeInfoText.textContent = typeInfo;
-      typeInfoDiv.className = `alert ${typeInfoClass} mb-3`;
+      capacityText.textContent = capacityMessage;
+      capacityDiv.className = `alert ${capacityClass} mb-3`;
       
       // Load eligible members
       loadEligibleMembers(ev);
@@ -1035,13 +1134,18 @@
     function loadEligibleMembers(event) {
       allTeamMembers = CACHE.students.filter(s => s.teamId === LEADER.teamId);
       
-      // Filter by event level if it's Stage or Non-Stage
-      if (event.level.toLowerCase() !== 'general' && 
-          (event.type === 'Stage' || event.type === 'Non-Stage')) {
-        allTeamMembers = allTeamMembers.filter(s => 
-          s.level?.toLowerCase() === event.level.toLowerCase()
-        );
+      // Filter by event level for Stage, Non-Stage, and Group events
+      const eventType = event.type?.toLowerCase();
+      const eventLevel = event.level?.toLowerCase();
+      
+      if (eventType === 'stage' || eventType === 'non-stage' || eventType === 'group') {
+        if (eventLevel !== 'general') {
+          allTeamMembers = allTeamMembers.filter(s => 
+            s.level?.toLowerCase() === eventLevel
+          );
+        }
       }
+      // Special, Open, and General events show all members
       
       // Get previously selected pending members
       const selected = CACHE.participations.filter(p => 
@@ -1110,7 +1214,7 @@
         const canJoinResult = canMemberJoinEvent(memberId, event);
         const canJoin = canJoinResult.canJoin;
         const reason = canJoinResult.reason;
-        const counts = memberCounts[memberId] || { stage: 0, offStage: 0, total: 0 };
+        const counts = memberCounts[memberId] || { stage: 0, offStage: 0, totalApproved: 0 };
         
         let boxClass = 'member-box';
         let levelColor = member.level?.toLowerCase() === 'senior' ? '#3b82f6' : '#10b981';
@@ -1125,17 +1229,15 @@
         
         // Show event counts
         let eventCountText = '';
-        if (event.type === 'Stage' || event.type === 'Non-Stage') {
-          const maxStage = member.level?.toLowerCase() === 'senior' ? 3 : 2;
-          const maxOffStage = member.level?.toLowerCase() === 'senior' ? 4 : 3;
-          
-          if (event.type === 'Stage') {
-            eventCountText = `Stage: ${counts.stage}/${maxStage}`;
-          } else if (event.type === 'Non-Stage') {
-            eventCountText = `Off-Stage: ${counts.offStage}/${maxOffStage}`;
-          }
+        const maxStage = member.level?.toLowerCase() === 'senior' ? 3 : 2;
+        const maxOffStage = member.level?.toLowerCase() === 'senior' ? 4 : 3;
+        
+        if (event.type === 'Stage') {
+          eventCountText = `Stage: ${counts.stage}/${maxStage}`;
+        } else if (event.type === 'Non-Stage') {
+          eventCountText = `Off-Stage: ${counts.offStage}/${maxOffStage}`;
         } else {
-          eventCountText = `Total: ${counts.total}`;
+          eventCountText = `Approved: ${counts.totalApproved}`;
         }
         
         return `
@@ -1149,9 +1251,7 @@
                 ${member.level || 'N/A'}
               </span>
             </div>
-            ${eventCountText ? `
-              <div class="event-counter text-muted">${eventCountText}</div>
-            ` : ''}
+            <div class="event-counter text-muted">${eventCountText}</div>
             ${isSelected ? `
               <div class="mt-1">
                 <i class="bi bi-check-circle-fill text-success" style="font-size: 12px;"></i>
@@ -1173,18 +1273,19 @@
         return;
       }
       
-      // Check Special event limit
-      if (event?.type === 'Special') {
-        const teamSpecialCount = CACHE.participations.filter(p => 
-          p.eventId == currentEventId && 
+      // Check event capacity
+      const capacity = getEventCapacity(event);
+      if (capacity !== null) {
+        const currentCount = CACHE.participations.filter(p => 
+          String(p.eventId) === String(currentEventId) && 
           p.teamId === LEADER.teamId && 
-          p.status === 'approved'
+          (p.status === 'pending' || p.status === 'approved')
         ).length;
         
         const currentlySelected = selectedMembers.size;
         
-        if (teamSpecialCount + currentlySelected >= 2) {
-          showToast('Special events are limited to 2 members per team', 'warning');
+        if (currentCount + currentlySelected >= capacity) {
+          showToast(`Event is full! Max ${capacity} members allowed`, 'warning');
           return;
         }
       }
@@ -1202,15 +1303,24 @@
     // Select All Members
     window.selectAllMembers = () => {
       const event = CACHE.events.find(e => String(e.id) === String(currentEventId));
+      const capacity = getEventCapacity(event);
       
       currentFilteredMembers.forEach(member => {
         const memberId = String(member.id);
         const canJoinResult = canMemberJoinEvent(memberId, event);
         
         if (canJoinResult.canJoin && !selectedMembers.has(memberId)) {
-          // Check Special event limit
-          if (event?.type === 'Special' && selectedMembers.size >= 2) {
-            return;
+          // Check capacity
+          if (capacity !== null) {
+            const currentCount = CACHE.participations.filter(p => 
+              String(p.eventId) === String(currentEventId) && 
+              p.teamId === LEADER.teamId && 
+              (p.status === 'pending' || p.status === 'approved')
+            ).length;
+            
+            if (currentCount + selectedMembers.size >= capacity) {
+              return;
+            }
           }
           selectedMembers.add(memberId);
         }
@@ -1240,9 +1350,9 @@
       
       document.getElementById('membersTitle').textContent = 'Eligible Members';
       
-      document.getElementById('eventTypeInfo').innerHTML = `
-        <i class="bi bi-info-circle me-2"></i>
-        <span id="typeInfoText">Select an event to see eligible members</span>
+      document.getElementById('eventCapacityInfo').innerHTML = `
+        <i class="bi bi-people me-2"></i>
+        <span id="capacityText">Select an event to see capacity</span>
       `;
       
       document.getElementById('memberGrid').innerHTML = `
@@ -1305,6 +1415,21 @@
         return;
       }
 
+      // Check event capacity
+      const capacity = getEventCapacity(event);
+      if (capacity !== null) {
+        const currentCount = CACHE.participations.filter(p => 
+          String(p.eventId) === String(currentEventId) && 
+          p.teamId === LEADER.teamId && 
+          (p.status === 'pending' || p.status === 'approved')
+        ).length;
+        
+        if (currentCount + selectedMembers.size > capacity) {
+          showToast(`Cannot nominate ${selectedMembers.size} members. Event capacity is ${capacity} (${currentCount} already nominated)`, 'error');
+          return;
+        }
+      }
+
       try {
         showToast('Saving nominations...', 'info');
 
@@ -1345,34 +1470,81 @@
       }
     };
 
-    // Render Approved Events
+    // Filter Approvals
+    window.filterApprovals = () => {
+      renderApprovedEvents();
+    };
+
+    // Render Approved Events (with Pending)
     function renderApprovedEvents() {
       const container = document.getElementById('approvedEvents');
-      const approved = CACHE.participations.filter(p => 
-        p.teamId === LEADER.teamId && 
-        p.status === 'approved'
+      const searchTerm = document.getElementById('approvalSearch').value.toLowerCase();
+      
+      // Get all participations for this team
+      const teamParticipations = CACHE.participations.filter(p => 
+        p.teamId === LEADER.teamId
       );
 
-      if (approved.length === 0) {
+      if (teamParticipations.length === 0) {
         container.innerHTML = `
           <div class="text-center py-5 text-muted">
             <i class="bi bi-check-circle fs-4 mb-3"></i>
-            <h5>No Approved Events</h5>
-            <p>Your approved nominations will appear here</p>
+            <h5>No Nominations Yet</h5>
+            <p>Your nominations will appear here</p>
           </div>
         `;
         return;
       }
 
       // Group by event
-      const grouped = approved.reduce((acc, p) => {
+      const grouped = teamParticipations.reduce((acc, p) => {
         const eventId = p.eventId;
-        if (!acc[eventId]) acc[eventId] = [];
-        acc[eventId].push(p);
+        if (!acc[eventId]) acc[eventId] = { pending: [], approved: [] };
+        
+        if (p.status === 'pending') {
+          acc[eventId].pending.push(p);
+        } else if (p.status === 'approved') {
+          acc[eventId].approved.push(p);
+        }
+        
         return acc;
       }, {});
 
-      container.innerHTML = Object.entries(grouped).map(([eventId, participants]) => {
+      // Filter events by search term
+      const filteredEvents = Object.entries(grouped).filter(([eventId, data]) => {
+        const event = CACHE.events.find(e => String(e.id) === String(eventId));
+        if (!event) return false;
+        
+        if (searchTerm) {
+          return event.name.toLowerCase().includes(searchTerm) ||
+                 event.type.toLowerCase().includes(searchTerm) ||
+                 event.level.toLowerCase().includes(searchTerm) ||
+                 data.pending.some(p => {
+                   const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                   return student?.name.toLowerCase().includes(searchTerm) ||
+                          p.studentId.toLowerCase().includes(searchTerm);
+                 }) ||
+                 data.approved.some(p => {
+                   const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                   return student?.name.toLowerCase().includes(searchTerm) ||
+                          p.studentId.toLowerCase().includes(searchTerm);
+                 });
+        }
+        return true;
+      });
+
+      if (filteredEvents.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-search fs-4 mb-3"></i>
+            <h5>No Results Found</h5>
+            <p>Try a different search term</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredEvents.map(([eventId, data]) => {
         const event = CACHE.events.find(e => String(e.id) === String(eventId));
         if (!event) return '';
         
@@ -1382,183 +1554,121 @@
         if (event.type === 'Group') eventColor = '#8b5cf6';
         if (event.type === 'Special') eventColor = '#ef4444';
         if (event.type === 'Open') eventColor = '#ec4899';
+        if (event.type === 'General') eventColor = '#6b7280';
+        
+        const capacity = getEventCapacity(event);
+        const totalCount = data.pending.length + data.approved.length;
         
         return `
           <div class="simple-card mb-3">
-            <div class="d-flex justify-content-between align-items-start">
-              <div style="flex: 1;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
                 <div class="d-flex align-items-center gap-2 mb-2">
                   <span class="badge" style="background: ${eventColor}">${event.level}</span>
                   <span class="badge bg-secondary">${event.type}</span>
-                  <span class="badge bg-success">${participants.length} approved</span>
-                  ${event.type === 'Special' ? `
-                    <span class="badge bg-warning">2-member limit</span>
-                  ` : ''}
+                  ${capacity ? `<span class="badge bg-dark">${totalCount}/${capacity}</span>` : ''}
                 </div>
                 <h5 class="mb-1">${event.name}</h5>
-                <div class="small">
-                  <button class="btn-secondary btn-sm" onclick="viewEventMembers('${eventId}')">
-                    <i class="bi bi-people me-1"></i> View ${participants.length} Members
-                  </button>
-                </div>
+              </div>
+              <div class="d-flex flex-column align-items-end gap-1">
+                ${data.pending.length > 0 ? `
+                  <span class="badge bg-warning">
+                    ${data.pending.length} pending
+                  </span>
+                ` : ''}
+                ${data.approved.length > 0 ? `
+                  <span class="badge bg-success">
+                    ${data.approved.length} approved
+                  </span>
+                ` : ''}
               </div>
             </div>
+            
+            <!-- Pending Members -->
+            ${data.pending.length > 0 ? `
+              <div class="mb-3">
+                <h6 class="text-warning mb-2">
+                  <i class="bi bi-clock me-1"></i> Pending Approval (${data.pending.length})
+                </h6>
+                <div class="table-responsive">
+                  <table class="participation-table">
+                    <tbody>
+                      ${data.pending.map(p => {
+                        const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                        return `
+                          <tr>
+                            <td style="width: 60px;">
+                              <code>${p.studentId}</code>
+                            </td>
+                            <td>${student?.name || 'Unknown'}</td>
+                            <td>
+                              <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                                ${student?.level || 'N/A'}
+                              </span>
+                            </td>
+                            <td class="text-end">
+                              <span class="status-badge status-pending">
+                                <i class="bi bi-clock me-1"></i> Pending
+                              </span>
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ` : ''}
+            
+            <!-- Approved Members -->
+            ${data.approved.length > 0 ? `
+              <div>
+                <h6 class="text-success mb-2">
+                  <i class="bi bi-check-circle me-1"></i> Approved (${data.approved.length})
+                </h6>
+                <div class="table-responsive">
+                  <table class="participation-table">
+                    <tbody>
+                      ${data.approved.map(p => {
+                        const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                        return `
+                          <tr>
+                            <td style="width: 60px;">
+                              <code>${p.studentId}</code>
+                            </td>
+                            <td>${student?.name || 'Unknown'}</td>
+                            <td>
+                              <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                                ${student?.level || 'N/A'}
+                              </span>
+                            </td>
+                            <td class="text-end">
+                              <span class="status-badge status-approved">
+                                <i class="bi bi-check-circle me-1"></i> Approved
+                              </span>
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
     }
 
-    // View Event Members
-    window.viewEventMembers = (eventId) => {
-      const approved = CACHE.participations.filter(p => 
-        p.eventId == eventId && 
-        p.teamId === LEADER.teamId && 
-        p.status === 'approved'
-      );
-      
-      const event = CACHE.events.find(e => String(e.id) === String(eventId));
-      const memberCounts = calculateMemberEventCounts();
-      
-      let html = `
-        <div class="simple-card">
-          <h5 class="mb-3">${event?.name}</h5>
-          <p class="text-muted mb-3">${event?.level} • ${event?.type}</p>
-          <div class="table-responsive">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Level</th>
-                  <th>Event Counts</th>
-                </tr>
-              </thead>
-              <tbody>
-      `;
-      
-      approved.forEach(p => {
-        const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-        const counts = memberCounts[p.studentId] || { stage: 0, offStage: 0, total: 0 };
-        
-        // Format event counts
-        let countsText = '';
-        if (event?.type === 'Stage' || event?.type === 'Non-Stage') {
-          const maxStage = student?.level?.toLowerCase() === 'senior' ? 3 : 2;
-          const maxOffStage = student?.level?.toLowerCase() === 'senior' ? 4 : 3;
-          countsText = `Stage: ${counts.stage}/${maxStage}<br>Off-Stage: ${counts.offStage}/${maxOffStage}`;
-        } else {
-          countsText = `Total: ${counts.total}`;
-        }
-        
-        html += `
-          <tr>
-            <td><code>${p.studentId}</code></td>
-            <td>${student?.name || 'Unknown'}</td>
-            <td><span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
-              ${student?.level || 'N/A'}
-            </span></td>
-            <td><small>${countsText}</small></td>
-          </tr>
-        `;
-      });
-      
-      html += `
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-      
-      const modalDiv = document.createElement('div');
-      modalDiv.className = 'modal fade';
-      modalDiv.innerHTML = `
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
-            <div class="modal-header">
-              <h5 class="modal-title">Approved Members</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-              ${html}
-            </div>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(modalDiv);
-      const modal = new bootstrap.Modal(modalDiv);
-      modal.show();
-      
-      modalDiv.addEventListener('hidden.bs.modal', () => {
-        document.body.removeChild(modalDiv);
-      });
-    };
-
-    // Export to PDF
-    window.exportToPDF = () => {
-      const approved = CACHE.participations.filter(p => 
-        p.teamId === LEADER.teamId && 
-        p.status === 'approved'
-      );
-
-      if (approved.length === 0) {
-        showToast('No approved events to export!', 'warning');
-        return;
-      }
-
-      let html = `
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h1 { color: #2563eb; margin-bottom: 10px; }
-          .event { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-          .members { margin-left: 20px; }
-        </style>
-        <h1>Approved Participation List</h1>
-        <p><strong>Team:</strong> ${LEADER.teamName}</p>
-        <p><strong>Leader:</strong> ${LEADER.name}</p>
-        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-        <hr>
-      `;
-
-      // Group by event
-      const grouped = approved.reduce((acc, p) => {
-        const eventId = p.eventId;
-        if (!acc[eventId]) acc[eventId] = [];
-        acc[eventId].push(p);
-        return acc;
-      }, {});
-
-      Object.entries(grouped).forEach(([eventId, participants]) => {
-        const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return;
-        
-        html += `
-          <div class="event">
-            <h3>${event.name}</h3>
-            <p><strong>Category:</strong> ${event.level} | <strong>Type:</strong> ${event.type}</p>
-            <div class="members">
-              ${participants.map(p => {
-                const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                return `<p>• ${student?.name || 'Unknown'} (${p.studentId}) - ${student?.level || 'N/A'}</p>`;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      });
-
-      html2pdf().from(html).set({
-        margin: 10,
-        filename: `approved_${LEADER.teamName}_${new Date().toISOString().slice(0, 10)}.pdf`,
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4' }
-      }).save();
-      
-      showToast('PDF exported successfully!', 'success');
+    // Filter Results
+    window.filterResults = () => {
+      renderResults();
     };
 
     // Render Results
     function renderResults() {
       const container = document.getElementById('resultsContainer');
+      const searchTerm = document.getElementById('resultsSearch').value.toLowerCase();
       const publishedResults = CACHE.results.filter(r => r.published);
       
       if (publishedResults.length === 0) {
@@ -1580,50 +1690,204 @@
         return acc;
       }, {});
 
-      container.innerHTML = Object.entries(grouped).map(([eventId, results]) => {
+      // Filter events by search term
+      const filteredEvents = Object.entries(grouped).filter(([eventId, results]) => {
         const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return '';
+        if (!event) return false;
         
-        // Sort by position
-        results.sort((a, b) => a.position - b.position);
-        
-        return `
-          <div class="simple-card mb-3">
-            <h5 class="mb-3">${event.name}</h5>
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <span class="badge bg-primary">${event.level}</span>
-              <span class="badge bg-secondary">${event.type}</span>
-            </div>
-            ${results.map(result => {
-              const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
-              const isTeamMember = student?.teamId === LEADER.teamId;
-              
-              return `
-                <div class="d-flex align-items-center gap-3 mb-2 p-2 ${isTeamMember ? 'bg-success bg-opacity-10' : ''}" 
-                     style="border-radius: 8px;">
-                  <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                       style="width: 40px; height: 40px; font-weight: bold;">
-                    ${result.position}
-                  </div>
-                  <div class="flex-grow-1">
-                    <div class="d-flex justify-content-between">
-                      <strong>${student?.name || 'Unknown'}</strong>
-                      <span class="badge ${isTeamMember ? 'bg-success' : 'bg-secondary'}">
-                        ${result.points} pts
-                      </span>
-                    </div>
-                    <div class="small text-muted">
-                      ID: ${result.studentId} • ${student?.level || 'N/A'} 
-                      ${isTeamMember ? '• Your Team Member' : ''}
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
+        if (searchTerm) {
+          return event.name.toLowerCase().includes(searchTerm) ||
+                 event.type.toLowerCase().includes(searchTerm) ||
+                 event.level.toLowerCase().includes(searchTerm) ||
+                 results.some(r => {
+                   const student = CACHE.students.find(s => String(s.id) === String(r.studentId));
+                   return student?.name.toLowerCase().includes(searchTerm) ||
+                          r.studentId.toLowerCase().includes(searchTerm);
+                 });
+        }
+        return true;
+      });
+
+      if (filteredEvents.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-search fs-4 mb-3"></i>
+            <h5>No Results Found</h5>
+            <p>Try a different search term</p>
           </div>
         `;
-      }).join('');
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="results-grid">
+          ${filteredEvents.map(([eventId, results]) => {
+            const event = CACHE.events.find(e => String(e.id) === String(eventId));
+            if (!event) return '';
+            
+            // Sort by position
+            results.sort((a, b) => a.position - b.position);
+            
+            let eventColor = '#3b82f6';
+            if (event.type === 'Stage') eventColor = '#f59e0b';
+            if (event.type === 'Non-Stage') eventColor = '#10b981';
+            if (event.type === 'Group') eventColor = '#8b5cf6';
+            if (event.type === 'Special') eventColor = '#ef4444';
+            if (event.type === 'Open') eventColor = '#ec4899';
+            if (event.type === 'General') eventColor = '#6b7280';
+            
+            return `
+              <div class="result-card">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <span class="badge" style="background: ${eventColor}">${event.level}</span>
+                  <span class="badge bg-secondary">${event.type}</span>
+                </div>
+                <h5 class="mb-3">${event.name}</h5>
+                
+                ${results.map(result => {
+                  const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
+                  const isTeamMember = student?.teamId === LEADER.teamId;
+                  
+                  // Position badge color
+                  let positionColor = '#6b7280';
+                  if (result.position === 1) positionColor = '#f59e0b'; // Gold
+                  if (result.position === 2) positionColor = '#9ca3af'; // Silver
+                  if (result.position === 3) positionColor = '#92400e'; // Bronze
+                  
+                  return `
+                    <div class="d-flex align-items-center gap-3 mb-2 p-2 ${isTeamMember ? 'bg-success bg-opacity-10' : ''}" 
+                         style="border-radius: 8px;">
+                      <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                           style="width: 40px; height: 40px; font-weight: bold; background: ${positionColor}; color: white;">
+                        ${result.position}
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <strong>${student?.name || 'Unknown'}</strong>
+                            <small class="text-muted ms-2">(${result.studentId})</small>
+                          </div>
+                          <span class="badge ${isTeamMember ? 'bg-success' : 'bg-secondary'}">
+                            ${result.points} pts
+                          </span>
+                        </div>
+                        <div class="small text-muted d-flex align-items-center gap-2">
+                          <span>${student?.level || 'N/A'}</span>
+                          ${isTeamMember ? '<span class="text-success">• Your Team</span>' : ''}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
     }
+
+    // Export to PDF
+    window.exportToPDF = () => {
+      const teamParticipations = CACHE.participations.filter(p => 
+        p.teamId === LEADER.teamId
+      );
+
+      if (teamParticipations.length === 0) {
+        showToast('No nominations to export!', 'warning');
+        return;
+      }
+
+      let html = `
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #2563eb; margin-bottom: 10px; }
+          h2 { color: #4b5563; margin-top: 30px; margin-bottom: 15px; }
+          .event { margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+          .members { margin-left: 20px; }
+          .status-pending { color: #f59e0b; }
+          .status-approved { color: #10b981; }
+          .summary { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+        </style>
+        <h1>Team Nominations Report</h1>
+        <p><strong>Team:</strong> ${LEADER.teamName}</p>
+        <p><strong>Leader:</strong> ${LEADER.name}</p>
+        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+        <hr>
+      `;
+
+      // Group by event
+      const grouped = teamParticipations.reduce((acc, p) => {
+        const eventId = p.eventId;
+        if (!acc[eventId]) acc[eventId] = { pending: [], approved: [] };
+        
+        if (p.status === 'pending') {
+          acc[eventId].pending.push(p);
+        } else {
+          acc[eventId].approved.push(p);
+        }
+        
+        return acc;
+      }, {});
+
+      let totalEvents = Object.keys(grouped).length;
+      let totalPending = 0;
+      let totalApproved = 0;
+
+      Object.entries(grouped).forEach(([eventId, data]) => {
+        const event = CACHE.events.find(e => String(e.id) === String(eventId));
+        if (!event) return;
+        
+        totalPending += data.pending.length;
+        totalApproved += data.approved.length;
+        
+        html += `
+          <div class="event">
+            <h2>${event.name}</h2>
+            <p><strong>Category:</strong> ${event.level} | <strong>Type:</strong> ${event.type}</p>
+            
+            ${data.pending.length > 0 ? `
+              <h3 class="status-pending">Pending Approval (${data.pending.length})</h3>
+              <div class="members">
+                ${data.pending.map(p => {
+                  const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                  return `<p>• ${student?.name || 'Unknown'} (${p.studentId}) - ${student?.level || 'N/A'}</p>`;
+                }).join('')}
+              </div>
+            ` : ''}
+            
+            ${data.approved.length > 0 ? `
+              <h3 class="status-approved">Approved (${data.approved.length})</h3>
+              <div class="members">
+                ${data.approved.map(p => {
+                  const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                  return `<p>• ${student?.name || 'Unknown'} (${p.studentId}) - ${student?.level || 'N/A'}</p>`;
+                }).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      // Add summary
+      html += `
+        <div class="summary">
+          <h2>Summary</h2>
+          <p><strong>Total Events Nominated:</strong> ${totalEvents}</p>
+          <p><strong>Total Pending Nominations:</strong> ${totalPending}</p>
+          <p><strong>Total Approved Nominations:</strong> ${totalApproved}</p>
+          <p><strong>Total Nominations:</strong> ${totalPending + totalApproved}</p>
+        </div>
+      `;
+
+      html2pdf().from(html).set({
+        margin: 10,
+        filename: `nominations_${LEADER.teamName}_${new Date().toISOString().slice(0, 10)}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4' }
+      }).save();
+      
+      showToast('PDF exported successfully!', 'success');
+    };
 
     // Navigation
     document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -1636,6 +1900,13 @@
           section.classList.add('d-none');
         });
         document.getElementById(targetId).classList.remove('d-none');
+        
+        // Refresh data when switching tabs
+        if (targetId === 'approved') {
+          renderApprovedEvents();
+        } else if (targetId === 'results') {
+          renderResults();
+        }
       });
     });
 
@@ -1664,8 +1935,6 @@
       initLeader();
       renderDashboard();
       renderEventsList();
-      renderResults();
-      renderApprovedEvents();
     });
 
     // Initialize
