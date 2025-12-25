@@ -1,601 +1,236 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Leader Dashboard — Fidak Fest</title>
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leader Dashboard - Fidak Fest</title>
+  
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  
   <style>
-    /* Simplified Modern Styles */
     :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-card: #334155;
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-muted: #94a3b8;
-      --accent-primary: #3b82f6;
-      --accent-secondary: #10b981;
-      --accent-warning: #f59e0b;
-      --accent-danger: #ef4444;
-      --border-color: #475569;
-      --shadow-color: rgba(0, 0, 0, 0.3);
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --danger: #e63946;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --light-gray: #e9ecef;
     }
     
-    [data-theme="light"] {
-      --bg-primary: #f1f5f9;
-      --bg-secondary: #ffffff;
-      --bg-card: #ffffff;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      --accent-primary: #2563eb;
-      --accent-secondary: #059669;
-      --accent-warning: #d97706;
-      --accent-danger: #dc2626;
-      --border-color: #e2e8f0;
-      --shadow-color: rgba(0, 0, 0, 0.05);
-    }
-
     body {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
     }
-
-    .container-wide {
-      max-width: 1400px;
+    
+    .main-container {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 20px;
     }
-
-    /* Header */
-    .main-header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .logo {
-      font-weight: 900;
-      font-size: 28px;
-      color: var(--accent-primary);
-      letter-spacing: -0.5px;
-    }
-
-    /* Tabs */
-    .nav-tabs-modern {
-      display: flex;
-      gap: 4px;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 24px;
-      overflow-x: auto;
-    }
-
-    .nav-tab {
-      padding: 10px 20px;
-      background: transparent;
-      border: 2px solid var(--border-color);
-      border-radius: 10px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 14px;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    
+    /* Card Styles */
+    .dashboard-card {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
       cursor: pointer;
+      height: 100%;
     }
-
-    .nav-tab:hover {
-      border-color: var(--accent-primary);
-      color: var(--accent-primary);
+    
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
     }
-
-    .nav-tab.active {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: white;
-    }
-
-    /* Cards */
-    .simple-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    /* Profile */
-    .profile-section {
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-    }
-
-    .profile-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 12px;
-      background: var(--accent-primary);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    /* Stats */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      border: 1px solid var(--border-color);
-    }
-
-    .stat-value {
-      font-size: 32px;
-      font-weight: 800;
-      margin-bottom: 4px;
-      color: var(--text-primary);
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* New Nominations Layout */
-    .nominations-layout {
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    @media (max-width: 1200px) {
-      .nominations-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Event Cards Grid */
-    .events-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .events-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
+    
     .event-card {
-      background: var(--bg-card);
-      border: 2px solid var(--border-color);
+      background: white;
       border-radius: 12px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-left: 5px solid var(--primary);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
     }
-
+    
     .event-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent-primary);
-      box-shadow: 0 8px 25px var(--shadow-color);
+      transform: translateX(5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
-
-    .event-card.selected {
-      border-color: var(--accent-primary);
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+    
+    .member-card {
+      background: white;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 5px;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
     }
-
-    .event-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
+    
+    .member-card.selected {
+      border-color: var(--primary);
+      background: rgba(67, 97, 238, 0.05);
     }
-
-    .event-category {
-      padding: 4px 10px;
+    
+    .member-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Badges */
+    .badge-stage {
+      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+      color: #333;
+    }
+    
+    .badge-offstage {
+      background: linear-gradient(45deg, #a1c4fd, #c2e9fb);
+      color: #333;
+    }
+    
+    .badge-group {
+      background: linear-gradient(45deg, #ffecd2, #fcb69f);
+      color: #333;
+    }
+    
+    .badge-open {
+      background: linear-gradient(45deg, #84fab0, #8fd3f4);
+      color: #333;
+    }
+    
+    .badge-junior {
+      background: linear-gradient(45deg, #fbc2eb, #a6c1ee);
+      color: #333;
+    }
+    
+    .badge-senior {
+      background: linear-gradient(45deg, #f6d365, #fda085);
+      color: #333;
+    }
+    
+    /* Status Badges */
+    .badge-pending {
+      background: linear-gradient(45deg, #ffd89b, #19547b);
       color: white;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
-
-    .event-name {
-      font-weight: 700;
-      font-size: 18px;
-      margin-bottom: 8px;
-      line-height: 1.3;
+    
+    .badge-approved {
+      background: linear-gradient(45deg, #56ab2f, #a8e063);
+      color: white;
     }
-
-    .event-info {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
+    
+    /* Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 10px 0;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+      z-index: 1000;
       display: flex;
-      align-items: center;
-      gap: 8px;
+      justify-content: space-around;
     }
-
-    .event-info i {
-      font-size: 12px;
-    }
-
-    .event-stats {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .stat-badge {
+    
+    .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      flex: 1;
+      padding: 8px 15px;
+      border-radius: 10px;
+      color: var(--gray);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
-
-    .stat-badge-value {
-      font-weight: 800;
-      font-size: 18px;
+    
+    .nav-item.active {
+      background: rgba(67, 97, 238, 0.1);
+      color: var(--primary);
     }
-
-    .stat-badge-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .badge-success {
-      background: var(--accent-secondary);
-    }
-
-    .badge-warning {
-      background: var(--accent-warning);
-    }
-
-    .badge-danger {
-      background: var(--accent-danger);
-    }
-
-    .badge-primary {
-      background: var(--accent-primary);
-    }
-
-    /* Selection Panel */
-    .selection-panel {
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid var(--border-color);
-      position: sticky;
-      top: 120px;
-      max-height: calc(100vh - 150px);
-      overflow-y: auto;
-    }
-
-    .panel-header {
-      margin-bottom: 20px;
-    }
-
-    .selected-event-info {
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid var(--accent-primary);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .selected-event-name {
-      font-weight: 700;
-      font-size: 16px;
+    
+    .nav-item i {
+      font-size: 22px;
       margin-bottom: 4px;
     }
-
-    .selected-event-meta {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .capacity-indicator {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid var(--accent-secondary);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
-
-    /* Quick Selection */
-    .quick-selection {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .quick-btn {
-      flex: 1;
-      padding: 8px 12px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-secondary);
+    
+    .nav-item span {
       font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      font-weight: 500;
     }
-
-    .quick-btn:hover {
-      border-color: var(--accent-primary);
-      color: var(--accent-primary);
-    }
-
-    /* Members List */
-    .members-list {
-      max-height: 400px;
-      overflow-y: auto;
+    
+    /* Tabs */
+    .filter-tabs {
+      display: flex;
+      overflow-x: auto;
+      padding: 10px 0;
+      gap: 10px;
       margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: var(--bg-primary);
+      -webkit-overflow-scrolling: touch;
     }
-
-    .member-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-color);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .member-item:last-child {
-      border-bottom: none;
-    }
-
-    .member-item:hover {
-      background: rgba(59, 130, 246, 0.05);
-    }
-
-    .member-item.selected {
-      background: rgba(59, 130, 246, 0.15);
-      border-left: 3px solid var(--accent-primary);
-    }
-
-    .member-info {
-      flex: 1;
-    }
-
-    .member-id {
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 2px;
-    }
-
-    .member-name {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .member-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .member-counts {
-      font-size: 11px;
-      background: rgba(0,0,0,0.2);
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: var(--text-muted);
-    }
-
-    .check-icon {
-      color: var(--accent-secondary);
-      font-size: 16px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-
-    .member-item.selected .check-icon {
-      opacity: 1;
-    }
-
-    /* Search */
-    .search-box {
-      position: relative;
-      margin-bottom: 16px;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 10px 16px 10px 40px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 14px;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-
-    /* Buttons */
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .btn-primary {
-      background: var(--accent-primary);
-      border: none;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
+    
+    .filter-tab {
+      padding: 8px 20px;
+      border-radius: 25px;
+      background: white;
+      border: 2px solid var(--light-gray);
+      color: var(--gray);
       font-weight: 600;
-      flex: 1;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .btn-primary:hover {
-      background: #2563eb;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--accent-primary);
-      color: var(--accent-primary);
-    }
-
-    /* Limits Indicator */
-    .limits-indicator {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .limit-card {
-      flex: 1;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .limit-value {
-      font-weight: 800;
-      font-size: 20px;
-      margin-bottom: 2px;
-    }
-
-    .limit-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .limit-card.danger {
-      border-color: var(--accent-danger);
-      background: rgba(239, 68, 68, 0.1);
-    }
-
-    .limit-card.warning {
-      border-color: var(--accent-warning);
-      background: rgba(245, 158, 11, 0.1);
-    }
-
-    .limit-card.success {
-      border-color: var(--accent-secondary);
-      background: rgba(16, 185, 129, 0.1);
-    }
-
-    /* Category Filters */
-    .category-filters {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
-      padding: 6px 12px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      color: var(--text-secondary);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
       white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
-
-    .filter-btn:hover {
-      border-color: var(--accent-primary);
-      color: var(--accent-primary);
-    }
-
-    .filter-btn.active {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
+    
+    .filter-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
       color: white;
     }
-
+    
+    /* Progress Bar */
+    .limit-progress {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--light-gray);
+      overflow: hidden;
+      margin: 5px 0;
+    }
+    
+    .limit-progress-fill {
+      height: 100%;
+      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
     /* Toast */
-    .toast {
+    .toast-container {
       position: fixed;
-      bottom: 20px;
+      top: 20px;
       right: 20px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      animation: slideIn 0.3s ease;
       z-index: 9999;
+    }
+    
+    .custom-toast {
+      background: white;
+      border-radius: 10px;
+      padding: 15px 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      margin-bottom: 10px;
+      animation: slideIn 0.3s ease;
       max-width: 300px;
     }
-
+    
     @keyframes slideIn {
       from {
         transform: translateX(100%);
@@ -606,314 +241,403 @@
         opacity: 1;
       }
     }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: var(--bg-primary);
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: 3px;
-    }
-
-    /* Responsive */
+    
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+      .main-container {
+        padding: 15px;
+        padding-bottom: 80px; /* Space for bottom nav */
       }
       
-      .action-buttons {
-        flex-direction: column;
+      .dashboard-card {
+        margin-bottom: 15px;
       }
       
-      .nav-tab {
-        padding: 8px 12px;
-        font-size: 12px;
+      .filter-tabs {
+        padding: 10px 5px;
       }
       
-      .quick-selection {
-        flex-direction: column;
+      .filter-tab {
+        padding: 6px 15px;
+        font-size: 14px;
+      }
+    }
+    
+    @media (min-width: 769px) {
+      .bottom-nav {
+        display: none;
       }
       
-      .limits-indicator {
-        flex-direction: column;
+      .desktop-nav {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        gap: 20px;
       }
+      
+      .desktop-nav-item {
+        padding: 12px 25px;
+        border-radius: 25px;
+        background: white;
+        border: 2px solid transparent;
+        color: var(--gray);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .desktop-nav-item.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+      }
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--light-gray);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Utility Classes */
+    .gradient-primary {
+      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      color: white;
+    }
+    
+    .text-gradient {
+      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="main-header">
-    <div class="container-wide">
-      <div class="d-flex align-items-center justify-content-between">
-        <div class="logo">FIDAK FEST</div>
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn-secondary btn-sm" onclick="toggleTheme()">
-            <i class="bi" id="themeIcon"></i>
-          </button>
-          <button class="btn btn-sm btn-danger" onclick="logout()">
-            <i class="bi bi-box-arrow-right"></i>
-          </button>
-        </div>
-      </div>
+  <!-- Desktop Navigation -->
+  <div class="desktop-nav">
+    <div class="desktop-nav-item active" data-page="dashboard">
+      <i class="bi bi-speedometer2 me-2"></i> Dashboard
     </div>
-  </header>
-
-  <!-- Navigation -->
-  <div class="container-wide">
-    <div class="nav-tabs-modern">
-      <button class="nav-tab active" data-target="dashboard">
-        <i class="bi bi-speedometer2"></i> Dashboard
-      </button>
-      <button class="nav-tab" data-target="nominations">
-        <i class="bi bi-calendar-plus"></i> Nominations
-      </button>
-      <button class="nav-tab" data-target="approved">
-        <i class="bi bi-check-circle"></i> Approved/Pending
-      </button>
-      <button class="nav-tab" data-target="results">
-        <i class="bi bi-trophy"></i> Results
-      </button>
+    <div class="desktop-nav-item" data-page="nominations">
+      <i class="bi bi-calendar-plus me-2"></i> Nominations
     </div>
-
-    <!-- Dashboard Section -->
-    <section id="dashboard" class="content-section">
-      <div class="profile-section">
-        <div class="d-flex align-items-center gap-3">
-          <div class="profile-avatar" id="userAvatar">L</div>
-          <div>
-            <h4 id="userName">Loading...</h4>
-            <p class="text-muted mb-0" id="userTeam">Team: --</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="teamScore">0</div>
-          <div class="stat-label">Team Score</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="teamMembers">0</div>
-          <div class="stat-label">Team Members</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="attendanceRate">0%</div>
-          <div class="stat-label">Attendance</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="approvedCount">0</div>
-          <div class="stat-label">Approved</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Nominations Section -->
-    <section id="nominations" class="content-section d-none">
-      <div class="simple-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h4 class="mb-1"><i class="bi bi-calendar-plus me-2"></i>Submit Nominations</h4>
-            <p class="text-muted mb-0">Select an event and choose members to nominate</p>
-          </div>
-          <button class="btn-secondary" onclick="resetAllSelections()">
-            <i class="bi bi-arrow-clockwise me-2"></i> Reset All
-          </button>
-        </div>
-        
-        <!-- Personal Limits -->
-        <div class="limits-indicator">
-          <div class="limit-card" id="seniorLimits">
-            <div class="limit-value">3 Stage / 4 Non-Stage</div>
-            <div class="limit-label">Senior Limits</div>
-          </div>
-          <div class="limit-card" id="juniorLimits">
-            <div class="limit-value">2 Stage / 3 Non-Stage</div>
-            <div class="limit-label">Junior Limits</div>
-          </div>
-          <div class="limit-card" id="eventLimits">
-            <div class="limit-value">2/5 Members</div>
-            <div class="limit-label">Per Event</div>
-          </div>
-        </div>
-
-        <!-- Category Filters -->
-        <div class="category-filters">
-          <button class="filter-btn active" onclick="setEventFilter('all')">
-            <i class="bi bi-grid me-1"></i> All Events
-          </button>
-          <button class="filter-btn" onclick="setEventFilter('Stage')">
-            <i class="bi bi-mic me-1"></i> Stage
-          </button>
-          <button class="filter-btn" onclick="setEventFilter('Non-Stage')">
-            <i class="bi bi-palette me-1"></i> Non-Stage
-          </button>
-          <button class="filter-btn" onclick="setEventFilter('Group')">
-            <i class="bi bi-people me-1"></i> Group
-          </button>
-          <button class="filter-btn" onclick="setEventFilter('Special')">
-            <i class="bi bi-star me-1"></i> Special
-          </button>
-          <button class="filter-btn" onclick="setEventFilter('General')">
-            <i class="bi bi-globe me-1"></i> General
-          </button>
-        </div>
-
-        <!-- Search Events -->
-        <div class="search-box mb-4">
-          <i class="bi bi-search search-icon"></i>
-          <input type="text" id="eventSearch" class="search-input" placeholder="Search events by name or type..." oninput="filterEvents()">
-        </div>
-
-        <div class="nominations-layout">
-          <!-- Events Grid -->
-          <div>
-            <div class="events-grid" id="eventsGrid">
-              <!-- Events will be loaded here -->
-            </div>
-          </div>
-
-          <!-- Selection Panel -->
-          <div class="selection-panel">
-            <div class="panel-header">
-              <h5 class="mb-0"><i class="bi bi-check-square me-2"></i>Selection Panel</h5>
-              <p class="text-muted small mt-1">Select members for the chosen event</p>
-            </div>
-
-            <!-- Selected Event Info -->
-            <div id="selectedEventContainer" class="d-none">
-              <div class="selected-event-info">
-                <div class="selected-event-name" id="selectedEventName">No event selected</div>
-                <div class="selected-event-meta" id="selectedEventMeta">Select an event to nominate members</div>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="badge" id="selectedEventType">--</span>
-                  <span class="badge" id="selectedEventLevel">--</span>
-                </div>
-              </div>
-
-              <!-- Capacity Indicator -->
-              <div class="capacity-indicator">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <span><i class="bi bi-people me-1"></i> Event Capacity</span>
-                  <span class="fw-bold" id="capacityStatus">0/0</span>
-                </div>
-                <div class="progress" style="height: 6px;">
-                  <div class="progress-bar" id="capacityProgress" style="width: 0%"></div>
-                </div>
-                <div class="small mt-2" id="capacityMessage">Select members below</div>
-              </div>
-
-              <!-- Quick Selection -->
-              <div class="quick-selection">
-                <button class="quick-btn" onclick="selectAllEligible()">
-                  <i class="bi bi-check-all me-1"></i> Select All
-                </button>
-                <button class="quick-btn" onclick="deselectAll()">
-                  <i class="bi bi-x-circle me-1"></i> Clear
-                </button>
-                <button class="quick-btn" onclick="toggleLevelFilter()" id="levelFilterBtn">
-                  <i class="bi bi-funnel me-1"></i> All Levels
-                </button>
-              </div>
-
-              <!-- Search Members -->
-              <div class="search-box">
-                <i class="bi bi-search search-icon"></i>
-                <input type="text" id="memberSearch" class="search-input" placeholder="Search members..." oninput="filterMembers()">
-              </div>
-
-              <!-- Members List -->
-              <div class="members-list" id="membersList">
-                <!-- Members will be loaded here -->
-              </div>
-
-              <!-- Action Buttons -->
-              <div class="action-buttons">
-                <button class="btn-secondary" onclick="cancelSelection()">
-                  <i class="bi bi-x me-2"></i> Cancel
-                </button>
-                <button class="btn-primary" onclick="submitNominations()" id="submitBtn">
-                  <i class="bi bi-send me-2"></i> Submit (0)
-                </button>
-              </div>
-            </div>
-
-            <!-- No Event Selected -->
-            <div id="noEventSelected" class="text-center py-5">
-              <i class="bi bi-calendar-event fs-1 text-muted mb-3"></i>
-              <h5>No Event Selected</h5>
-              <p class="text-muted">Choose an event from the grid to nominate members</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Approved/Pending Section -->
-    <section id="approved" class="content-section d-none">
-      <div class="simple-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h4 class="mb-1"><i class="bi bi-check-circle me-2"></i>Approved & Pending Nominations</h4>
-            <p class="text-muted mb-0">Track your team's nominations and approvals</p>
-          </div>
-          <div class="d-flex gap-2">
-            <button class="btn-secondary" onclick="exportToExcel()">
-              <i class="bi bi-file-earmark-excel me-2"></i> Excel
-            </button>
-            <button class="btn-primary" onclick="exportToPDF()">
-              <i class="bi bi-file-earmark-pdf me-2"></i> PDF
-            </button>
-          </div>
-        </div>
-        
-        <!-- Search -->
-        <div class="search-box mb-4">
-          <i class="bi bi-search search-icon"></i>
-          <input type="text" id="approvalSearch" class="search-input" placeholder="Search events or members..." oninput="filterApprovals()">
-        </div>
-        
-        <div id="approvedEvents">
-          <!-- Approved and pending events will be loaded here -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Results Section -->
-    <section id="results" class="content-section d-none">
-      <div class="simple-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h4 class="mb-1"><i class="bi bi-trophy me-2"></i>Event Results</h4>
-            <p class="text-muted mb-0">Check results and team performance</p>
-          </div>
-        </div>
-        
-        <!-- Search -->
-        <div class="search-box mb-4">
-          <i class="bi bi-search search-icon"></i>
-          <input type="text" id="resultsSearch" class="search-input" placeholder="Search events or winners..." oninput="filterResults()">
-        </div>
-        
-        <div id="resultsContainer">
-          <!-- Results will be loaded here -->
-        </div>
-      </div>
-    </section>
+    <div class="desktop-nav-item" data-page="status">
+      <i class="bi bi-check-circle me-2"></i> Status
+    </div>
+    <div class="desktop-nav-item" data-page="results">
+      <i class="bi bi-trophy me-2"></i> Results
+    </div>
   </div>
 
-  <!-- Toast Container -->
-  <div id="toastContainer"></div>
+  <!-- Main Container -->
+  <div class="main-container">
+    
+    <!-- Header -->
+    <div class="text-center mb-4">
+      <h1 class="text-white mb-3">Team Leader Dashboard</h1>
+      <div id="teamInfo" class="text-white opacity-75">
+        <i class="bi bi-people-fill me-2"></i>
+        <span id="teamName">Loading...</span>
+      </div>
+    </div>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Pages -->
+    <div id="pages">
+      
+      <!-- DASHBOARD PAGE -->
+      <div id="dashboardPage" class="page active">
+        <div class="row g-4">
+          <!-- Score Card -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card gradient-primary" onclick="showPage('nominations')">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <i class="bi bi-trophy-fill" style="font-size: 2rem;"></i>
+                <span class="badge bg-white text-dark">Team</span>
+              </div>
+              <h2 class="mb-2" id="teamScore">0</h2>
+              <p class="mb-0 opacity-75">Total Score</p>
+            </div>
+          </div>
+          
+          <!-- Attendance Card -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card" onclick="showPage('nominations')">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <i class="bi bi-clipboard-check" style="font-size: 2rem; color: var(--primary);"></i>
+                <span class="badge bg-primary">Attendance</span>
+              </div>
+              <h2 class="mb-2 text-gradient" id="attendanceRate">0%</h2>
+              <p class="mb-0 text-muted">Attendance Rate</p>
+            </div>
+          </div>
+          
+          <!-- Approved Events Card -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card" onclick="showPage('status')">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <i class="bi bi-check-circle-fill" style="font-size: 2rem; color: var(--success);"></i>
+                <span class="badge bg-success">Approved</span>
+              </div>
+              <h2 class="mb-2" style="color: var(--success);" id="approvedCount">0</h2>
+              <p class="mb-0 text-muted">Approved Events</p>
+            </div>
+          </div>
+          
+          <!-- Pending Events Card -->
+          <div class="col-md-3 col-sm-6">
+            <div class="dashboard-card" onclick="showPage('status')">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <i class="bi bi-clock-fill" style="font-size: 2rem; color: var(--warning);"></i>
+                <span class="badge bg-warning">Pending</span>
+              </div>
+              <h2 class="mb-2" style="color: var(--warning);" id="pendingCount">0</h2>
+              <p class="mb-0 text-muted">Pending Events</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="dashboard-card">
+              <h5 class="mb-3"><i class="bi bi-graph-up me-2"></i>Quick Stats</h5>
+              <div class="row">
+                <div class="col-md-3 col-6">
+                  <div class="text-center p-3">
+                    <h4 class="text-gradient" id="totalMembers">0</h4>
+                    <small class="text-muted">Team Members</small>
+                  </div>
+                </div>
+                <div class="col-md-3 col-6">
+                  <div class="text-center p-3">
+                    <h4 class="text-gradient" id="stageEvents">0</h4>
+                    <small class="text-muted">Stage Events</small>
+                  </div>
+                </div>
+                <div class="col-md-3 col-6">
+                  <div class="text-center p-3">
+                    <h4 class="text-gradient" id="offstageEvents">0</h4>
+                    <small class="text-muted">Off-Stage Events</small>
+                  </div>
+                </div>
+                <div class="col-md-3 col-6">
+                  <div class="text-center p-3">
+                    <h4 class="text-gradient" id="groupEvents">0</h4>
+                    <small class="text-muted">Group Events</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOMINATIONS PAGE -->
+      <div id="nominationsPage" class="page" style="display: none;">
+        <div class="dashboard-card mb-4">
+          <h4 class="mb-3"><i class="bi bi-calendar-plus me-2"></i>Submit Nominations</h4>
+          
+          <!-- Event Type Tabs -->
+          <div class="filter-tabs">
+            <div class="filter-tab active" data-type="all">All Events</div>
+            <div class="filter-tab" data-type="Stage">🎤 Stage</div>
+            <div class="filter-tab" data-type="Non-Stage">📝 Off-Stage</div>
+            <div class="filter-tab" data-type="Group">👥 Group</div>
+            <div class="filter-tab" data-type="Open">🌍 Open</div>
+          </div>
+          
+          <!-- Level Filters -->
+          <div class="filter-tabs">
+            <div class="filter-tab active" data-level="all">All Levels</div>
+            <div class="filter-tab" data-level="Junior">Junior</div>
+            <div class="filter-tab" data-level="Senior">Senior</div>
+            <div class="filter-tab" data-level="General">Open/Special</div>
+          </div>
+        </div>
+        
+        <!-- Events List -->
+        <div id="eventsList" class="row">
+          <!-- Events will be loaded here -->
+        </div>
+      </div>
+
+      <!-- EVENT DETAIL PAGE -->
+      <div id="eventDetailPage" class="page" style="display: none;">
+        <div class="dashboard-card mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-outline-primary btn-sm" onclick="showPage('nominations')">
+              <i class="bi bi-arrow-left me-1"></i> Back
+            </button>
+            <h4 class="mb-0"><i class="bi bi-calendar-event me-2"></i><span id="selectedEventName"></span></h4>
+          </div>
+          
+          <!-- Event Info -->
+          <div class="row mb-4">
+            <div class="col-md-3 col-6">
+              <div class="text-center p-2">
+                <div class="badge" id="eventCategoryBadge">Stage</div>
+                <small class="d-block mt-1 text-muted">Category</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="text-center p-2">
+                <div class="badge" id="eventLevelBadge">Senior</div>
+                <small class="d-block mt-1 text-muted">Level</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="text-center p-2">
+                <h5 class="mb-0" id="eventMaxMembers">2</h5>
+                <small class="d-block text-muted">Max Members</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="text-center p-2">
+                <h5 class="mb-0" id="eventCurrentMembers">0</h5>
+                <small class="d-block text-muted">Selected</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Members Selection -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6><i class="bi bi-people me-2"></i>Select Team Members</h6>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="selectAllMembers()">
+                  <i class="bi bi-check-all me-1"></i> Select All
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="deselectAllMembers()">
+                  <i class="bi bi-x-circle me-1"></i> Clear All
+                </button>
+              </div>
+            </div>
+            
+            <!-- Member Filters -->
+            <div class="filter-tabs mb-3">
+              <div class="filter-tab active" data-member-filter="all">All</div>
+              <div class="filter-tab" data-member-filter="Senior">Senior</div>
+              <div class="filter-tab" data-member-filter="Junior">Junior</div>
+            </div>
+            
+            <!-- Search -->
+            <div class="input-group mb-3">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" id="memberSearch" class="form-control" placeholder="Search members by name or ID...">
+            </div>
+            
+            <!-- Members Grid -->
+            <div id="membersGrid" class="row g-2">
+              <!-- Members will be loaded here -->
+            </div>
+            
+            <!-- Limit Info -->
+            <div class="alert alert-info mt-3" id="limitInfo">
+              <i class="bi bi-info-circle me-2"></i>
+              <span id="limitText">Select members to nominate</span>
+            </div>
+          </div>
+          
+          <!-- Submit Button -->
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary btn-lg" id="submitNominationBtn" onclick="submitNomination()">
+              <i class="bi bi-send me-2"></i> Submit for Approval
+            </button>
+            <button class="btn btn-outline-secondary" onclick="showPage('nominations')">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATUS PAGE -->
+      <div id="statusPage" class="page" style="display: none;">
+        <div class="dashboard-card mb-4">
+          <h4 class="mb-3"><i class="bi bi-check-circle me-2"></i>Approved & Pending Events</h4>
+          
+          <!-- Tabs -->
+          <ul class="nav nav-tabs" id="statusTabs">
+            <li class="nav-item">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pendingTab">Pending</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approvedTab">Approved</button>
+            </li>
+          </ul>
+          
+          <!-- Tab Content -->
+          <div class="tab-content mt-3">
+            <!-- Pending Tab -->
+            <div class="tab-pane fade show active" id="pendingTab">
+              <div id="pendingEventsList">
+                <!-- Pending events will be loaded here -->
+              </div>
+            </div>
+            
+            <!-- Approved Tab -->
+            <div class="tab-pane fade" id="approvedTab">
+              <div id="approvedEventsList">
+                <!-- Approved events will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS PAGE -->
+      <div id="resultsPage" class="page" style="display: none;">
+        <div class="dashboard-card mb-4">
+          <h4 class="mb-3"><i class="bi bi-trophy me-2"></i>Published Results</h4>
+          <p class="text-muted mb-4">View scores and rankings for your team's approved events</p>
+          
+          <div id="resultsList">
+            <!-- Results will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Navigation (Mobile) -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-page="dashboard">
+      <i class="bi bi-speedometer2"></i>
+      <span>Dashboard</span>
+    </div>
+    <div class="nav-item" data-page="nominations">
+      <i class="bi bi-calendar-plus"></i>
+      <span>Nominations</span>
+    </div>
+    <div class="nav-item" data-page="status">
+      <i class="bi bi-check-circle"></i>
+      <span>Status</span>
+    </div>
+    <div class="nav-item" data-page="results">
+      <i class="bi bi-trophy"></i>
+      <span>Results</span>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getDatabase, ref, onValue, set, push, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    import { getDatabase, ref, onValue, push, set, update, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBMDGNukeonNa_-PWB-5cTO4GMofd3vyiM",
       authDomain: "gen7-3e139.firebaseapp.com",
@@ -927,383 +651,525 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let CACHE = { students: [], teams: [], events: [], participations: [], results: [], attendance: {} };
-    let KEYMAP = { parts: {} };
-    let LEADER = { id: null, teamId: null, name: '', teamName: '' };
-    let currentEventId = null;
+    // Global Variables
+    let currentUser = null;
+    let currentTeam = null;
+    let currentEvent = null;
     let selectedMembers = new Set();
-    let allTeamMembers = [];
-    let currentFilteredMembers = [];
-    let eventFilter = 'all';
-    let levelFilter = 'all';
+    let events = [];
+    let students = [];
+    let participations = [];
+    let results = [];
+    let attendance = [];
+    
+    // Cache for quick access
+    const cache = {
+      events: {},
+      students: {},
+      participations: {},
+      results: {}
+    };
 
-    // Initialize Theme
-    function initTheme() {
-      const savedTheme = localStorage.getItem('theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      const icon = document.getElementById('themeIcon');
-      icon.className = savedTheme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      checkLeaderSession();
+      setupEventListeners();
+    });
+
+    // Check if leader is logged in
+    function checkLeaderSession() {
+      const leaderId = sessionStorage.getItem('leaderId') || localStorage.getItem('leaderId');
+      if (!leaderId) {
+        window.location.href = 'index.html';
+        return;
+      }
+      loadData(leaderId);
     }
 
-    function toggleTheme() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      const icon = document.getElementById('themeIcon');
-      icon.className = newTheme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+    // Setup Event Listeners
+    function setupEventListeners() {
+      // Navigation
+      document.querySelectorAll('.nav-item, .desktop-nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const page = item.dataset.page;
+          showPage(page);
+        });
+      });
+
+      // Filter Tabs
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Handle event type filters
+          if (tab.dataset.type) {
+            document.querySelectorAll('.filter-tab[data-type]').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            filterEvents(tab.dataset.type, 'type');
+          }
+          
+          // Handle level filters
+          if (tab.dataset.level) {
+            document.querySelectorAll('.filter-tab[data-level]').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            filterEvents(tab.dataset.level, 'level');
+          }
+          
+          // Handle member filters
+          if (tab.dataset.memberFilter) {
+            document.querySelectorAll('.filter-tab[data-member-filter]').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            filterMembers(tab.dataset.memberFilter);
+          }
+        });
+      });
+
+      // Member Search
+      document.getElementById('memberSearch').addEventListener('input', (e) => {
+        filterMembers('all', e.target.value);
+      });
+
+      // Bootstrap Tab Events
+      document.querySelectorAll('#statusTabs button').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', (event) => {
+          if (event.target.dataset.bsTarget === '#pendingTab') {
+            renderPendingEvents();
+          } else {
+            renderApprovedEvents();
+          }
+        });
+      });
     }
 
-    // Toast Notification
+    // Load Data from Firebase
+    function loadData(leaderId) {
+      // Listen for all data changes
+      const refs = {
+        students: ref(db, 'students'),
+        teams: ref(db, 'teams'),
+        events: ref(db, 'events'),
+        participations: ref(db, 'participations'),
+        results: ref(db, 'results'),
+        attendance: ref(db, 'attendance')
+      };
+
+      Object.entries(refs).forEach(([key, ref]) => {
+        onValue(ref, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            // Convert object to array
+            const dataArray = Object.values(data).map(item => ({
+              ...item,
+              dbKey: Object.keys(data)[Object.values(data).indexOf(item)]
+            }));
+
+            switch(key) {
+              case 'students':
+                students = dataArray;
+                cache.students = dataArray.reduce((acc, s) => {
+                  acc[s.id] = s;
+                  return acc;
+                }, {});
+                break;
+              case 'teams':
+                const userTeam = dataArray.find(t => {
+                  const teamMembers = students.filter(s => s.teamId === t.id);
+                  return teamMembers.some(m => m.id === leaderId);
+                });
+                if (userTeam) {
+                  currentTeam = userTeam;
+                  document.getElementById('teamName').textContent = currentTeam.name;
+                }
+                break;
+              case 'events':
+                events = dataArray;
+                cache.events = dataArray.reduce((acc, e) => {
+                  acc[e.id] = e;
+                  return acc;
+                }, {});
+                renderEventsList();
+                break;
+              case 'participations':
+                participations = dataArray;
+                cache.participations = dataArray.reduce((acc, p) => {
+                  if (!acc[p.eventId]) acc[p.eventId] = [];
+                  acc[p.eventId].push(p);
+                  return acc;
+                }, {});
+                updateDashboard();
+                renderPendingEvents();
+                renderApprovedEvents();
+                break;
+              case 'results':
+                results = dataArray;
+                cache.results = dataArray.reduce((acc, r) => {
+                  if (!acc[r.eventId]) acc[r.eventId] = [];
+                  acc[r.eventId].push(r);
+                  return acc;
+                }, {});
+                renderResults();
+                break;
+              case 'attendance':
+                attendance = Object.values(data);
+                updateDashboard();
+                break;
+            }
+          }
+        });
+      });
+    }
+
+    // Update Dashboard Stats
+    function updateDashboard() {
+      if (!currentTeam) return;
+
+      // Team members
+      const teamMembers = students.filter(s => s.teamId === currentTeam.id);
+      document.getElementById('totalMembers').textContent = teamMembers.length;
+
+      // Team score
+      document.getElementById('teamScore').textContent = currentTeam.score || 0;
+
+      // Attendance rate
+      const totalAttendance = attendance.reduce((sum, session) => {
+        return sum + (Object.values(session.students || {}).length || 0);
+      }, 0);
+      
+      const presentCount = attendance.reduce((sum, session) => {
+        return sum + (Object.values(session.students || {}).filter(s => s === 'Present').length || 0);
+      }, 0);
+      
+      const attendanceRate = totalAttendance > 0 ? Math.round((presentCount / totalAttendance) * 100) : 0;
+      document.getElementById('attendanceRate').textContent = attendanceRate + '%';
+
+      // Event counts
+      const teamParticipations = participations.filter(p => p.teamId === currentTeam.id);
+      const approvedCount = teamParticipations.filter(p => p.status === 'approved').length;
+      const pendingCount = teamParticipations.filter(p => p.status === 'pending').length;
+      
+      document.getElementById('approvedCount').textContent = approvedCount;
+      document.getElementById('pendingCount').textContent = pendingCount;
+
+      // Event type counts
+      const stageEvents = events.filter(e => e.type === 'Stage' && e.section !== 'Open').length;
+      const offstageEvents = events.filter(e => e.type === 'Offstage' && e.section !== 'Open').length;
+      const groupEvents = events.filter(e => e.type === 'Group').length;
+      
+      document.getElementById('stageEvents').textContent = stageEvents;
+      document.getElementById('offstageEvents').textContent = offstageEvents;
+      document.getElementById('groupEvents').textContent = groupEvents;
+    }
+
+    // Show Toast Notification
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
-      
-      if (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
-      
       const toast = document.createElement('div');
-      toast.className = 'toast';
+      toast.className = 'custom-toast';
       
       let icon = 'bi-info-circle';
-      if (type === 'success') icon = 'bi-check-circle';
-      if (type === 'error') icon = 'bi-x-circle';
-      if (type === 'warning') icon = 'bi-exclamation-triangle';
+      let bgColor = '#4361ee';
+      
+      if (type === 'success') {
+        icon = 'bi-check-circle';
+        bgColor = '#4cc9f0';
+      } else if (type === 'warning') {
+        icon = 'bi-exclamation-triangle';
+        bgColor = '#f72585';
+      } else if (type === 'error') {
+        icon = 'bi-x-circle';
+        bgColor = '#e63946';
+      }
       
       toast.innerHTML = `
-        <i class="bi ${icon} text-${type}"></i>
-        <span>${message}</span>
+        <div class="d-flex align-items-center">
+          <i class="bi ${icon} me-3" style="font-size: 1.5rem; color: ${bgColor};"></i>
+          <div>
+            <div class="fw-semibold">${message}</div>
+          </div>
+        </div>
       `;
       
       container.appendChild(toast);
       
+      // Remove toast after 3 seconds
       setTimeout(() => {
-        if (toast.parentNode === container) {
-          container.removeChild(toast);
-        }
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => {
+          if (toast.parentNode === container) {
+            container.removeChild(toast);
+          }
+        }, 300);
       }, 3000);
     }
 
-    // Initialize Leader
-    function initLeader() {
-      const qId = sessionStorage.getItem('leaderId') || new URLSearchParams(window.location.search).get('leader');
-      if (!qId) {
-        window.location.href = 'index.html';
-        return;
-      }
-      
-      sessionStorage.setItem('leaderId', qId);
-      const user = CACHE.students.find(s => String(s.id) === String(qId));
-      const team = CACHE.teams.find(t => t.id === user?.teamId);
-      
-      if (!team) {
-        showToast('Team not found!', 'error');
-        return;
-      }
-
-      LEADER = {
-        id: qId,
-        teamId: team.id,
-        name: user?.name || 'Unknown',
-        teamName: team.name
-      };
-
-      document.getElementById('userName').textContent = LEADER.name;
-      document.getElementById('userTeam').textContent = `Team: ${LEADER.teamName}`;
-      document.getElementById('userAvatar').textContent = LEADER.name.charAt(0);
-    }
-
-    // Render Dashboard Stats
-    function renderDashboard() {
-      if (!LEADER.teamId) return;
-
-      const team = CACHE.teams.find(t => t.id === LEADER.teamId);
-      const teamMembers = CACHE.students.filter(s => s.teamId === LEADER.teamId);
-      const approved = CACHE.participations.filter(p => p.teamId === LEADER.teamId && p.status === 'approved');
-      
-      let totalAttendance = 0;
-      let attendanceCount = 0;
-      Object.values(CACHE.attendance).forEach(session => {
-        const present = Object.values(session.students || {}).filter(s => s === 'Present').length;
-        totalAttendance += Object.keys(session.students || {}).length;
-        attendanceCount += present;
+    // Navigation Functions
+    window.showPage = function(page) {
+      // Update active states
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.nav-item, .desktop-nav-item').forEach(item => {
+        item.classList.remove('active');
       });
       
-      const attendanceRate = totalAttendance > 0 ? Math.round((attendanceCount / totalAttendance) * 100) : 0;
-
-      document.getElementById('teamScore').textContent = team?.score || 0;
-      document.getElementById('teamMembers').textContent = teamMembers.length;
-      document.getElementById('attendanceRate').textContent = `${attendanceRate}%`;
-      document.getElementById('approvedCount').textContent = approved.length;
-    }
-
-    // Calculate Member Event Counts
-    function calculateMemberEventCounts() {
-      const counts = {};
-      
-      // Get all APPROVED participations for this team
-      const teamParticipations = CACHE.participations.filter(p => 
-        p.teamId === LEADER.teamId && 
-        p.status === 'approved'
-      );
-      
-      // Get all team members
-      const teamMembers = CACHE.students.filter(s => s.teamId === LEADER.teamId);
-      
-      teamMembers.forEach(member => {
-        const memberId = String(member.id);
-        const memberParticipations = teamParticipations.filter(p => String(p.studentId) === memberId);
-        
-        // Count by event type
-        counts[memberId] = {
-          stage: 0,
-          nonStage: 0,
-          group: 0,
-          special: 0,
-          open: 0,
-          general: 0,
-          totalApproved: memberParticipations.length
-        };
-        
-        memberParticipations.forEach(p => {
-          const event = CACHE.events.find(e => String(e.id) === String(p.eventId));
-          if (!event) return;
-          
-          const eventType = event.type?.toLowerCase();
-          
-          if (eventType === 'stage') {
-            counts[memberId].stage++;
-          } else if (eventType === 'non-stage') {
-            counts[memberId].nonStage++;
-          } else if (eventType === 'group') {
-            counts[memberId].group++;
-          } else if (eventType === 'special') {
-            counts[memberId].special++;
-          } else if (eventType === 'open') {
-            counts[memberId].open++;
-          } else if (eventType === 'general') {
-            counts[memberId].general++;
-          }
-        });
+      // Show selected page
+      document.getElementById(page + 'Page').style.display = 'block';
+      document.querySelectorAll(`[data-page="${page}"]`).forEach(item => {
+        item.classList.add('active');
       });
       
-      return counts;
-    }
-
-    // Get Event Capacity
-    function getEventCapacity(event) {
-      const eventType = event.type?.toLowerCase();
-      
-      if (eventType === 'stage' || eventType === 'non-stage') {
-        return 2; // Max 2 persons per Stage/Non-Stage event
-      } else if (eventType === 'group') {
-        return 5; // Max 5 persons per Group event
-      } else if (eventType === 'special' || eventType === 'open' || eventType === 'general') {
-        return null; // No limit
+      // Load data for the page
+      if (page === 'nominations') {
+        renderEventsList();
+      } else if (page === 'status') {
+        renderPendingEvents();
+      } else if (page === 'results') {
+        renderResults();
       }
-      
-      return 2; // Default
-    }
-
-    // Check if Member Can Join Event
-    function canMemberJoinEvent(memberId, event) {
-      const member = CACHE.students.find(s => String(s.id) === memberId);
-      if (!member) return { canJoin: false, reason: 'Member not found' };
-      
-      const eventType = event.type?.toLowerCase();
-      const eventLevel = event.level?.toLowerCase();
-      const memberLevel = member.level?.toLowerCase();
-      
-      // Get member's event counts
-      const memberCounts = calculateMemberEventCounts()[memberId] || {
-        stage: 0, nonStage: 0, group: 0, special: 0, open: 0, general: 0, totalApproved: 0
-      };
-      
-      // Check if already nominated for this event
-      const alreadyNominated = CACHE.participations.some(p => 
-        String(p.studentId) === memberId && 
-        String(p.eventId) === String(event.id) && 
-        (p.status === 'pending' || p.status === 'approved')
-      );
-      
-      if (alreadyNominated) {
-        return { canJoin: false, reason: 'Already nominated for this event' };
-      }
-      
-      // Check event capacity
-      const capacity = getEventCapacity(event);
-      if (capacity !== null) {
-        const currentCount = CACHE.participations.filter(p => 
-          String(p.eventId) === String(event.id) && 
-          p.teamId === LEADER.teamId && 
-          (p.status === 'pending' || p.status === 'approved')
-        ).length;
-        
-        if (currentCount >= capacity) {
-          return { canJoin: false, reason: `Event full (${capacity} max)` };
-        }
-      }
-      
-      // Check level restrictions
-      if (eventType === 'stage' || eventType === 'non-stage' || eventType === 'group') {
-        if (eventLevel !== 'general' && eventLevel !== memberLevel) {
-          return { canJoin: false, reason: `Only ${eventLevel} level` };
-        }
-      }
-      
-      // Check personal limits
-      if (eventType === 'stage') {
-        const maxStage = memberLevel === 'senior' ? 3 : 2;
-        if (memberCounts.stage >= maxStage) {
-          return { canJoin: false, reason: `Max ${maxStage} stage events` };
-        }
-      }
-      
-      if (eventType === 'non-stage') {
-        const maxNonStage = memberLevel === 'senior' ? 4 : 3;
-        if (memberCounts.nonStage >= maxNonStage) {
-          return { canJoin: false, reason: `Max ${maxNonStage} non-stage events` };
-        }
-      }
-      
-      return { canJoin: true, reason: '' };
-    }
-
-    // Set Event Filter
-    window.setEventFilter = (filter) => {
-      eventFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      event.target.classList.add('active');
-      renderEventsGrid();
     };
 
     // Filter Events
-    window.filterEvents = () => {
-      renderEventsGrid();
-    };
-
-    // Render Events Grid
-    function renderEventsGrid() {
-      const grid = document.getElementById('eventsGrid');
-      const searchTerm = document.getElementById('eventSearch').value.toLowerCase();
+    function filterEvents(filterValue, filterType) {
+      const eventType = document.querySelector('.filter-tab[data-type].active')?.dataset.type || 'all';
+      const level = document.querySelector('.filter-tab[data-level].active')?.dataset.level || 'all';
       
-      let events = CACHE.events;
+      let filteredEvents = events;
       
-      // Apply filter
-      if (eventFilter !== 'all') {
-        events = events.filter(e => e.type === eventFilter);
+      // Filter by type
+      if (eventType !== 'all') {
+        filteredEvents = filteredEvents.filter(e => e.type === eventType);
       }
       
-      // Apply search
-      if (searchTerm) {
-        events = events.filter(e => 
-          e.name.toLowerCase().includes(searchTerm) ||
-          e.type.toLowerCase().includes(searchTerm) ||
-          e.level.toLowerCase().includes(searchTerm)
-        );
+      // Filter by level
+      if (level !== 'all') {
+        filteredEvents = filteredEvents.filter(e => e.section === level);
       }
       
-      // Sort events
-      events.sort((a, b) => {
-        if (a.type === b.type) {
-          return a.name.localeCompare(b.name);
-        }
-        return a.type.localeCompare(b.type);
-      });
+      renderEventsList(filteredEvents);
+    }
 
-      if (events.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full text-center py-5 text-muted">
-            <i class="bi bi-calendar-x fs-1 mb-3"></i>
-            <h5>No Events Found</h5>
-            <p>Try a different search or filter</p>
+    // Render Events List
+    function renderEventsList(filteredEvents = events) {
+      const container = document.getElementById('eventsList');
+      
+      if (filteredEvents.length === 0) {
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="event-card text-center py-5">
+              <i class="bi bi-calendar-x mb-3" style="font-size: 3rem; color: var(--gray);"></i>
+              <h5 class="text-muted">No events found</h5>
+              <p class="text-muted">Try changing your filters</p>
+            </div>
           </div>
         `;
         return;
       }
-
-      grid.innerHTML = events.map(ev => {
-        // Get event stats
-        const pendingCount = CACHE.participations.filter(p => 
-          p.eventId == ev.id && 
-          p.teamId == LEADER.teamId && 
-          p.status === 'pending'
-        ).length;
+      
+      container.innerHTML = filteredEvents.map(event => {
+        // Get participation status for this team
+        const teamParticipations = participations.filter(p => 
+          p.eventId === event.id && p.teamId === currentTeam.id
+        );
         
-        const approvedCount = CACHE.participations.filter(p => 
-          p.eventId == ev.id && 
-          p.teamId == LEADER.teamId && 
-          p.status === 'approved'
-        ).length;
+        const pendingCount = teamParticipations.filter(p => p.status === 'pending').length;
+        const approvedCount = teamParticipations.filter(p => p.status === 'approved').length;
         
-        const totalNominated = pendingCount + approvedCount;
-        const capacity = getEventCapacity(ev);
-        const isFull = capacity !== null && totalNominated >= capacity;
+        // Determine status
+        let status = 'Available';
+        let statusClass = 'badge bg-success';
         
-        // Get event color
-        let eventColor = '#3b82f6';
-        let eventIcon = 'bi-calendar-event';
-        if (ev.type === 'Stage') {
-          eventColor = '#f59e0b';
-          eventIcon = 'bi-mic';
-        } else if (ev.type === 'Non-Stage') {
-          eventColor = '#10b981';
-          eventIcon = 'bi-palette';
-        } else if (ev.type === 'Group') {
-          eventColor = '#8b5cf6';
-          eventIcon = 'bi-people';
-        } else if (ev.type === 'Special') {
-          eventColor = '#ef4444';
-          eventIcon = 'bi-star';
-        } else if (ev.type === 'General') {
-          eventColor = '#6b7280';
-          eventIcon = 'bi-globe';
+        if (approvedCount > 0) {
+          status = 'Approved';
+          statusClass = 'badge-approved';
+        } else if (pendingCount > 0) {
+          status = 'Pending';
+          statusClass = 'badge-pending';
         }
         
-        const isSelected = currentEventId === ev.id;
+        // Get badge classes
+        const typeClass = getEventTypeClass(event.type);
+        const levelClass = getLevelClass(event.section);
         
         return `
-          <div class="event-card ${isSelected ? 'selected' : ''}" onclick="selectEvent('${ev.id}')">
-            <div class="event-header">
+          <div class="col-md-6 col-lg-4">
+            <div class="event-card" onclick="selectEvent('${event.id}')">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <span class="badge ${typeClass} me-2">${event.type}</span>
+                  <span class="badge ${levelClass}">${event.section}</span>
+                </div>
+                <span class="badge ${statusClass}">${status}</span>
+              </div>
+              
+              <h6 class="mb-2">${event.name}</h6>
+              
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">
+                  <i class="bi bi-people me-1"></i> Max ${getMaxMembers(event.type)}
+                </small>
+                <button class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-plus-circle me-1"></i> Nominate
+                </button>
+              </div>
+              
+              ${approvedCount > 0 ? `
+                <div class="mt-2 small text-success">
+                  <i class="bi bi-check-circle me-1"></i> ${approvedCount} approved
+                </div>
+              ` : ''}
+              
+              ${pendingCount > 0 ? `
+                <div class="mt-2 small text-warning">
+                  <i class="bi bi-clock me-1"></i> ${pendingCount} pending
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Select Event for Nomination
+    window.selectEvent = function(eventId) {
+      currentEvent = cache.events[eventId];
+      selectedMembers.clear();
+      
+      if (!currentEvent) return;
+      
+      // Update UI
+      document.getElementById('selectedEventName').textContent = currentEvent.name;
+      
+      // Set event info badges
+      const typeBadge = document.getElementById('eventCategoryBadge');
+      typeBadge.className = 'badge ' + getEventTypeClass(currentEvent.type);
+      typeBadge.textContent = currentEvent.type;
+      
+      const levelBadge = document.getElementById('eventLevelBadge');
+      levelBadge.className = 'badge ' + getLevelClass(currentEvent.section);
+      levelBadge.textContent = currentEvent.section;
+      
+      // Set max members
+      const maxMembers = getMaxMembers(currentEvent.type);
+      document.getElementById('eventMaxMembers').textContent = maxMembers;
+      
+      // Check existing nominations
+      const existingNominations = participations.filter(p => 
+        p.eventId === eventId && 
+        p.teamId === currentTeam.id && 
+        p.status === 'pending'
+      );
+      
+      // Load members based on event level
+      loadMembersForEvent();
+      
+      // Show event detail page
+      showPage('eventDetail');
+    };
+
+    // Load Members for Event
+    function loadMembersForEvent() {
+      let eligibleMembers = students.filter(s => s.teamId === currentTeam.id);
+      
+      // Filter by event level
+      if (currentEvent.section === 'Senior') {
+        eligibleMembers = eligibleMembers.filter(s => s.level === 'Senior');
+      } else if (currentEvent.section === 'Junior') {
+        eligibleMembers = eligibleMembers.filter(s => s.level === 'Junior');
+      }
+      // Open/Special events allow all levels
+      
+      // Check existing nominations
+      const existingNominations = participations.filter(p => 
+        p.eventId === currentEvent.id && 
+        p.teamId === currentTeam.id && 
+        p.status === 'pending'
+      );
+      
+      // Pre-select pending members
+      existingNominations.forEach(p => {
+        selectedMembers.add(p.studentId);
+      });
+      
+      // Update UI
+      document.getElementById('eventCurrentMembers').textContent = selectedMembers.size;
+      updateMembersGrid(eligibleMembers);
+      updateLimitInfo();
+    }
+
+    // Update Members Grid
+    function updateMembersGrid(members) {
+      const container = document.getElementById('membersGrid');
+      const searchTerm = document.getElementById('memberSearch').value.toLowerCase();
+      const activeFilter = document.querySelector('.filter-tab[data-member-filter].active')?.dataset.memberFilter || 'all';
+      
+      // Apply filters
+      let filteredMembers = members;
+      
+      if (activeFilter !== 'all') {
+        filteredMembers = filteredMembers.filter(m => m.level === activeFilter);
+      }
+      
+      if (searchTerm) {
+        filteredMembers = filteredMembers.filter(m => 
+          m.name.toLowerCase().includes(searchTerm) || 
+          m.id.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      if (filteredMembers.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-4">
+            <i class="bi bi-people mb-3" style="font-size: 2rem; color: var(--gray);"></i>
+            <p class="text-muted">No members found</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = filteredMembers.map(member => {
+        const isSelected = selectedMembers.has(member.id);
+        const canSelect = canMemberJoinEvent(member.id);
+        
+        let cardClass = 'member-card col-md-4 col-sm-6 col-12';
+        if (isSelected) cardClass += ' selected';
+        if (!canSelect.canJoin) cardClass += ' disabled';
+        
+        // Get personal limits
+        const limits = getMemberLimits(member.id);
+        
+        return `
+          <div class="${cardClass}" onclick="toggleMemberSelection('${member.id}')" 
+               title="${!canSelect.canJoin ? canSelect.reason : ''}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
-                <span class="event-category" style="background: ${eventColor}">
-                  <i class="bi ${eventIcon} me-1"></i>${ev.type}
+                <h6 class="mb-1">${member.id}</h6>
+                <small class="text-muted">${member.name}</small>
+              </div>
+              <span class="badge ${member.level === 'Senior' ? 'badge-senior' : 'badge-junior'}">
+                ${member.level}
+              </span>
+            </div>
+            
+            <div class="small">
+              <div class="d-flex justify-content-between mb-1">
+                <span>Stage: ${limits.stageCount}/${limits.maxStage}</span>
+                <span class="${limits.stageCount >= limits.maxStage ? 'text-danger' : 'text-success'}">
+                  ${limits.stageCount >= limits.maxStage ? '✗' : '✓'}
                 </span>
               </div>
-              <div>
-                ${isFull ? '<span class="badge badge-danger">Full</span>' : ''}
-                ${pendingCount > 0 ? '<span class="badge badge-warning ms-1">' + pendingCount + ' P</span>' : ''}
-                ${approvedCount > 0 ? '<span class="badge badge-success ms-1">' + approvedCount + ' A</span>' : ''}
-              </div>
-            </div>
-            
-            <h4 class="event-name">${ev.name}</h4>
-            
-            <div class="event-info">
-              <span><i class="bi bi-person-badge"></i> ${ev.level}</span>
-              <span><i class="bi bi-people"></i> ${capacity ? `Max ${capacity}` : 'No limit'}</span>
-            </div>
-            
-            <div class="event-stats">
-              <div class="stat-badge">
-                <div class="stat-badge-value">${totalNominated}</div>
-                <div class="stat-badge-label">Nominated</div>
-              </div>
-              <div class="stat-badge">
-                <div class="stat-badge-value">${pendingCount}</div>
-                <div class="stat-badge-label">Pending</div>
-              </div>
-              <div class="stat-badge">
-                <div class="stat-badge-value">${approvedCount}</div>
-                <div class="stat-badge-label">Approved</div>
+              <div class="d-flex justify-content-between">
+                <span>Off-Stage: ${limits.offstageCount}/${limits.maxOffstage}</span>
+                <span class="${limits.offstageCount >= limits.maxOffstage ? 'text-danger' : 'text-success'}">
+                  ${limits.offstageCount >= limits.maxOffstage ? '✗' : '✓'}
+                </span>
               </div>
             </div>
             
             ${isSelected ? `
-              <div class="text-center mt-3 text-success">
-                <i class="bi bi-check-circle-fill me-1"></i> Selected
+              <div class="text-center mt-2 text-success">
+                <i class="bi bi-check-circle-fill"></i> Selected
+              </div>
+            ` : ''}
+            
+            ${!canSelect.canJoin ? `
+              <div class="text-center mt-2 text-danger small">
+                <i class="bi bi-exclamation-circle"></i> Cannot select
               </div>
             ` : ''}
           </div>
@@ -1311,585 +1177,404 @@
       }).join('');
     }
 
-    // Select Event
-    window.selectEvent = (evId) => {
-      currentEventId = evId;
-      selectedMembers.clear();
+    // Filter Members
+    function filterMembers(filter, searchTerm = '') {
+      if (!currentEvent) return;
       
-      const ev = CACHE.events.find(e => String(e.id) === String(evId));
-      if (!ev) return;
+      let eligibleMembers = students.filter(s => s.teamId === currentTeam.id);
       
-      // Update selected event info
-      document.getElementById('selectedEventName').textContent = ev.name;
-      document.getElementById('selectedEventMeta').textContent = `${ev.type} • ${ev.level} Level`;
-      document.getElementById('selectedEventType').textContent = ev.type;
-      document.getElementById('selectedEventType').className = `badge ${getEventTypeClass(ev.type)}`;
-      document.getElementById('selectedEventLevel').textContent = ev.level;
-      document.getElementById('selectedEventLevel').className = `badge ${ev.level === 'Senior' ? 'bg-primary' : 'bg-success'}`;
+      // Filter by event level
+      if (currentEvent.section === 'Senior') {
+        eligibleMembers = eligibleMembers.filter(s => s.level === 'Senior');
+      } else if (currentEvent.section === 'Junior') {
+        eligibleMembers = eligibleMembers.filter(s => s.level === 'Junior');
+      }
       
-      // Show/hide panels
-      document.getElementById('selectedEventContainer').classList.remove('d-none');
-      document.getElementById('noEventSelected').classList.add('d-none');
+      updateMembersGrid(eligibleMembers);
+    }
+
+    // Toggle Member Selection
+    window.toggleMemberSelection = function(memberId) {
+      const canSelect = canMemberJoinEvent(memberId);
       
-      // Load eligible members
-      loadEligibleMembers(ev);
+      if (!canSelect.canJoin) {
+        showToast(canSelect.reason, 'warning');
+        return;
+      }
       
-      // Update capacity info
-      updateCapacityInfo(ev);
+      // Check event capacity
+      const maxMembers = getMaxMembers(currentEvent.type);
+      const existingNominations = participations.filter(p => 
+        p.eventId === currentEvent.id && 
+        p.teamId === currentTeam.id && 
+        p.status === 'approved'
+      );
+      
+      const totalSelected = existingNominations.length + selectedMembers.size;
+      
+      if (selectedMembers.has(memberId)) {
+        // Deselect
+        selectedMembers.delete(memberId);
+      } else {
+        // Check if we can add more
+        if (totalSelected >= maxMembers) {
+          showToast(`Maximum ${maxMembers} members allowed for ${currentEvent.type} events`, 'warning');
+          return;
+        }
+        selectedMembers.add(memberId);
+      }
       
       // Update UI
-      updateSubmitButton();
-      renderEventsGrid();
+      document.getElementById('eventCurrentMembers').textContent = selectedMembers.size;
+      loadMembersForEvent();
+      updateLimitInfo();
     };
 
-    // Get event type class
-    function getEventTypeClass(type) {
-      switch(type) {
-        case 'Stage': return 'bg-warning';
-        case 'Non-Stage': return 'bg-success';
-        case 'Group': return 'bg-purple';
-        case 'Special': return 'bg-danger';
-        case 'General': return 'bg-secondary';
-        default: return 'bg-primary';
-      }
-    }
-
-    // Load Eligible Members
-    function loadEligibleMembers(event) {
-      allTeamMembers = CACHE.students.filter(s => s.teamId === LEADER.teamId);
+    // Select All Members
+    window.selectAllMembers = function() {
+      let eligibleMembers = students.filter(s => s.teamId === currentTeam.id);
       
-      // Filter by event level for Stage, Non-Stage, and Group events
-      const eventType = event.type?.toLowerCase();
-      const eventLevel = event.level?.toLowerCase();
-      
-      if (eventType === 'stage' || eventType === 'non-stage' || eventType === 'group') {
-        if (eventLevel !== 'general') {
-          allTeamMembers = allTeamMembers.filter(s => 
-            s.level?.toLowerCase() === eventLevel
-          );
-        }
+      // Filter by event level
+      if (currentEvent.section === 'Senior') {
+        eligibleMembers = eligibleMembers.filter(s => s.level === 'Senior');
+      } else if (currentEvent.section === 'Junior') {
+        eligibleMembers = eligibleMembers.filter(s => s.level === 'Junior');
       }
       
-      // Get previously selected pending members for this event
-      const pendingSelections = CACHE.participations.filter(p => 
-        p.eventId == currentEventId && 
-        p.teamId == LEADER.teamId && 
-        p.status === 'pending'
-      ).map(p => String(p.studentId));
-      
-      selectedMembers = new Set(pendingSelections);
-      
-      filterMembers();
-    }
-
-    // Update Capacity Info
-    function updateCapacityInfo(event) {
-      const pendingCount = CACHE.participations.filter(p => 
-        p.eventId == currentEventId && 
-        p.teamId == LEADER.teamId && 
-        p.status === 'pending'
-      ).length;
-      
-      const approvedCount = CACHE.participations.filter(p => 
-        p.eventId == currentEventId && 
-        p.teamId == LEADER.teamId && 
+      const maxMembers = getMaxMembers(currentEvent.type);
+      const existingNominations = participations.filter(p => 
+        p.eventId === currentEvent.id && 
+        p.teamId === currentTeam.id && 
         p.status === 'approved'
-      ).length;
+      );
       
-      const currentTotal = pendingCount + approvedCount;
-      const capacity = getEventCapacity(event);
-      const selectedCount = selectedMembers.size;
-      
-      let capacityStatus = '';
-      let progressPercent = 0;
-      let capacityMessage = '';
-      
-      if (capacity === null) {
-        capacityStatus = `${currentTotal} nominated`;
-        progressPercent = 0;
-        capacityMessage = 'No member limit for this event';
-      } else {
-        capacityStatus = `${currentTotal}/${capacity}`;
-        progressPercent = Math.min((currentTotal / capacity) * 100, 100);
-        const remaining = capacity - currentTotal;
-        capacityMessage = `${remaining} slot${remaining !== 1 ? 's' : ''} available`;
+      let count = 0;
+      eligibleMembers.forEach(member => {
+        if (count + selectedMembers.size >= maxMembers) return;
         
-        if (selectedCount > 0) {
-          capacityMessage += ` (${selectedCount} selected)`;
+        const canSelect = canMemberJoinEvent(member.id);
+        if (canSelect.canJoin && !selectedMembers.has(member.id)) {
+          selectedMembers.add(member.id);
+          count++;
         }
-        
-        if (remaining <= 0) {
-          capacityMessage = 'Event is full';
-        }
-      }
-      
-      document.getElementById('capacityStatus').textContent = capacityStatus;
-      document.getElementById('capacityProgress').style.width = `${progressPercent}%`;
-      document.getElementById('capacityMessage').textContent = capacityMessage;
-      
-      // Update progress bar color
-      const progressBar = document.getElementById('capacityProgress');
-      if (progressPercent >= 100) {
-        progressBar.className = 'progress-bar bg-danger';
-      } else if (progressPercent >= 80) {
-        progressBar.className = 'progress-bar bg-warning';
-      } else {
-        progressBar.className = 'progress-bar bg-success';
-      }
-    }
-
-    // Filter Members
-    window.filterMembers = () => {
-      const searchTerm = document.getElementById('memberSearch').value.toLowerCase();
-      const list = document.getElementById('membersList');
-      const event = CACHE.events.find(e => String(e.id) === String(currentEventId));
-      
-      if (!event) return;
-      
-      let filtered = allTeamMembers;
-      
-      // Apply level filter
-      if (levelFilter !== 'all') {
-        filtered = filtered.filter(m => m.level?.toLowerCase() === levelFilter);
-      }
-      
-      // Apply search filter
-      if (searchTerm) {
-        filtered = filtered.filter(m => 
-          m.id.toLowerCase().includes(searchTerm) ||
-          m.name.toLowerCase().includes(searchTerm)
-        );
-      }
-      
-      // Sort by level then ID
-      filtered.sort((a, b) => {
-        if (a.level === b.level) {
-          return a.id.localeCompare(b.id);
-        }
-        return a.level.localeCompare(b.level);
       });
       
-      currentFilteredMembers = filtered;
+      loadMembersForEvent();
+      updateLimitInfo();
+    };
+
+    // Deselect All Members
+    window.deselectAllMembers = function() {
+      selectedMembers.clear();
+      loadMembersForEvent();
+      updateLimitInfo();
+    };
+
+    // Check if member can join event
+    function canMemberJoinEvent(memberId) {
+      const member = cache.students[memberId];
+      if (!member) return { canJoin: false, reason: 'Member not found' };
       
-      if (filtered.length === 0) {
-        list.innerHTML = `
-          <div class="text-center py-5 text-muted">
-            <i class="bi bi-people fs-4 mb-2"></i>
-            <p>No members found</p>
-            <small>Try adjusting your search or filters</small>
+      // Check personal limits
+      const limits = getMemberLimits(memberId);
+      
+      if (currentEvent.type === 'Stage') {
+        if (limits.stageCount >= limits.maxStage) {
+          return { 
+            canJoin: false, 
+            reason: `Stage limit reached (${limits.maxStage} max)` 
+          };
+        }
+      } else if (currentEvent.type === 'Non-Stage') {
+        if (limits.offstageCount >= limits.maxOffstage) {
+          return { 
+            canJoin: false, 
+            reason: `Off-Stage limit reached (${limits.maxOffstage} max)` 
+          };
+        }
+      }
+      
+      // Check if already nominated for this event
+      const alreadyNominated = participations.some(p => 
+        p.studentId === memberId && 
+        p.eventId === currentEvent.id && 
+        p.status === 'pending'
+      );
+      
+      if (alreadyNominated) {
+        return { canJoin: false, reason: 'Already nominated for this event' };
+      }
+      
+      return { canJoin: true, reason: '' };
+    }
+
+    // Get member personal limits
+    function getMemberLimits(memberId) {
+      const member = cache.students[memberId];
+      if (!member) return { stageCount: 0, offstageCount: 0, maxStage: 0, maxOffstage: 0 };
+      
+      // Get approved participations for this member
+      const memberParticipations = participations.filter(p => 
+        p.studentId === memberId && 
+        p.status === 'approved'
+      );
+      
+      let stageCount = 0;
+      let offstageCount = 0;
+      
+      memberParticipations.forEach(p => {
+        const event = cache.events[p.eventId];
+        if (!event) return;
+        
+        if (event.type === 'Stage') {
+          stageCount++;
+        } else if (event.type === 'Non-Stage') {
+          offstageCount++;
+        }
+      });
+      
+      // Set limits based on level
+      const maxStage = member.level === 'Senior' ? 3 : 2;
+      const maxOffstage = member.level === 'Senior' ? 4 : 3;
+      
+      return { stageCount, offstageCount, maxStage, maxOffstage };
+    }
+
+    // Get max members for event type
+    function getMaxMembers(eventType) {
+      switch(eventType) {
+        case 'Stage':
+        case 'Non-Stage':
+          return 2;
+        case 'Group':
+        case 'Open':
+          return 5;
+        default:
+          return 2;
+      }
+    }
+
+    // Update limit info display
+    function updateLimitInfo() {
+      const maxMembers = getMaxMembers(currentEvent.type);
+      const existingNominations = participations.filter(p => 
+        p.eventId === currentEvent.id && 
+        p.teamId === currentTeam.id && 
+        p.status === 'approved'
+      );
+      
+      const totalSelected = existingNominations.length + selectedMembers.size;
+      const remaining = maxMembers - totalSelected;
+      
+      let message = '';
+      let alertClass = 'alert-info';
+      
+      if (remaining <= 0) {
+        message = `Event is full! ${totalSelected}/${maxMembers} members`;
+        alertClass = 'alert-danger';
+      } else {
+        message = `${remaining} slot(s) remaining (${totalSelected}/${maxMembers})`;
+        alertClass = remaining <= 1 ? 'alert-warning' : 'alert-success';
+      }
+      
+      document.getElementById('limitInfo').className = `alert ${alertClass}`;
+      document.getElementById('limitText').textContent = message;
+    }
+
+    // Submit Nomination
+    window.submitNomination = async function() {
+      if (!currentEvent || selectedMembers.size === 0) {
+        showToast('Please select at least one member', 'warning');
+        return;
+      }
+      
+      try {
+        // Remove existing pending nominations for this event
+        const existingPending = participations.filter(p => 
+          p.eventId === currentEvent.id && 
+          p.teamId === currentTeam.id && 
+          p.status === 'pending'
+        );
+        
+        // Delete existing pending nominations
+        for (const p of existingPending) {
+          await remove(ref(db, `participations/${p.dbKey}`));
+        }
+        
+        // Add new nominations
+        for (const memberId of selectedMembers) {
+          const nominationRef = push(ref(db, 'participations'));
+          await set(nominationRef, {
+            id: nominationRef.key,
+            eventId: currentEvent.id,
+            studentId: memberId,
+            teamId: currentTeam.id,
+            status: 'pending',
+            submittedAt: Date.now(),
+            eventName: currentEvent.name,
+            eventType: currentEvent.type,
+            eventSection: currentEvent.section
+          });
+        }
+        
+        showToast(`Submitted ${selectedMembers.size} member(s) for approval`, 'success');
+        
+        // Return to nominations page
+        setTimeout(() => {
+          showPage('nominations');
+        }, 1500);
+        
+      } catch (error) {
+        console.error('Error submitting nomination:', error);
+        showToast('Error submitting nomination', 'error');
+      }
+    };
+
+    // Render Pending Events
+    function renderPendingEvents() {
+      const container = document.getElementById('pendingEventsList');
+      const pendingParticipations = participations.filter(p => 
+        p.teamId === currentTeam.id && 
+        p.status === 'pending'
+      );
+      
+      if (pendingParticipations.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5">
+            <i class="bi bi-clock mb-3" style="font-size: 3rem; color: var(--gray);"></i>
+            <h5 class="text-muted">No pending events</h5>
+            <p class="text-muted">Submit nominations to see them here</p>
           </div>
         `;
         return;
       }
       
-      // Get member counts
-      const memberCounts = calculateMemberEventCounts();
-      
-      list.innerHTML = filtered.map(member => {
-        const memberId = String(member.id);
-        const isSelected = selectedMembers.has(memberId);
-        const canJoinResult = canMemberJoinEvent(memberId, event);
-        const canJoin = canJoinResult.canJoin;
-        const reason = canJoinResult.reason;
-        const counts = memberCounts[memberId] || { stage: 0, nonStage: 0, totalApproved: 0 };
-        
-        let itemClass = 'member-item';
-        if (isSelected) itemClass += ' selected';
-        if (!canJoin) itemClass += ' disabled';
-        
-        // Get counts text
-        let countsText = '';
-        if (event.type === 'Stage') {
-          const maxStage = member.level?.toLowerCase() === 'senior' ? 3 : 2;
-          countsText = `Stage: ${counts.stage}/${maxStage}`;
-        } else if (event.type === 'Non-Stage') {
-          const maxNonStage = member.level?.toLowerCase() === 'senior' ? 4 : 3;
-          countsText = `Non-Stage: ${counts.nonStage}/${maxNonStage}`;
-        } else {
-          countsText = `Events: ${counts.totalApproved}`;
+      // Group by event
+      const eventsMap = {};
+      pendingParticipations.forEach(p => {
+        if (!eventsMap[p.eventId]) {
+          eventsMap[p.eventId] = {
+            event: cache.events[p.eventId],
+            members: []
+          };
         }
+        eventsMap[p.eventId].members.push(cache.students[p.studentId]);
+      });
+      
+      container.innerHTML = Object.values(eventsMap).map(item => {
+        const typeClass = getEventTypeClass(item.event.type);
+        const levelClass = getLevelClass(item.event.section);
         
         return `
-          <div class="${itemClass}" onclick="${canJoin ? `toggleMemberSelection('${memberId}')` : ''}" 
-               ${!canJoin ? `title="${reason}"` : ''}>
-            <div class="member-info">
-              <div class="member-id">
-                ${member.id}
-                <span class="badge ${member.level === 'Senior' ? 'bg-primary' : 'bg-success'} ms-2" style="font-size: 9px;">
-                  ${member.level}
-                </span>
+          <div class="event-card mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <span class="badge ${typeClass} me-2">${item.event.type}</span>
+                <span class="badge ${levelClass}">${item.event.section}</span>
               </div>
-              <div class="member-name">${member.name}</div>
+              <span class="badge-pending">Pending</span>
             </div>
-            <div class="member-status">
-              <div class="member-counts">${countsText}</div>
-              <i class="bi bi-check-circle-fill check-icon"></i>
+            
+            <h6 class="mb-3">${item.event.name}</h6>
+            
+            <div class="mb-3">
+              <small class="text-muted d-block mb-1">Nominated Members:</small>
+              <div class="d-flex flex-wrap gap-2">
+                ${item.members.map(m => `
+                  <span class="badge bg-light text-dark">
+                    ${m.id} - ${m.name}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+            
+            <div class="small text-muted">
+              <i class="bi bi-clock me-1"></i> Awaiting admin approval
             </div>
           </div>
         `;
       }).join('');
-    };
-
-    // Toggle Level Filter
-    window.toggleLevelFilter = () => {
-      const btn = document.getElementById('levelFilterBtn');
-      if (levelFilter === 'all') {
-        levelFilter = 'senior';
-        btn.innerHTML = '<i class="bi bi-funnel me-1"></i> Senior Only';
-      } else if (levelFilter === 'senior') {
-        levelFilter = 'junior';
-        btn.innerHTML = '<i class="bi bi-funnel me-1"></i> Junior Only';
-      } else {
-        levelFilter = 'all';
-        btn.innerHTML = '<i class="bi bi-funnel me-1"></i> All Levels';
-      }
-      filterMembers();
-    };
-
-    // Toggle Member Selection
-    window.toggleMemberSelection = (memberId) => {
-      const idStr = String(memberId);
-      const event = CACHE.events.find(e => String(e.id) === String(currentEventId));
-      
-      if (!event) return;
-      
-      // Check if can join
-      const canJoinResult = canMemberJoinEvent(memberId, event);
-      if (!canJoinResult.canJoin) {
-        showToast(canJoinResult.reason, 'warning');
-        return;
-      }
-      
-      // Check capacity
-      const capacity = getEventCapacity(event);
-      if (capacity !== null) {
-        const pendingCount = CACHE.participations.filter(p => 
-          p.eventId == currentEventId && 
-          p.teamId == LEADER.teamId && 
-          p.status === 'pending'
-        ).length;
-        
-        const approvedCount = CACHE.participations.filter(p => 
-          p.eventId == currentEventId && 
-          p.teamId == LEADER.teamId && 
-          p.status === 'approved'
-        ).length;
-        
-        const currentTotal = pendingCount + approvedCount;
-        
-        if (selectedMembers.has(idStr)) {
-          // Deselecting is always allowed
-          selectedMembers.delete(idStr);
-        } else {
-          // Check if we can add more
-          if (currentTotal + selectedMembers.size >= capacity) {
-            showToast(`Cannot select more members. Event capacity is ${capacity}`, 'warning');
-            return;
-          }
-          selectedMembers.add(idStr);
-        }
-      } else {
-        // No capacity limit
-        if (selectedMembers.has(idStr)) {
-          selectedMembers.delete(idStr);
-        } else {
-          selectedMembers.add(idStr);
-        }
-      }
-      
-      filterMembers();
-      updateCapacityInfo(event);
-      updateSubmitButton();
-    };
-
-    // Select All Eligible
-    window.selectAllEligible = () => {
-      const event = CACHE.events.find(e => String(e.id) === String(currentEventId));
-      if (!event) return;
-      
-      const capacity = getEventCapacity(event);
-      currentFilteredMembers.forEach(member => {
-        const memberId = String(member.id);
-        const canJoinResult = canMemberJoinEvent(memberId, event);
-        
-        if (canJoinResult.canJoin && !selectedMembers.has(memberId)) {
-          // Check capacity
-          if (capacity !== null) {
-            const pendingCount = CACHE.participations.filter(p => 
-              p.eventId == currentEventId && 
-              p.teamId == LEADER.teamId && 
-              p.status === 'pending'
-            ).length;
-            
-            const approvedCount = CACHE.participations.filter(p => 
-              p.eventId == currentEventId && 
-              p.teamId == LEADER.teamId && 
-              p.status === 'approved'
-            ).length;
-            
-            const currentTotal = pendingCount + approvedCount;
-            if (currentTotal + selectedMembers.size >= capacity) {
-              return;
-            }
-          }
-          selectedMembers.add(memberId);
-        }
-      });
-      
-      filterMembers();
-      updateCapacityInfo(event);
-      updateSubmitButton();
-    };
-
-    // Deselect All
-    window.deselectAll = () => {
-      selectedMembers.clear();
-      filterMembers();
-      updateCapacityInfo(CACHE.events.find(e => String(e.id) === String(currentEventId)));
-      updateSubmitButton();
-    };
-
-    // Cancel Selection
-    window.cancelSelection = () => {
-      currentEventId = null;
-      selectedMembers.clear();
-      
-      document.getElementById('selectedEventContainer').classList.add('d-none');
-      document.getElementById('noEventSelected').classList.remove('d-none');
-      
-      renderEventsGrid();
-      showToast('Selection cancelled', 'info');
-    };
-
-    // Reset All Selections
-    window.resetAllSelections = () => {
-      currentEventId = null;
-      selectedMembers.clear();
-      eventFilter = 'all';
-      levelFilter = 'all';
-      
-      document.getElementById('selectedEventContainer').classList.add('d-none');
-      document.getElementById('noEventSelected').classList.remove('d-none');
-      
-      document.getElementById('eventSearch').value = '';
-      document.getElementById('memberSearch').value = '';
-      
-      document.querySelectorAll('.filter-btn').forEach((btn, index) => {
-        btn.classList.toggle('active', index === 0);
-      });
-      
-      document.getElementById('levelFilterBtn').innerHTML = '<i class="bi bi-funnel me-1"></i> All Levels';
-      
-      renderEventsGrid();
-      showToast('All selections reset', 'success');
-    };
-
-    // Update Submit Button
-    function updateSubmitButton() {
-      const btn = document.getElementById('submitBtn');
-      const count = selectedMembers.size;
-      btn.innerHTML = `<i class="bi bi-send me-2"></i> Submit (${count})`;
-      
-      if (count === 0) {
-        btn.disabled = true;
-        btn.style.opacity = '0.6';
-      } else {
-        btn.disabled = false;
-        btn.style.opacity = '1';
-      }
     }
-
-    // Submit Nominations
-    window.submitNominations = async () => {
-      if (!currentEventId) {
-        showToast('Please select an event first!', 'warning');
-        return;
-      }
-
-      if (selectedMembers.size === 0) {
-        showToast('Please select at least one member!', 'warning');
-        return;
-      }
-
-      const event = CACHE.events.find(e => String(e.id) === String(currentEventId));
-      if (!event) {
-        showToast('Event not found!', 'error');
-        return;
-      }
-
-      // Validate all selected members
-      const invalidMembers = [];
-      for (const memberId of selectedMembers) {
-        const canJoinResult = canMemberJoinEvent(memberId, event);
-        if (!canJoinResult.canJoin) {
-          const member = CACHE.students.find(s => String(s.id) === memberId);
-          invalidMembers.push(`${member?.name || memberId}: ${canJoinResult.reason}`);
-        }
-      }
-
-      if (invalidMembers.length > 0) {
-        showToast(`${invalidMembers.length} member(s) cannot be nominated:\n${invalidMembers.slice(0, 3).join('\n')}${invalidMembers.length > 3 ? '\n...' : ''}`, 'error');
-        return;
-      }
-
-      try {
-        showToast('Saving nominations...', 'info');
-
-        // Remove old pending nominations for this event
-        const oldNominations = CACHE.participations.filter(p => 
-          p.eventId == currentEventId && 
-          p.teamId == LEADER.teamId && 
-          p.status === 'pending'
-        );
-
-        for (const nomination of oldNominations) {
-          await remove(ref(db, `participations/${nomination.dbKey}`));
-        }
-
-        // Add new nominations
-        for (const studentId of selectedMembers) {
-          await push(ref(db, 'participations'), {
-            eventId: currentEventId,
-            studentId: studentId,
-            teamId: LEADER.teamId,
-            status: 'pending',
-            id: Date.now() + studentId,
-            submittedAt: Date.now(),
-            submittedBy: LEADER.id,
-            eventName: event.name,
-            eventType: event.type,
-            eventLevel: event.level
-          });
-        }
-
-        showToast(`Successfully nominated ${selectedMembers.size} member(s) for ${event.name}!`, 'success');
-        
-        // Refresh after a moment
-        setTimeout(() => {
-          location.reload();
-        }, 1500);
-        
-      } catch (error) {
-        console.error('Error saving nominations:', error);
-        showToast('Error saving nominations!', 'error');
-      }
-    };
 
     // Render Approved Events
     function renderApprovedEvents() {
-      const container = document.getElementById('approvedEvents');
-      const searchTerm = document.getElementById('approvalSearch').value.toLowerCase();
-      
-      const teamParticipations = CACHE.participations.filter(p => 
-        p.teamId === LEADER.teamId
+      const container = document.getElementById('approvedEventsList');
+      const approvedParticipations = participations.filter(p => 
+        p.teamId === currentTeam.id && 
+        p.status === 'approved'
       );
-
-      if (teamParticipations.length === 0) {
+      
+      if (approvedParticipations.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-5 text-muted">
-            <i class="bi bi-check-circle fs-4 mb-3"></i>
-            <h5>No Nominations Yet</h5>
-            <p>Your nominations will appear here</p>
+          <div class="text-center py-5">
+            <i class="bi bi-check-circle mb-3" style="font-size: 3rem; color: var(--success);"></i>
+            <h5 class="text-muted">No approved events</h5>
+            <p class="text-muted">Approved events will appear here</p>
           </div>
         `;
         return;
       }
-
+      
       // Group by event
-      const grouped = teamParticipations.reduce((acc, p) => {
-        const eventId = p.eventId;
-        if (!acc[eventId]) acc[eventId] = { pending: [], approved: [] };
-        
-        if (p.status === 'pending') {
-          acc[eventId].pending.push(p);
-        } else {
-          acc[eventId].approved.push(p);
+      const eventsMap = {};
+      approvedParticipations.forEach(p => {
+        if (!eventsMap[p.eventId]) {
+          eventsMap[p.eventId] = {
+            event: cache.events[p.eventId],
+            members: []
+          };
         }
-        
-        return acc;
-      }, {});
-
-      // Filter
-      const filteredEvents = Object.entries(grouped).filter(([eventId, data]) => {
-        const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return false;
-        
-        if (searchTerm) {
-          return event.name.toLowerCase().includes(searchTerm) ||
-                 event.type.toLowerCase().includes(searchTerm) ||
-                 event.level.toLowerCase().includes(searchTerm) ||
-                 data.pending.some(p => {
-                   const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                   return student?.name.toLowerCase().includes(searchTerm) ||
-                          p.studentId.toLowerCase().includes(searchTerm);
-                 }) ||
-                 data.approved.some(p => {
-                   const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                   return student?.name.toLowerCase().includes(searchTerm) ||
-                          p.studentId.toLowerCase().includes(searchTerm);
-                 });
-        }
-        return true;
-      });
-
-      if (filteredEvents.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-5 text-muted">
-            <i class="bi bi-search fs-4 mb-3"></i>
-            <h5>No Results Found</h5>
-            <p>Try a different search term</p>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = filteredEvents.map(([eventId, data]) => {
-        const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return '';
-        
-        const allMembers = [...data.pending, ...data.approved].map(p => {
-          const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-          return { ...p, studentName: student?.name || 'Unknown', studentLevel: student?.level || 'N/A' };
+        eventsMap[p.eventId].members.push({
+          student: cache.students[p.studentId],
+          participation: p
         });
+      });
+      
+      container.innerHTML = Object.values(eventsMap).map(item => {
+        const typeClass = getEventTypeClass(item.event.type);
+        const levelClass = getLevelClass(item.event.section);
+        
+        // Check if results are published
+        const eventResults = cache.results[item.event.id] || [];
+        const hasResults = eventResults.length > 0;
         
         return `
-          <div class="simple-card mb-3">
-            <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="event-card mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
-                <h5 class="mb-1">${event.name}</h5>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="badge ${getEventTypeClass(event.type)}">${event.type}</span>
-                  <span class="badge ${event.level === 'Senior' ? 'bg-primary' : 'bg-success'}">${event.level}</span>
-                  <span class="text-muted small">${allMembers.length} member(s)</span>
-                </div>
+                <span class="badge ${typeClass} me-2">${item.event.type}</span>
+                <span class="badge ${levelClass}">${item.event.section}</span>
               </div>
-              <div class="d-flex gap-2">
-                ${data.pending.length > 0 ? `<span class="badge bg-warning">${data.pending.length} pending</span>` : ''}
-                ${data.approved.length > 0 ? `<span class="badge bg-success">${data.approved.length} approved</span>` : ''}
+              <span class="badge-approved">Approved</span>
+            </div>
+            
+            <h6 class="mb-3">${item.event.name}</h6>
+            
+            <div class="mb-3">
+              <small class="text-muted d-block mb-1">Approved Members:</small>
+              <div class="d-flex flex-wrap gap-2">
+                ${item.members.map(m => `
+                  <span class="badge bg-success text-white">
+                    ${m.student.id} - ${m.student.name}
+                  </span>
+                `).join('')}
               </div>
             </div>
             
-            <div class="table-responsive">
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Level</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${allMembers.map(m => `
-                    <tr>
-                      <td><code>${m.studentId}</code></td>
-                      <td>${m.studentName}</td>
-                      <td><span class="badge ${m.studentLevel === 'Senior' ? 'bg-primary' : 'bg-success'}">${m.studentLevel}</span></td>
-                      <td><span class="badge ${m.status === 'pending' ? 'bg-warning' : 'bg-success'}">${m.status}</span></td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+            ${hasResults ? `
+              <div class="alert alert-success py-2 mb-2">
+                <i class="bi bi-trophy me-2"></i>
+                <strong>Results Published!</strong>
+                <div class="small mt-1">
+                  ${eventResults.map(r => `
+                    ${r.position}${getOrdinal(r.position)}: ${cache.students[r.studentId]?.name || r.studentId} - ${r.points} points
+                  `).join('<br>')}
+                </div>
+              </div>
+            ` : ''}
+            
+            <div class="small text-success">
+              <i class="bi bi-check-circle-fill me-1"></i> Ready for participation
             </div>
           </div>
         `;
@@ -1898,195 +1583,118 @@
 
     // Render Results
     function renderResults() {
-      const container = document.getElementById('resultsContainer');
-      const searchTerm = document.getElementById('resultsSearch').value.toLowerCase();
-      const publishedResults = CACHE.results.filter(r => r.published);
+      const container = document.getElementById('resultsList');
+      const approvedParticipations = participations.filter(p => 
+        p.teamId === currentTeam.id && 
+        p.status === 'approved'
+      );
       
-      if (publishedResults.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-5 text-muted">
-            <i class="bi bi-trophy fs-4 mb-3"></i>
-            <h5>No Results Published Yet</h5>
-            <p>Check back later for event results</p>
-          </div>
-        `;
-        return;
-      }
-
-      // Group by event
-      const grouped = publishedResults.reduce((acc, result) => {
-        const eventId = result.eventId;
-        if (!acc[eventId]) acc[eventId] = [];
-        acc[eventId].push(result);
-        return acc;
-      }, {});
-
-      // Filter
-      const filteredEvents = Object.entries(grouped).filter(([eventId, results]) => {
-        const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return false;
-        
-        if (searchTerm) {
-          return event.name.toLowerCase().includes(searchTerm) ||
-                 event.type.toLowerCase().includes(searchTerm) ||
-                 event.level.toLowerCase().includes(searchTerm) ||
-                 results.some(r => {
-                   const student = CACHE.students.find(s => String(s.id) === String(r.studentId));
-                   return student?.name.toLowerCase().includes(searchTerm) ||
-                          r.studentId.toLowerCase().includes(searchTerm);
-                 });
+      // Get events with results
+      const eventsWithResults = [];
+      approvedParticipations.forEach(p => {
+        const eventResults = cache.results[p.eventId];
+        if (eventResults && eventResults.length > 0) {
+          eventsWithResults.push({
+            event: cache.events[p.eventId],
+            results: eventResults
+          });
         }
-        return true;
       });
-
-      if (filteredEvents.length === 0) {
+      
+      if (eventsWithResults.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-5 text-muted">
-            <i class="bi bi-search fs-4 mb-3"></i>
-            <h5>No Results Found</h5>
-            <p>Try a different search term</p>
+          <div class="text-center py-5">
+            <i class="bi bi-trophy mb-3" style="font-size: 3rem; color: var(--gray);"></i>
+            <h5 class="text-muted">No published results</h5>
+            <p class="text-muted">Results will appear here when published by admin</p>
           </div>
         `;
         return;
       }
-
-      container.innerHTML = filteredEvents.map(([eventId, results]) => {
-        const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return '';
+      
+      container.innerHTML = eventsWithResults.map(item => {
+        const typeClass = getEventTypeClass(item.event.type);
+        const levelClass = getLevelClass(item.event.section);
         
-        results.sort((a, b) => a.position - b.position);
-        
-        const resultsWithDetails = results.map(result => {
-          const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
-          const team = CACHE.teams.find(t => t.id === student?.teamId);
-          return {
-            ...result,
-            studentName: student?.name || 'Unknown',
-            studentLevel: student?.level || 'N/A',
-            teamName: team?.name || 'Unknown',
-            isTeamMember: student?.teamId === LEADER.teamId
-          };
-        });
+        // Sort results by position
+        const sortedResults = [...item.results].sort((a, b) => a.position - b.position);
         
         return `
-          <div class="simple-card mb-3">
+          <div class="event-card mb-4">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <div>
-                <h5 class="mb-1">${event.name}</h5>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="badge ${getEventTypeClass(event.type)}">${event.type}</span>
-                  <span class="badge ${event.level === 'Senior' ? 'bg-primary' : 'bg-success'}">${event.level}</span>
-                </div>
+                <span class="badge ${typeClass} me-2">${item.event.type}</span>
+                <span class="badge ${levelClass}">${item.event.section}</span>
               </div>
-              <span class="badge bg-secondary">${results.length} participant(s)</span>
+              <span class="badge-approved">Published</span>
             </div>
             
-            ${resultsWithDetails.map((result, index) => `
-              <div class="d-flex align-items-center gap-3 p-3 mb-2 ${result.isTeamMember ? 'bg-success bg-opacity-10' : ''}" style="border-radius: 8px;">
-                <div class="rounded-circle d-flex align-items-center justify-content-center" 
-                     style="width: 40px; height: 40px; background: ${index < 3 ? ['#fbbf24', '#94a3b8', '#92400e'][index] : '#6b7280'}; color: white; font-weight: bold;">
-                  ${result.position}
-                </div>
-                <div class="flex-grow-1">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <strong>${result.studentName}</strong>
-                      <small class="text-muted ms-2">(${result.studentId})</small>
-                    </div>
-                    <span class="badge ${result.isTeamMember ? 'bg-success' : 'bg-secondary'}">
-                      ${result.points} pts
-                    </span>
-                  </div>
-                  <div class="small text-muted">
-                    ${result.studentLevel} • ${result.teamName}
-                    ${result.isTeamMember ? ' • <span class="text-success">Your Team</span>' : ''}
-                  </div>
-                </div>
-              </div>
-            `).join('')}
+            <h5 class="mb-3">${item.event.name}</h5>
+            
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Position</th>
+                    <th>Member</th>
+                    <th>Points</th>
+                    <th>Team</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${sortedResults.map(r => {
+                    const student = cache.students[r.studentId];
+                    const isTeamMember = student?.teamId === currentTeam.id;
+                    
+                    return `
+                      <tr class="${isTeamMember ? 'table-success' : ''}">
+                        <td>
+                          <span class="badge ${r.position === 1 ? 'bg-warning' : r.position === 2 ? 'bg-secondary' : 'bg-danger'}">
+                            ${r.position}${getOrdinal(r.position)}
+                          </span>
+                        </td>
+                        <td>
+                          ${student?.name || r.studentId}
+                          ${isTeamMember ? '<span class="badge bg-success ms-2">Your Team</span>' : ''}
+                        </td>
+                        <td><strong>${r.points}</strong></td>
+                        <td>${cache.students[r.studentId]?.teamId || 'N/A'}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    // Export functions (keep from previous version)
-    window.exportToPDF = function() {
-      // Implementation from previous version
-      showToast('PDF export coming soon!', 'info');
-    };
-    
-    window.exportToExcel = function() {
-      // Implementation from previous version
-      showToast('Excel export coming soon!', 'info');
-    };
-
-    // Navigation
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
-        const targetId = tab.dataset.target;
-        document.querySelectorAll('.content-section').forEach(section => {
-          section.classList.add('d-none');
-        });
-        document.getElementById(targetId).classList.remove('d-none');
-        
-        // Refresh data when switching tabs
-        if (targetId === 'approved') {
-          renderApprovedEvents();
-        } else if (targetId === 'results') {
-          renderResults();
-        } else if (targetId === 'nominations') {
-          renderEventsGrid();
-        }
-      });
-    });
-
-    // Logout
-    window.logout = () => {
-      sessionStorage.clear();
-      window.location.href = 'index.html';
-    };
-
-    // Filter Approvals
-    window.filterApprovals = () => {
-      renderApprovedEvents();
-    };
-
-    // Filter Results
-    window.filterResults = () => {
-      renderResults();
-    };
-
-    // Firebase Data Listener
-    onValue(ref(db, '/'), (snap) => {
-      const d = snap.val() || {};
-      
-      CACHE.students = Object.values(d.students || {});
-      CACHE.teams = Object.values(d.teams || {});
-      CACHE.events = Object.values(d.events || {});
-      CACHE.results = Object.values(d.results || {});
-      CACHE.attendance = d.attendance || {};
-      
-      const partsRaw = d.participations || {};
-      CACHE.participations = Object.entries(partsRaw).map(([k, v]) => {
-        KEYMAP.parts[v.id || k] = k;
-        return { ...v, dbKey: k };
-      });
-
-      initLeader();
-      renderDashboard();
-      if (document.getElementById('nominations').classList.contains('d-none') === false) {
-        renderEventsGrid();
+    // Helper Functions
+    function getEventTypeClass(type) {
+      switch(type) {
+        case 'Stage': return 'badge-stage';
+        case 'Non-Stage': return 'badge-offstage';
+        case 'Group': return 'badge-group';
+        case 'Open': return 'badge-open';
+        default: return 'badge bg-secondary';
       }
-    });
+    }
 
-    // Initialize
-    initTheme();
-    showToast('Welcome to Fidak Fest Leader Dashboard!', 'success');
+    function getLevelClass(level) {
+      switch(level) {
+        case 'Senior': return 'badge-senior';
+        case 'Junior': return 'badge-junior';
+        case 'General': return 'badge bg-info';
+        default: return 'badge bg-secondary';
+      }
+    }
 
+    function getOrdinal(n) {
+      const s = ["th", "st", "nd", "rd"];
+      const v = n % 100;
+      return s[(v - 20) % 10] || s[v] || s[0];
+    }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
