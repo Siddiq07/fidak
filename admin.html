@@ -2097,7 +2097,7 @@ $('publishAllResults').addEventListener('click', async ()=>{
 // Render results
 function renderResults(){
   const tbody = $('resultsTable');
-  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">No events</td></tr>'; return; }
+  if(!CACHE.events.length){ tbody.innerHTML = '<tr><td colspan="600" class="text-center muted">No events</td></tr>'; return; }
   const evMap = {};
   CACHE.results.forEach(r => { if(!evMap[r.eventId]) evMap[r.eventId] = {}; evMap[r.eventId][r.position] = r; });
   let rows = [];
