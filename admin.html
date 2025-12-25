@@ -383,7 +383,7 @@
         }
     }
     
-    /* Reset button styling */
+    /* Reset button styling - CHANGED TO DANGER COLOR */
     .btn-reset {
         background: var(--danger);
         color: white;
@@ -397,6 +397,7 @@
         background: #bb2d3b;
         color: white;
         transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
     }
     
     /* Clear button styling for result modal */
@@ -617,15 +618,37 @@
         <div class="row g-3">
           <div class="col-lg-4">
             <div class="card-neo">
+              <!-- CHANGED: Updated title -->
               <div class="section-title"><i class="bi bi-calendar-plus"></i> Add / Import Events</div>
               <input id="eventName" class="form-control mb-2" placeholder="Event Name">
-              <select id="eventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option><option>Group</option><option>Open</option></select>
-              <select id="eventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option></select>
+              
+              <!-- CHANGED: Type changed to Section -->
+              <select id="eventSection" class="form-select mb-2">
+                <option>Senior</option>
+                <option>Junior</option>
+                <option>Open</option>
+                <option>Special</option>
+              </select>
+              
+              <!-- CHANGED: Level changed to Type -->
+              <select id="eventType" class="form-select mb-2">
+                <option>Stage</option>
+                <option>Offstage</option>
+                <option>Open</option>
+                <option>Special</option>
+              </select>
+              
+              <!-- CHANGED: Updated button -->
               <button id="saveEvent" class="btn btn-accent w-100 mb-3">Add Event</button>
               <hr style="border-top:1px solid var(--border)">
-              <div class="muted small mb-1">Columns: Name, Type, Level</div>
+              
+              <!-- CHANGED: Updated column description -->
+              <div class="muted small mb-1">Columns: Name, Section, Type</div>
               <input id="eventFile" type="file" accept=".xlsx,.xls" class="form-control mb-2">
-              <div class="d-flex gap-2"><button id="previewEvents" class="btn btn-outline-primary btn-sm">Preview</button><button id="importEvents" class="btn btn-accent btn-sm">Import</button></div>
+              <div class="d-flex gap-2">
+                <button id="previewEvents" class="btn btn-outline-primary btn-sm">Preview</button>
+                <button id="importEvents" class="btn btn-accent btn-sm">Import</button>
+              </div>
               <div id="eventsPreview" class="mt-2" style="max-height:150px;overflow:auto"></div>
             </div>
           </div>
@@ -636,8 +659,9 @@
                 <input id="filterEventSearch" class="form-control form-control-sm" style="width: 200px;" placeholder="Search events...">
               </div>
               <div class="table-responsive" style="max-height:600px;overflow:auto">
+                <!-- CHANGED: Updated table headers -->
                 <table class="table table-sm align-middle">
-                  <thead class="table-light"><tr><th>Name</th><th>Type</th><th>Level</th><th>Actions</th></tr></thead>
+                  <thead class="table-light"><tr><th>Name</th><th>Section</th><th>Type</th><th>Actions</th></tr></thead>
                   <tbody id="eventsTable"></tbody>
                 </table>
               </div>
@@ -680,15 +704,16 @@
             <button id="downloadApprovalsPdf" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Approved Roster</button>
           </div>
         </div>
+        <!-- CHANGED: Updated table headers for Approvals -->
         <div class="table-responsive">
           <table class="table table-hover">
-            <thead><tr><th>Event</th><th>Category</th><th>Pending</th><th>Approved</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Event</th><th>Section</th><th>Type</th><th>Pending</th><th>Approved</th><th>Actions</th></tr></thead>
             <tbody id="approvalsTable"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- RESULTS SECTION REPLACED -->
+      <!-- RESULTS SECTION -->
       <section id="panel-results" class="card-neo d-none">
         <div class="card-neo">
           <div class="section-title">Add / Manage Results</div>
@@ -769,7 +794,7 @@
   </div>
 </div>
 
-<!-- Edit Event Modal -->
+<!-- Edit Event Modal - UPDATED FOR SECTION/TYPE -->
 <div class="modal fade" id="editEventModal" tabindex="-1">
   <div class="modal-dialog">
     <form id="editEventForm" class="modal-content">
@@ -781,8 +806,22 @@
         <input type="hidden" id="editEventDbKey">
         <input id="editEventId" class="form-control mb-2" readonly>
         <input id="editEventName" class="form-control mb-2" placeholder="Event Name">
-        <select id="editEventType" class="form-select mb-2"><option>Stage</option><option>Non-Stage</option><option>Group</option><option>Open</option></select>
-        <select id="editEventLevel" class="form-select mb-2"><option>Junior</option><option>Senior</option><option>General</option></select>
+        
+        <!-- CHANGED: Type changed to Section -->
+        <select id="editEventSection" class="form-select mb-2">
+          <option>Senior</option>
+          <option>Junior</option>
+          <option>Open</option>
+          <option>Special</option>
+        </select>
+        
+        <!-- CHANGED: Level changed to Type -->
+        <select id="editEventType" class="form-select mb-2">
+          <option>Stage</option>
+          <option>Offstage</option>
+          <option>Open</option>
+          <option>Special</option>
+        </select>
       </div>
       <div class="modal-footer">
         <button type="button" id="deleteEventBtn" class="btn btn-danger">Delete</button>
@@ -841,7 +880,7 @@
   </div>
 </div>
 
-<!-- Result Manage Modal - FIXED STRUCTURE -->
+<!-- Result Manage Modal -->
 <div class="modal fade" id="resultManageModal" tabindex="-1">
     <div class="modal-dialog">
         <form id="resultManageForm" class="modal-content">
@@ -937,7 +976,7 @@
   </div>
 </div>
 
-<!-- System Reset Modal -->
+<!-- System Reset Modal - UPDATED RESET BUTTON -->
 <div class="modal fade" id="systemResetModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -972,7 +1011,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" id="executeSystemReset" class="btn btn-danger" disabled>RESET ENTIRE SYSTEM</button>
+                <!-- CHANGED: Added btn-reset class to make it red -->
+                <button type="button" id="executeSystemReset" class="btn btn-reset" disabled>RESET ENTIRE SYSTEM</button>
             </div>
         </div>
     </div>
@@ -1237,8 +1277,9 @@ function displayEventRoster(event) {
 
     $('lookupTitle').textContent = event.name;
     $('studentLookupID').textContent = event.id;
-    $('studentLookupLevel').textContent = event.level;
-    $('studentLookupTeam').textContent = event.type;
+    // CHANGED: Updated to show Section and Type instead of Level and Type
+    $('studentLookupLevel').textContent = event.section || '-';
+    $('studentLookupTeam').textContent = event.type || '-';
     $('listHeader').textContent = 'Approved Participants Roster';
     $('listTableHeaders').innerHTML = '<th>Student Name</th><th>Chess ID & Team</th>';
 
@@ -1281,7 +1322,7 @@ $('searchPdfBtn').addEventListener('click', () => {
         
         let headerHtml = `
             <h2>Approved Roster: ${ev.name}</h2>
-            <p>Category: ${ev.type} / ${ev.level}</p>
+            <p>Category: ${ev.section} / ${ev.type}</p>
         `;
         
         html2pdf().from(headerHtml + $('studentParticipationTable').outerHTML).set({ margin: 10, filename: `roster_${ev.id}.pdf` }).save();
@@ -1484,30 +1525,41 @@ $('deleteTeamBtn').addEventListener('click', async ()=>{
 });
 
 
-/* ---------------- EVENTS ---------------- */
+/* ---------------- EVENTS ---------------- (UPDATED FOR SECTION/TYPE) */
+// CHANGED: Updated event saving logic for Section/Type
 $('saveEvent').addEventListener('click', async ()=>{
   const n = $('eventName').value.trim();
   if(!n) return toast('Name required','danger');
   const id = Date.now().toString();
   // FIX: Using push to get a unique key
-  await set(push(ref(db, 'events')), { id, name:n, type:$('eventType').value, level:$('eventLevel').value });
+  // CHANGED: Save with section and type instead of type and level
+  await set(push(ref(db, 'events')), { 
+    id, 
+    name:n, 
+    section:$('eventSection').value, // CHANGED: section instead of type
+    type:$('eventType').value,       // CHANGED: type instead of level
+    // Keep backward compatibility for existing code
+    level: $('eventSection').value === 'Open' || $('eventSection').value === 'Special' ? 'General' : $('eventSection').value
+  });
   $('eventName').value=''; toast('Event added');
 });
 
-// Event Import
+// Event Import - UPDATED FOR SECTION/TYPE
 let tempEventData = [];
 $('previewEvents').addEventListener('click', () => {
   const f = $('eventFile').files[0]; if(!f) return toast('Select File','warning');
   readExcel(f, (json) => {
     tempEventData = json;
-    let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Type</th><th>Level</th></tr></thead><tbody>';
+    let html = '<table class="table table-sm"><thead><tr><th>Name</th><th>Section</th><th>Type</th></tr></thead><tbody>';
     json.slice(0,5).forEach(r => {
-      html += `<tr><td>${r['Name']||r['Event']||''}</td><td>${r['Type']||''}</td><td>${r['Level']||''}</td></tr>`;
+      // CHANGED: Updated column names
+      html += `<tr><td>${r['Name']||r['Event']||''}</td><td>${r['Section']||r['Level']||''}</td><td>${r['Type']||''}</td></tr>`;
     });
     html += '</tbody></table>';
     $('eventsPreview').innerHTML = html;
   });
 });
+
 $('importEvents').addEventListener('click', async () => {
   if(!tempEventData.length) return toast('Preview first','warning');
   const updates = {};
@@ -1517,26 +1569,45 @@ $('importEvents').addEventListener('click', async () => {
        // FIX: Use push to ensure unique key
        const newKey = push(ref(db, 'events')).key;
        const id = Date.now() + Math.floor(Math.random()*1000).toString();
-       updates[`events/${newKey}`] = { id:id, name:name, type:r['Type']||'Stage', level:r['Level']||'General' };
+       // CHANGED: Map columns to section and type
+       const section = r['Section'] || r['Level'] || 'Senior';
+       const type = r['Type'] || 'Stage';
+       updates[`events/${newKey}`] = { 
+         id:id, 
+         name:name, 
+         section: section,
+         type: type,
+         // Backward compatibility
+         level: section === 'Open' || section === 'Special' ? 'General' : section
+       };
     }
   });
   if(Object.keys(updates).length){ await update(ref(db), updates); toast('Events Imported'); }
   tempEventData = []; $('eventsPreview').innerHTML = ''; $('eventFile').value = '';
 });
 
+// CHANGED: Updated renderEvents for Section/Type
 function renderEvents(){
   const q = ($('filterEventSearch').value||'').trim().toLowerCase();
   let html='';
   CACHE.events.forEach(e => {
     const dbKey = KEYMAP.events[e.id]; // FIX: Get the unique DB key
     if(q && !e.name.toLowerCase().includes(q)) return;
-    // FIX: Added 'Edit' button
-    html += `<tr data-id="${e.id}"><td>${e.name}</td><td>${e.type}</td><td>${e.level}</td><td><div class="action-buttons"><button class="btn btn-sm btn-outline-primary btn-edit-ev me-1" data-dbkey="${dbKey}">Edit</button><button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">Del</button></div></td></tr>`;
+    // CHANGED: Updated to show section and type
+    html += `<tr data-id="${e.id}">
+      <td>${e.name}</td>
+      <td>${e.section || e.level || '-'}</td>
+      <td>${e.type || '-'}</td>
+      <td><div class="action-buttons">
+        <button class="btn btn-sm btn-outline-primary btn-edit-ev me-1" data-dbkey="${dbKey}">Edit</button>
+        <button class="btn btn-sm btn-outline-danger btn-del-ev" data-dbkey="${dbKey}">Del</button>
+      </div></td>
+    </tr>`;
   });
   $('eventsTable').innerHTML = html;
 }
 
-// FIX: Edit/Delete Event Logic
+// FIX: Edit/Delete Event Logic - UPDATED FOR SECTION/TYPE
 $('eventsTable').addEventListener('click', async e=>{
     const btn = e.target.closest('button');
     if (!btn) return;
@@ -1548,8 +1619,8 @@ $('eventsTable').addEventListener('click', async e=>{
         $('editEventDbKey').value = dbKey;
         $('editEventId').value = ev.id; 
         $('editEventName').value = ev.name; 
-        $('editEventType').value = ev.type; 
-        $('editEventLevel').value = ev.level; 
+        $('editEventSection').value = ev.section || ev.level || 'Senior'; // CHANGED: section
+        $('editEventType').value = ev.type || 'Stage'; // CHANGED: type
         new bootstrap.Modal($('editEventModal')).show();
 
     } else if (btn.classList.contains('btn-del-ev')) {
@@ -1560,13 +1631,16 @@ $('eventsTable').addEventListener('click', async e=>{
     }
 });
 
+// CHANGED: Updated edit event form submission for Section/Type
 $('editEventForm').addEventListener('submit', async e => {
     e.preventDefault();
     const k = $('editEventDbKey').value;
     await update(ref(db, `events/${k}`), { 
         name:$('editEventName').value, 
-        type:$('editEventType').value, 
-        level:$('editEventLevel').value 
+        section:$('editEventSection').value, // CHANGED: section
+        type:$('editEventType').value,       // CHANGED: type
+        // Backward compatibility
+        level: $('editEventSection').value === 'Open' || $('editEventSection').value === 'Special' ? 'General' : $('editEventSection').value
     });
     try { bootstrap.Modal.getInstance($('editEventModal')).hide(); } catch(e){}
     toast('Event updated');
@@ -1693,6 +1767,7 @@ $('attendanceSessions').addEventListener('click', (e) => {
 
 
 /* ---------------- APPROVALS & PROGRAM MANAGEMENT (COMBINED) ---------------- */
+// CHANGED: Updated renderApprovals for Section/Type
 function renderApprovals(){
   const q = ($('searchApprovals').value||'').trim().toLowerCase();
   const summary = {};
@@ -1703,7 +1778,20 @@ function renderApprovals(){
   let html='';
   Object.values(summary).forEach(x => {
     if(q && !x.ev.name.toLowerCase().includes(q)) return;
-    html += `<tr><td>${escapeHtml(x.ev.name)}</td><td>${x.ev.type}</td><td><span class="badge bg-warning text-dark">${x.p}</span></td><td><span class="badge bg-success">${x.a}</span></td><td><div class="action-buttons"><button class="btn btn-sm btn-primary btn-view-app me-1" data-eid="${x.ev.id}">View</button> <button class="btn btn-sm btn-outline-info btn-manage-prog" data-eid="${x.ev.id}">Manage Program</button></div></td></tr>`;
+    // CHANGED: Updated to show section and type
+    html += `<tr>
+      <td>${escapeHtml(x.ev.name)}</td>
+      <td>${x.ev.section || x.ev.level || '-'}</td>
+      <td>${x.ev.type || '-'}</td>
+      <td><span class="badge bg-warning text-dark">${x.p}</span></td>
+      <td><span class="badge bg-success">${x.a}</span></td>
+      <td>
+        <div class="action-buttons">
+          <button class="btn btn-sm btn-primary btn-view-app me-1" data-eid="${x.ev.id}">View</button> 
+          <button class="btn btn-sm btn-outline-info btn-manage-prog" data-eid="${x.ev.id}">Manage Program</button>
+        </div>
+      </td>
+    </tr>`;
   });
   $('approvalsTable').innerHTML = html;
 }
@@ -1870,9 +1958,10 @@ $('downloadApprovalsPdf').addEventListener('click', () => {
 
     Object.values(eventsMap).sort((a,b)=>a.name.localeCompare(b.name)).forEach(ev => {
         if(ev.list.length){
+            // CHANGED: Updated to show section and type
             htmlContent += `<div style="margin-bottom:25px; border:1px solid #dee2e6; padding:15px; border-radius: 4px;">
               <h3 style="margin:0 0 5px 0; font-size:16px; color:#0d6efd;">${escapeHtml(ev.name)}</h3>
-              <p style="margin:0 0 10px 0; font-size:11px; color:#6c757d;">Category: ${ev.type} / ${ev.level}</p>
+              <p style="margin:0 0 10px 0; font-size:11px; color:#6c757d;">Section: ${ev.section || ev.level || '-'} / Type: ${ev.type || '-'}</p>
               <table style="width:100%; border-collapse:collapse; font-size:11px; color:#212529;">
                 <tr style="background:#f8f9fa; text-align:left;">
                   <th style="padding:6px; border-bottom:1px solid #dee2e6; width:25%;">Chess ID</th>
@@ -2239,7 +2328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Data loading (renderAll) is handled by Firebase onValue listeners
 });
 
-console.log('Admin v6 Combined Loaded - Results with Proper Score Management');
+console.log('Admin v6 Combined Loaded - Events Updated to Section/Type, Reset Button Fixed');
 </script>
 </body>
 </html>
