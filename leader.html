@@ -358,7 +358,7 @@
       position: absolute;
       top: -5px;
       right: -5px;
-      background: var(--accent-warning);
+      background: var(--accent-danger);
       color: white;
       border-radius: 50%;
       width: 18px;
@@ -373,55 +373,189 @@
     .event-counter {
       font-size: 11px;
       margin-top: 4px;
+      color: var(--text-muted);
     }
 
-    /* Participation Table */
-    .participation-table {
-      width: 100%;
-      border-collapse: collapse;
+    /* Limits Warning */
+    .limits-warning {
+      color: var(--accent-danger);
+      font-size: 11px;
+      margin-top: 2px;
     }
 
-    .participation-table th {
-      text-align: left;
-      padding: 12px;
-      border-bottom: 2px solid var(--border-color);
-      font-weight: 600;
-    }
-
-    .participation-table td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .status-badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .status-pending {
-      background: rgba(245, 158, 11, 0.1);
-      color: var(--accent-warning);
-    }
-
-    .status-approved {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--accent-secondary);
-    }
-
-    /* Results Grid */
-    .results-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    /* Results Display Styles (like reference image) */
+    .results-container-modern {
+      display: flex;
+      flex-direction: column;
       gap: 20px;
     }
 
-    .result-card {
+    .result-event-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 20px;
+      margin-bottom: 15px;
+    }
+
+    .event-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .event-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .event-category-badge {
+      background: var(--accent-secondary);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .event-number {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .winners-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .winner-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .winner-row:hover {
+      background: rgba(59, 130, 246, 0.05);
+      border-color: var(--accent-primary);
+    }
+
+    .winner-position {
+      width: 30px;
+      height: 30px;
+      background: var(--accent-warning);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .winner-position.second {
+      background: #9ca3af;
+    }
+
+    .winner-position.third {
+      background: #92400e;
+    }
+
+    .winner-info {
+      flex: 1;
+    }
+
+    .winner-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .winner-team {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .your-team-badge {
+      background: var(--accent-secondary);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    /* Approvals Display */
+    .approval-event-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .approval-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .approval-status-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-pending-badge {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-warning);
+    }
+
+    .status-approved-badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-secondary);
+    }
+
+    .members-list-compact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .member-chip {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid var(--accent-primary);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .member-level-badge {
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: var(--border-color);
     }
 
     /* Toast */
@@ -485,8 +619,16 @@
         font-size: 12px;
       }
       
-      .results-grid {
-        grid-template-columns: 1fr;
+      .event-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .winner-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
       }
     }
   </style>
@@ -564,14 +706,16 @@
         <h4 class="mb-4"><i class="bi bi-calendar-plus me-2"></i>Submit Nominations</h4>
         
         <!-- Instructions -->
-        <div class="alert alert-info mb-4">
-          <i class="bi bi-info-circle me-2"></i>
-          <strong>Nomination Rules:</strong>
+        <div class="alert alert-danger mb-4">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <strong>STRICT PERSONAL LIMITS:</strong>
           <ul class="mb-0 mt-1" style="font-size: 14px;">
-            <li><strong>Personal Limits:</strong> Senior: 3 Stage + 4 Off-Stage | Junior: 2 Stage + 3 Off-Stage <em>(for Stage and Off-Stage events only)</em></li>
-            <li><strong>Group Events:</strong> Max 5 persons per team <em>(Junior for Junior events, Senior for Senior events)</em></li>
-            <li><strong>Special/Open/General:</strong> All members can participate <em>(no personal limits)</em></li>
+            <li><strong>Senior:</strong> Max 3 Stage + 4 Off-Stage events</li>
+            <li><strong>Junior:</strong> Max 2 Stage + 3 Off-Stage events</li>
             <li><strong>Stage/Off-Stage:</strong> Max 2 persons per event</li>
+            <li><strong>Group Events:</strong> Max 5 persons per team</li>
+            <li><strong>Special/Open/General:</strong> No personal limits</li>
+            <li><strong>WARNING:</strong> If limits are crossed, member CANNOT join any other Senior/Junior competitions!</li>
           </ul>
         </div>
 
@@ -659,7 +803,7 @@
         <!-- Search for this section -->
         <div class="search-box mb-4">
           <i class="bi bi-search search-icon"></i>
-          <input type="text" id="approvalSearch" class="search-input" placeholder="Search events or members..." oninput="filterApprovals()">
+          <input type="text" id="approvalSearch" class="search-input" placeholder="Search programs..." oninput="filterApprovals()">
         </div>
         
         <div id="approvedEvents">
@@ -676,7 +820,7 @@
         <!-- Search for results -->
         <div class="search-box mb-4">
           <i class="bi bi-search search-icon"></i>
-          <input type="text" id="resultsSearch" class="search-input" placeholder="Search events or winners..." oninput="filterResults()">
+          <input type="text" id="resultsSearch" class="search-input" placeholder="Search programs..." oninput="filterResults()">
         </div>
         
         <div id="resultsContainer">
@@ -814,11 +958,11 @@
       document.getElementById('approvedCount').textContent = approved.length;
     }
 
-    // Calculate Member Event Counts
+    // Calculate Member Event Counts (STRICT LIMITS)
     function calculateMemberEventCounts() {
       const counts = {};
       
-      // Get all APPROVED participations for this team (only approved count toward limits)
+      // Get all APPROVED participations for this team
       const teamParticipations = CACHE.participations.filter(p => 
         p.teamId === LEADER.teamId && 
         p.status === 'approved'
@@ -831,7 +975,6 @@
         const memberId = String(member.id);
         const memberParticipations = teamParticipations.filter(p => String(p.studentId) === memberId);
         
-        // Count by event type (only Stage and Non-Stage count toward limits for Senior/Junior sections)
         counts[memberId] = {
           stage: 0,
           offStage: 0,
@@ -847,28 +990,46 @@
           if (!event) return;
           
           const eventType = event.type?.toLowerCase();
+          const eventLevel = event.level?.toLowerCase();
           
-          // Only count Stage and Off-Stage events toward personal limits
-          if (eventType === 'stage') {
-            counts[memberId].stage++;
-          } else if (eventType === 'non-stage') {
-            counts[memberId].offStage++;
-          } else if (eventType === 'group') {
-            counts[memberId].group++;
-          } else if (eventType === 'special') {
-            counts[memberId].special++;
-          } else if (eventType === 'open') {
-            counts[memberId].open++;
-          } else if (eventType === 'general') {
-            counts[memberId].general++;
+          // Only count Senior/Junior section events toward limits
+          if (eventLevel === 'senior' || eventLevel === 'junior') {
+            if (eventType === 'stage') {
+              counts[memberId].stage++;
+            } else if (eventType === 'non-stage') {
+              counts[memberId].offStage++;
+            } else if (eventType === 'group') {
+              counts[memberId].group++;
+            }
           }
+          // Special/Open/General don't count toward limits
+          if (eventType === 'special') counts[memberId].special++;
+          if (eventType === 'open') counts[memberId].open++;
+          if (eventType === 'general') counts[memberId].general++;
         });
       });
       
       return counts;
     }
 
-    // Check Event Capacity - UPDATED
+    // Check if member has exceeded limits (STRICT CHECK)
+    function hasMemberExceededLimits(memberId) {
+      const member = CACHE.students.find(s => String(s.id) === memberId);
+      if (!member) return false;
+      
+      const memberLevel = member.level?.toLowerCase();
+      const counts = calculateMemberEventCounts()[memberId] || { stage: 0, offStage: 0 };
+      
+      if (memberLevel === 'senior') {
+        return counts.stage > 3 || counts.offStage > 4;
+      } else if (memberLevel === 'junior') {
+        return counts.stage > 2 || counts.offStage > 3;
+      }
+      
+      return false;
+    }
+
+    // Check Event Capacity
     function getEventCapacity(event) {
       const eventType = event.type?.toLowerCase();
       
@@ -883,7 +1044,7 @@
       return 2; // Default
     }
 
-    // Check if Member Can Join Event - UPDATED
+    // Check if Member Can Join Event (STRICT LIMITS)
     function canMemberJoinEvent(memberId, event) {
       const member = CACHE.students.find(s => String(s.id) === memberId);
       if (!member) return { canJoin: false, reason: 'Member not found' };
@@ -891,6 +1052,14 @@
       const eventType = event.type?.toLowerCase();
       const eventLevel = event.level?.toLowerCase();
       const memberLevel = member.level?.toLowerCase();
+      
+      // STRICT CHECK: If member has already exceeded limits for their level, they cannot join ANY Senior/Junior events
+      if ((eventLevel === 'senior' || eventLevel === 'junior') && hasMemberExceededLimits(memberId)) {
+        return { 
+          canJoin: false, 
+          reason: `Member has exceeded personal limits! Cannot join any more ${memberLevel} events.` 
+        };
+      }
       
       // Get member's event counts
       const memberCounts = calculateMemberEventCounts()[memberId] || {
@@ -930,7 +1099,6 @@
       
       // Check level restrictions for Stage, Non-Stage, and Group events
       if (eventType === 'stage' || eventType === 'non-stage' || eventType === 'group') {
-        // For Stage, Non-Stage, and Group events, check level
         if (eventLevel === 'junior' || eventLevel === 'senior') {
           if (eventLevel !== memberLevel) {
             return { 
@@ -940,7 +1108,6 @@
           }
         }
       }
-      // Special, Open, and General events allow all levels
       
       // Check personal limits (only for Stage and Non-Stage events in Senior/Junior sections)
       if (eventType === 'stage' && (eventLevel === 'senior' || eventLevel === 'junior')) {
@@ -962,9 +1129,6 @@
           };
         }
       }
-      
-      // Group, Special, Open, and General events don't count toward personal limits
-      // Special and Open events can be participated by all members
       
       return { canJoin: true, reason: '' };
     }
@@ -1237,10 +1401,16 @@
         const canJoin = canJoinResult.canJoin;
         const reason = canJoinResult.reason;
         const counts = memberCounts[memberId] || { stage: 0, offStage: 0, totalApproved: 0 };
+        const memberLevel = member.level?.toLowerCase();
+        const eventLevel = event.level?.toLowerCase();
         
         let boxClass = 'member-box';
-        let levelColor = member.level?.toLowerCase() === 'senior' ? '#3b82f6' : '#10b981';
+        let levelColor = memberLevel === 'senior' ? '#3b82f6' : '#10b981';
         let tooltip = '';
+        let warningText = '';
+        
+        // Check if member has exceeded limits
+        const hasExceeded = hasMemberExceededLimits(memberId);
         
         if (!canJoin) {
           boxClass += ' disabled';
@@ -1251,14 +1421,15 @@
         
         // Show event counts
         let eventCountText = '';
-        const eventLevel = event.level?.toLowerCase();
         
-        if (event.type === 'Stage' && (eventLevel === 'senior' || eventLevel === 'junior')) {
-          const maxStage = eventLevel === 'senior' ? 3 : 2;
-          eventCountText = `Stage: ${counts.stage}/${maxStage}`;
-        } else if (event.type === 'Non-Stage' && (eventLevel === 'senior' || eventLevel === 'junior')) {
-          const maxOffStage = eventLevel === 'senior' ? 4 : 3;
-          eventCountText = `Off-Stage: ${counts.offStage}/${maxOffStage}`;
+        if (memberLevel === 'senior' || memberLevel === 'junior') {
+          const maxStage = memberLevel === 'senior' ? 3 : 2;
+          const maxOffStage = memberLevel === 'senior' ? 4 : 3;
+          eventCountText = `Stage: ${counts.stage}/${maxStage} | Off: ${counts.offStage}/${maxOffStage}`;
+          
+          if (hasExceeded) {
+            warningText = `<div class="limits-warning">LIMIT EXCEEDED!</div>`;
+          }
         } else {
           eventCountText = `Approved: ${counts.totalApproved}`;
         }
@@ -1266,7 +1437,7 @@
         return `
           <div class="${boxClass}" ${tooltip} onclick="${canJoin ? `toggleMemberSelection('${memberId}')` : ''}" 
                style="${!canJoin ? 'opacity: 0.6; cursor: not-allowed;' : ''} position: relative;">
-            ${!canJoin ? '<div class="limit-badge">!</div>' : ''}
+            ${!canJoin || hasExceeded ? '<div class="limit-badge">!</div>' : ''}
             <div class="member-id">${member.id}</div>
             <div class="member-name">${member.name}</div>
             <div class="mt-1">
@@ -1274,7 +1445,8 @@
                 ${member.level || 'N/A'}
               </span>
             </div>
-            <div class="event-counter text-muted">${eventCountText}</div>
+            <div class="event-counter">${eventCountText}</div>
+            ${warningText}
             ${isSelected ? `
               <div class="mt-1">
                 <i class="bi bi-check-circle-fill text-success" style="font-size: 12px;"></i>
@@ -1493,12 +1665,12 @@
       }
     };
 
-    // Filter Approvals - UPDATED with view button
+    // Filter Approvals
     window.filterApprovals = () => {
       renderApprovedEvents();
     };
 
-    // Render Approved Events (with Pending) - UPDATED
+    // Render Approved Events (Like reference image)
     function renderApprovedEvents() {
       const container = document.getElementById('approvedEvents');
       const searchTerm = document.getElementById('approvalSearch').value.toLowerCase();
@@ -1541,17 +1713,7 @@
         if (searchTerm) {
           return event.name.toLowerCase().includes(searchTerm) ||
                  event.type.toLowerCase().includes(searchTerm) ||
-                 event.level.toLowerCase().includes(searchTerm) ||
-                 data.pending.some(p => {
-                   const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                   return student?.name.toLowerCase().includes(searchTerm) ||
-                          p.studentId.toLowerCase().includes(searchTerm);
-                 }) ||
-                 data.approved.some(p => {
-                   const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                   return student?.name.toLowerCase().includes(searchTerm) ||
-                          p.studentId.toLowerCase().includes(searchTerm);
-                 });
+                 event.level.toLowerCase().includes(searchTerm);
         }
         return true;
       });
@@ -1567,169 +1729,225 @@
         return;
       }
 
-      container.innerHTML = filteredEvents.map(([eventId, data]) => {
-        const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return '';
-        
-        let eventColor = '#3b82f6';
-        if (event.type === 'Stage') eventColor = '#f59e0b';
-        if (event.type === 'Non-Stage') eventColor = '#10b981';
-        if (event.type === 'Group') eventColor = '#8b5cf6';
-        if (event.type === 'Special') eventColor = '#ef4444';
-        if (event.type === 'Open') eventColor = '#ec4899';
-        if (event.type === 'General') eventColor = '#6b7280';
-        
-        const capacity = getEventCapacity(event);
-        const totalCount = data.pending.length + data.approved.length;
-        const hasPending = data.pending.length > 0;
-        const hasApproved = data.approved.length > 0;
-        
-        // Generate unique ID for modal
-        const modalId = `modal-${eventId.replace(/[^a-zA-Z0-9]/g, '-')}`;
-        
-        return `
-          <div class="simple-card mb-3">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <span class="badge" style="background: ${eventColor}">${event.level}</span>
-                  <span class="badge bg-secondary">${event.type}</span>
-                  ${capacity ? `<span class="badge bg-dark">${totalCount}/${capacity}</span>` : ''}
-                </div>
-                <h5 class="mb-1">${event.name}</h5>
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                ${hasPending ? `
-                  <span class="badge bg-warning">
-                    ${data.pending.length} pending
-                  </span>
-                ` : ''}
-                ${hasApproved ? `
-                  <span class="badge bg-success">
-                    ${data.approved.length} approved
-                  </span>
-                ` : ''}
-                <button class="view-btn" data-bs-toggle="modal" data-bs-target="#${modalId}">
-                  <i class="bi bi-eye me-1"></i> View Details
-                </button>
-              </div>
-            </div>
+      // Sort events by name
+      filteredEvents.sort((a, b) => {
+        const eventA = CACHE.events.find(e => String(e.id) === String(a[0]));
+        const eventB = CACHE.events.find(e => String(e.id) === String(b[0]));
+        return eventA.name.localeCompare(eventB.name);
+      });
+
+      container.innerHTML = `
+        <div class="results-container-modern">
+          ${filteredEvents.map(([eventId, data], index) => {
+            const event = CACHE.events.find(e => String(e.id) === String(eventId));
+            if (!event) return '';
             
-            <!-- Modal for event details -->
-            <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
-                  <div class="modal-header">
-                    <h5 class="modal-title">${event.name}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+            const hasPending = data.pending.length > 0;
+            const hasApproved = data.approved.length > 0;
+            
+            // Generate event number (like #94, #95 in reference)
+            const eventNumber = 100 - index;
+            
+            return `
+              <div class="approval-event-card">
+                <div class="approval-header">
+                  <div class="event-title">
+                    <span>${event.name}</span>
+                    <span class="event-category-badge">${event.level}</span>
+                    <span class="event-number">#${eventNumber}</span>
                   </div>
-                  <div class="modal-body">
-                    <div class="row mb-3">
-                      <div class="col-md-6">
-                        <strong>Event Type:</strong> ${event.type}
-                      </div>
-                      <div class="col-md-6">
-                        <strong>Level:</strong> ${event.level}
-                      </div>
-                    </div>
-                    
-                    <!-- Pending Members -->
+                  <div>
                     ${hasPending ? `
-                      <div class="mb-4">
-                        <h6 class="text-warning mb-3">
-                          <i class="bi bi-clock me-1"></i> Pending Approval (${data.pending.length})
-                        </h6>
-                        <div class="table-responsive">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Level</th>
-                                <th>Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              ${data.pending.map(p => {
-                                const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                                return `
-                                  <tr>
-                                    <td><code>${p.studentId}</code></td>
-                                    <td>${student?.name || 'Unknown'}</td>
-                                    <td>
-                                      <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
-                                        ${student?.level || 'N/A'}
-                                      </span>
-                                    </td>
-                                    <td>
-                                      <span class="badge bg-warning">Pending</span>
-                                    </td>
-                                  </tr>
-                                `;
-                              }).join('')}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+                      <span class="approval-status-badge status-pending-badge">
+                        <i class="bi bi-clock me-1"></i> ${data.pending.length} Pending
+                      </span>
                     ` : ''}
-                    
-                    <!-- Approved Members -->
                     ${hasApproved ? `
-                      <div>
-                        <h6 class="text-success mb-3">
-                          <i class="bi bi-check-circle me-1"></i> Approved (${data.approved.length})
-                        </h6>
-                        <div class="table-responsive">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Level</th>
-                                <th>Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              ${data.approved.map(p => {
-                                const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                                return `
-                                  <tr>
-                                    <td><code>${p.studentId}</code></td>
-                                    <td>${student?.name || 'Unknown'}</td>
-                                    <td>
-                                      <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
-                                        ${student?.level || 'N/A'}
-                                      </span>
-                                    </td>
-                                    <td>
-                                      <span class="badge bg-success">Approved</span>
-                                    </td>
-                                  </tr>
-                                `;
-                              }).join('')}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+                      <span class="approval-status-badge status-approved-badge">
+                        <i class="bi bi-check-circle me-1"></i> ${data.approved.length} Approved
+                      </span>
                     ` : ''}
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                   </div>
                 </div>
+                
+                <div class="members-list-compact">
+                  ${data.pending.map(p => {
+                    const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                    return `
+                      <div class="member-chip">
+                        <i class="bi bi-clock text-warning"></i>
+                        ${student?.name || p.studentId}
+                        <span class="member-level-badge">${student?.level || 'N/A'}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                  
+                  ${data.approved.map(p => {
+                    const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                    return `
+                      <div class="member-chip">
+                        <i class="bi bi-check-circle text-success"></i>
+                        ${student?.name || p.studentId}
+                        <span class="member-level-badge">${student?.level || 'N/A'}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+                
+                <div class="mt-3">
+                  <button class="view-btn" onclick="viewEventDetails('${eventId}')">
+                    <i class="bi bi-eye me-1"></i> View Details
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    // View Event Details (for Approvals page)
+    window.viewEventDetails = (eventId) => {
+      const event = CACHE.events.find(e => String(e.id) === String(eventId));
+      if (!event) return;
+      
+      // Get participations for this event
+      const participations = CACHE.participations.filter(p => 
+        p.eventId == eventId && 
+        p.teamId == LEADER.teamId
+      );
+      
+      // Group by status
+      const pending = participations.filter(p => p.status === 'pending');
+      const approved = participations.filter(p => p.status === 'approved');
+      
+      let html = `
+        <div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
+              <div class="modal-header">
+                <h5 class="modal-title">${event.name} - Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+              </div>
+              <div class="modal-body">
+                <div class="row mb-3">
+                  <div class="col-md-4">
+                    <strong>Event Type:</strong> ${event.type}
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Level:</strong> ${event.level}
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Capacity:</strong> ${getEventCapacity(event) || 'Unlimited'}
+                  </div>
+                </div>
+                
+                ${pending.length > 0 ? `
+                  <div class="mb-4">
+                    <h6 class="text-warning mb-3">
+                      <i class="bi bi-clock me-1"></i> Pending Approval (${pending.length})
+                    </h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Level</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${pending.map(p => {
+                            const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                            return `
+                              <tr>
+                                <td><code>${p.studentId}</code></td>
+                                <td>${student?.name || 'Unknown'}</td>
+                                <td>
+                                  <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                                    ${student?.level || 'N/A'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="badge bg-warning">Pending</span>
+                                </td>
+                              </tr>
+                            `;
+                          }).join('')}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ` : ''}
+                
+                ${approved.length > 0 ? `
+                  <div>
+                    <h6 class="text-success mb-3">
+                      <i class="bi bi-check-circle me-1"></i> Approved (${approved.length})
+                    </h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Level</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${approved.map(p => {
+                            const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                            return `
+                              <tr>
+                                <td><code>${p.studentId}</code></td>
+                                <td>${student?.name || 'Unknown'}</td>
+                                <td>
+                                  <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                                    ${student?.level || 'N/A'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="badge bg-success">Approved</span>
+                                </td>
+                              </tr>
+                            `;
+                          }).join('')}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+      `;
+      
+      // Remove existing modal if any
+      const existingModal = document.getElementById('eventDetailsModal');
+      if (existingModal) {
+        existingModal.remove();
+      }
+      
+      // Add modal to body
+      document.body.insertAdjacentHTML('beforeend', html);
+      
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+      modal.show();
+    };
 
-    // Filter Results - UPDATED to show only published events
+    // Filter Results
     window.filterResults = () => {
       renderResults();
     };
 
-    // Render Results - UPDATED to show only published events
+    // Render Results (Like reference image - TED Talk example)
     function renderResults() {
       const container = document.getElementById('resultsContainer');
       const searchTerm = document.getElementById('resultsSearch').value.toLowerCase();
@@ -1764,12 +1982,7 @@
         if (searchTerm) {
           return event.name.toLowerCase().includes(searchTerm) ||
                  event.type.toLowerCase().includes(searchTerm) ||
-                 event.level.toLowerCase().includes(searchTerm) ||
-                 results.some(r => {
-                   const student = CACHE.students.find(s => String(s.id) === String(r.studentId));
-                   return student?.name.toLowerCase().includes(searchTerm) ||
-                          r.studentId.toLowerCase().includes(searchTerm);
-                 });
+                 event.level.toLowerCase().includes(searchTerm);
         }
         return true;
       });
@@ -1785,150 +1998,68 @@
         return;
       }
 
+      // Sort events by name
+      filteredEvents.sort((a, b) => {
+        const eventA = CACHE.events.find(e => String(e.id) === String(a[0]));
+        const eventB = CACHE.events.find(e => String(e.id) === String(b[0]));
+        return eventA.name.localeCompare(eventB.name);
+      });
+
       container.innerHTML = `
-        <div class="results-grid">
-          ${filteredEvents.map(([eventId, results]) => {
+        <div class="results-container-modern">
+          ${filteredEvents.map(([eventId, results], index) => {
             const event = CACHE.events.find(e => String(e.id) === String(eventId));
             if (!event) return '';
             
             // Sort by position
             results.sort((a, b) => a.position - b.position);
             
-            let eventColor = '#3b82f6';
-            if (event.type === 'Stage') eventColor = '#f59e0b';
-            if (event.type === 'Non-Stage') eventColor = '#10b981';
-            if (event.type === 'Group') eventColor = '#8b5cf6';
-            if (event.type === 'Special') eventColor = '#ef4444';
-            if (event.type === 'Open') eventColor = '#ec4899';
-            if (event.type === 'General') eventColor = '#6b7280';
+            // Generate event number (like #94, #95 in reference)
+            const eventNumber = 100 - index;
             
-            // Generate modal ID
-            const modalId = `winners-modal-${eventId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            // Get top 3 winners
+            const topWinners = results.slice(0, 3);
             
             return `
-              <div class="result-card">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <span class="badge" style="background: ${eventColor}">${event.level}</span>
-                  <span class="badge bg-secondary">${event.type}</span>
-                </div>
-                <h5 class="mb-3">${event.name}</h5>
-                
-                <!-- Show top 3 winners preview -->
-                ${results.slice(0, 3).map((result, index) => {
-                  const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
-                  const isTeamMember = student?.teamId === LEADER.teamId;
-                  
-                  // Position badge color
-                  let positionColor = '#6b7280';
-                  if (result.position === 1) positionColor = '#f59e0b'; // Gold
-                  if (result.position === 2) positionColor = '#9ca3af'; // Silver
-                  if (result.position === 3) positionColor = '#92400e'; // Bronze
-                  
-                  return `
-                    <div class="d-flex align-items-center gap-3 mb-2 p-2 ${isTeamMember ? 'bg-success bg-opacity-10' : ''}" 
-                         style="border-radius: 8px;">
-                      <div class="rounded-circle d-flex align-items-center justify-content-center" 
-                           style="width: 40px; height: 40px; font-weight: bold; background: ${positionColor}; color: white;">
-                        ${result.position}
-                      </div>
-                      <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-center">
-                          <div>
-                            <strong>${student?.name || 'Unknown'}</strong>
-                            <small class="text-muted ms-2">(${result.studentId})</small>
-                          </div>
-                          <span class="badge ${isTeamMember ? 'bg-success' : 'bg-secondary'}">
-                            ${result.points || 0} pts
-                          </span>
-                        </div>
-                        <div class="small text-muted d-flex align-items-center gap-2">
-                          <span>${student?.level || 'N/A'}</span>
-                          ${isTeamMember ? '<span class="text-success">• Your Team</span>' : ''}
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-                
-                ${results.length > 3 ? `
-                  <div class="text-center mt-3">
-                    <small class="text-muted">+ ${results.length - 3} more participants</small>
+              <div class="result-event-card">
+                <div class="event-header-row">
+                  <div class="event-title">
+                    <span>${event.name}</span>
+                    <span class="event-category-badge">${event.level}</span>
+                    <span class="event-number">#${eventNumber}</span>
                   </div>
-                ` : ''}
-                
-                <div class="text-center mt-3">
-                  <button class="view-btn" data-bs-toggle="modal" data-bs-target="#${modalId}">
-                    <i class="bi bi-eye me-1"></i> View All Winners
+                  <button class="view-btn" onclick="viewResultsDetails('${eventId}')">
+                    <i class="bi bi-eye me-1"></i> View All
                   </button>
                 </div>
                 
-                <!-- Modal for all winners -->
-                <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog modal-lg">
-                    <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
-                      <div class="modal-header">
-                        <h5 class="modal-title">${event.name} - Results</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
-                      </div>
-                      <div class="modal-body">
-                        <div class="row mb-3">
-                          <div class="col-md-6">
-                            <strong>Event Type:</strong> ${event.type}
+                <div class="winners-list">
+                  ${topWinners.map(result => {
+                    const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
+                    const team = CACHE.teams.find(t => t.id === student?.teamId);
+                    const isTeamMember = student?.teamId === LEADER.teamId;
+                    
+                    let positionClass = '';
+                    if (result.position === 2) positionClass = 'second';
+                    if (result.position === 3) positionClass = 'third';
+                    
+                    return `
+                      <div class="winner-row">
+                        <div class="winner-position ${positionClass}">
+                          ${result.position}
+                        </div>
+                        <div class="winner-info">
+                          <div class="winner-name">
+                            ${student?.name || 'Unknown'}
+                            ${isTeamMember ? '<span class="your-team-badge">YOUR TEAM</span>' : ''}
                           </div>
-                          <div class="col-md-6">
-                            <strong>Level:</strong> ${event.level}
+                          <div class="winner-team">
+                            ${team?.name || 'N/A'}
                           </div>
                         </div>
-                        
-                        <div class="table-responsive">
-                          <table class="table table-sm">
-                            <thead>
-                              <tr>
-                                <th>Position</th>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Level</th>
-                                <th>Team</th>
-                                <th>Points</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              ${results.map(result => {
-                                const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
-                                const team = CACHE.teams.find(t => t.id === student?.teamId);
-                                const isTeamMember = student?.teamId === LEADER.teamId;
-                                
-                                return `
-                                  <tr ${isTeamMember ? 'class="table-success"' : ''}>
-                                    <td>
-                                      <span class="badge ${result.position === 1 ? 'bg-warning' : result.position === 2 ? 'bg-secondary' : result.position === 3 ? 'bg-danger' : 'bg-dark'}">
-                                        ${result.position}
-                                      </span>
-                                    </td>
-                                    <td><code>${result.studentId}</code></td>
-                                    <td>
-                                      ${student?.name || 'Unknown'}
-                                      ${isTeamMember ? '<span class="badge bg-success ms-1">Yours</span>' : ''}
-                                    </td>
-                                    <td>
-                                      <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
-                                        ${student?.level || 'N/A'}
-                                      </span>
-                                    </td>
-                                    <td>${team?.name || 'N/A'}</td>
-                                    <td><strong>${result.points || 0}</strong></td>
-                                  </tr>
-                                `;
-                              }).join('')}
-                            </tbody>
-                          </table>
-                        </div>
                       </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-                  </div>
+                    `;
+                  }).join('')}
                 </div>
               </div>
             `;
@@ -1936,6 +2067,101 @@
         </div>
       `;
     }
+
+    // View Results Details (for Results page)
+    window.viewResultsDetails = (eventId) => {
+      const event = CACHE.events.find(e => String(e.id) === String(eventId));
+      if (!event) return;
+      
+      // Get results for this event
+      const results = CACHE.results.filter(r => 
+        r.eventId == eventId && 
+        r.published === true
+      ).sort((a, b) => a.position - b.position);
+      
+      let html = `
+        <div class="modal fade" id="resultsDetailsModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
+              <div class="modal-header">
+                <h5 class="modal-title">${event.name} - Complete Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+              </div>
+              <div class="modal-body">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <strong>Event Type:</strong> ${event.type}
+                  </div>
+                  <div class="col-md-6">
+                    <strong>Level:</strong> ${event.level}
+                  </div>
+                </div>
+                
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Position</th>
+                        <th>Name</th>
+                        <th>ID</th>
+                        <th>Team</th>
+                        <th>Level</th>
+                        <th>Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${results.map(result => {
+                        const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
+                        const team = CACHE.teams.find(t => t.id === student?.teamId);
+                        const isTeamMember = student?.teamId === LEADER.teamId;
+                        
+                        return `
+                          <tr ${isTeamMember ? 'class="table-success"' : ''}>
+                            <td>
+                              <span class="badge ${result.position === 1 ? 'bg-warning' : result.position === 2 ? 'bg-secondary' : result.position === 3 ? 'bg-danger' : 'bg-dark'}">
+                                ${result.position}
+                              </span>
+                            </td>
+                            <td>
+                              ${student?.name || 'Unknown'}
+                              ${isTeamMember ? '<span class="badge bg-success ms-1">YOUR TEAM</span>' : ''}
+                            </td>
+                            <td><code>${result.studentId}</code></td>
+                            <td>${team?.name || 'N/A'}</td>
+                            <td>
+                              <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                                ${student?.level || 'N/A'}
+                              </span>
+                            </td>
+                            <td><strong>${result.points || 0}</strong></td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Remove existing modal if any
+      const existingModal = document.getElementById('resultsDetailsModal');
+      if (existingModal) {
+        existingModal.remove();
+      }
+      
+      // Add modal to body
+      document.body.insertAdjacentHTML('beforeend', html);
+      
+      // Show modal
+      const modal = new bootstrap.Modal(document.getElementById('resultsDetailsModal'));
+      modal.show();
+    };
 
     // Export to PDF
     window.exportToPDF = () => {
