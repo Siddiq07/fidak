@@ -369,51 +369,45 @@
       justify-content: center;
     }
 
-    /* Event Counter */
-    .event-counter {
-      font-size: 11px;
-      margin-top: 4px;
-      color: var(--text-muted);
-    }
-
     /* Limits Warning */
     .limits-warning {
       color: var(--accent-danger);
       font-size: 11px;
       margin-top: 2px;
+      font-weight: 600;
     }
 
-    /* Results Display Styles (like reference image) */
-    .results-container-modern {
+    /* Results & Approvals Display */
+    .event-list-container {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px;
     }
 
-    .result-event-card {
+    .event-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 15px;
+      padding: 15px;
+      transition: all 0.2s ease;
     }
 
-    .event-header-row {
+    .event-card:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+
+    .event-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 10px;
     }
 
     .event-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .event-category-badge {
@@ -425,37 +419,51 @@
       font-weight: 600;
     }
 
-    .event-number {
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 500;
+    .status-badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
-    .winners-list {
+    .status-badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-approved {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-secondary);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* Winners Display */
+    .winners-preview {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
+      margin-top: 10px;
     }
 
-    .winner-row {
+    .winner-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 10px;
+      gap: 10px;
+      padding: 6px;
       background: rgba(255, 255, 255, 0.03);
-      border-radius: 8px;
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
-    }
-
-    .winner-row:hover {
-      background: rgba(59, 130, 246, 0.05);
-      border-color: var(--accent-primary);
+      border-radius: 6px;
     }
 
     .winner-position {
-      width: 30px;
-      height: 30px;
+      width: 24px;
+      height: 24px;
       background: var(--accent-warning);
       color: white;
       border-radius: 50%;
@@ -463,7 +471,8 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
+      flex-shrink: 0;
     }
 
     .winner-position.second {
@@ -479,82 +488,49 @@
     }
 
     .winner-name {
-      font-weight: 600;
-      font-size: 14px;
+      font-weight: 500;
+      font-size: 13px;
       color: var(--text-primary);
-      margin-bottom: 2px;
     }
 
     .winner-team {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
     }
 
     .your-team-badge {
       background: var(--accent-secondary);
       color: white;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
       font-weight: 600;
-      margin-left: 8px;
+      margin-left: 6px;
     }
 
-    /* Approvals Display */
-    .approval-event-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 15px;
-    }
-
-    .approval-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .approval-status-badge {
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .status-pending-badge {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--accent-warning);
-    }
-
-    .status-approved-badge {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-secondary);
-    }
-
-    .members-list-compact {
+    /* Members Preview */
+    .members-preview {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       margin-top: 10px;
     }
 
-    .member-chip {
+    .member-tag {
       background: rgba(59, 130, 246, 0.1);
-      border: 1px solid var(--accent-primary);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 12px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
-    .member-level-badge {
+    .member-level {
       font-size: 9px;
       padding: 1px 4px;
-      border-radius: 3px;
+      border-radius: 2px;
       background: var(--border-color);
     }
 
@@ -619,16 +595,14 @@
         font-size: 12px;
       }
       
-      .event-header-row {
+      .event-card-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
       }
       
-      .winner-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+      .status-badges {
+        align-self: flex-start;
       }
     }
   </style>
@@ -1057,7 +1031,7 @@
       if ((eventLevel === 'senior' || eventLevel === 'junior') && hasMemberExceededLimits(memberId)) {
         return { 
           canJoin: false, 
-          reason: `Member has exceeded personal limits! Cannot join any more ${memberLevel} events.` 
+          reason: `LIMIT EXCEEDED! Cannot join more ${memberLevel} events.` 
         };
       }
       
@@ -1115,7 +1089,7 @@
         if (memberCounts.stage >= maxStage) {
           return { 
             canJoin: false, 
-            reason: `Max ${maxStage} stage events reached (${memberCounts.stage}/${maxStage})` 
+            reason: `Max ${maxStage} stage events reached` 
           };
         }
       }
@@ -1125,7 +1099,7 @@
         if (memberCounts.offStage >= maxOffStage) {
           return { 
             canJoin: false, 
-            reason: `Max ${maxOffStage} off-stage events reached (${memberCounts.offStage}/${maxOffStage})` 
+            reason: `Max ${maxOffStage} off-stage events reached` 
           };
         }
       }
@@ -1345,7 +1319,7 @@
       filterMembers();
     }
 
-    // Filter Members
+    // Filter Members (SIMPLIFIED - removed counter display)
     window.filterMembers = () => {
       const searchTerm = document.getElementById('memberSearch').value.toLowerCase();
       const grid = document.getElementById('memberGrid');
@@ -1391,18 +1365,13 @@
         return;
       }
       
-      // Get member event counts
-      const memberCounts = calculateMemberEventCounts();
-      
       grid.innerHTML = filtered.map(member => {
         const memberId = String(member.id);
         const isSelected = selectedMembers.has(memberId);
         const canJoinResult = canMemberJoinEvent(memberId, event);
         const canJoin = canJoinResult.canJoin;
         const reason = canJoinResult.reason;
-        const counts = memberCounts[memberId] || { stage: 0, offStage: 0, totalApproved: 0 };
         const memberLevel = member.level?.toLowerCase();
-        const eventLevel = event.level?.toLowerCase();
         
         let boxClass = 'member-box';
         let levelColor = memberLevel === 'senior' ? '#3b82f6' : '#10b981';
@@ -1419,19 +1388,8 @@
           boxClass += ' selected';
         }
         
-        // Show event counts
-        let eventCountText = '';
-        
-        if (memberLevel === 'senior' || memberLevel === 'junior') {
-          const maxStage = memberLevel === 'senior' ? 3 : 2;
-          const maxOffStage = memberLevel === 'senior' ? 4 : 3;
-          eventCountText = `Stage: ${counts.stage}/${maxStage} | Off: ${counts.offStage}/${maxOffStage}`;
-          
-          if (hasExceeded) {
-            warningText = `<div class="limits-warning">LIMIT EXCEEDED!</div>`;
-          }
-        } else {
-          eventCountText = `Approved: ${counts.totalApproved}`;
+        if (hasExceeded) {
+          warningText = `<div class="limits-warning">LIMIT EXCEEDED!</div>`;
         }
         
         return `
@@ -1445,7 +1403,6 @@
                 ${member.level || 'N/A'}
               </span>
             </div>
-            <div class="event-counter">${eventCountText}</div>
             ${warningText}
             ${isSelected ? `
               <div class="mt-1">
@@ -1670,7 +1627,7 @@
       renderApprovedEvents();
     };
 
-    // Render Approved Events (Like reference image)
+    // Render Approved Events (Simple card view)
     function renderApprovedEvents() {
       const container = document.getElementById('approvedEvents');
       const searchTerm = document.getElementById('approvalSearch').value.toLowerCase();
@@ -1705,11 +1662,15 @@
         return acc;
       }, {});
 
-      // Filter events by search term
-      const filteredEvents = Object.entries(grouped).filter(([eventId, data]) => {
+      // Get events with participations
+      const eventsWithParticipations = Object.keys(grouped).map(eventId => {
         const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return false;
-        
+        return { event, data: grouped[eventId] };
+      }).filter(item => item.event); // Remove events not found
+
+      // Filter by search term
+      const filteredEvents = eventsWithParticipations.filter(item => {
+        const event = item.event;
         if (searchTerm) {
           return event.name.toLowerCase().includes(searchTerm) ||
                  event.type.toLowerCase().includes(searchTerm) ||
@@ -1730,75 +1691,64 @@
       }
 
       // Sort events by name
-      filteredEvents.sort((a, b) => {
-        const eventA = CACHE.events.find(e => String(e.id) === String(a[0]));
-        const eventB = CACHE.events.find(e => String(e.id) === String(b[0]));
-        return eventA.name.localeCompare(eventB.name);
-      });
+      filteredEvents.sort((a, b) => a.event.name.localeCompare(b.event.name));
 
       container.innerHTML = `
-        <div class="results-container-modern">
-          ${filteredEvents.map(([eventId, data], index) => {
-            const event = CACHE.events.find(e => String(e.id) === String(eventId));
-            if (!event) return '';
-            
+        <div class="event-list-container">
+          ${filteredEvents.map(item => {
+            const event = item.event;
+            const data = item.data;
             const hasPending = data.pending.length > 0;
             const hasApproved = data.approved.length > 0;
             
-            // Generate event number (like #94, #95 in reference)
-            const eventNumber = 100 - index;
+            // Get all members for preview (max 3)
+            const allMembers = [...data.pending, ...data.approved].slice(0, 3);
             
             return `
-              <div class="approval-event-card">
-                <div class="approval-header">
-                  <div class="event-title">
-                    <span>${event.name}</span>
-                    <span class="event-category-badge">${event.level}</span>
-                    <span class="event-number">#${eventNumber}</span>
-                  </div>
+              <div class="event-card">
+                <div class="event-card-header">
                   <div>
+                    <div class="event-title">${event.name}</div>
+                    <span class="event-category-badge">${event.level}</span>
+                  </div>
+                  <div class="status-badges">
                     ${hasPending ? `
-                      <span class="approval-status-badge status-pending-badge">
+                      <span class="status-badge status-pending">
                         <i class="bi bi-clock me-1"></i> ${data.pending.length} Pending
                       </span>
                     ` : ''}
                     ${hasApproved ? `
-                      <span class="approval-status-badge status-approved-badge">
+                      <span class="status-badge status-approved">
                         <i class="bi bi-check-circle me-1"></i> ${data.approved.length} Approved
                       </span>
                     ` : ''}
+                    <button class="view-btn" onclick="viewEventDetails('${event.id}')">
+                      <i class="bi bi-eye me-1"></i> View
+                    </button>
                   </div>
                 </div>
                 
-                <div class="members-list-compact">
-                  ${data.pending.map(p => {
-                    const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                    return `
-                      <div class="member-chip">
-                        <i class="bi bi-clock text-warning"></i>
-                        ${student?.name || p.studentId}
-                        <span class="member-level-badge">${student?.level || 'N/A'}</span>
+                ${allMembers.length > 0 ? `
+                  <div class="members-preview">
+                    ${allMembers.map(p => {
+                      const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                      const statusIcon = p.status === 'pending' ? 'bi-clock text-warning' : 'bi-check-circle text-success';
+                      return `
+                        <div class="member-tag">
+                          <i class="bi ${statusIcon}"></i>
+                          ${student?.name || p.studentId}
+                          <span class="member-level">${student?.level || 'N/A'}</span>
+                        </div>
+                      `;
+                    }).join('')}
+                    ${(data.pending.length + data.approved.length) > 3 ? `
+                      <div class="member-tag">
+                        <i class="bi bi-three-dots"></i>
+                        +${(data.pending.length + data.approved.length) - 3} more
                       </div>
-                    `;
-                  }).join('')}
-                  
-                  ${data.approved.map(p => {
-                    const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                    return `
-                      <div class="member-chip">
-                        <i class="bi bi-check-circle text-success"></i>
-                        ${student?.name || p.studentId}
-                        <span class="member-level-badge">${student?.level || 'N/A'}</span>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-                
-                <div class="mt-3">
-                  <button class="view-btn" onclick="viewEventDetails('${eventId}')">
-                    <i class="bi bi-eye me-1"></i> View Details
-                  </button>
-                </div>
+                    ` : ''}
+                  </div>
+                ` : ''}
               </div>
             `;
           }).join('')}
@@ -1826,7 +1776,7 @@
           <div class="modal-dialog modal-lg">
             <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
               <div class="modal-header">
-                <h5 class="modal-title">${event.name} - Details</h5>
+                <h5 class="modal-title">${event.name} - Nominations</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
               </div>
               <div class="modal-body">
@@ -1947,7 +1897,7 @@
       renderResults();
     };
 
-    // Render Results (Like reference image - TED Talk example)
+    // Render Results (Simple card view - just event names with View button)
     function renderResults() {
       const container = document.getElementById('resultsContainer');
       const searchTerm = document.getElementById('resultsSearch').value.toLowerCase();
@@ -1966,19 +1916,19 @@
         return;
       }
 
-      // Group by event
-      const grouped = publishedResults.reduce((acc, result) => {
-        const eventId = result.eventId;
-        if (!acc[eventId]) acc[eventId] = [];
-        acc[eventId].push(result);
-        return acc;
-      }, {});
-
-      // Filter events by search term
-      const filteredEvents = Object.entries(grouped).filter(([eventId, results]) => {
+      // Get unique event IDs from published results
+      const eventIds = [...new Set(publishedResults.map(r => r.eventId))];
+      
+      // Get events with published results
+      const eventsWithResults = eventIds.map(eventId => {
         const event = CACHE.events.find(e => String(e.id) === String(eventId));
-        if (!event) return false;
-        
+        const results = publishedResults.filter(r => r.eventId == eventId);
+        return { event, results };
+      }).filter(item => item.event); // Remove events not found
+
+      // Filter by search term
+      const filteredEvents = eventsWithResults.filter(item => {
+        const event = item.event;
         if (searchTerm) {
           return event.name.toLowerCase().includes(searchTerm) ||
                  event.type.toLowerCase().includes(searchTerm) ||
@@ -1999,68 +1949,59 @@
       }
 
       // Sort events by name
-      filteredEvents.sort((a, b) => {
-        const eventA = CACHE.events.find(e => String(e.id) === String(a[0]));
-        const eventB = CACHE.events.find(e => String(e.id) === String(b[0]));
-        return eventA.name.localeCompare(eventB.name);
-      });
+      filteredEvents.sort((a, b) => a.event.name.localeCompare(b.event.name));
 
       container.innerHTML = `
-        <div class="results-container-modern">
-          ${filteredEvents.map(([eventId, results], index) => {
-            const event = CACHE.events.find(e => String(e.id) === String(eventId));
-            if (!event) return '';
+        <div class="event-list-container">
+          ${filteredEvents.map(item => {
+            const event = item.event;
+            const results = item.results;
             
-            // Sort by position
-            results.sort((a, b) => a.position - b.position);
-            
-            // Generate event number (like #94, #95 in reference)
-            const eventNumber = 100 - index;
-            
-            // Get top 3 winners
-            const topWinners = results.slice(0, 3);
+            // Sort by position and get top 3
+            const topResults = results.sort((a, b) => a.position - b.position).slice(0, 3);
             
             return `
-              <div class="result-event-card">
-                <div class="event-header-row">
-                  <div class="event-title">
-                    <span>${event.name}</span>
+              <div class="event-card">
+                <div class="event-card-header">
+                  <div>
+                    <div class="event-title">${event.name}</div>
                     <span class="event-category-badge">${event.level}</span>
-                    <span class="event-number">#${eventNumber}</span>
                   </div>
-                  <button class="view-btn" onclick="viewResultsDetails('${eventId}')">
-                    <i class="bi bi-eye me-1"></i> View All
+                  <button class="view-btn" onclick="viewResultsDetails('${event.id}')">
+                    <i class="bi bi-eye me-1"></i> View Winners
                   </button>
                 </div>
                 
-                <div class="winners-list">
-                  ${topWinners.map(result => {
-                    const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
-                    const team = CACHE.teams.find(t => t.id === student?.teamId);
-                    const isTeamMember = student?.teamId === LEADER.teamId;
-                    
-                    let positionClass = '';
-                    if (result.position === 2) positionClass = 'second';
-                    if (result.position === 3) positionClass = 'third';
-                    
-                    return `
-                      <div class="winner-row">
-                        <div class="winner-position ${positionClass}">
-                          ${result.position}
-                        </div>
-                        <div class="winner-info">
-                          <div class="winner-name">
-                            ${student?.name || 'Unknown'}
-                            ${isTeamMember ? '<span class="your-team-badge">YOUR TEAM</span>' : ''}
+                ${topResults.length > 0 ? `
+                  <div class="winners-preview">
+                    ${topResults.map(result => {
+                      const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
+                      const team = CACHE.teams.find(t => t.id === student?.teamId);
+                      const isTeamMember = student?.teamId === LEADER.teamId;
+                      
+                      let positionClass = '';
+                      if (result.position === 2) positionClass = 'second';
+                      if (result.position === 3) positionClass = 'third';
+                      
+                      return `
+                        <div class="winner-item">
+                          <div class="winner-position ${positionClass}">
+                            ${result.position}
                           </div>
-                          <div class="winner-team">
-                            ${team?.name || 'N/A'}
+                          <div class="winner-info">
+                            <div class="winner-name">
+                              ${student?.name || 'Unknown'}
+                              ${isTeamMember ? '<span class="your-team-badge">YOUR TEAM</span>' : ''}
+                            </div>
+                            <div class="winner-team">
+                              ${team?.name || 'N/A'}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
+                      `;
+                    }).join('')}
+                  </div>
+                ` : ''}
               </div>
             `;
           }).join('')}
@@ -2084,7 +2025,7 @@
           <div class="modal-dialog modal-lg">
             <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
               <div class="modal-header">
-                <h5 class="modal-title">${event.name} - Complete Results</h5>
+                <h5 class="modal-title">${event.name} - Winners</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
               </div>
               <div class="modal-body">
