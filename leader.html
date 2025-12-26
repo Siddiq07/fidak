@@ -47,6 +47,7 @@
       color: var(--text-primary);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .container-wide {
@@ -534,6 +535,108 @@
       background: var(--border-color);
     }
 
+    /* Slide Down Animation */
+    .slide-down-enter {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    .slide-down-enter-active {
+      max-height: 1000px;
+      opacity: 1;
+      transition: max-height 0.5s ease, opacity 0.5s ease;
+    }
+
+    .slide-down-exit {
+      max-height: 1000px;
+      opacity: 1;
+    }
+
+    .slide-down-exit-active {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease, opacity 0.5s ease;
+    }
+
+    /* Modal with slide effect */
+    .modal-slide {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1050;
+      display: none;
+    }
+
+    .modal-slide.show {
+      display: block;
+    }
+
+    .modal-slide-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1040;
+    }
+
+    .modal-slide-content {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 80%;
+      max-width: 600px;
+      height: 100%;
+      background: var(--bg-card);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1050;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal-slide.show .modal-slide-content {
+      transform: translateX(0);
+    }
+
+    .modal-slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-slide-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .modal-slide-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-slide-close:hover {
+      color: var(--accent-danger);
+    }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -603,6 +706,10 @@
       
       .status-badges {
         align-self: flex-start;
+      }
+      
+      .modal-slide-content {
+        width: 90%;
       }
     }
   </style>
@@ -755,7 +862,7 @@
               <button class="btn-secondary" onclick="clearAllSelections()">
                 <i class="bi bi-arrow-clockwise me-2"></i> Reset
               </button>
-              <button class="btn-primary" onclick="saveNominations()">
+              <button class="btn-primary" onclick="saveNominationsAndRedirect()">
                 <i class="bi bi-save me-2"></i> Save Nominations
               </button>
             </div>
@@ -803,6 +910,9 @@
       </div>
     </section>
   </div>
+
+  <!-- Slide Modal Container -->
+  <div id="slideModalContainer"></div>
 
   <!-- Toast Container -->
   <div id="toastContainer"></div>
@@ -1018,7 +1128,7 @@
       return 2; // Default
     }
 
-    // Check if Member Can Join Event (STRICT LIMITS)
+    // Check if Member Can Join Event (STRICT LIMITS - BLOCKED IF EXCEEDED)
     function canMemberJoinEvent(memberId, event) {
       const member = CACHE.students.find(s => String(s.id) === memberId);
       if (!member) return { canJoin: false, reason: 'Member not found' };
@@ -1031,7 +1141,7 @@
       if ((eventLevel === 'senior' || eventLevel === 'junior') && hasMemberExceededLimits(memberId)) {
         return { 
           canJoin: false, 
-          reason: `LIMIT EXCEEDED! Cannot join more ${memberLevel} events.` 
+          reason: `BLOCKED! Member has exceeded personal limits and cannot join any more ${memberLevel} events.` 
         };
       }
       
@@ -1389,12 +1499,12 @@
         }
         
         if (hasExceeded) {
-          warningText = `<div class="limits-warning">LIMIT EXCEEDED!</div>`;
+          warningText = `<div class="limits-warning">BLOCKED!</div>`;
         }
         
         return `
           <div class="${boxClass}" ${tooltip} onclick="${canJoin ? `toggleMemberSelection('${memberId}')` : ''}" 
-               style="${!canJoin ? 'opacity: 0.6; cursor: not-allowed;' : ''} position: relative;">
+               style="${!canJoin ? 'opacity: 0.4; cursor: not-allowed;' : ''} position: relative;">
             ${!canJoin || hasExceeded ? '<div class="limit-badge">!</div>' : ''}
             <div class="member-id">${member.id}</div>
             <div class="member-name">${member.name}</div>
@@ -1534,8 +1644,8 @@
       }
     }
 
-    // Save Nominations
-    window.saveNominations = async () => {
+    // Save Nominations AND REDIRECT TO DASHBOARD
+    window.saveNominationsAndRedirect = async () => {
       if (!currentEventId) {
         showToast('Please select an event first!', 'warning');
         return;
@@ -1611,10 +1721,35 @@
 
         showToast(`Successfully nominated ${selectedMembers.size} members for ${event.name}!`, 'success');
         
-        // Refresh after a moment
+        // REDIRECT TO DASHBOARD IMMEDIATELY
         setTimeout(() => {
-          location.reload();
-        }, 1500);
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelector('[data-target="dashboard"]').classList.add('active');
+          
+          document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.add('d-none');
+          });
+          document.getElementById('dashboard').classList.remove('d-none');
+          
+          // Clear selections
+          currentEventId = null;
+          selectedMembers.clear();
+          renderEventsList();
+          
+          // Reset the nominations form
+          document.getElementById('selectedEventInfo').innerHTML = `
+            <h5 class="mb-2">Select an Event</h5>
+            <p class="text-muted mb-3">Choose an event from the left panel</p>
+          `;
+          
+          document.getElementById('membersTitle').textContent = 'Eligible Members';
+          document.getElementById('memberGrid').innerHTML = `
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-calendar-event fs-4 mb-2"></i>
+              <p>Select an event first</p>
+            </div>
+          `;
+        }, 500);
         
       } catch (error) {
         console.error('Error saving nominations:', error);
@@ -1722,7 +1857,7 @@
                         <i class="bi bi-check-circle me-1"></i> ${data.approved.length} Approved
                       </span>
                     ` : ''}
-                    <button class="view-btn" onclick="viewEventDetails('${event.id}')">
+                    <button class="view-btn" onclick="showSlideModal('${event.id}', 'approvals')">
                       <i class="bi bi-eye me-1"></i> View
                     </button>
                   </div>
@@ -1755,142 +1890,6 @@
         </div>
       `;
     }
-
-    // View Event Details (for Approvals page)
-    window.viewEventDetails = (eventId) => {
-      const event = CACHE.events.find(e => String(e.id) === String(eventId));
-      if (!event) return;
-      
-      // Get participations for this event
-      const participations = CACHE.participations.filter(p => 
-        p.eventId == eventId && 
-        p.teamId == LEADER.teamId
-      );
-      
-      // Group by status
-      const pending = participations.filter(p => p.status === 'pending');
-      const approved = participations.filter(p => p.status === 'approved');
-      
-      let html = `
-        <div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
-              <div class="modal-header">
-                <h5 class="modal-title">${event.name} - Nominations</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
-              </div>
-              <div class="modal-body">
-                <div class="row mb-3">
-                  <div class="col-md-4">
-                    <strong>Event Type:</strong> ${event.type}
-                  </div>
-                  <div class="col-md-4">
-                    <strong>Level:</strong> ${event.level}
-                  </div>
-                  <div class="col-md-4">
-                    <strong>Capacity:</strong> ${getEventCapacity(event) || 'Unlimited'}
-                  </div>
-                </div>
-                
-                ${pending.length > 0 ? `
-                  <div class="mb-4">
-                    <h6 class="text-warning mb-3">
-                      <i class="bi bi-clock me-1"></i> Pending Approval (${pending.length})
-                    </h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Level</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          ${pending.map(p => {
-                            const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                            return `
-                              <tr>
-                                <td><code>${p.studentId}</code></td>
-                                <td>${student?.name || 'Unknown'}</td>
-                                <td>
-                                  <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
-                                    ${student?.level || 'N/A'}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span class="badge bg-warning">Pending</span>
-                                </td>
-                              </tr>
-                            `;
-                          }).join('')}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ` : ''}
-                
-                ${approved.length > 0 ? `
-                  <div>
-                    <h6 class="text-success mb-3">
-                      <i class="bi bi-check-circle me-1"></i> Approved (${approved.length})
-                    </h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Level</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          ${approved.map(p => {
-                            const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
-                            return `
-                              <tr>
-                                <td><code>${p.studentId}</code></td>
-                                <td>${student?.name || 'Unknown'}</td>
-                                <td>
-                                  <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
-                                    ${student?.level || 'N/A'}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span class="badge bg-success">Approved</span>
-                                </td>
-                              </tr>
-                            `;
-                          }).join('')}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ` : ''}
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      // Remove existing modal if any
-      const existingModal = document.getElementById('eventDetailsModal');
-      if (existingModal) {
-        existingModal.remove();
-      }
-      
-      // Add modal to body
-      document.body.insertAdjacentHTML('beforeend', html);
-      
-      // Show modal
-      const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
-      modal.show();
-    };
 
     // Filter Results
     window.filterResults = () => {
@@ -1967,7 +1966,7 @@
                     <div class="event-title">${event.name}</div>
                     <span class="event-category-badge">${event.level}</span>
                   </div>
-                  <button class="view-btn" onclick="viewResultsDetails('${event.id}')">
+                  <button class="view-btn" onclick="showSlideModal('${event.id}', 'results')">
                     <i class="bi bi-eye me-1"></i> View Winners
                   </button>
                 </div>
@@ -2009,8 +2008,141 @@
       `;
     }
 
-    // View Results Details (for Results page)
-    window.viewResultsDetails = (eventId) => {
+    // Show Slide Modal for Approvals/Results
+    window.showSlideModal = (eventId, type) => {
+      const container = document.getElementById('slideModalContainer');
+      
+      if (type === 'approvals') {
+        showApprovalsSlideModal(eventId);
+      } else if (type === 'results') {
+        showResultsSlideModal(eventId);
+      }
+    };
+
+    // Show Approvals Slide Modal
+    function showApprovalsSlideModal(eventId) {
+      const event = CACHE.events.find(e => String(e.id) === String(eventId));
+      if (!event) return;
+      
+      // Get participations for this event
+      const participations = CACHE.participations.filter(p => 
+        p.eventId == eventId && 
+        p.teamId == LEADER.teamId
+      );
+      
+      // Group by status
+      const pending = participations.filter(p => p.status === 'pending');
+      const approved = participations.filter(p => p.status === 'approved');
+      
+      const modalId = `slide-modal-${Date.now()}`;
+      
+      const modalHTML = `
+        <div class="modal-slide show" id="${modalId}">
+          <div class="modal-slide-backdrop" onclick="closeSlideModal('${modalId}')"></div>
+          <div class="modal-slide-content">
+            <div class="modal-slide-header">
+              <h5 class="modal-slide-title">${event.name} - Nominations</h5>
+              <button class="modal-slide-close" onclick="closeSlideModal('${modalId}')">&times;</button>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <strong>Event Type:</strong> ${event.type}
+              </div>
+              <div class="col-md-4">
+                <strong>Level:</strong> ${event.level}
+              </div>
+              <div class="col-md-4">
+                <strong>Capacity:</strong> ${getEventCapacity(event) || 'Unlimited'}
+              </div>
+            </div>
+            
+            ${pending.length > 0 ? `
+              <div class="mb-4">
+                <h6 class="text-warning mb-3">
+                  <i class="bi bi-clock me-1"></i> Pending Approval (${pending.length})
+                </h6>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${pending.map(p => {
+                        const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                        return `
+                          <tr>
+                            <td><code>${p.studentId}</code></td>
+                            <td>${student?.name || 'Unknown'}</td>
+                            <td>
+                              <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                                ${student?.level || 'N/A'}
+                              </span>
+                            </td>
+                            <td>
+                              <span class="badge bg-warning">Pending</span>
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ` : ''}
+            
+            ${approved.length > 0 ? `
+              <div>
+                <h6 class="text-success mb-3">
+                  <i class="bi bi-check-circle me-1"></i> Approved (${approved.length})
+                </h6>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${approved.map(p => {
+                        const student = CACHE.students.find(s => String(s.id) === String(p.studentId));
+                        return `
+                          <tr>
+                            <td><code>${p.studentId}</code></td>
+                            <td>${student?.name || 'Unknown'}</td>
+                            <td>
+                              <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                                ${student?.level || 'N/A'}
+                              </span>
+                            </td>
+                            <td>
+                              <span class="badge bg-success">Approved</span>
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML = modalHTML;
+    }
+
+    // Show Results Slide Modal
+    function showResultsSlideModal(eventId) {
       const event = CACHE.events.find(e => String(e.id) === String(eventId));
       if (!event) return;
       
@@ -2020,88 +2152,87 @@
         r.published === true
       ).sort((a, b) => a.position - b.position);
       
-      let html = `
-        <div class="modal fade" id="resultsDetailsModal" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="background: var(--bg-card); color: var(--text-primary);">
-              <div class="modal-header">
-                <h5 class="modal-title">${event.name} - Winners</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+      const modalId = `slide-modal-${Date.now()}`;
+      
+      const modalHTML = `
+        <div class="modal-slide show" id="${modalId}">
+          <div class="modal-slide-backdrop" onclick="closeSlideModal('${modalId}')"></div>
+          <div class="modal-slide-content">
+            <div class="modal-slide-header">
+              <h5 class="modal-slide-title">${event.name} - Winners</h5>
+              <button class="modal-slide-close" onclick="closeSlideModal('${modalId}')">&times;</button>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Event Type:</strong> ${event.type}
               </div>
-              <div class="modal-body">
-                <div class="row mb-3">
-                  <div class="col-md-6">
-                    <strong>Event Type:</strong> ${event.type}
-                  </div>
-                  <div class="col-md-6">
-                    <strong>Level:</strong> ${event.level}
-                  </div>
-                </div>
-                
-                <div class="table-responsive">
-                  <table class="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Position</th>
-                        <th>Name</th>
-                        <th>ID</th>
-                        <th>Team</th>
-                        <th>Level</th>
-                        <th>Points</th>
+              <div class="col-md-6">
+                <strong>Level:</strong> ${event.level}
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Position</th>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Team</th>
+                    <th>Level</th>
+                    <th>Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${results.map(result => {
+                    const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
+                    const team = CACHE.teams.find(t => t.id === student?.teamId);
+                    const isTeamMember = student?.teamId === LEADER.teamId;
+                    
+                    return `
+                      <tr ${isTeamMember ? 'class="table-success"' : ''}>
+                        <td>
+                          <span class="badge ${result.position === 1 ? 'bg-warning' : result.position === 2 ? 'bg-secondary' : result.position === 3 ? 'bg-danger' : 'bg-dark'}">
+                            ${result.position}
+                          </span>
+                        </td>
+                        <td>
+                          ${student?.name || 'Unknown'}
+                          ${isTeamMember ? '<span class="badge bg-success ms-1">YOUR TEAM</span>' : ''}
+                        </td>
+                        <td><code>${result.studentId}</code></td>
+                        <td>${team?.name || 'N/A'}</td>
+                        <td>
+                          <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
+                            ${student?.level || 'N/A'}
+                          </span>
+                        </td>
+                        <td><strong>${result.points || 0}</strong></td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      ${results.map(result => {
-                        const student = CACHE.students.find(s => String(s.id) === String(result.studentId));
-                        const team = CACHE.teams.find(t => t.id === student?.teamId);
-                        const isTeamMember = student?.teamId === LEADER.teamId;
-                        
-                        return `
-                          <tr ${isTeamMember ? 'class="table-success"' : ''}>
-                            <td>
-                              <span class="badge ${result.position === 1 ? 'bg-warning' : result.position === 2 ? 'bg-secondary' : result.position === 3 ? 'bg-danger' : 'bg-dark'}">
-                                ${result.position}
-                              </span>
-                            </td>
-                            <td>
-                              ${student?.name || 'Unknown'}
-                              ${isTeamMember ? '<span class="badge bg-success ms-1">YOUR TEAM</span>' : ''}
-                            </td>
-                            <td><code>${result.studentId}</code></td>
-                            <td>${team?.name || 'N/A'}</td>
-                            <td>
-                              <span class="badge ${student?.level?.toLowerCase() === 'senior' ? 'bg-primary' : 'bg-success'}">
-                                ${student?.level || 'N/A'}
-                              </span>
-                            </td>
-                            <td><strong>${result.points || 0}</strong></td>
-                          </tr>
-                        `;
-                      }).join('')}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              </div>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       `;
       
-      // Remove existing modal if any
-      const existingModal = document.getElementById('resultsDetailsModal');
-      if (existingModal) {
-        existingModal.remove();
+      container.innerHTML = modalHTML;
+    }
+
+    // Close Slide Modal
+    window.closeSlideModal = (modalId) => {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        const content = modal.querySelector('.modal-slide-content');
+        content.style.transform = 'translateX(100%)';
+        
+        setTimeout(() => {
+          modal.remove();
+        }, 300);
       }
-      
-      // Add modal to body
-      document.body.insertAdjacentHTML('beforeend', html);
-      
-      // Show modal
-      const modal = new bootstrap.Modal(document.getElementById('resultsDetailsModal'));
-      modal.show();
     };
 
     // Export to PDF
